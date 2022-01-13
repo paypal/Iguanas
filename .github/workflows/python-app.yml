@@ -52,7 +52,7 @@ jobs:
     #   run: |                
     #     pytest iguanas/*/tests/*spark*
     #     pytest iguanas/*/examples/*spark* --nbmake --nbmake-kernel=iguanas
-    - name: Test non-Spark modules with pytest
+    - name: Test non-Spark modules
       run: |        
         shopt -s extglob
         coverage run -m pytest iguanas/*/tests/!(*spark*) && coverage report && coverage xml 
