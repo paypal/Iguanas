@@ -146,6 +146,12 @@ class RuleGeneratorDTSpark(_BaseGenerator):
             columns_cat=columns_cat,
         )
         self.rule_names = list(self.rule_strings.keys())
+        # Convert generated rules into lambda format. Set rule_lambdas to an
+        # empty dict first, prevents errors when running fit more than once.
+        self.rule_lambdas = {}
+        self.rule_lambdas = self.as_rule_lambdas(
+            as_numpy=False, with_kwargs=True
+        )
         return X_rules
 
     def _extract_rules_from_ensemble(self, X: KoalasDataFrameType, y: KoalasSeriesType,

@@ -174,6 +174,12 @@ class RuleGeneratorOpt(_BaseGenerator):
             X_rules, y, rule_strings, self.remove_corr_rules, sample_weight
         )
         self.rule_names = list(self.rule_strings.keys())
+        # Convert generated rules into lambda format. Set rule_lambdas to an
+        # empty dict first, prevents errors when running fit more than once.
+        self.rule_lambdas = {}
+        self.rule_lambdas = self.as_rule_lambdas(
+            as_numpy=False, with_kwargs=True
+        )
         return X_rules
 
     def _generate_numeric_one_condition_rules(self, X: PandasDataFrameType,

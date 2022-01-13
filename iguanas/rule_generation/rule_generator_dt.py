@@ -13,53 +13,53 @@ import sys
 
 class RuleGeneratorDT(_BaseGenerator):
     """
-    Generate rules by extracting the highest performing branches from a 
+    Generate rules by extracting the highest performing branches from a
     tree ensemble model.
 
     Parameters
     ----------
     metric : Callable
-        A function/method which calculates the desired performance metric 
+        A function/method which calculates the desired performance metric
         (e.g. Fbeta score).
-    n_total_conditions : int 
+    n_total_conditions : int
         The maximum number of conditions per generated rule.
     tree_ensemble : Union[RandomForestClassifier, ExtraTreesClassifier]
         Instantiated Sklearn tree ensemble classifier object used to generated
         rules.
-    precision_threshold : float, optional 
-        Precision threshold for the tree/branch to be used to create rules. 
-        If the overall precision of the tree/branch is less than or equal 
-        to this value, it will not be used in rule generation. Note that if 
+    precision_threshold : float, optional
+        Precision threshold for the tree/branch to be used to create rules.
+        If the overall precision of the tree/branch is less than or equal
+        to this value, it will not be used in rule generation. Note that if
         `bootstrap` == True in the tree_ensemble class, the precision will
         be based on the bootstrapped sample used to create the tree.
         Defaults to 0.
-    num_cores : int, optional 
+    num_cores : int, optional
         The number of cores to use when iterating through the ensemble to
         generate rules. Defaults to 1.
     target_feat_corr_types : Union[Dict[str, List[str]], str], optional
         Limits the conditions of the rules based on the target-feature
-        correlation (e.g. if a feature has a positive correlation with 
+        correlation (e.g. if a feature has a positive correlation with
         respect to the target, then only greater than operators are used
-        for conditions that utilise that feature). Can be either a 
-        dictionary specifying the list of positively correlated features 
-        wrt the target (under the key `PositiveCorr`) and negatively 
-        correlated features wrt the target (under the key `NegativeCorr`), 
-        or 'Infer' (where each target-feature correlation type is inferred 
+        for conditions that utilise that feature). Can be either a
+        dictionary specifying the list of positively correlated features
+        wrt the target (under the key `PositiveCorr`) and negatively
+        correlated features wrt the target (under the key `NegativeCorr`),
+        or 'Infer' (where each target-feature correlation type is inferred
         from the data). Defaults to None.
-    verbose : int, optional 
+    verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : gives
-        the overall progress of the training of the ensemble model and the 
+        the overall progress of the training of the ensemble model and the
         extraction of the rules from the trees. Defaults to 0.
-    rule_name_prefix : str, optional 
+    rule_name_prefix : str, optional
         Prefix to use for each rule. Defaults to 'RGDT_Rule'.
 
     Attributes
     ----------
     rule_strings : Dict[str, str]
         The generated rules, defined using the standard Iguanas string format
-        (values) and their names (keys). 
+        (values) and their names (keys).
     rule_names : List[str]
-        The names of the generated rules.   
+        The names of the generated rules.
     """
 
     def __init__(self, metric: Callable,
@@ -102,14 +102,14 @@ class RuleGeneratorDT(_BaseGenerator):
         X : PandasDataFrameType
             The feature set used for training the model.
         y : PandasSeriesType
-            The target column.            
+            The target column.
         sample_weight : PandasSeriesType, optional
             Record-wise weights to apply. Defaults to None.
 
         Returns
         -------
         PandasDataFrameType
-            The binary columns of the generated rules. 
+            The binary columns of the generated rules.
         """
 
         utils.check_allowed_types(X, 'X', [PandasDataFrame])
@@ -146,6 +146,12 @@ class RuleGeneratorDT(_BaseGenerator):
             sample_weight=sample_weight
         )
         self.rule_names = list(self.rule_strings.keys())
+        # Convert generated rules into lambda format. Set rule_lambdas to an
+        # empty dict first, prevents errors when running fit more than once.
+        self.rule_lambdas = {}
+        self.rule_lambdas = self.as_rule_lambdas(
+            as_numpy=False, with_kwargs=True
+        )
         return X_rules
 
     def _extract_rules_from_ensemble(self, X: PandasDataFrameType, y: PandasSeriesType,
@@ -155,7 +161,7 @@ class RuleGeneratorDT(_BaseGenerator):
                                      columns_int: List[str],
                                      columns_cat: List[str]) -> PandasDataFrameType:
         """
-        Method for returning all of the rules from the ensemble tree-based 
+        Method for returning all of the rules from the ensemble tree-based
         model.
         """
 

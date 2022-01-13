@@ -99,7 +99,8 @@ def test_fit(create_data, rg_instantiated):
         'RGDT_Rule_20200204_0': "(X['email_alpharatio']<=0.29912)&(X['email_alpharatio']>0.22241)&(X['num_distinct_txn_per_email_7day']>=4)",
         'RGDT_Rule_20200204_1': "(X['email_alpharatio']<=0.33992)&(X['email_alpharatio']>0.29912)&(X['num_distinct_txn_per_email_7day']>=4)"
     }
-    assert rg.rule_names == ['RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1']
+    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(
+        rg.lambda_kwargs.keys()) == ['RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1']
     assert rg.__repr__() == "RuleGeneratorDTSpark object with 2 rules generated"
     # Test with weights
     X_rules = rg.fit(X, y, weights)
@@ -107,7 +108,8 @@ def test_fit(create_data, rg_instantiated):
     assert rg.rule_strings == {
         'RGDT_Rule_20200204_2': "(X['email_alpharatio']<=0.32306)&(X['email_alpharatio']>0.22241)&(X['num_distinct_txn_per_email_1day']>=1)&(X['num_distinct_txn_per_email_7day']>=4)"
     }
-    assert rg.rule_names == ['RGDT_Rule_20200204_2']
+    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(
+        rg.lambda_kwargs.keys()) == ['RGDT_Rule_20200204_2']
     # Test fit_transform without weights
     X_rules = rg.fit_transform(X, y, None)
     np.testing.assert_array_equal(X_rules.sum().to_numpy(), exp_results[0])
@@ -115,14 +117,16 @@ def test_fit(create_data, rg_instantiated):
         'RGDT_Rule_20200204_3': "(X['email_alpharatio']<=0.29912)&(X['email_alpharatio']>0.22241)&(X['num_distinct_txn_per_email_7day']>=4)",
         'RGDT_Rule_20200204_4': "(X['email_alpharatio']<=0.33992)&(X['email_alpharatio']>0.29912)&(X['num_distinct_txn_per_email_7day']>=4)"
     }
-    assert rg.rule_names == ['RGDT_Rule_20200204_3', 'RGDT_Rule_20200204_4']
+    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(
+        rg.lambda_kwargs.keys()) == ['RGDT_Rule_20200204_3', 'RGDT_Rule_20200204_4']
     # Test fit_transform without weights
     X_rules = rg.fit_transform(X, y, weights)
     np.testing.assert_array_equal(X_rules.sum().to_numpy(), exp_results[1])
     assert rg.rule_strings == {
         'RGDT_Rule_20200204_5': "(X['email_alpharatio']<=0.32306)&(X['email_alpharatio']>0.22241)&(X['num_distinct_txn_per_email_1day']>=1)&(X['num_distinct_txn_per_email_7day']>=4)"
     }
-    assert rg.rule_names == ['RGDT_Rule_20200204_5']
+    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(
+        rg.lambda_kwargs.keys()) == ['RGDT_Rule_20200204_5']
 
 
 def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
@@ -143,7 +147,7 @@ def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
         'RGDT_Rule_20200204_2': "(X['email_alpharatio']<=0.33992)",
         'RGDT_Rule_20200204_3': "(X['email_alpharatio']<=0.33992)&(X['num_distinct_txn_per_email_7day']>=4)"
     }
-    assert rg.rule_names == [
+    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == [
         'RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1', 'RGDT_Rule_20200204_2',
         'RGDT_Rule_20200204_3'
     ]
@@ -156,7 +160,7 @@ def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
         'RGDT_Rule_20200204_6': "(X['email_alpharatio']<=0.32306)&(X['num_distinct_txn_per_email_1day']>=1)&(X['num_distinct_txn_per_email_7day']>=4)",
         'RGDT_Rule_20200204_7': "(X['email_alpharatio']<=0.32306)&(X['num_distinct_txn_per_email_7day']>=4)"
     }
-    assert rg.rule_names == [
+    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == [
         'RGDT_Rule_20200204_4', 'RGDT_Rule_20200204_5', 'RGDT_Rule_20200204_6',
         'RGDT_Rule_20200204_7'
     ]
@@ -169,7 +173,7 @@ def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
         'RGDT_Rule_20200204_10': "(X['email_alpharatio']<=0.33992)",
         'RGDT_Rule_20200204_11': "(X['email_alpharatio']<=0.33992)&(X['num_distinct_txn_per_email_7day']>=4)"
     }
-    assert rg.rule_names == [
+    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == [
         'RGDT_Rule_20200204_8', 'RGDT_Rule_20200204_9', 'RGDT_Rule_20200204_10',
         'RGDT_Rule_20200204_11'
     ]
@@ -182,7 +186,7 @@ def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
         'RGDT_Rule_20200204_14': "(X['email_alpharatio']<=0.32306)&(X['num_distinct_txn_per_email_1day']>=1)&(X['num_distinct_txn_per_email_7day']>=4)",
         'RGDT_Rule_20200204_15': "(X['email_alpharatio']<=0.32306)&(X['num_distinct_txn_per_email_7day']>=4)"
     }
-    assert rg.rule_names == [
+    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == [
         'RGDT_Rule_20200204_12', 'RGDT_Rule_20200204_13', 'RGDT_Rule_20200204_14',
         'RGDT_Rule_20200204_15'
     ]
