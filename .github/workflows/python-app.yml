@@ -29,8 +29,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         # if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip install .
-        pip install .[spark]
+        pip install .        
         pip install .[dev]
         python -m ipykernel install --user --name iguanas
     - name: Lint with flake8
@@ -46,6 +45,9 @@ jobs:
         pytest examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
         pytest iguanas/*/examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
         shopt -u extglob  
+    - name: Install Spark dependencies
+      run: |        
+        pip install .[spark]        
     - name: Test Spark modules with pytest
       run: |                
         pytest iguanas/*/tests/*spark*
