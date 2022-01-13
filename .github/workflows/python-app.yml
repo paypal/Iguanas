@@ -27,38 +27,23 @@ jobs:
     - name: Install dependencies
       run: |        
         python -m pip install --upgrade pip
-        pip install flake8 pytest
-        # if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install flake8 pytest 
         pip install .        
         pip install .[dev]
+        pip install .[spark]  
         python -m ipykernel install --user --name iguanas
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    # - name: Test non-Spark modules with pytest
-    #   run: |        
-    #     shopt -s extglob
-    #     pytest iguanas/*/tests/!(*spark*) -vv        
-    #     pytest examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
-    #     pytest iguanas/*/examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
-    #     shopt -u extglob  
-    - name: Install Spark dependencies
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics    
+    - name: Unit tests
       run: |        
-        pip install .[spark]        
-    # - name: Test Spark modules with pytest
-    #   run: |                
-    #     pytest iguanas/*/tests/*spark*
-    #     pytest iguanas/*/examples/*spark* --nbmake --nbmake-kernel=iguanas
-    - name: Test non-Spark modules
-      run: |        
-        shopt -s extglob
-        # coverage run -m pytest iguanas/*/tests/!(*spark*) && coverage report && coverage xml 
-        pytest --cov=iguanas/*/tests/!(*spark*) --cov-report=xml
-        pytest examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
-        pytest iguanas/*/examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
+        shopt -s extglob        
+        pytest --cov=iguanas --cov-report=xml
+        pytest iguanas/*/examples/ --nbmake --nbmake-kernel=iguanas
+        pytest examples/ --nbmake --nbmake-kernel=iguanas
         shopt -u extglob  
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
