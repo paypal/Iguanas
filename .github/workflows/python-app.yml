@@ -40,11 +40,11 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics    
     - name: Unit tests
       run: |        
-        shopt -s extglob        
+        # shopt -s extglob        
         pytest --cov=iguanas --cov-report=xml
         pytest iguanas/*/examples/ --nbmake --nbmake-kernel=iguanas
         pytest examples/ --nbmake --nbmake-kernel=iguanas
-        shopt -u extglob  
+        # shopt -u extglob  
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
       with:
