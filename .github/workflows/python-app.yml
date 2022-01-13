@@ -38,18 +38,30 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test non-Spark modules with pytest
-      run: |        
-        shopt -s extglob
-        pytest iguanas/*/tests/!(*spark*) -vv        
-        pytest examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
-        pytest iguanas/*/examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
-        shopt -u extglob  
+    # - name: Test non-Spark modules with pytest
+    #   run: |        
+    #     shopt -s extglob
+    #     pytest iguanas/*/tests/!(*spark*) -vv        
+    #     pytest examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
+    #     pytest iguanas/*/examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
+    #     shopt -u extglob  
     - name: Install Spark dependencies
       run: |        
         pip install .[spark]        
-    - name: Test Spark modules with pytest
-      run: |                
-        pytest iguanas/*/tests/*spark*
-        pytest iguanas/*/examples/*spark* --nbmake --nbmake-kernel=iguanas
-      
+    # - name: Test Spark modules with pytest
+    #   run: |                
+    #     pytest iguanas/*/tests/*spark*
+    #     pytest iguanas/*/examples/*spark* --nbmake --nbmake-kernel=iguanas
+    - name: Test non-Spark modules with pytest
+      run: |        
+        shopt -s extglob
+        coverage run -m pytest iguanas/*/tests/!(*spark*) && coverage report && coverage xml 
+        pytest examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
+        pytest iguanas/*/examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
+        shopt -u extglob  
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: coverage.xml
+    
