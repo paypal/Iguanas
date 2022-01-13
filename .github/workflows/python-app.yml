@@ -55,7 +55,8 @@ jobs:
     - name: Test non-Spark modules
       run: |        
         shopt -s extglob
-        coverage run -m pytest iguanas/*/tests/!(*spark*) && coverage report && coverage xml 
+        # coverage run -m pytest iguanas/*/tests/!(*spark*) && coverage report && coverage xml 
+        pytest --cov=iguanas/*/tests/!(*spark*) --cov-report=xml
         pytest examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
         pytest iguanas/*/examples/!(*spark*) --nbmake --nbmake-kernel=iguanas
         shopt -u extglob  
