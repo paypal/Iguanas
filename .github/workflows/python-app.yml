@@ -49,5 +49,5 @@ jobs:
     - name: Test Spark modules with pytest
       run: |                
         pytest iguanas/*/tests/*spark*
-        pytest examples/*spark* --nbmake --nbmake-kernel=iguanas                
+        pytest iguanas/*/examples/*spark* --nbmake --nbmake-kernel=iguanas
       
