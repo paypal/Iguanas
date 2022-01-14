@@ -52,7 +52,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics    
     - name: Unit tests
       run: |                             
-        coverage run --omit iguanas/*/test*.py -m pytest iguanas && coverage report && coverage xml
+        coverage run --omit iguanas/*/test*.py -m pytest iguanas && coverage report && coverage xml -vv
         pytest iguanas/*/examples/ --nbmake --nbmake-kernel=iguanas
         pytest examples/ --nbmake --nbmake-kernel=iguanas             
     - name: Upload coverage to Codecov
