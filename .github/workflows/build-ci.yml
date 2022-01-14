@@ -24,7 +24,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install matplotlib deps manually if windows-latest
-      if: contains(${{ matrix.os }},windows-latest)
+      if: matrix.os == 'windows-latest'
       run: |
         sudo apt-get install freetype6-dev
         sudo apt-get install pkg-config
