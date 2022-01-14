@@ -40,7 +40,8 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics    
     - name: Unit tests
       run: |                     
-        pytest --cov=iguanas --cov-report=xml:cov.xml -vv
+        # pytest --cov=iguanas --cov-report=xml:cov.xml -vv
+        coverage run --omit iguanas/*/test*.py -m pytest iguanas && coverage report && coverage xml
         pytest iguanas/*/examples/ --nbmake --nbmake-kernel=iguanas
         pytest examples/ --nbmake --nbmake-kernel=iguanas     
         ls   
@@ -48,5 +49,5 @@ jobs:
       uses: codecov/codecov-action@v2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: cov.xml
+        file: coverage.xml
     
