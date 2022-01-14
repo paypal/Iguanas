@@ -26,6 +26,8 @@ jobs:
     - name: Install matplotlib deps manually if windows-latest
       if: matrix.os == 'windows-latest'
       run: |
+        # $CONDA is an environment variable pointing to the root of the miniconda directory
+        echo $CONDA/bin >> $GITHUB_PATH
         # apt-get install freetype6-dev
         # apt-get install pkg-config
         conda install matplotlib
