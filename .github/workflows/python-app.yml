@@ -39,16 +39,14 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics    
     - name: Unit tests
-      run: |        
-        # shopt -s extglob        
-        pytest --cov=iguanas --cov-report=xml
-        # coverage run -m pytest iguanas && coverage report && coverage xml
+      run: |                     
+        pytest --cov=iguanas --cov-report=xml:cov.xml –-cov-fail-under=100        
         pytest iguanas/*/examples/ --nbmake --nbmake-kernel=iguanas
-        pytest examples/ --nbmake --nbmake-kernel=iguanas
-        # shopt -u extglob  
+        pytest examples/ --nbmake --nbmake-kernel=iguanas     
+        ls   
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: coverage.xml
+        file: cov.xml
     
