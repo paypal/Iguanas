@@ -40,7 +40,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics    
     - name: Unit tests
       run: |                     
-        pytest --cov=iguanas --cov-report=xml:cov.xml –-cov-fail-under=100        
+        pytest --cov=iguanas --cov-report=xml:cov.xml      
         pytest iguanas/*/examples/ --nbmake --nbmake-kernel=iguanas
         pytest examples/ --nbmake --nbmake-kernel=iguanas     
         ls   
