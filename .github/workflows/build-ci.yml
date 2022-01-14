@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.8]
     env:
       OS: ${{ matrix.os }}
@@ -24,7 +24,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install matplotlib deps manually if windows-latest
-      if: ${{ matrix.os }} == windows-latest
+      if: contains(${{ matrix.os }},windows-latest)
       run: |
         sudo apt-get install freetype6-dev
         sudo apt-get install pkg-config
