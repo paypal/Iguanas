@@ -561,6 +561,8 @@ def check_allowed_types(x: object, x_name: str,
     """
 
     x_type = str(type(x))
+    if not x_type.startswith('<class'):
+        x_type = f"<class '{x_type}'>"
     if x_type not in allowed_types:
         allowed_types_str = ' or '.join(
             [allowed_type.split("'")[1] for allowed_type in allowed_types])
@@ -588,4 +590,6 @@ def is_type(x: object, types: List[str]) -> bool:
     """
 
     x_type = str(type(x))
+    if not x_type.startswith('<class'):
+        x_type = f"<class '{x_type}'>"
     return x_type in types
