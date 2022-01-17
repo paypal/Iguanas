@@ -17,7 +17,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['examples']),
     install_requires=['category-encoders==2.0.0', 'matplotlib==3.*',
                       'seaborn==0.9.0', 'numpy==1.19.4', 'pandas==1.1.4',
-                      'hyperopt==0.2.5', 'joblib==0.16.0',
+                      'hyperopt==0.2.5', 'joblib==1.1.*',
                       'scikit-learn==0.23.2', 'scipy==1.*'],
     extras_require={
         'dev': [
