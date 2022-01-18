@@ -64,6 +64,7 @@ jobs:
 
         # pytest iguanas/*/examples/ --nbmake --nbmake-kernel=iguanas
         # pytest examples/ --nbmake --nbmake-kernel=iguanas             
+      shell: bash
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
       with:
