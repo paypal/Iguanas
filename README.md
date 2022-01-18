@@ -2,6 +2,8 @@
   <img src=./run_doc/files/_static/iguanas_logo.png width="500"/>
 </p>
 
+[![PyPI version](https://badge.fury.io/py/iguanas.svg)](https://badge.fury.io/py/iguanas) [![codecov](https://codecov.io/gh/paypal/Iguanas/branch/pylint_workflow/graph/badge.svg?token=GgQNjHzHeM)](https://codecov.io/gh/paypal/Iguanas)
+
 # What is Iguanas?
 
 Iguanas is a fast, flexible and modular Python package for:

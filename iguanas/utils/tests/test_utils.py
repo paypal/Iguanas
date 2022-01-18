@@ -8,6 +8,8 @@ import string
 from iguanas.metrics import FScore, AlertsPerDay
 from tqdm import tqdm
 
+from iguanas.utils.types import PandasDataFrame
+
 
 @pytest.fixture
 def create_data():
@@ -326,6 +328,13 @@ def test_return_conf_matrix():
     conf_matrix_weighted = utils.return_conf_matrix(y, y_pred, weights)
     np.testing.assert_array_almost_equal(
         conf_matrix_weighted.values, exp_conf_mat_weighted)
+
+
+def test_check_allowed_types():
+    X = pd.DataFrame()
+    utils.check_allowed_types(X, 'X', [PandasDataFrame])
+    with pytest.raises(TypeError, match="`X` must be a pandas.core.frame.DataFrame. Current type is int."):
+        utils.check_allowed_types(2, 'X', [PandasDataFrame])
 
 
 def _test_y_preds(y_preds, rule_descriptions, y, sample_weight):

@@ -12,7 +12,6 @@ from iguanas.rule_selection import SimpleFilter, CorrelatedFilter, GreedyFilter
 from iguanas.correlation_reduction import AgglomerativeClusteringReducer
 from iguanas.rbs import RBSOptimiser, RBSPipeline
 from iguanas.pipeline import LinearPipeline, ClassAccessor
-from iguanas.rule_generation import RuleGeneratorDT
 
 f1 = FScore(1)
 js = JaccardSimilarity()
