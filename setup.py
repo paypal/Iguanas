@@ -18,7 +18,7 @@ setuptools.setup(
     install_requires=['category-encoders==2.0.0', 'matplotlib==3.*',
                       'seaborn==0.9.0', 'numpy==1.19.4', 'pandas==1.1.4',
                       'hyperopt==0.2.5', 'joblib==1.1.*',
-                      'scikit-learn==0.23.2', 'scipy==1.*'],
+                      'scikit-learn==0.23.2', 'scipy==1.7.*'],
     extras_require={
         'dev': [
             'pytest==6.1.0', 'check-manifest==0.47', 'wheel==0.37.0',
