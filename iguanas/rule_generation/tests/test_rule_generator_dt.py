@@ -95,7 +95,7 @@ def test_fit(create_data, rg_instantiated):
                 27, 5, 10, 107, 81, 64, 35, 11, 35, 1, 22, 133, 4, 14, 119, 171, 2,
                 1, 27, 14, 5, 33, 5, 10, 7, 42, 310, 7, 90, 17, 18, 8, 32, 33, 1,
                 2, 77, 172, 33, 58
-            ]),
+            ], dtype='int64'),
             index=[
                 'RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1', 'RGDT_Rule_20200204_2', 'RGDT_Rule_20200204_3', 'RGDT_Rule_20200204_4', 'RGDT_Rule_20200204_5', 'RGDT_Rule_20200204_6', 'RGDT_Rule_20200204_7', 'RGDT_Rule_20200204_8',
                 'RGDT_Rule_20200204_9', 'RGDT_Rule_20200204_10', 'RGDT_Rule_20200204_11', 'RGDT_Rule_20200204_12', 'RGDT_Rule_20200204_13', 'RGDT_Rule_20200204_14', 'RGDT_Rule_20200204_15', 'RGDT_Rule_20200204_16', 'RGDT_Rule_20200204_17',
@@ -106,7 +106,7 @@ def test_fit(create_data, rg_instantiated):
         pd.Series(
             data=np.array([
                 161, 219, 166, 125, 107, 205, 133, 225, 228, 110, 163, 43, 21, 170
-            ]),
+            ], dtype='int64'),
             index=[
                 'RGDT_Rule_20200204_40', 'RGDT_Rule_20200204_41', 'RGDT_Rule_20200204_42', 'RGDT_Rule_20200204_43', 'RGDT_Rule_20200204_44', 'RGDT_Rule_20200204_45', 'RGDT_Rule_20200204_46', 'RGDT_Rule_20200204_47',
                 'RGDT_Rule_20200204_48', 'RGDT_Rule_20200204_49', 'RGDT_Rule_20200204_50', 'RGDT_Rule_20200204_51', 'RGDT_Rule_20200204_52', 'RGDT_Rule_20200204_53'
