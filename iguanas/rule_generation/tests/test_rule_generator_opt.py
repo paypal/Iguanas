@@ -462,14 +462,14 @@ def test_generate_n_order_pairwise_rules(return_dummy_rules, create_smaller_data
 def test_generate_rule_descriptions(rg_instantiated):
     exp_rule_descriptions = pd.DataFrame({
         'Logic': ["(X['A']>0)"],
-        'nConditions': [1],
+        'nConditions': np.array([1], dtype='int32'),
         'Precision': [1.0],
         'Metric': [1.0]
     },
         index=['Rule1']
     )
-    exp_rule_descriptions['nConditions'] = exp_rule_descriptions['nConditions'].astype(
-        'int64')
+    # exp_rule_descriptions['nConditions'] = exp_rule_descriptions['nConditions'].astype(
+    #     'int32')
     p = Precision()
     X_rules = pd.DataFrame({'A': [0, 1, 0, 1]})
     y = pd.Series([0, 1, 0, 1])
