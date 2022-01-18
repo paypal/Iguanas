@@ -1,18 +1,18 @@
 name: Build
 on:
   push:
-    branches: [ pylint_workflow ]
+    branches: [ dev ]
   pull_request:
-    branches: [ pylint_workflow ]
+    branches: [ dev ]
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.7, 3.8, 3.9]
-        # os: [windows-latest]
-        # python-version: [3.7]
+        # os: [ubuntu-latest, macos-latest, windows-latest]
+        # python-version: [3.7, 3.8, 3.9]
+        os: [windows-latest]
+        python-version: [3.7]
     env:
       OS: ${{ matrix.os }}
       PYTHON_VERSION: ${{ matrix.python-version }}
@@ -56,9 +56,14 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics    
     - name: Unit tests
       run: |                             
-        coverage run --omit iguanas/*/test*.py -m pytest -vv iguanas && coverage report && coverage xml
-        pytest iguanas/*/examples/ --nbmake --nbmake-kernel=iguanas
-        pytest examples/ --nbmake --nbmake-kernel=iguanas             
+        # coverage run --omit iguanas/*/test*.py -m pytest -vv iguanas && coverage report && coverage xml
+
+        shopt -s extglob
+        pytest ./iguanas/*/tests/!(*spark*)
+        shopt -u extglob
+
+        # pytest iguanas/*/examples/ --nbmake --nbmake-kernel=iguanas
+        # pytest examples/ --nbmake --nbmake-kernel=iguanas             
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
       with:
