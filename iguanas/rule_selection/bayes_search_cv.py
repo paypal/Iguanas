@@ -80,6 +80,8 @@ class BayesSearchCV:
         The parameter set index that produced the best mean score.
     best_params : dict
         The parameter set that produced the best mean score.
+    pipeline_ : LinearPipeline
+        The optimised LinearPipeline.
     """
 
     def __init__(self,
@@ -140,14 +142,15 @@ class BayesSearchCV:
             X=X, y=y, sample_weight=sample_weight, cv=self.cv
         )
         # Convert values of `search_spaces` into hyperopt search functions
-        self.search_spaces_ = self._convert_search_spaces_to_hyperopt(
+        search_spaces_ = self._convert_search_spaces_to_hyperopt(
             search_spaces=self.search_spaces
         )
         # Optimise pipeline parameters
         if self.verbose > 0:
             print('--- Optimising pipeline parameters ---')
         self.best_params, self.cv_results = self._optimise_params(
-            cv_datasets=cv_datasets, pipeline=self.pipeline_
+            cv_datasets=cv_datasets, pipeline=self.pipeline_,
+            search_spaces=search_spaces_
         )
         # Reformat hyperopt output
         self.best_params = self._reformat_best_params(
@@ -211,11 +214,12 @@ class BayesSearchCV:
 
     def _optimise_params(self,
                          cv_datasets: Dict[int, list],
-                         pipeline: LinearPipeline) -> Tuple[dict, dict]:
+                         pipeline: LinearPipeline,
+                         search_spaces: Dict[str, dict]) -> Tuple[dict, dict]:
         """Optimises the parameters of the given pipeline."""
 
         self.cv_results = []
-        objective_inputs = (self.search_spaces_, pipeline, cv_datasets)
+        objective_inputs = (search_spaces, pipeline, cv_datasets)
         best_params = fmin(
             fn=self._objective,
             space=objective_inputs,
@@ -392,19 +396,23 @@ class BayesSearchCV:
         # Convert back into original search_spaces format (i.e. a dictionary
         # whose keys are the steps in the pipeline, and whose values are
         # dictionaries of the parameters for that step).
-        best_params = {
-            param_tag.split("__")[0]: {param_tag.split(
-                "__")[1]: param_value} for param_tag, param_value in best_params.items()
+        best_params_ = {
+            param_tag.split("__")[0]: {} for param_tag in best_params.keys()
         }
+        for param_tag, param_value in best_params.items():
+            stage_tag = param_tag.split("__")[0]
+            param = param_tag.split("__")[1]
+            best_params_[stage_tag][param] = param_value
         # If value for param in search_spaces was a iguanas.space.Choice type,
         # then the outputted opt value will be the index of the best choice. So
         # need to return the best choice option from the original list.
         for step_tag, step_params in search_spaces.items():
             for param, value in step_params.items():
                 if isinstance(value, Choice):
-                    best_choice_idx = best_params[step_tag][param]
-                    best_params[step_tag][param] = value.options[best_choice_idx]
-        return best_params
+                    best_choice_idx = best_params_[step_tag][param]
+                    best_params_[
+                        step_tag][param] = value.options[best_choice_idx]
+        return best_params_
 
     @staticmethod
     def _format_cv_results(cv_results: dict) -> PandasDataFrameType:

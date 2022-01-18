@@ -168,8 +168,8 @@
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#the-pros-and-cons-of-an-rbs">
-   The pros and cons of an RBS
+  <a class="reference internal nav-link" href="#the-advantages-and-disadvantages-of-an-rbs">
+   The advantages and disadvantages of an RBS
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
@@ -210,7 +210,7 @@
 <h2>What is Iguanas?<a class="headerlink" href="#what-is-iguanas" title="Permalink to this headline">¶</a></h2>
 <p>Iguanas is a fast, flexible and modular Python package for:</p>
 <ul class="simple">
-<li><p>Generating new fraud-capture rules using a labelled dataset.</p></li>
+<li><p>Generating new rules using a labelled dataset.</p></li>
 <li><p>Optimising existing rules using a labelled or unlabelled dataset.</p></li>
 <li><p>Combining rule sets and removing/filtering those which are unnecessary.</p></li>
 <li><p>Generating rule scores based on their performance.</p></li>
@@ -219,35 +219,37 @@
 </section>
 <section id="what-are-rules-and-rule-based-systems-rbs">
 <h2>What are rules and rule-based systems (RBS)?<a class="headerlink" href="#what-are-rules-and-rule-based-systems-rbs" title="Permalink to this headline">¶</a></h2>
-<p>A <strong>rule</strong> is a set of conditions which, if met, trigger a certain response.​ An example of a rule is one that captures a particular type of fraudulent behaviour for an e-commerce company:</p>
-<p><em>If the number of transactions made from a given email address in the past 4 hours is greater than 10, reject the transaction.​</em></p>
-<p>An <strong>RBS</strong> is one that leverages a number of these rules to provide a certain outcome.​</p>
-<p>For example, an e-commerce company might employ an RBS to <em>accept</em>, <em>reject</em> and <em>review</em> its transactions.​</p>
+<p>A <strong>rule</strong> is a set of conditions which, if met, trigger a certain response.</p>
+<p>An example of a rule is a condition that captures a particular type of fraudulent behaviour for an e-commerce company:</p>
+<p><em>If the number of transactions made from a given email address in the past 4 hours is greater than 10, reject the transaction.</em></p>
+<p>An <strong>RBS</strong> leverages a number of these rules to provide a certain outcome.</p>
+<p>For example, an e-commerce company might employ an RBS to <em>accept</em>, <em>reject</em> and <em>review</em> its transactions.</p>
 </section>
-<section id="the-pros-and-cons-of-an-rbs">
-<h2>The pros and cons of an RBS<a class="headerlink" href="#the-pros-and-cons-of-an-rbs" title="Permalink to this headline">¶</a></h2>
-<p>As with any approach, there are pros and cons to RBS’s.​</p>
-<p><strong>Pros</strong></p>
+<section id="the-advantages-and-disadvantages-of-an-rbs">
+<h2>The advantages and disadvantages of an RBS<a class="headerlink" href="#the-advantages-and-disadvantages-of-an-rbs" title="Permalink to this headline">¶</a></h2>
+<p>As with any approach, there are both advantages and disadvantages related to Rules-Based Systems:</p>
+<p><strong>Advantages</strong></p>
 <ul class="simple">
-<li><p>Rules are intuitive, so the outcome given by the RBS is easy to understand.​​</p></li>
-<li><p>RBS’s are flexible, since rules can be quickly added to address new behaviour.​​</p></li>
-<li><p>Rules can be built using domain knowledge, which may capture behaviour an ML model would have missed.​​</p></li>
+<li><p>Rules are intuitive, so the outcome given by the RBS is easy to understand.</p></li>
+<li><p>Rules-Based Systems are flexible, since rules can be quickly added to address new behaviour.</p></li>
+<li><p>Rules can be built using domain knowledge, which may capture behaviour an ML model would have missed.</p></li>
 </ul>
-<p><strong>Cons</strong></p>
+<p><strong>Disadvantages</strong></p>
 <ul class="simple">
-<li><p>Linked to the last pro - domain knowledge is usually required to build rules.​ If you don’t have the domain knowledge, creating rules can be difficult.​</p></li>
-<li><p>Generating these rules can be challenging and time consuming, especially if a data-guided approach is used.​</p></li>
-<li><p>Difficult to tweak existing rules to address new trends.​</p></li>
+<li><p>If you don’t have domain knowledge, you need to use a data-guided approach when generating rules, which can be challenging and time consuming.</p></li>
+<li><p>It’s difficult to tweak existing rules to address new trends.</p></li>
+<li><p>Knowing which rules to include in the RBS to maximise its performance is very difficult.</p></li>
 </ul>
 </section>
 <section id="the-solution-iguanas">
 <h2>The solution – Iguanas!<a class="headerlink" href="#the-solution-iguanas" title="Permalink to this headline">¶</a></h2>
-<p>Iguanas addresses the cons of an RBS for binary classification problems:​</p>
+<p>Iguanas addresses the disadvantages of an RBS for binary classification problems:</p>
 <ul class="simple">
-<li><p>Iguanas only requires a historic dataset to generate rules – similar to the requirements of an ML model.​​</p></li>
-<li><p>Iguanas quickly and easily generates high performance rules and utilizes an API that is familiar to most data scientists - Sklearn’s fit/transform methology.​</p></li>
-<li><p>Iguanas’ rule optimization module allows the user to tweak the thresholds of current rules using a labelled dataset.​</p></li>
-<li><p>Iguanas also has a host of other modules which help to streamline the RBS set up process.​</p></li>
+<li><p>Iguanas only requires a historic data set to generate rules - similar to the requirements of an ML model.</p></li>
+<li><p>Iguanas utilises an API that is familiar to most data scientists - Sklearn’s fit/transform/predict methodology.</p></li>
+<li><p>Iguanas’ Rule Optimisation module allows users to update the thresholds of current rules based on new trends.</p></li>
+<li><p>Iguanas’ <strong>LinearPipeline</strong> and <strong>BayesSearchCV</strong> classes allow users to identify the combination of rules that gives the best RBS performance.</p></li>
+<li><p>Iguanas has many other modules that streamline the process of generating an RBS.</p></li>
 </ul>
 </section>
 <section id="getting-started">

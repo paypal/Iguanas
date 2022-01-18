@@ -1,2 +1,1 @@
-# find iguanas/*/examples -name "*example.ipynb" -name "*spark*" -exec python -m pytest "{}" --nbmake --nbmake-kernel=iguanas_os_dev \;
-pytest ./iguanas/*/examples/*spark* --nbmake --nbmake-kernel=iguanas_os_dev
+pytest ./iguanas/*/examples/*spark* --nbmake --nbmake-kernel=$1

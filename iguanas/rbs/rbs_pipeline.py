@@ -5,6 +5,7 @@ import iguanas.utils as utils
 from iguanas.utils.types import PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from typing import List, Tuple
+from joblib import Parallel, delayed
 
 
 class RBSPipeline:
@@ -40,13 +41,15 @@ class RBSPipeline:
 
     def __init__(self,
                  config: List[Tuple[int, list]],
-                 final_decision: int) -> None:
+                 final_decision: int,
+                 num_cores=1) -> None:
         if not isinstance(config, list):
             raise ValueError('`config` must be a list')
         if final_decision not in [0, 1]:
             raise ValueError('`final_decision` must be either 0 or 1')
         self.config = config
         self.final_decision = final_decision
+        self.num_cores = num_cores
 
     def predict(self,
                 X_rules: PandasDataFrameType) -> PandasSeriesType:
@@ -71,30 +74,31 @@ class RBSPipeline:
         return y_pred
 
     @staticmethod
-    def _get_stage_level_preds(X_rules: PandasDataFrameType,
-                               config: List[Tuple[int, list]]) -> PandasDataFrameType:
+    def _get_stage_level_preds(X_rules, config):
         """Returns the predictions for each stage in the pipeline"""
 
-        rules = X_rules.columns.tolist()
         stage_level_preds = []
-        for i, stage in enumerate(config):
-            decision = stage[0]
-            stage_rules = stage[1]
-            stage_rules_present = [
-                rule for rule in stage_rules if rule in rules]
-            if not stage_rules_present:
+        col_names = []
+        for i, (decision, stage_rules) in enumerate(config):
+            if not stage_rules:
                 continue
-            y_pred_stage = (
-                X_rules[stage_rules_present].sum(1) > 0).astype(int)
+            if len(stage_rules) == 1:
+                y_pred_stage = X_rules[stage_rules[0]].values
+            else:
+                y_pred_stage = np.bitwise_or.reduce(
+                    X_rules[stage_rules].values, axis=1
+                )
             if decision == 0:
                 y_pred_stage = -y_pred_stage
-            y_pred_stage.name = f'Stage={i}, Decision={decision}'
+            col_names.append(f'Stage={i}, Decision={decision}')
             stage_level_preds.append(y_pred_stage)
         if not stage_level_preds:
             return None
         else:
-            stage_level_preds = pd.concat(stage_level_preds, axis=1)
-            return stage_level_preds
+            stage_level_preds = pd.DataFrame(
+                np.array(stage_level_preds).T, columns=col_names
+            )
+        return stage_level_preds
 
     def _get_pipeline_pred(self, stage_level_preds: PandasDataFrameType,
                            num_rows: int) -> PandasSeriesType:

@@ -99,7 +99,7 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
         ('gf', gf),
         ('rbs', rbs)
     ]
-    rg_dt.today = '20211220'
+    rg_dt._today = '20211220'
     lp = LinearPipeline(steps)
     # Test fit/predict/fit_predict, no sample_weight
     lp.fit(X, y)
@@ -146,7 +146,7 @@ def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
         ('gf', gf),
         ('rbs', rbs)
     ]
-    rg_opt.today = '20211220'
+    rg_opt._today = '20211220'
     lp = LinearPipeline(steps)
     # Test fit/predict/fit_predict, no sample_weight
     lp.fit(X, y)

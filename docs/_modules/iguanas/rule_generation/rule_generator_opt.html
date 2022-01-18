@@ -234,8 +234,7 @@
 <span class="sd">        Controls the verbosity - the higher, the more messages. &gt;0 : gives the</span>
 <span class="sd">        progress of the training of the rules. Defaults to 0.</span>
 <span class="sd">    rule_name_prefix : str, optional </span>
-<span class="sd">        Prefix to use for each rule name. If None, the standard prefix is used.</span>
-<span class="sd">        Defaults to None.</span>
+<span class="sd">        Prefix to use for each rule. Defaults to &#39;RGO_Rule&#39;.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -250,7 +249,7 @@
                  <span class="n">n_total_conditions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_rules_keep</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
                  <span class="n">ratio_window</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">one_cond_rule_opt_metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
                  <span class="n">remove_corr_rules</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">target_feat_corr_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rule_name_prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rule_name_prefix</span><span class="o">=</span><span class="s1">&#39;RGO_Rule&#39;</span><span class="p">):</span>
 
         <span class="n">_BaseGenerator</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -632,16 +631,6 @@
         <span class="n">rule_strings</span> <span class="o">=</span> <span class="p">{</span><span class="n">rule_name</span><span class="p">:</span> <span class="n">rule_logic</span> <span class="k">for</span> <span class="n">rule_name</span><span class="p">,</span>
                         <span class="n">rule_logic</span> <span class="ow">in</span> <span class="n">rule_strings</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">rule_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rules_to_drop</span><span class="p">}</span>
         <span class="k">return</span> <span class="n">rule_strings</span><span class="p">,</span> <span class="n">X_rules</span>
-
-    <span class="k">def</span> <span class="nf">_generate_rule_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Generates rule name&quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_name_prefix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">rule_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;RGO_Rule_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">today</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_rule_name_counter</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">rule_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_name_prefix</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_rule_name_counter</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_rule_name_counter</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">return</span> <span class="n">rule_name</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_generate_rule_descriptions</span><span class="p">(</span><span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>

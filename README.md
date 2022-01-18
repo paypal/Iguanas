@@ -8,7 +8,7 @@
 
 Iguanas is a fast, flexible and modular Python package for:
 
-* Generating new fraud-capture rules using a labelled dataset.
+* Generating new rules using a labelled dataset.
 * Optimising existing rules using a labelled or unlabelled dataset.
 * Combining rule sets and removing/filtering those which are unnecessary.
 * Generating rule scores based on their performance.

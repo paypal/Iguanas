@@ -63,6 +63,13 @@ def test_get_stage_level_preds(_create_data, _instantiate):
     rbsp = _instantiate
     stage_level_preds = rbsp._get_stage_level_preds(X_rules=X, config=config)
     assert all(stage_level_preds == exp_results)
+    # Test when config contains no rules
+    config = [
+        (0, []),
+        (1, [])
+    ]
+    stage_level_preds = rbsp._get_stage_level_preds(X_rules=X, config=config)
+    assert stage_level_preds is None
 
 
 def test_get_pipeline_pred(_instantiate):

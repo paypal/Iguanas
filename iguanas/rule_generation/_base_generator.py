@@ -46,8 +46,8 @@ class _BaseGenerator(Rules):
         self.target_feat_corr_types = target_feat_corr_types
         self.rule_name_prefix = rule_name_prefix
         self._rule_name_counter = 0
-        today = date.today()
-        self.today = today.strftime("%Y%m%d")
+        _today = date.today()
+        self._today = _today.strftime("%Y%m%d")
         Rules.__init__(self, rule_strings={})
 
     def fit_transform(self,
@@ -135,11 +135,11 @@ class _BaseGenerator(Rules):
             rule_strings_set.add(rule_logic)
         return rule_strings_set
 
-    def _generate_rule_name_dt(self) -> str:
+    def _generate_rule_name(self) -> str:
         """Generates rule name"""
 
-        if self.rule_name_prefix is None:
-            rule_name = f'RGDT_Rule_{self.today}_{self._rule_name_counter}'
+        if self.rule_name_prefix == 'RGDT_Rule' or self.rule_name_prefix == 'RGO_Rule':
+            rule_name = f'{self.rule_name_prefix}_{self._today}_{self._rule_name_counter}'
         else:
             rule_name = f'{self.rule_name_prefix}_{self._rule_name_counter}'
         self._rule_name_counter += 1

@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from hyperopt import tpe, anneal
+from hyperopt import hp
 from sklearn.ensemble import RandomForestClassifier
 
 from iguanas.rule_generation import RuleGeneratorDT, RuleGeneratorOpt
@@ -91,12 +91,76 @@ def _instantiate_classes():
     return rg_dt, rg_opt, ro, sf, cf, gf, rbs
 
 
+@pytest.fixture
+def _cv_datasets(_create_data):
+    X, y, sample_weight = _create_data
+    cv_datasets = {
+        0: (X[:50], X[50:], y[:50], y[50:], sample_weight[:50], sample_weight[50:]),
+        1: (X[50:], X[:50], y[50:], y[:50], sample_weight[50:], sample_weight[:50])
+    }
+    return cv_datasets
+
+
+@pytest.fixture
+def _instantiate_lp_and_bs(_instantiate_classes):
+    rg_dt, _, _, _, _, _, rbs = _instantiate_classes
+    search_spaces = {
+        'rg_dt': {
+            'n_total_conditions': UniformInteger(2, 5),
+            'target_feat_corr_types': Choice([None])
+        },
+        'rbs': {
+            'n_iter': UniformInteger(10, 15)
+        }
+    }
+    search_spaces_ = {
+        'rg_dt': {
+            'n_total_conditions': hp.quniform('n_total_conditions', 2, 5, q=1),
+            'target_feat_corr_types': hp.choice('target_feat_corr_types', [None])
+        },
+        'rbs': {
+            'n_iter': hp.quniform('n_iter', 10, 15, q=1)
+        }
+    }
+    rbs.pos_pred_rules = ClassAccessor('rg_dt', 'rule_names')
+    steps = [
+        ('rg_dt', rg_dt),
+        ('rbs', rbs)
+    ]
+    lp = LinearPipeline(steps)
+    bs = BayesSearchCV(
+        pipeline=lp,
+        search_spaces=search_spaces,
+        metric=f1.fit,
+        cv=3,
+        n_iter=1,
+        error_score=0,
+        verbose=1
+    )
+    return lp, bs, search_spaces_
+
+
+@pytest.fixture
+def _params_iter():
+    params_iter = {
+        'rg_dt': {
+            'n_total_conditions': 2,
+            'target_feat_corr_types': None
+        },
+        'rbs': {
+            'n_iter': 10
+        }
+    }
+    return params_iter
+
+
 def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
     X, y, sample_weight = _create_data
     rg_dt, _, _, sf, cf, gf, rbs = _instantiate_classes
     search_spaces = {
         'rg_dt': {
             'n_total_conditions': UniformInteger(2, 5),
+            'target_feat_corr_types': Choice([None])
         },
         'sf': {
             'threshold': UniformFloat(0, 1),
@@ -138,8 +202,9 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
                    ) == '<bound method Precision.fit of Precision>'
         assert bs.best_params['rbs']['n_iter'] == 15.0
         assert bs.best_params['rg_dt']['n_total_conditions'] == 5.0
+        assert bs.best_params['rg_dt']['target_feat_corr_types'] is None
         assert bs.best_params['sf']['threshold'] == 0.2583716619727481
-        assert bs.cv_results.shape == (5, 10)
+        assert bs.cv_results.shape == (5, 11)
         y_pred = bs.predict(X)
         assert y_pred.mean() == 0.02
         assert f1.fit(y_pred, y) == 0.33333333333333337
@@ -155,8 +220,9 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
                    ) == '<bound method FScore.fit of FScore with beta=1>'
         assert bs.best_params['rbs']['n_iter'] == 12.0
         assert bs.best_params['rg_dt']['n_total_conditions'] == 4.0
+        assert bs.best_params['rg_dt']['target_feat_corr_types'] is None
         assert bs.best_params['sf']['threshold'] == 0.1474198119511717
-        assert bs.cv_results.shape == (5, 10)
+        assert bs.cv_results.shape == (5, 11)
         y_pred = bs.predict(X)
         assert y_pred.mean() == 0.1
         assert f1.fit(y_pred, y, sample_weight) == 0.8421052631578948
@@ -313,6 +379,308 @@ def test_fit_predict_rule_opt(_create_data, _instantiate_classes):
         y_pred = bs.fit_predict(X, y, sample_weight)
         assert y_pred.mean() == 0.82
         assert f1.fit(y_pred, y, sample_weight) == 0.3243243243243243
+
+
+def test_optimise_params(_cv_datasets, _instantiate_lp_and_bs):
+    exp_best_params = {
+        'n_iter': 13.0, 'n_total_conditions': 3.0, 'target_feat_corr_types': 0
+    }
+    exp_cv_results = [
+        {
+            'Params': {
+                'rbs': {'n_iter': 13.0},
+                'rg_dt': {'n_total_conditions': 3.0, 'target_feat_corr_types': None}
+            },
+            'rbs__n_iter': 13.0,
+            'rg_dt__n_total_conditions': 3.0,
+            'rg_dt__target_feat_corr_types': None,
+            'FoldIdx': [0, 1],
+            'Scores': np.array([0.21621622, 0.38095238]),
+            'MeanScore': 0.2985842985842986,
+            'StdDevScore': 0.08236808236808235
+        }
+    ]
+    cv_datasets = _cv_datasets
+    lp, bs, search_spaces_ = _instantiate_lp_and_bs
+    best_params, cv_results = bs._optimise_params(
+        cv_datasets, lp, search_spaces_)
+    assert best_params == exp_best_params
+    pd.testing.assert_frame_equal(pd.DataFrame(
+        cv_results), pd.DataFrame(exp_cv_results))
+
+
+def test_objective(_cv_datasets, _instantiate_lp_and_bs):
+    cv_datasets = _cv_datasets
+    lp, bs, _ = _instantiate_lp_and_bs
+    params_iter = {
+        'rg_dt': {
+            'n_total_conditions': 2,
+            'target_feat_corr_types': None
+        },
+        'rbs': {
+            'n_iter': 10
+        }
+    }
+    bs.cv_results = []
+    mean_score = bs._objective((params_iter, lp, cv_datasets))
+    assert mean_score == -0.2507836990595611
+
+
+def test_check_search_spaces_type(_instantiate_lp_and_bs):
+    _, bs, _ = _instantiate_lp_and_bs
+    search_spaces = {
+        'ro': {
+            'metric': Choice([p.fit, f1.fit])
+        },
+        'sf': {
+            'threshold': UniformFloat(0, 1),
+        },
+        'rbs': {
+            'n_iter': UniformInteger(10, 15)
+        }
+    }
+    # Check no errors
+    bs._check_search_spaces_type(search_spaces)
+    # Check errors
+    with pytest.raises(TypeError, match="`metric` must be a iguanas.space.spaces.UniformFloat or iguanas.space.spaces.UniformInteger or iguanas.space.spaces.Choice. Current type is int."):
+        bs._check_search_spaces_type({'ro': {'metric': 1}})
+
+
+def test_generate_cv_datasets(_create_data, _instantiate_lp_and_bs):
+    _, bs, _ = _instantiate_lp_and_bs
+    X, y, sample_weight = _create_data
+    exp_results = [
+        [
+            ((50, 4), 306.3046730719136),
+            ((50, 4), 277.2591450699665),
+            ((50,), 5),
+            ((50,), 5),
+            ((50,), 550),
+            ((50,), 550)
+        ],
+        [
+            ((50, 4), 277.2591450699665),
+            ((50, 4), 306.3046730719136),
+            ((50,), 5),
+            ((50,), 5),
+            ((50,), 550),
+            ((50,), 550)
+        ]
+    ]
+    # With weights
+    cv_datasets_values = bs._generate_cv_datasets(
+        X, y, sample_weight, 2).values()
+    results = list(
+        map(
+            lambda x: [(i.shape, i.sum().sum())
+                       for i in x], cv_datasets_values
+        )
+    )
+    assert results == exp_results
+    # Without weights
+    cv_datasets_values = list(bs._generate_cv_datasets(
+        X, y, None, 2).values())
+    assert cv_datasets_values[0][-2:] == (None, None)
+    assert cv_datasets_values[1][-2:] == (None, None)
+    # Remove sample_weight values
+    cv_datasets_values[0] = cv_datasets_values[0][:-2]
+    cv_datasets_values[1] = cv_datasets_values[1][:-2]
+    results = list(
+        map(
+            lambda x: [(i.shape, i.sum().sum())
+                       for i in x], cv_datasets_values
+        )
+    )
+    # Remove sample_weight values
+    exp_results[0].pop(-2)
+    exp_results[0].pop(-1)
+    exp_results[1].pop(-2)
+    exp_results[1].pop(-1)
+    assert results == exp_results
+
+
+def test_convert_search_spaces_to_hyperopt(_instantiate_lp_and_bs):
+    _, bs, exp_search_spaces = _instantiate_lp_and_bs
+    search_spaces_ = bs._convert_search_spaces_to_hyperopt(bs.search_spaces)
+    search_spaces_ == exp_search_spaces
+    for step_tag, step_params in search_spaces_.items():
+        for param, param_value in step_params.items():
+            assert type(param_value) == type(
+                exp_search_spaces[step_tag][param])
+
+
+def test_inject_params_into_pipeline(_instantiate_lp_and_bs):
+    lp, bs, _ = _instantiate_lp_and_bs
+    params = {
+        'rg_dt': {
+            'n_total_conditions': 10
+        }
+    }
+    pipeline = bs._inject_params_into_pipeline(lp, params)
+    assert pipeline.get_params()['rg_dt__n_total_conditions'] == 10
+
+
+def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,
+                             _instantiate_classes):
+    lp, bs, _ = _instantiate_lp_and_bs
+    cv_datasets = _cv_datasets
+    rg_dt, _, _, sf, _, _, rbs = _instantiate_classes
+    steps = [
+        ('rg_dt', rg_dt),
+        ('sf', sf),
+        ('rbs', rbs)
+    ]
+    lp.steps = steps
+    params_iter = {
+        'rg_dt': {
+            'n_total_conditions': 2,
+            'target_feat_corr_types': None
+        },
+        'rbs': {
+            'n_iter': 10
+        }
+    }
+    fold_score = bs._fit_predict_on_fold(
+        metric=f1.fit,
+        error_score='raise',
+        datasets=cv_datasets[0],
+        pipeline=lp,
+        params_iter=params_iter,
+        fold_idx=0
+    )
+    assert fold_score == 0.25806451612903225
+    sf.threshold = 1
+    with pytest.raises(Exception, match="No rules remaining for: Pipeline parameter set = {'rg_dt': {'n_total_conditions': 2, 'target_feat_corr_types': None}, 'rbs': {'n_iter': 10}}; Fold index = 0."):
+        bs._fit_predict_on_fold(
+            metric=f1.fit,
+            error_score='raise',
+            datasets=cv_datasets[0],
+            pipeline=lp,
+            params_iter=params_iter,
+            fold_idx=0
+        )
+    with pytest.warns(UserWarning, match="No rules remaining for: Pipeline parameter set = {'rg_dt': {'n_total_conditions': 2, 'target_feat_corr_types': None}, 'rbs': {'n_iter': 10}}; Fold index = 0. The metric score for this parameter set & fold will be set to 0"):
+        fold_score = bs._fit_predict_on_fold(
+            metric=f1.fit,
+            error_score=0,
+            datasets=cv_datasets[0],
+            pipeline=lp,
+            params_iter=params_iter,
+            fold_idx=0
+        )
+        assert fold_score == 0
+
+
+def test_update_cv_results(_instantiate_lp_and_bs, _params_iter):
+    _, bs, _ = _instantiate_lp_and_bs
+    params_iter = _params_iter
+    exp_cv_results = [
+        {
+            'Params': {
+                'rg_dt': {'n_total_conditions': 2, 'target_feat_corr_types': None},
+                'rbs': {'n_iter': 10}
+            },
+            'rg_dt__n_total_conditions': 2,
+            'rg_dt__target_feat_corr_types': None,
+            'rbs__n_iter': 10,
+            'FoldIdx': [0, 1, 2],
+            'Scores': np.array([0.5, 0.25, 0.75]),
+            'MeanScore': 0.5,
+            'StdDevScore': 0.1
+        }
+    ]
+    cv_results = bs._update_cv_results(
+        [], params_iter, [0, 1, 2], np.array([0.5, 0.25, 0.75]), 0.5, 0.1
+    )
+    np.testing.assert_array_equal(
+        cv_results[0]['Scores'], exp_cv_results[0]['Scores']
+    )
+    cv_results[0].pop('Scores')
+    exp_cv_results[0].pop('Scores')
+    assert cv_results == exp_cv_results
+
+
+def test_reformat_best_params(_instantiate_lp_and_bs):
+    _, bs, _ = _instantiate_lp_and_bs
+    best_params = {
+        'rbs__n_iter': 13.0, 'rg_dt__n_total_conditions': 3.0, 'rg_dt__target_feat_corr_types': 0
+    }
+    bs._reformat_best_params(best_params, bs.search_spaces)
+
+
+def test_format_cv_results(_instantiate_lp_and_bs):
+    _, bs, _ = _instantiate_lp_and_bs
+    cv_results = [
+        {
+            'Params': {'rbs': {'n_iter': 13.0},
+                       'rg_dt': {'n_total_conditions': 4.0, 'target_feat_corr_types': None}},
+            'rbs__n_iter': 13.0,
+            'rg_dt__n_total_conditions': 4.0,
+            'rg_dt__target_feat_corr_types': None,
+            'FoldIdx': [0, 1, 2],
+            'Scores': np.array([0.3, 0.26086957, 0.25]),
+            'MeanScore': 0.2702898550724638,
+            'StdDevScore': 0.021471786072505872
+        },
+        {
+            'Params': {'rbs': {'n_iter': 13.0},
+                       'rg_dt': {'n_total_conditions': 3.0, 'target_feat_corr_types': None}},
+            'rbs__n_iter': 13.0,
+            'rg_dt__n_total_conditions': 3.0,
+            'rg_dt__target_feat_corr_types': None,
+            'FoldIdx': [0, 1, 2],
+            'Scores': np.array([0.23076923, 0.14285714, 0.1875]),
+            'MeanScore': 0.18704212454212454,
+            'StdDevScore': 0.035891419937703416
+        },
+        {
+            'Params': {'rbs': {'n_iter': 15.0},
+                       'rg_dt': {'n_total_conditions': 3.0, 'target_feat_corr_types': None}},
+            'rbs__n_iter': 15.0,
+            'rg_dt__n_total_conditions': 3.0,
+            'rg_dt__target_feat_corr_types': None,
+            'FoldIdx': [0, 1, 2],
+            'Scores': np.array([0.16666667, 0.16, 0.07407407]),
+            'MeanScore': 0.13358024691358025,
+            'StdDevScore': 0.04216514805393193
+        }]
+    exp_result = pd.DataFrame([
+        {
+            'Params': {'rbs': {'n_iter': 13.0},
+                       'rg_dt': {'n_total_conditions': 4.0, 'target_feat_corr_types': None}},
+            'rbs__n_iter': 13.0,
+            'rg_dt__n_total_conditions': 4.0,
+            'rg_dt__target_feat_corr_types': None,
+            'FoldIdx': [0, 1, 2],
+            'Scores': np.array([0.3, 0.26086957, 0.25]),
+            'MeanScore': 0.2702898550724638,
+            'StdDevScore': 0.021471786072505872
+        },
+        {
+            'Params': {'rbs': {'n_iter': 13.0},
+                       'rg_dt': {'n_total_conditions': 3.0, 'target_feat_corr_types': None}},
+            'rbs__n_iter': 13.0,
+            'rg_dt__n_total_conditions': 3.0,
+            'rg_dt__target_feat_corr_types': None,
+            'FoldIdx': [0, 1, 2],
+            'Scores': np.array([0.23076923, 0.14285714, 0.1875]),
+            'MeanScore': 0.18704212454212454,
+            'StdDevScore': 0.035891419937703416
+        },
+        {
+            'Params': {'rbs': {'n_iter': 15.0},
+                       'rg_dt': {'n_total_conditions': 3.0, 'target_feat_corr_types': None}},
+            'rbs__n_iter': 15.0,
+            'rg_dt__n_total_conditions': 3.0,
+            'rg_dt__target_feat_corr_types': None,
+            'FoldIdx': [0, 1, 2],
+            'Scores': np.array([0.16666667, 0.16, 0.07407407]),
+            'MeanScore': 0.13358024691358025,
+            'StdDevScore': 0.04216514805393193
+        }
+    ])
+    result = bs._format_cv_results(cv_results)
+    pd.testing.assert_frame_equal(result, exp_result)
 
 
 def test_error(_create_data, _instantiate_classes):
