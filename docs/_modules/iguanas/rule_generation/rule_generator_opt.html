@@ -334,6 +334,12 @@
             <span class="n">X_rules</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">rule_strings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_corr_rules</span><span class="p">,</span> <span class="n">sample_weight</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="c1"># Convert generated rules into lambda format. Set rule_lambdas to an</span>
+        <span class="c1"># empty dict first, prevents errors when running fit more than once.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rule_lambdas</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rule_lambdas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_rule_lambdas</span><span class="p">(</span>
+            <span class="n">as_numpy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">with_kwargs</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">X_rules</span></div>
 
     <span class="k">def</span> <span class="nf">_generate_numeric_one_condition_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
@@ -875,7 +881,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
 </p>
     </div>
     

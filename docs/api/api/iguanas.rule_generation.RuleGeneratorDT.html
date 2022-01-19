@@ -658,12 +658,12 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="iguanas.rule_generation.RuleGeneratorDT">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.rule_generation.</span></span><span class="sig-name descname"><span class="pre">RuleGeneratorDT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_total_conditions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree_ensemble</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">sklearn.ensemble._forest.RandomForestClassifier</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">sklearn.ensemble._forest.ExtraTreesClassifier</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_feat_corr_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule_name_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RGDT_Rule'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/rule_generation/rule_generator_dt.html#RuleGeneratorDT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_generation.RuleGeneratorDT" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate rules by extracting the highest performing branches from a 
+<dd><p>Generate rules by extracting the highest performing branches from a
 tree ensemble model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>metric</strong><span class="classifier">Callable</span></dt><dd><p>A function/method which calculates the desired performance metric 
+<dt><strong>metric</strong><span class="classifier">Callable</span></dt><dd><p>A function/method which calculates the desired performance metric
 (e.g. Fbeta score).</p>
 </dd>
 <dt><strong>n_total_conditions</strong><span class="classifier">int</span></dt><dd><p>The maximum number of conditions per generated rule.</p>
@@ -671,9 +671,9 @@ tree ensemble model.</p>
 <dt><strong>tree_ensemble</strong><span class="classifier">Union[RandomForestClassifier, ExtraTreesClassifier]</span></dt><dd><p>Instantiated Sklearn tree ensemble classifier object used to generated
 rules.</p>
 </dd>
-<dt><strong>precision_threshold</strong><span class="classifier">float, optional</span></dt><dd><p>Precision threshold for the tree/branch to be used to create rules. 
-If the overall precision of the tree/branch is less than or equal 
-to this value, it will not be used in rule generation. Note that if 
+<dt><strong>precision_threshold</strong><span class="classifier">float, optional</span></dt><dd><p>Precision threshold for the tree/branch to be used to create rules.
+If the overall precision of the tree/branch is less than or equal
+to this value, it will not be used in rule generation. Note that if
 <cite>bootstrap</cite> == True in the tree_ensemble class, the precision will
 be based on the bootstrapped sample used to create the tree.
 Defaults to 0.</p>
@@ -682,17 +682,17 @@ Defaults to 0.</p>
 generate rules. Defaults to 1.</p>
 </dd>
 <dt><strong>target_feat_corr_types</strong><span class="classifier">Union[Dict[str, List[str]], str], optional</span></dt><dd><p>Limits the conditions of the rules based on the target-feature
-correlation (e.g. if a feature has a positive correlation with 
+correlation (e.g. if a feature has a positive correlation with
 respect to the target, then only greater than operators are used
-for conditions that utilise that feature). Can be either a 
-dictionary specifying the list of positively correlated features 
-wrt the target (under the key <cite>PositiveCorr</cite>) and negatively 
-correlated features wrt the target (under the key <cite>NegativeCorr</cite>), 
-or ‘Infer’ (where each target-feature correlation type is inferred 
+for conditions that utilise that feature). Can be either a
+dictionary specifying the list of positively correlated features
+wrt the target (under the key <cite>PositiveCorr</cite>) and negatively
+correlated features wrt the target (under the key <cite>NegativeCorr</cite>),
+or ‘Infer’ (where each target-feature correlation type is inferred
 from the data). Defaults to None.</p>
 </dd>
 <dt><strong>verbose</strong><span class="classifier">int, optional</span></dt><dd><p>Controls the verbosity - the higher, the more messages. &gt;0 : gives
-the overall progress of the training of the ensemble model and the 
+the overall progress of the training of the ensemble model and the
 extraction of the rules from the trees. Defaults to 0.</p>
 </dd>
 <dt><strong>rule_name_prefix</strong><span class="classifier">str, optional</span></dt><dd><p>Prefix to use for each rule. Defaults to ‘RGDT_Rule’.</p>
@@ -711,7 +711,7 @@ extraction of the rules from the trees. Defaults to 0.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.rule_generation.RuleGeneratorDT.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">iguanas.utils.typing.pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">iguanas.utils.typing.pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">iguanas.utils.typing.pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/iguanas/rule_generation/rule_generator_dt.html#RuleGeneratorDT.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_generation.RuleGeneratorDT.fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/iguanas/rule_generation/rule_generator_dt.html#RuleGeneratorDT.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_generation.RuleGeneratorDT.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates rules by extracting the highest performing branches in a tree
 ensemble model.</p>
 <dl class="field-list simple">
@@ -820,7 +820,7 @@ quickly on larger dataset stored as Pandas DataFrames.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.rule_generation.RuleGeneratorDT.fit_transform">
-<span class="sig-name descname"><span class="pre">fit_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">iguanas.utils.typing.pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">iguanas.utils.typing.databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">iguanas.utils.typing.pandas.core.series.Series</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">iguanas.utils.typing.databricks.koalas.series.Series</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">iguanas.utils.typing.pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">iguanas.utils.typing.databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#iguanas.rule_generation.RuleGeneratorDT.fit_transform" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">databricks.koalas.series.Series</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#iguanas.rule_generation.RuleGeneratorDT.fit_transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Same as <cite>.fit()</cite> method - ensures rule generator conforms to 
 fit/transform methodology.</p>
 <dl class="field-list simple">
@@ -859,7 +859,7 @@ fit/transform methodology.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.rule_generation.RuleGeneratorDT.transform">
-<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">iguanas.utils.typing.pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">iguanas.utils.typing.databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">iguanas.utils.typing.pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">iguanas.utils.typing.databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#iguanas.rule_generation.RuleGeneratorDT.transform" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#iguanas.rule_generation.RuleGeneratorDT.transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the set of rules to a dataset, <cite>X</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -903,7 +903,7 @@ fit/transform methodology.</p>
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
 </p>
     </div>
     
