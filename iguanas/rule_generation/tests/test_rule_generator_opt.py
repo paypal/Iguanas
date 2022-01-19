@@ -447,7 +447,6 @@ def test_generate_n_order_pairwise_rules(return_dummy_rules, create_smaller_data
     ]
     X, y, _, _, _, weights = create_smaller_data
     rg, _ = rg_instantiated
-    metric = fs_instantiated
     rg._rule_name_counter = 3
     for i, (rem_corr_rules, w) in enumerate(list(product([True, False], [None, weights]))):
         rule_descriptions, X_rules, _ = return_dummy_rules(w is None)
@@ -462,7 +461,7 @@ def test_generate_n_order_pairwise_rules(return_dummy_rules, create_smaller_data
 def test_generate_rule_descriptions(rg_instantiated):
     exp_rule_descriptions = pd.DataFrame({
         'Logic': ["(X['A']>0)"],
-        'nConditions': np.array([1], dtype='int32'),
+        'nConditions': [1],
         'Precision': [1.0],
         'Metric': [1.0]
     },
