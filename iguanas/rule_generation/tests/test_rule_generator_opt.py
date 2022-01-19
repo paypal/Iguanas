@@ -468,8 +468,6 @@ def test_generate_rule_descriptions(rg_instantiated):
     },
         index=['Rule1']
     )
-    # exp_rule_descriptions['nConditions'] = exp_rule_descriptions['nConditions'].astype(
-    #     'int32')
     p = Precision()
     X_rules = pd.DataFrame({'A': [0, 1, 0, 1]})
     y = pd.Series([0, 1, 0, 1])
