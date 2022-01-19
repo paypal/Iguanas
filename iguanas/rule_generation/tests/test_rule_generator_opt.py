@@ -462,7 +462,7 @@ def test_generate_n_order_pairwise_rules(return_dummy_rules, create_smaller_data
 def test_generate_rule_descriptions(rg_instantiated):
     exp_rule_descriptions = pd.DataFrame({
         'Logic': ["(X['A']>0)"],
-        'nConditions': np.array([1], dtype='int32'),
+        'nConditions': [1],
         'Precision': [1.0],
         'Metric': [1.0]
     },
