@@ -62,7 +62,9 @@ def return_columns_types(X: Union[PandasDataFrameType, KoalasDataFrameType]) -> 
     """
 
     num_cols = X.shape[1]
-    int64_cols = list(X.dtypes.index[X.dtypes == 'Int64'])
+    int64_cols = list(
+        X.dtypes.index[(X.dtypes == 'Int64') | (X.dtypes == 'int64')]
+    )
     if len(int64_cols) == num_cols:
         int_cols = int64_cols
         float_cols = []
