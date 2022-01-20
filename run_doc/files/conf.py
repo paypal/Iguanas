@@ -6,8 +6,7 @@ sys.path.insert(0, '..')
 project = 'Iguanas'
 copyright = '2021, James Laidler'
 author = 'James Laidler'
-# version = iguanas.__version__
-
+version = iguanas.__version__
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',

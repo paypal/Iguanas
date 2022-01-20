@@ -123,7 +123,8 @@ class AgglomerativeClusteringReducer:
                 similarity_df.drop(columns_to_drop, axis=0, inplace=True)
                 num_remaining_columns = similarity_df.shape[1]
             else:
-                columns_to_keep = columns_to_keep + similarity_df.columns.tolist()
+                columns_to_keep = list(
+                    set(columns_to_keep + similarity_df.columns.tolist()))
                 break
         self.columns_to_keep = columns_to_keep
 

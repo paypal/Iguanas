@@ -240,6 +240,8 @@
 <span class="sd">        The parameter set index that produced the best mean score.</span>
 <span class="sd">    best_params : dict</span>
 <span class="sd">        The parameter set that produced the best mean score.</span>
+<span class="sd">    pipeline_ : LinearPipeline</span>
+<span class="sd">        The optimised LinearPipeline.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -300,14 +302,15 @@
             <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span>
         <span class="p">)</span>
         <span class="c1"># Convert values of `search_spaces` into hyperopt search functions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">search_spaces_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_search_spaces_to_hyperopt</span><span class="p">(</span>
+        <span class="n">search_spaces_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_search_spaces_to_hyperopt</span><span class="p">(</span>
             <span class="n">search_spaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">search_spaces</span>
         <span class="p">)</span>
         <span class="c1"># Optimise pipeline parameters</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;--- Optimising pipeline parameters ---&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">best_params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cv_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimise_params</span><span class="p">(</span>
-            <span class="n">cv_datasets</span><span class="o">=</span><span class="n">cv_datasets</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline_</span>
+            <span class="n">cv_datasets</span><span class="o">=</span><span class="n">cv_datasets</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline_</span><span class="p">,</span>
+            <span class="n">search_spaces</span><span class="o">=</span><span class="n">search_spaces_</span>
         <span class="p">)</span>
         <span class="c1"># Reformat hyperopt output</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">best_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reformat_best_params</span><span class="p">(</span>
@@ -371,11 +374,12 @@
 
     <span class="k">def</span> <span class="nf">_optimise_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                          <span class="n">cv_datasets</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
-                         <span class="n">pipeline</span><span class="p">:</span> <span class="n">LinearPipeline</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+                         <span class="n">pipeline</span><span class="p">:</span> <span class="n">LinearPipeline</span><span class="p">,</span>
+                         <span class="n">search_spaces</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Optimises the parameters of the given pipeline.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">cv_results</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">objective_inputs</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search_spaces_</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">cv_datasets</span><span class="p">)</span>
+        <span class="n">objective_inputs</span> <span class="o">=</span> <span class="p">(</span><span class="n">search_spaces</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">cv_datasets</span><span class="p">)</span>
         <span class="n">best_params</span> <span class="o">=</span> <span class="n">fmin</span><span class="p">(</span>
             <span class="n">fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_objective</span><span class="p">,</span>
             <span class="n">space</span><span class="o">=</span><span class="n">objective_inputs</span><span class="p">,</span>
@@ -552,19 +556,23 @@
         <span class="c1"># Convert back into original search_spaces format (i.e. a dictionary</span>
         <span class="c1"># whose keys are the steps in the pipeline, and whose values are</span>
         <span class="c1"># dictionaries of the parameters for that step).</span>
-        <span class="n">best_params</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">param_tag</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span> <span class="p">{</span><span class="n">param_tag</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
-                <span class="s2">&quot;__&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">param_value</span><span class="p">}</span> <span class="k">for</span> <span class="n">param_tag</span><span class="p">,</span> <span class="n">param_value</span> <span class="ow">in</span> <span class="n">best_params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">best_params_</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">param_tag</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">param_tag</span> <span class="ow">in</span> <span class="n">best_params</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
         <span class="p">}</span>
+        <span class="k">for</span> <span class="n">param_tag</span><span class="p">,</span> <span class="n">param_value</span> <span class="ow">in</span> <span class="n">best_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">stage_tag</span> <span class="o">=</span> <span class="n">param_tag</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="n">param_tag</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">best_params_</span><span class="p">[</span><span class="n">stage_tag</span><span class="p">][</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_value</span>
         <span class="c1"># If value for param in search_spaces was a iguanas.space.Choice type,</span>
         <span class="c1"># then the outputted opt value will be the index of the best choice. So</span>
         <span class="c1"># need to return the best choice option from the original list.</span>
         <span class="k">for</span> <span class="n">step_tag</span><span class="p">,</span> <span class="n">step_params</span> <span class="ow">in</span> <span class="n">search_spaces</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">step_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Choice</span><span class="p">):</span>
-                    <span class="n">best_choice_idx</span> <span class="o">=</span> <span class="n">best_params</span><span class="p">[</span><span class="n">step_tag</span><span class="p">][</span><span class="n">param</span><span class="p">]</span>
-                    <span class="n">best_params</span><span class="p">[</span><span class="n">step_tag</span><span class="p">][</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">best_choice_idx</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">best_params</span>
+                    <span class="n">best_choice_idx</span> <span class="o">=</span> <span class="n">best_params_</span><span class="p">[</span><span class="n">step_tag</span><span class="p">][</span><span class="n">param</span><span class="p">]</span>
+                    <span class="n">best_params_</span><span class="p">[</span>
+                        <span class="n">step_tag</span><span class="p">][</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">best_choice_idx</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">best_params_</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_format_cv_results</span><span class="p">(</span><span class="n">cv_results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
@@ -602,7 +610,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
 </p>
     </div>
     

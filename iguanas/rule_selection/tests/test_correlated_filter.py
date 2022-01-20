@@ -67,9 +67,8 @@ def test_fit(create_data, expected_columns_to_keep):
         if metric is None:
             fr.fit(X_rules=X_rules)
         else:
-            print(type(y))
             fr.fit(X_rules=X_rules, y=y)
-        assert fr.rules_to_keep == expected_results[i]
+        assert sorted(fr.rules_to_keep) == sorted(expected_results[i])
 
 
 def test_transform(create_data, expected_columns_to_keep):
@@ -86,29 +85,16 @@ def test_transform(create_data, expected_columns_to_keep):
             similarity_function=similarity_function,
             metric=metric
         )
-        crc_wo_rd = AgglomerativeClusteringReducer(
-            threshold=threshold, strategy=strategy,
-            similarity_function=similarity_function,
-            metric=metric
-        )
         fr = CorrelatedFilter(
             correlation_reduction_class=crc
         )
-        fr_wo_rd = CorrelatedFilter(
-            correlation_reduction_class=crc_wo_rd
-        )
         if metric is None:
             fr.fit(X_rules=X_rules)
-            fr_wo_rd.fit(X_rules=X_rules)
         else:
             fr.fit(X_rules=X_rules, y=y)
-            fr_wo_rd.fit(X_rules=X_rules, y=y)
         X_rules_reduced = fr.transform(X_rules=X_rules)
-        X_rules_wo_rd_reduced = fr_wo_rd.transform(X_rules=X_rules)
-        assert fr.rules_to_keep == X_rules_reduced.columns.tolist(
-        ) == expected_results[i]
-        assert fr_wo_rd.rules_to_keep == X_rules_wo_rd_reduced.columns.tolist(
-        ) == expected_results[i]
+        assert sorted(fr.rules_to_keep) == sorted(X_rules_reduced.columns.tolist(
+        )) == sorted(expected_results[i])
 
 
 def test_fit_transform(create_data, expected_columns_to_keep):
@@ -125,25 +111,12 @@ def test_fit_transform(create_data, expected_columns_to_keep):
             similarity_function=similarity_function,
             metric=metric
         )
-        crc_wo_rd = AgglomerativeClusteringReducer(
-            threshold=threshold, strategy=strategy,
-            similarity_function=similarity_function,
-            metric=metric
-        )
         fr = CorrelatedFilter(
             correlation_reduction_class=crc
         )
-        fr_wo_rd = CorrelatedFilter(
-            correlation_reduction_class=crc_wo_rd
-        )
         if metric is None:
             X_rules_reduced = fr.fit_transform(X_rules=X_rules)
-            X_rules_wo_rd_reduced = fr_wo_rd.fit_transform(X_rules=X_rules)
         else:
             X_rules_reduced = fr.fit_transform(X_rules=X_rules, y=y)
-            X_rules_wo_rd_reduced = fr_wo_rd.fit_transform(
-                X_rules=X_rules, y=y)
-        assert fr.rules_to_keep == X_rules_reduced.columns.tolist(
-        ) == expected_results[i]
-        assert fr_wo_rd.rules_to_keep == X_rules_wo_rd_reduced.columns.tolist(
-        ) == expected_results[i]
+        assert sorted(fr.rules_to_keep) == sorted(X_rules_reduced.columns.tolist(
+        )) == sorted(expected_results[i])

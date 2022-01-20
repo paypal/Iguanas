@@ -74,8 +74,7 @@ class RuleGeneratorOpt(_BaseGenerator):
         Controls the verbosity - the higher, the more messages. >0 : gives the
         progress of the training of the rules. Defaults to 0.
     rule_name_prefix : str, optional 
-        Prefix to use for each rule name. If None, the standard prefix is used.
-        Defaults to None.
+        Prefix to use for each rule. Defaults to 'RGO_Rule'.
 
     Attributes
     ----------
@@ -90,7 +89,7 @@ class RuleGeneratorOpt(_BaseGenerator):
                  n_total_conditions: int, num_rules_keep: int, n_points=10,
                  ratio_window=2, one_cond_rule_opt_metric=f1.fit,
                  remove_corr_rules=True, target_feat_corr_types=None,
-                 verbose=0, rule_name_prefix=None):
+                 verbose=0, rule_name_prefix='RGO_Rule'):
 
         _BaseGenerator.__init__(
             self,
@@ -175,6 +174,12 @@ class RuleGeneratorOpt(_BaseGenerator):
             X_rules, y, rule_strings, self.remove_corr_rules, sample_weight
         )
         self.rule_names = list(self.rule_strings.keys())
+        # Convert generated rules into lambda format. Set rule_lambdas to an
+        # empty dict first, prevents errors when running fit more than once.
+        self.rule_lambdas = {}
+        self.rule_lambdas = self.as_rule_lambdas(
+            as_numpy=False, with_kwargs=True
+        )
         return X_rules
 
     def _generate_numeric_one_condition_rules(self, X: PandasDataFrameType,
@@ -472,16 +477,6 @@ class RuleGeneratorOpt(_BaseGenerator):
         rule_strings = {rule_name: rule_logic for rule_name,
                         rule_logic in rule_strings.items() if rule_name not in rules_to_drop}
         return rule_strings, X_rules
-
-    def _generate_rule_name(self) -> str:
-        """Generates rule name"""
-
-        if self.rule_name_prefix is None:
-            rule_name = f'RGO_Rule_{self.today}_{self._rule_name_counter}'
-        else:
-            rule_name = f'{self.rule_name_prefix}_{self._rule_name_counter}'
-        self._rule_name_counter += 1
-        return rule_name
 
     @staticmethod
     def _generate_rule_descriptions(X_rules: PandasDataFrameType,

@@ -76,7 +76,9 @@ def test_fit(create_data, expected_results):
     for label, (scorer, scaler, w) in zip(labels, score_scaler_comb):
         rs = RuleScorer(scorer, scaler)
         rs.fit(X_rules, y, w)
-        assert all(rs.rule_scores == expected_results[label])
+        pd.testing.assert_series_equal(
+            rs.rule_scores.astype(float), expected_results[label].astype(float)
+        )
 
 
 def test_transform(create_data, expected_results):
@@ -104,6 +106,8 @@ def test_fit_transform(create_data, expected_results):
     for label, (scorer, scaler, w) in zip(labels, score_scaler_comb):
         rs = RuleScorer(scorer, scaler)
         X_scores = rs.fit_transform(X_rules, y, w)
-        assert all(rs.rule_scores == expected_results[label])
+        pd.testing.assert_series_equal(
+            rs.rule_scores.astype(float), expected_results[label].astype(float)
+        )
         assert X_scores.shape == X_rules.shape
         assert all(X_scores == expected_results[label] * X_rules)

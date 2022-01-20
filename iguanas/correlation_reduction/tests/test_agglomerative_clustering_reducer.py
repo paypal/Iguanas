@@ -121,7 +121,25 @@ def test_fit(create_data, cos_sim, jacc_sim, expected_columns_to_keep):
             fr.fit(X)
         else:
             fr.fit(X, y)
-        assert fr.columns_to_keep == expected_results[i]
+        assert sorted(fr.columns_to_keep) == sorted(expected_results[i])
+
+
+def test_fit_2_cols(create_data, jacc_sim):
+    X, y = create_data
+    js = jacc_sim
+    fs = FScore(0.5)
+    fr = AgglomerativeClusteringReducer(
+        0.5, 'top_down', js.fit, fs.fit,
+        print_clustermap=True
+    )
+    fr.fit(X.iloc[:, :2], y)
+    assert sorted(fr.columns_to_keep) == ['col0', 'col1']
+    fr = AgglomerativeClusteringReducer(
+        0.5, 'bottom_up', js.fit, fs.fit,
+        print_clustermap=True
+    )
+    fr.fit(X.iloc[:, :2], y)
+    assert sorted(fr.columns_to_keep) == ['col0']
 
 
 def test_transform(create_data, cos_sim, jacc_sim, expected_columns_to_keep):
@@ -140,7 +158,8 @@ def test_transform(create_data, cos_sim, jacc_sim, expected_columns_to_keep):
         else:
             fr.fit(X, y)
         X_reduced = fr.transform(X)
-        assert X_reduced.columns.tolist() == expected_results[i]
+        assert sorted(X_reduced.columns.tolist()
+                      ) == sorted(expected_results[i])
 
 
 def test_fit_transform(create_data, cos_sim, jacc_sim, expected_columns_to_keep):
@@ -158,8 +177,8 @@ def test_fit_transform(create_data, cos_sim, jacc_sim, expected_columns_to_keep)
             X_reduced = fr.fit_transform(X)
         else:
             X_reduced = fr.fit_transform(X, y)
-        assert fr.columns_to_keep == X_reduced.columns.tolist(
-        ) == expected_results[i]
+        assert sorted(fr.columns_to_keep) == sorted(X_reduced.columns.tolist(
+        )) == sorted(expected_results[i])
 
 
 def test_bottom_up(agg_instantiated, clusters, similarity_df):

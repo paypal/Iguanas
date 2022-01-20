@@ -3,8 +3,11 @@ Unit tests for methods in _base_generator module that aren't specific to Pandas
 or Koalas
 """
 import pytest
+from iguanas.metrics.classification import FScore
 from iguanas.rule_generation import RuleGeneratorDT
 from sklearn.ensemble import RandomForestClassifier
+
+from iguanas.rule_generation.rule_generator_opt import RuleGeneratorOpt
 
 
 @pytest.fixture
@@ -17,7 +20,7 @@ def rg_instantiated():
         'num_cores': 4
     }
     rg = RuleGeneratorDT(**params)
-    rg.today = '20200204'
+    rg._today = '20200204'
     return [rg, params]
 
 
@@ -65,11 +68,21 @@ def test_clean_dup_features_from_conditions(rg_instantiated):
 
 
 def test_generate_rule_name(rg_instantiated):
+    # Test with default Rule Gen DT prefix
     rg, _ = rg_instantiated
-    rule_name = rg._generate_rule_name_dt()
+    rule_name = rg._generate_rule_name()
     assert rule_name == 'RGDT_Rule_20200204_0'
+    # Test with default Rule Gen Opt prefix
+    f1 = FScore(1)
+    rgo = RuleGeneratorOpt(
+        metric=f1.fit, n_total_conditions=4, num_rules_keep=10
+    )
+    rgo._today = '20200204'
+    rule_name = rgo._generate_rule_name()
+    assert rule_name == 'RGO_Rule_20200204_0'
+    # Test with default Rule Gen DT prefix
     rg.rule_name_prefix = 'TEST'
-    rule_name = rg._generate_rule_name_dt()
+    rule_name = rg._generate_rule_name()
     assert rule_name == 'TEST_1'
 
 

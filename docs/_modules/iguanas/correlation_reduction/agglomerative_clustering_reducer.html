@@ -283,7 +283,8 @@
                 <span class="n">similarity_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns_to_drop</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">num_remaining_columns</span> <span class="o">=</span> <span class="n">similarity_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">columns_to_keep</span> <span class="o">=</span> <span class="n">columns_to_keep</span> <span class="o">+</span> <span class="n">similarity_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">columns_to_keep</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="nb">set</span><span class="p">(</span><span class="n">columns_to_keep</span> <span class="o">+</span> <span class="n">similarity_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()))</span>
                 <span class="k">break</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">columns_to_keep</span> <span class="o">=</span> <span class="n">columns_to_keep</span></div>
 
@@ -468,7 +469,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
 </p>
     </div>
     

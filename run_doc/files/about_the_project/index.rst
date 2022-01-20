@@ -13,26 +13,12 @@ Our vision
 Authors
 -------
 
-* `James Laidler <https://githubmemory.com/index.php/@lamesjaidler>`_
+* `James Laidler <https://github.com/lamesjaidler>`_
 
 Contributing
 ------------
 
-If you'd like to contribute to Iguanas, you can do so by raising a pull-request and assigning the reviewer as James Laidler. 
-
-Please ensure that, when contributing:
-
-* Code is profiled thouroughly first to ensure runtime is optimised.
-* Unit tests are added/extended.
-* Unit test coverage is >95%.
-* Docstrings are added, in the same style as the existing docstrings.
-* An example notebook is added, in the same style as the existing notebooks.
-
-Also make sure that before contrbuting, you install the `dev` extras:
-
-.. code-block:: bash
-   
-   pip install iguanas.\[dev\]
+If you'd like to contribute to Iguanas, please first read the `Contributing Guidelines <https://github.com/paypal/Iguanas/blob/main/CONTRIBUTING.md>`_.
 
 Roadmap
 -------

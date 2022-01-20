@@ -56,7 +56,7 @@ def rg_instantiated(fs_instantiated):
         'verbose': 1
     }
     rg = RuleGeneratorDT(**params)
-    rg.today = '20200204'
+    rg._today = '20200204'
     return [rg, params]
 
 
@@ -95,7 +95,7 @@ def test_fit(create_data, rg_instantiated):
                 27, 5, 10, 107, 81, 64, 35, 11, 35, 1, 22, 133, 4, 14, 119, 171, 2,
                 1, 27, 14, 5, 33, 5, 10, 7, 42, 310, 7, 90, 17, 18, 8, 32, 33, 1,
                 2, 77, 172, 33, 58
-            ]),
+            ], dtype='int64'),
             index=[
                 'RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1', 'RGDT_Rule_20200204_2', 'RGDT_Rule_20200204_3', 'RGDT_Rule_20200204_4', 'RGDT_Rule_20200204_5', 'RGDT_Rule_20200204_6', 'RGDT_Rule_20200204_7', 'RGDT_Rule_20200204_8',
                 'RGDT_Rule_20200204_9', 'RGDT_Rule_20200204_10', 'RGDT_Rule_20200204_11', 'RGDT_Rule_20200204_12', 'RGDT_Rule_20200204_13', 'RGDT_Rule_20200204_14', 'RGDT_Rule_20200204_15', 'RGDT_Rule_20200204_16', 'RGDT_Rule_20200204_17',
@@ -106,7 +106,7 @@ def test_fit(create_data, rg_instantiated):
         pd.Series(
             data=np.array([
                 161, 219, 166, 125, 107, 205, 133, 225, 228, 110, 163, 43, 21, 170
-            ]),
+            ], dtype='int64'),
             index=[
                 'RGDT_Rule_20200204_40', 'RGDT_Rule_20200204_41', 'RGDT_Rule_20200204_42', 'RGDT_Rule_20200204_43', 'RGDT_Rule_20200204_44', 'RGDT_Rule_20200204_45', 'RGDT_Rule_20200204_46', 'RGDT_Rule_20200204_47',
                 'RGDT_Rule_20200204_48', 'RGDT_Rule_20200204_49', 'RGDT_Rule_20200204_50', 'RGDT_Rule_20200204_51', 'RGDT_Rule_20200204_52', 'RGDT_Rule_20200204_53'
@@ -115,8 +115,12 @@ def test_fit(create_data, rg_instantiated):
     X, y, _, _, _, weights = create_data
     rg, _ = rg_instantiated
     for i, w in enumerate([None, weights]):
+        print(i)
         X_rules = rg.fit(X, y, sample_weight=w)
         pd.testing.assert_series_equal(X_rules.sum(), exp_results[i])
+        assert rg.rule_names == exp_results[i].index.tolist() == list(
+            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == list(
+            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys())
 
 
 def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
@@ -125,7 +129,7 @@ def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
             data=np.array([
                 32, 46, 11, 107, 81, 332, 69, 35, 71, 36, 70, 203, 182, 85, 119, 217, 27, 121, 218,
                 121, 187, 220, 18, 30, 18, 67, 14, 32, 65, 66, 15, 31, 15, 226, 373, 256, 71, 312, 199, 71
-            ]),
+            ], dtype='int64'),
             index=[
                 'RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1', 'RGDT_Rule_20200204_2', 'RGDT_Rule_20200204_3', 'RGDT_Rule_20200204_4', 'RGDT_Rule_20200204_5', 'RGDT_Rule_20200204_6', 'RGDT_Rule_20200204_7', 'RGDT_Rule_20200204_8',
                 'RGDT_Rule_20200204_9', 'RGDT_Rule_20200204_10', 'RGDT_Rule_20200204_11', 'RGDT_Rule_20200204_12', 'RGDT_Rule_20200204_13', 'RGDT_Rule_20200204_14', 'RGDT_Rule_20200204_15', 'RGDT_Rule_20200204_16', 'RGDT_Rule_20200204_17',
@@ -136,7 +140,7 @@ def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
         pd.Series(
             data=np.array([
                 234, 232, 232, 125, 232, 216, 142, 225, 272, 120, 371, 43, 96, 213
-            ]),
+            ], dtype='int64'),
             index=[
                 'RGDT_Rule_20200204_40', 'RGDT_Rule_20200204_41', 'RGDT_Rule_20200204_42', 'RGDT_Rule_20200204_43', 'RGDT_Rule_20200204_44', 'RGDT_Rule_20200204_45', 'RGDT_Rule_20200204_46', 'RGDT_Rule_20200204_47', 'RGDT_Rule_20200204_48',
                 'RGDT_Rule_20200204_49', 'RGDT_Rule_20200204_50', 'RGDT_Rule_20200204_51', 'RGDT_Rule_20200204_52', 'RGDT_Rule_20200204_53',
@@ -148,6 +152,8 @@ def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
     for i, w in enumerate([None, weights]):
         X_rules = rg.fit(X, y, sample_weight=w)
         pd.testing.assert_series_equal(X_rules.sum(), exp_results[i])
+        assert rg.rule_names == exp_results[i].index.tolist() == list(
+            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys())
         assert len(
             [l for l in list(rg.rule_strings.keys()) if "X['email_alpharatio']>" in l]) == 0
         assert len(
@@ -166,7 +172,7 @@ def test_fit_target_feat_corr_types_provided(create_data, rg_instantiated):
             data=np.array([
                 32, 46, 11, 107, 81, 332, 69, 35, 71, 36, 70, 203, 182, 85, 119, 217, 27, 121, 218,
                 121, 187, 220, 18, 30, 18, 67, 14, 32, 65, 66, 15, 31, 15, 226, 373, 256, 71, 312, 199, 71
-            ]),
+            ], dtype='int64'),
             index=[
                 'RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1', 'RGDT_Rule_20200204_2', 'RGDT_Rule_20200204_3', 'RGDT_Rule_20200204_4', 'RGDT_Rule_20200204_5', 'RGDT_Rule_20200204_6', 'RGDT_Rule_20200204_7', 'RGDT_Rule_20200204_8',
                 'RGDT_Rule_20200204_9', 'RGDT_Rule_20200204_10', 'RGDT_Rule_20200204_11', 'RGDT_Rule_20200204_12', 'RGDT_Rule_20200204_13', 'RGDT_Rule_20200204_14', 'RGDT_Rule_20200204_15', 'RGDT_Rule_20200204_16', 'RGDT_Rule_20200204_17',
@@ -177,7 +183,7 @@ def test_fit_target_feat_corr_types_provided(create_data, rg_instantiated):
         pd.Series(
             data=np.array([
                 234, 232, 232, 125, 232, 216, 142, 225, 272, 120, 371, 43, 96, 213
-            ]),
+            ], dtype='int64'),
             index=[
                 'RGDT_Rule_20200204_40', 'RGDT_Rule_20200204_41', 'RGDT_Rule_20200204_42', 'RGDT_Rule_20200204_43', 'RGDT_Rule_20200204_44', 'RGDT_Rule_20200204_45', 'RGDT_Rule_20200204_46', 'RGDT_Rule_20200204_47', 'RGDT_Rule_20200204_48',
                 'RGDT_Rule_20200204_49', 'RGDT_Rule_20200204_50', 'RGDT_Rule_20200204_51', 'RGDT_Rule_20200204_52', 'RGDT_Rule_20200204_53',
@@ -196,6 +202,8 @@ def test_fit_target_feat_corr_types_provided(create_data, rg_instantiated):
     for i, w in enumerate([None, weights]):
         X_rules = rg.fit(X, y, sample_weight=w)
         pd.testing.assert_series_equal(X_rules.sum(), exp_results[i])
+        assert rg.rule_names == exp_results[i].index.tolist() == list(
+            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys())
         assert len(
             [l for l in list(rg.rule_strings.values()) if "X['email_alpharatio']>" in l]) == 0
         assert len(
@@ -215,7 +223,7 @@ def test_transform(create_data, rg_instantiated):
                 27, 5, 10, 107, 81, 64, 35, 11, 35, 1, 22, 133, 4, 14, 119, 171, 2,
                 1, 27, 14, 5, 33, 5, 10, 7, 42, 310, 7, 90, 17, 18, 8, 32, 33, 1,
                 2, 77, 172, 33, 58
-            ]),
+            ], dtype='int64'),
             index=[
                 'RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1', 'RGDT_Rule_20200204_2', 'RGDT_Rule_20200204_3', 'RGDT_Rule_20200204_4', 'RGDT_Rule_20200204_5', 'RGDT_Rule_20200204_6', 'RGDT_Rule_20200204_7', 'RGDT_Rule_20200204_8',
                 'RGDT_Rule_20200204_9', 'RGDT_Rule_20200204_10', 'RGDT_Rule_20200204_11', 'RGDT_Rule_20200204_12', 'RGDT_Rule_20200204_13', 'RGDT_Rule_20200204_14', 'RGDT_Rule_20200204_15', 'RGDT_Rule_20200204_16', 'RGDT_Rule_20200204_17',
@@ -226,7 +234,7 @@ def test_transform(create_data, rg_instantiated):
         pd.Series(
             data=np.array([
                 161, 219, 166, 125, 107, 205, 133, 225, 228, 110, 163, 43, 21, 170
-            ]),
+            ], dtype='int64'),
             index=[
                 'RGDT_Rule_20200204_40', 'RGDT_Rule_20200204_41', 'RGDT_Rule_20200204_42', 'RGDT_Rule_20200204_43', 'RGDT_Rule_20200204_44', 'RGDT_Rule_20200204_45', 'RGDT_Rule_20200204_46', 'RGDT_Rule_20200204_47',
                 'RGDT_Rule_20200204_48', 'RGDT_Rule_20200204_49', 'RGDT_Rule_20200204_50', 'RGDT_Rule_20200204_51', 'RGDT_Rule_20200204_52', 'RGDT_Rule_20200204_53'
@@ -247,7 +255,7 @@ def test_extract_rules_from_ensemble(create_data, rg_instantiated):
                 27, 5, 10, 107, 81, 64, 35, 11, 35, 1, 22, 133, 4, 14, 119, 171, 2,
                 1, 27, 14, 5, 33, 5, 10, 7, 42, 310, 7, 90, 17, 18, 8, 32, 33, 1,
                 2, 77, 172, 33, 58
-            ]),
+            ], dtype='int64'),
             index=[
                 'RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1', 'RGDT_Rule_20200204_2', 'RGDT_Rule_20200204_3', 'RGDT_Rule_20200204_4', 'RGDT_Rule_20200204_5', 'RGDT_Rule_20200204_6', 'RGDT_Rule_20200204_7', 'RGDT_Rule_20200204_8',
                 'RGDT_Rule_20200204_9', 'RGDT_Rule_20200204_10', 'RGDT_Rule_20200204_11', 'RGDT_Rule_20200204_12', 'RGDT_Rule_20200204_13', 'RGDT_Rule_20200204_14', 'RGDT_Rule_20200204_15', 'RGDT_Rule_20200204_16', 'RGDT_Rule_20200204_17',
@@ -258,7 +266,7 @@ def test_extract_rules_from_ensemble(create_data, rg_instantiated):
         pd.Series(
             data=np.array([
                 161, 219, 166, 125, 107, 205, 133, 225, 228, 110, 163, 43, 21, 170
-            ]),
+            ], dtype='int64'),
             index=[
                 'RGDT_Rule_20200204_40', 'RGDT_Rule_20200204_41', 'RGDT_Rule_20200204_42', 'RGDT_Rule_20200204_43', 'RGDT_Rule_20200204_44', 'RGDT_Rule_20200204_45', 'RGDT_Rule_20200204_46', 'RGDT_Rule_20200204_47',
                 'RGDT_Rule_20200204_48', 'RGDT_Rule_20200204_49', 'RGDT_Rule_20200204_50', 'RGDT_Rule_20200204_51', 'RGDT_Rule_20200204_52', 'RGDT_Rule_20200204_53'
