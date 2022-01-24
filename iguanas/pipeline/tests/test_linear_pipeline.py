@@ -2,7 +2,7 @@ import pytest
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from iguanas.pipeline.linear_pipeline import DataFrameSizeError
+from iguanas.pipeline._base_pipeline import DataFrameSizeError
 
 from iguanas.rule_generation import RuleGeneratorDT, RuleGeneratorOpt
 from iguanas.rule_optimisation import BayesianOptimiser
@@ -103,10 +103,10 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
     lp = LinearPipeline(steps)
     # Test fit/predict/fit_predict, no sample_weight
     lp.fit(X, y)
-    assert len(lp.get_params()['sf__rules_to_keep']) == 43
-    assert len(lp.get_params()['cf__rules_to_keep']) == 41
-    assert len(lp.get_params()['gf__rules_to_keep']) == 10
-    assert lp.get_params()['rbs__rules_to_keep'] == [
+    assert len(lp.get_params()['sf']['rules_to_keep']) == 43
+    assert len(lp.get_params()['cf']['rules_to_keep']) == 41
+    assert len(lp.get_params()['gf']['rules_to_keep']) == 10
+    assert lp.get_params()['rbs']['rules_to_keep'] == [
         'RGDT_Rule_20211220_26', 'RGDT_Rule_20211220_6', 'RGDT_Rule_20211220_11',
         'RGDT_Rule_20211220_41', 'RGDT_Rule_20211220_36',
         'RGDT_Rule_20211220_40', 'RGDT_Rule_20211220_5'
@@ -119,10 +119,10 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
     assert f1.fit(y_pred, y) == 0.7826086956521738
     # Test fit/predict/fit_predict, sample_weight given
     lp.fit(X, y, sample_weight)
-    assert len(lp.get_params()['sf__rules_to_keep']) == 40
-    assert len(lp.get_params()['cf__rules_to_keep']) == 38
-    assert len(lp.get_params()['gf__rules_to_keep']) == 10
-    assert lp.get_params()['rbs__rules_to_keep'] == [
+    assert len(lp.get_params()['sf']['rules_to_keep']) == 40
+    assert len(lp.get_params()['cf']['rules_to_keep']) == 38
+    assert len(lp.get_params()['gf']['rules_to_keep']) == 10
+    assert lp.get_params()['rbs']['rules_to_keep'] == [
         'RGDT_Rule_20211220_25', 'RGDT_Rule_20211220_8',
         'RGDT_Rule_20211220_11', 'RGDT_Rule_20211220_38',
         'RGDT_Rule_20211220_36', 'RGDT_Rule_20211220_37',
@@ -150,10 +150,10 @@ def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
     lp = LinearPipeline(steps)
     # Test fit/predict/fit_predict, no sample_weight
     lp.fit(X, y)
-    assert len(lp.get_params()['sf__rules_to_keep']) == 26
-    assert len(lp.get_params()['cf__rules_to_keep']) == 26
-    assert len(lp.get_params()['gf__rules_to_keep']) == 3
-    assert lp.get_params()['rbs__rules_to_keep'] == [
+    assert len(lp.get_params()['sf']['rules_to_keep']) == 26
+    assert len(lp.get_params()['cf']['rules_to_keep']) == 26
+    assert len(lp.get_params()['gf']['rules_to_keep']) == 3
+    assert lp.get_params()['rbs']['rules_to_keep'] == [
         'RGO_Rule_20211220_25', 'RGO_Rule_20211220_27', 'RGO_Rule_20211220_41'
     ]
     y_pred = lp.predict(X)
@@ -164,10 +164,10 @@ def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
     assert f1.fit(y_pred, y) == 0.5714285714285713
     # Test fit/predict/fit_predict, sample_weight given
     lp.fit(X, y, sample_weight)
-    assert len(lp.get_params()['sf__rules_to_keep']) == 26
-    assert len(lp.get_params()['cf__rules_to_keep']) == 26
-    assert len(lp.get_params()['gf__rules_to_keep']) == 5
-    assert lp.get_params()['rbs__rules_to_keep'] == [
+    assert len(lp.get_params()['sf']['rules_to_keep']) == 26
+    assert len(lp.get_params()['cf']['rules_to_keep']) == 26
+    assert len(lp.get_params()['gf']['rules_to_keep']) == 5
+    assert lp.get_params()['rbs']['rules_to_keep'] == [
         'RGO_Rule_20211220_31', 'RGO_Rule_20211220_24', 'RGO_Rule_20211220_34'
     ]
     y_pred = lp.predict(X)
@@ -191,10 +191,10 @@ def test_fit_predict_rule_opt(_create_data, _instantiate_classes):
     lp = LinearPipeline(steps)
     # Test fit/predict/fit_predict, no sample_weight
     lp.fit(X, y)
-    assert len(lp.get_params()['sf__rules_to_keep']) == 2
-    assert len(lp.get_params()['cf__rules_to_keep']) == 2
-    assert len(lp.get_params()['gf__rules_to_keep']) == 1
-    assert lp.get_params()['rbs__rules_to_keep'] == ['Rule4']
+    assert len(lp.get_params()['sf']['rules_to_keep']) == 2
+    assert len(lp.get_params()['cf']['rules_to_keep']) == 2
+    assert len(lp.get_params()['gf']['rules_to_keep']) == 1
+    assert lp.get_params()['rbs']['rules_to_keep'] == ['Rule4']
     y_pred = lp.predict(X)
     assert y_pred.mean() == 0.95
     assert f1.fit(y_pred, y) == 0.1904761904761905
@@ -203,10 +203,10 @@ def test_fit_predict_rule_opt(_create_data, _instantiate_classes):
     assert f1.fit(y_pred, y) == 0.1904761904761905
     # Test fit/predict/fit_predict, sample_weight given
     lp.fit(X, y, sample_weight)
-    assert len(lp.get_params()['sf__rules_to_keep']) == 4
-    assert len(lp.get_params()['cf__rules_to_keep']) == 4
-    assert len(lp.get_params()['gf__rules_to_keep']) == 1
-    assert lp.get_params()['rbs__rules_to_keep'] == ['Rule4']
+    assert len(lp.get_params()['sf']['rules_to_keep']) == 4
+    assert len(lp.get_params()['cf']['rules_to_keep']) == 4
+    assert len(lp.get_params()['gf']['rules_to_keep']) == 1
+    assert lp.get_params()['rbs']['rules_to_keep'] == ['Rule4']
     y_pred = lp.predict(X)
     assert y_pred.mean() == 0.95
     assert f1.fit(y_pred, y, sample_weight) == 0.32
@@ -229,16 +229,16 @@ def test_fit_transform(_create_data, _instantiate_classes):
     X_rules = lp.fit_transform(X, y)
     assert X_rules.columns.tolist() == ['Rule4']
     np.testing.assert_equal(X_rules.mean().values, np.array([0.95]))
-    assert len(lp.get_params()['sf__rules_to_keep']) == 2
-    assert len(lp.get_params()['cf__rules_to_keep']) == 2
-    assert len(lp.get_params()['gf__rules_to_keep']) == 1
+    assert len(lp.get_params()['sf']['rules_to_keep']) == 2
+    assert len(lp.get_params()['cf']['rules_to_keep']) == 2
+    assert len(lp.get_params()['gf']['rules_to_keep']) == 1
     # Test fit_transform, sample_weight given
     X_rules = lp.fit_transform(X, y, sample_weight)
     assert X_rules.columns.tolist() == ['Rule4']
     np.testing.assert_equal(X_rules.mean().values, np.array([0.95]))
-    assert len(lp.get_params()['sf__rules_to_keep']) == 4
-    assert len(lp.get_params()['cf__rules_to_keep']) == 4
-    assert len(lp.get_params()['gf__rules_to_keep']) == 1
+    assert len(lp.get_params()['sf']['rules_to_keep']) == 4
+    assert len(lp.get_params()['cf']['rules_to_keep']) == 4
+    assert len(lp.get_params()['gf']['rules_to_keep']) == 1
 
 
 def test_get_params(_instantiate_classes):
@@ -251,11 +251,11 @@ def test_get_params(_instantiate_classes):
     assert str(type(params['steps'][0][1]
                     )) == "<class 'iguanas.rule_selection.simple_filter.SimpleFilter'>"
     assert params['steps_'] == None
-    assert params['sf__threshold'] == 0.05
-    assert params['sf__operator'] == '>='
-    assert str(params['sf__metric']
+    assert params['sf']['threshold'] == 0.05
+    assert params['sf']['operator'] == '>='
+    assert str(params['sf']['metric']
                ) == '<bound method FScore.fit of FScore with beta=1>'
-    assert params['sf__rules_to_keep'] == []
+    assert params['sf']['rules_to_keep'] == []
 
 
 def test_check_accessor(_instantiate_classes):

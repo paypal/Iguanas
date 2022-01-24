@@ -9,7 +9,7 @@ from copy import deepcopy
 import pandas as pd
 import warnings
 from iguanas.pipeline import LinearPipeline
-from iguanas.pipeline.linear_pipeline import DataFrameSizeError
+from iguanas.pipeline._base_pipeline import DataFrameSizeError
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.utils.types import PandasDataFrame, PandasSeries
 import iguanas.utils as utils
@@ -239,6 +239,7 @@ class BayesSearchCV:
         """
 
         params_iter, pipeline, cv_datasets = objective_inputs
+        print(params_iter)
         pipeline = self._inject_params_into_pipeline(pipeline, params_iter)
         # Fit/predict/score on each fold
         with Parallel(n_jobs=self.num_cores) as parallel:
