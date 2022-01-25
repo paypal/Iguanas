@@ -68,6 +68,7 @@ class _BasePipeline:
         return step.predict(X)
 
     def _pipeline_fit_transform(self, step_tag, step, X, y, sample_weight):
+        print(step_tag)
         step = self._check_accessor(step)
         X, y, sample_weight = [
             self._return_dataset_if_dict(

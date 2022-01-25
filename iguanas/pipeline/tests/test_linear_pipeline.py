@@ -265,7 +265,8 @@ def test_check_accessor(_instantiate_classes):
         ('rbs', rbs)
     ]
     lp = LinearPipeline(steps)
-    rbs = lp._check_accessor(rbs, steps)
+    for _, step in lp.steps:
+        lp._check_accessor(step)
     assert rbs.pos_pred_rules == ['Rule1']
 
 
