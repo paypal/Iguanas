@@ -517,7 +517,7 @@ def test_inject_params_into_pipeline(_instantiate_lp_and_bs):
         }
     }
     pipeline = bs._inject_params_into_pipeline(lp, params)
-    assert pipeline.get_params()['rg_dt__n_total_conditions'] == 10
+    assert pipeline.get_params()['rg_dt']['n_total_conditions'] == 10
 
 
 def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,

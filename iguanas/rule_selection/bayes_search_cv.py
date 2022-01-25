@@ -1,5 +1,3 @@
-from os import stat
-from random import sample
 from typing import Callable, Tuple, Dict, List, Union
 from sklearn.model_selection import StratifiedKFold
 from joblib import Parallel, delayed
@@ -239,7 +237,6 @@ class BayesSearchCV:
         """
 
         params_iter, pipeline, cv_datasets = objective_inputs
-        print(params_iter)
         pipeline = self._inject_params_into_pipeline(pipeline, params_iter)
         # Fit/predict/score on each fold
         with Parallel(n_jobs=self.num_cores) as parallel:
