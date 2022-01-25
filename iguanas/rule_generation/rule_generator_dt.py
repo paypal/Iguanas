@@ -117,6 +117,10 @@ class RuleGeneratorDT(_BaseGenerator):
         if sample_weight is not None:
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [PandasSeries])
+        # Ensures rule names are the same when fit run without reinstantiating
+        self._rule_name_counter = 0
+        # Ensures max_depth updates if n_total_conditions changed in
+        # already instantiated class
         self.tree_ensemble.max_depth = self.n_total_conditions
         self.tree_ensemble.random_state = 0
         if self.target_feat_corr_types == 'Infer':

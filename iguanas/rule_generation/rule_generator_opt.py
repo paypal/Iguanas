@@ -140,6 +140,8 @@ class RuleGeneratorOpt(_BaseGenerator):
         if sample_weight is not None:
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [PandasSeries])
+        # Ensures rule names are the same when fit run without reinstantiating
+        self._rule_name_counter = 0
         if self.target_feat_corr_types == 'Infer':
             self.target_feat_corr_types = self._calc_target_ratio_wrt_features(
                 X=X, y=y
