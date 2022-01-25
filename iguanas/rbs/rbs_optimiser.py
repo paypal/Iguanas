@@ -9,10 +9,9 @@ from iguanas.utils.types import PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 
 
-# class RBSOptimiser(RBSPipeline):
-class RBSOptimiser:
+class RBSOptimiser(RBSPipeline):
     """
-    Optimises the rules within an RBS Pipeline based on an optimisation
+    Optimises the rules within an RBS Pipeline based on an optimisation 
     function. If the `config` parameter is an empty list, then the pipeline
     configuration is optimised from scratch; else, the rules included within
     the existing pipeline configuration are optimised.
@@ -27,18 +26,18 @@ class RBSOptimiser:
         The number of iterations that the optimiser should perform.
     algorithm : Callable, optional
         The algorithm leveraged by hyperopt's `fmin` function, which optimises
-        the rules. Defaults to tpe.suggest, which corresponds to
+        the rules. Defaults to tpe.suggest, which corresponds to 
         Tree-of-Parzen-Estimator.
     pos_pred_rules : List[str], optional
-        The list of rules that predict a positive case (i.e. 1). This parameter
-        and/or `neg_pred_rules` must be given when the `config` parameter in
+        The list of rules that predict a positive case (i.e. 1). This parameter 
+        and/or `neg_pred_rules` must be given when the `config` parameter in 
         the `pipeline` is an empty list. Defaults to None.
     neg_pred_rules : List[str], optional
-        The list of rules that predict a negative case (i.e. 0). This parameter
-        and/or `pos_pred_rules` must be given when the `config` parameter in
-        the `pipeline` is an empty list. Defaults to None.
+        The list of rules that predict a negative case (i.e. 0). This parameter 
+        and/or `pos_pred_rules` must be given when the `config` parameter in 
+        the `pipeline` is an empty list. Defaults to None.    
     verbose : int, optional
-        Controls the verbosity - the higher, the more messages. >0 : shows the
+        Controls the verbosity - the higher, the more messages. >0 : shows the 
         overall progress of the optimisation process. Defaults to 0.
 
     Raises
@@ -48,14 +47,14 @@ class RBSOptimiser:
 
     Attributes
     ----------
-    config : List[Tuple(int, list)]
+    config : List[Tuple(int, list)] 
         The optimised pipeline configuration, where each element aligns to a
-        stage in the pipeline. Each element is a tuple with 2 elements: the
+        stage in the pipeline. Each element is a tuple with 2 elements: the 
         first element corresponds to the decision made at that stage (either 0
-        or 1); the second element is a list of the rules that must trigger to
+        or 1); the second element is a list of the rules that must trigger to 
         give that decision.
     rules_to_keep: List[str]
-        The rules used in the optimised pipeline.
+        The rules used in the optimised pipeline.    
     """
 
     def __init__(self,
@@ -66,15 +65,14 @@ class RBSOptimiser:
                  pos_pred_rules=None,
                  neg_pred_rules=None,
                  verbose=0,
-                 #  num_cores=1,
+                 num_cores=1,
                  **kwargs) -> None:
-        # RBSPipeline.__init__(
-        #     self,
-        #     config=deepcopy(pipeline.config),
-        #     final_decision=pipeline.final_decision,
-        #     num_cores=num_cores
-        # )
-        self._pipeline = pipeline
+        RBSPipeline.__init__(
+            self,
+            config=deepcopy(pipeline.config),
+            final_decision=pipeline.final_decision,
+            num_cores=num_cores
+        )
         self.metric = metric
         self.n_iter = n_iter
         self.algorithm = algorithm
@@ -82,9 +80,8 @@ class RBSOptimiser:
         self.neg_pred_rules = [] if neg_pred_rules is None else neg_pred_rules
         self.verbose = verbose
         self.kwargs = kwargs
-        self.config_given = self._pipeline.config != []
-        # self.orig_config = deepcopy(pipeline.config)
-        # self.config_given = self.orig_config != []
+        self.orig_config = deepcopy(pipeline.config)
+        self.config_given = self.orig_config != []
         if not self.config_given and self.pos_pred_rules == [] and self.neg_pred_rules == []:
             raise ValueError(
                 'If `config` not provided in `pipeline`, then one or both of `pos_pred_rules` and `neg_pred_rules` must be given.')
@@ -101,7 +98,7 @@ class RBSOptimiser:
         y : PandasSeriesType
             The target.
         sample_weight : PandasSeriesType, optional
-            Record-wise weights to apply. Defaults to None. Defaults to
+            Record-wise weights to apply. Defaults to None. Defaults to 
             None.
         """
 
@@ -110,10 +107,6 @@ class RBSOptimiser:
         if sample_weight is not None:
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [PandasSeries])
-
-        # Copy original pipeline
-        self.pipeline = deepcopy(self._pipeline)
-
         # Get space functions
         space_funcs = self._get_space_funcs(X_rules)
         # Optimise pipeline
@@ -124,18 +117,13 @@ class RBSOptimiser:
         self._generate_config(opt_thresholds)
         # Create list of final rules present in pipeline
         self.rules_to_keep = [
-            # rule for stage in self.config for rule in stage[1]
-            rule for stage in self.pipeline.config for rule in stage[1]
+            rule for stage in self.config for rule in stage[1]
         ]
-        print(X_rules[self.rules_to_keep].sum().sum())
-
-    def predict(self, X_rules):
-        return self.pipeline.predict(X_rules)
 
     def fit_predict(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
                     sample_weight=None) -> PandasSeriesType:
         """
-        Optimises the pipeline for the given dataset and applies the pipeline
+        Optimises the pipeline for the given dataset and applies the pipeline 
         to the dataset.
 
         Parameters
@@ -145,7 +133,7 @@ class RBSOptimiser:
         y : PandasSeriesType
             The target.
         sample_weight : PandasSeriesType, optional
-            Record-wise weights to apply. Defaults to None. Defaults to
+            Record-wise weights to apply. Defaults to None. Defaults to 
             None.
 
         Returns
@@ -182,17 +170,10 @@ class RBSOptimiser:
             rules_for_iter = [
                 rule for rule, keep in space_funcs.items() if keep == 1
             ]
-            # self.config = self._update_config(
-            #     space_funcs, deepcopy(self.orig_config)
-            # )
-            # y_pred = self.predict(X_rules[rules_for_iter])
-
-            config = self._update_config(
-                space_funcs, deepcopy(self._pipeline.config)
+            self.config = self._update_config(
+                space_funcs, deepcopy(self.orig_config)
             )
-            self.pipeline.config = config
-            y_pred = self.pipeline.predict(X_rules[rules_for_iter])
-
+            y_pred = self.predict(X_rules[rules_for_iter])
             score = self.metric(y_pred, y, sample_weight)
             return -score
 
@@ -201,13 +182,8 @@ class RBSOptimiser:
             rules_for_iter = [
                 rule for rule, (keep, _) in space_funcs.items() if keep == 1
             ]
-            # self.config = self._create_config(space_funcs)
-            # y_pred = self.predict(X_rules[rules_for_iter])
-
-            config = self._create_config(space_funcs)
-            self.pipeline.config = config
-            y_pred = self.pipeline.predict(X_rules[rules_for_iter])
-
+            self.config = self._create_config(space_funcs)
+            y_pred = self.predict(X_rules[rules_for_iter])
             score = self.metric(y_pred, y, sample_weight)
             return -score
 
@@ -231,14 +207,10 @@ class RBSOptimiser:
         """Generates final pipeline config based on optimisation"""
 
         if self.config_given:
-            # self.config = self._update_config(opt_thresholds, self.config)
-            config = self._update_config(
-                opt_thresholds, deepcopy(self._pipeline.config))
+            self.config = self._update_config(opt_thresholds, self.config)
         else:
             opt_thresholds = self._convert_opt_thr(opt_thresholds)
-            # self.config = self._create_config(opt_thresholds)
-            config = self._create_config(opt_thresholds)
-        self.pipeline.config = config
+            self.config = self._create_config(opt_thresholds)
 
     def _create_config(self, space_funcs: dict) -> dict:
         """Creates pipeline config from space functions"""
@@ -264,7 +236,7 @@ class RBSOptimiser:
                 config.append((decision, [rule]))
         return config
 
-    @ staticmethod
+    @staticmethod
     def _update_config(space_funcs: dict,
                        config: List[Tuple[int, list]]) -> List[dict]:
         """Updates existing config from space functions"""
@@ -277,7 +249,7 @@ class RBSOptimiser:
                         rules.remove(rule)
         return config
 
-    @ staticmethod
+    @staticmethod
     def _convert_opt_thr(opt_thresholds: dict) -> dict:
         """Converts output of optimiser into space function format"""
 

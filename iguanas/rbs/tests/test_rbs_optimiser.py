@@ -111,8 +111,7 @@ def test_fit_config_given(_create_data, _instantiate_config):
     X, y = _create_data
     rbso = _instantiate_config
     rbso.fit(X, y)
-    # assert rbso.config == exp_config
-    assert rbso.pipeline.config == exp_config
+    assert rbso.config == exp_config
     assert rbso.rules_to_keep == ['Approve1', 'Decline1']
 
 
@@ -124,8 +123,7 @@ def test_fit_predict_config_given(_create_data, _instantiate_config):
     X, y = _create_data
     rbso = _instantiate_config
     y_pred = rbso.fit_predict(X, y)
-    # assert rbso.config == exp_config
-    assert rbso.pipeline.config == exp_config
+    assert rbso.config == exp_config
     assert rbso.rules_to_keep == ['Approve1', 'Decline1']
     assert all(y_pred == y)
 
@@ -139,8 +137,7 @@ def test_fit_config_omitted(_create_data, _instantiate_no_config):
     X, y = _create_data
     rbso = _instantiate_no_config
     rbso.fit(X, y)
-    # assert rbso.config == exp_config
-    assert rbso.pipeline.config == exp_config
+    assert rbso.config == exp_config
     assert rbso.rules_to_keep == [
         'Approve1', 'Decline1', 'Decline3', 'Approve2']
 
@@ -154,8 +151,7 @@ def test_fit_predict_config_omitted(_create_data, _instantiate_no_config):
     X, y = _create_data
     rbso = _instantiate_no_config
     y_pred = rbso.fit_predict(X, y)
-    # assert rbso.config == exp_config
-    assert rbso.pipeline.config == exp_config
+    assert rbso.config == exp_config
     assert rbso.rules_to_keep == [
         'Approve1', 'Decline1', 'Decline3', 'Approve2']
     assert all(y_pred == y)
@@ -169,8 +165,7 @@ def test_fit_weighted_config_given(_create_data_random, _instantiate_config):
     X, y, sample_weight = _create_data_random
     rbso = _instantiate_config
     rbso.fit(X, y, sample_weight)
-    # assert rbso.config == exp_config
-    assert rbso.pipeline.config == exp_config
+    assert rbso.config == exp_config
     assert rbso.rules_to_keep == ['Decline1', 'Decline2', 'Decline3']
 
 
@@ -182,8 +177,7 @@ def test_fit_predict_weighted_config_given(_create_data_random, _instantiate_con
     X, y, sample_weight = _create_data_random
     rbso = _instantiate_config
     rbso.fit_predict(X, y, sample_weight)
-    # assert rbso.config == exp_config
-    assert rbso.pipeline.config == exp_config
+    assert rbso.config == exp_config
     assert rbso.rules_to_keep == ['Decline1', 'Decline2', 'Decline3']
 
 
@@ -195,8 +189,7 @@ def test_fit_weighted_config_omitted(_create_data_random, _instantiate_no_config
     X, y, sample_weight = _create_data_random
     rbso = _instantiate_no_config
     rbso.fit(X, y, sample_weight)
-    # assert rbso.config == exp_config
-    assert rbso.pipeline.config == exp_config
+    assert rbso.config == exp_config
     assert rbso.rules_to_keep == [
         'Decline2', 'Decline3', 'Decline1', 'Approve1', 'Approve3'
     ]
@@ -210,8 +203,7 @@ def test_fit_predict_weighted_config_omitted(_create_data_random, _instantiate_n
     X, y, sample_weight = _create_data_random
     rbso = _instantiate_no_config
     rbso.fit_predict(X, y, sample_weight)
-    # assert rbso.config == exp_config
-    assert rbso.pipeline.config == exp_config
+    assert rbso.config == exp_config
     assert rbso.rules_to_keep == [
         'Decline2', 'Decline3', 'Decline1', 'Approve1', 'Approve3'
     ]
