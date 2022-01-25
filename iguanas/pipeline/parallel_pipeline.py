@@ -22,17 +22,17 @@ class ParallelPipeline(_BasePipeline):
         self.steps_ = deepcopy(self.steps)
         with Parallel(n_jobs=self.num_cores) as parallel:
             X_rules_list = parallel(delayed(self._pipeline_fit_transform)(
-                step_idx, step_tag, step, X, y, sample_weight
-            ) for step_idx, (step_tag, step) in enumerate(self.steps_)
+                step_tag, step, X, y, sample_weight
+            ) for step_tag, step in self.steps_
             )
         X_rules = pd.concat(X_rules_list, axis=1)
         return X_rules
 
     def transform(self, X):
         with Parallel(n_jobs=self.num_cores) as parallel:
-            X_rules_list = parallel(delayed(step.transform)(
-                X
-            ) for step_idx, (step_tag, step) in enumerate(self.steps_)
+            X_rules_list = parallel(delayed(self._pipeline_transform)(
+                step_tag, step, X
+            ) for step_tag, step in self.steps_
             )
         X_rules = pd.concat(X_rules_list, axis=1)
         return X_rules

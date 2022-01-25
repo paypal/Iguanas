@@ -46,17 +46,29 @@ class _BasePipeline:
             if step_tag in params.keys():
                 step.__dict__.update(params[step_tag])
 
-    def _pipeline_fit_transform(self, step_idx, step_tag, step, X, y, sample_weight):
-        # print(step_idx, step_tag)
-        # step = self._check_accessor(step, self.steps_)
+    def _pipeline_fit(self, step_tag, step, X, y, sample_weight):
         step = self._check_accessor(step)
-        # if step_idx == 0 and not issubclass(step.__class__, _BasePipeline):
-        # X, y, sample_weight = self._return_datasets_if_dict(
-        #     step_tag=step_tag, X=X, y=y, sample_weight=sample_weight
-        # )
-        # X, y, sample_weight = self._return_datasets_if_dict(
-        #     step_tag=step_tag, X=X, y=y, sample_weight=sample_weight
-        # )
+        X, y, sample_weight = [
+            self._return_dataset_if_dict(
+                step_tag=step_tag, df=df
+            ) for df in (X, y, sample_weight)
+        ]
+        step.fit(X, y, sample_weight)
+        # return step
+
+    def _pipeline_transform(self, step_tag, step, X):
+        step = self._check_accessor(step)
+        X = self._return_dataset_if_dict(step_tag=step_tag, df=X)
+        X = step.transform(X)
+        self._exception_if_no_cols_in_X(X, step_tag)
+        return X
+
+    def _pipeline_predict(self, step, X):
+        step = self._check_accessor(step)
+        return step.predict(X)
+
+    def _pipeline_fit_transform(self, step_tag, step, X, y, sample_weight):
+        step = self._check_accessor(step)
         X, y, sample_weight = [
             self._return_dataset_if_dict(
                 step_tag=step_tag, df=df
@@ -65,21 +77,6 @@ class _BasePipeline:
         X = step.fit_transform(X, y, sample_weight)
         self._exception_if_no_cols_in_X(X, step_tag)
         return X
-
-    def _prepare_final_step(self, y, sample_weight):
-        final_step = self.steps_[-1][1]
-        final_step_tag = self.steps_[-1][0]
-        final_step = self._check_accessor(final_step)
-        # y = self._return_dataset_if_dict(step_tag=final_step_tag, df=y)
-        # sample_weight = self._return_dataset_if_dict(
-        #     step_tag=final_step_tag, df=sample_weight
-        # )
-        y, sample_weight = [
-            self._return_dataset_if_dict(
-                step_tag=final_step_tag, df=df
-            ) for df in (y, sample_weight)
-        ]
-        return final_step, y, sample_weight
 
     def _check_accessor(self,
                         step: object,

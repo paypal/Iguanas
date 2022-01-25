@@ -248,9 +248,6 @@ def test_get_params(_instantiate_classes):
     ]
     lp = LinearPipeline(steps)
     params = lp.get_params()
-    assert str(type(params['steps'][0][1]
-                    )) == "<class 'iguanas.rule_selection.simple_filter.SimpleFilter'>"
-    assert params['steps_'] == None
     assert params['sf']['threshold'] == 0.05
     assert params['sf']['operator'] == '>='
     assert str(params['sf']['metric']

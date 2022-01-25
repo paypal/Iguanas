@@ -119,6 +119,7 @@ class RBSOptimiser(RBSPipeline):
         self.rules_to_keep = [
             rule for stage in self.config for rule in stage[1]
         ]
+        print(X_rules[self.rules_to_keep].sum().sum())
 
     def fit_predict(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
                     sample_weight=None) -> PandasSeriesType:
