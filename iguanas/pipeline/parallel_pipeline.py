@@ -20,19 +20,37 @@ class ParallelPipeline(_BasePipeline):
                       sample_weight=None):
 
         self.steps_ = deepcopy(self.steps)
-        with Parallel(n_jobs=self.num_cores) as parallel:
-            X_rules_list = parallel(delayed(self._pipeline_fit_transform)(
-                step_tag, step, X, y, sample_weight
-            ) for step_tag, step in self.steps_
+        # with Parallel(n_jobs=self.num_cores) as parallel:
+        #     X_rules_list = parallel(delayed(self._pipeline_fit_transform)(
+        #         step_tag, step, X, y, sample_weight
+        #     ) for step_tag, step in self.steps_
+        #     )
+
+        X_rules_list = []
+        for step_tag, step in self.steps_:
+            X_rules_list.append(
+                self._pipeline_fit_transform(
+                    step_tag, step, X, y, sample_weight
+                )
             )
+
         X_rules = pd.concat(X_rules_list, axis=1)
         return X_rules
 
     def transform(self, X):
-        with Parallel(n_jobs=self.num_cores) as parallel:
-            X_rules_list = parallel(delayed(self._pipeline_transform)(
-                step_tag, step, X
-            ) for step_tag, step in self.steps_
+        # with Parallel(n_jobs=self.num_cores) as parallel:
+        #     X_rules_list = parallel(delayed(self._pipeline_transform)(
+        #         step_tag, step, X
+        #     ) for step_tag, step in self.steps_
+        #     )
+
+        X_rules_list = []
+        for step_tag, step in self.steps_:
+            X_rules_list.append(
+                self._pipeline_transform(
+                    step_tag, step, X
+                )
             )
+
         X_rules = pd.concat(X_rules_list, axis=1)
         return X_rules

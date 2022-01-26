@@ -591,3 +591,10 @@ def is_type(x: object, types: List[str]) -> bool:
 
     x_type = str(type(x))
     return x_type in types
+
+
+def return_dataset_if_dict(step_tag, df):
+    if isinstance(df, dict) and step_tag in df.keys():
+        return df[step_tag]
+    else:
+        return df

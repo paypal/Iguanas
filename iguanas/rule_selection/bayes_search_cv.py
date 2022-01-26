@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 from typing import Callable, Tuple, Dict, List, Union
 from sklearn.model_selection import StratifiedKFold
 from joblib import Parallel, delayed
@@ -9,7 +10,7 @@ import warnings
 from iguanas.pipeline import LinearPipeline
 from iguanas.pipeline._base_pipeline import DataFrameSizeError
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
-from iguanas.utils.types import PandasDataFrame, PandasSeries
+from iguanas.utils.types import PandasDataFrame, PandasSeries, Dictionary
 import iguanas.utils as utils
 from iguanas.space import Choice
 
@@ -112,27 +113,29 @@ class BayesSearchCV:
         self.kwargs = kwargs
 
     def fit(self,
-            X: PandasDataFrameType,
-            y: PandasSeriesType,
+            X: Union[PandasDataFrameType, dict],
+            y: Union[PandasSeriesType, dict],
             sample_weight=None) -> None:
         """
         Optimises the parameters of the given pipeline.
 
         Parameters
         ----------
-        X : PandasDataFrameType
-            The dataset.
-        y : PandasSeriesType
-            The binary target column.
-        sample_weight : PandasSeriesType, optional
-            Row-wise weights to apply. Defaults to None.
+        X : Union[PandasDataFrameType, dict]
+            The dataset or dictionary of datasets for each pipeline step.
+        y : Union[PandasSeriesType, dict]
+            The binary target column or dictionary of binary target columns
+            for each pipeline step.
+        sample_weight : Union[PandasSeriesType, dict], optional
+            Row-wise weights or dictionary of row-wise weights for each 
+            pipeline step.. Defaults to None.
         """
 
-        utils.check_allowed_types(X, 'X', [PandasDataFrame])
-        utils.check_allowed_types(y, 'y', [PandasSeries])
+        utils.check_allowed_types(X, 'X', [PandasDataFrame, Dictionary])
+        utils.check_allowed_types(y, 'y', [PandasSeries, Dictionary])
         if sample_weight is not None:
             utils.check_allowed_types(
-                sample_weight, 'sample_weight', [PandasSeries])
+                sample_weight, 'sample_weight', [PandasSeries, Dictionary])
         # Copy original pipeline
         self.pipeline_ = deepcopy(self.pipeline)
         # Generate CV datasets
@@ -162,19 +165,17 @@ class BayesSearchCV:
         if self.refit:
             if self.verbose > 0:
                 print('--- Refitting on entire dataset with best pipeline ---')
-            self._inject_params_into_pipeline(
-                pipeline=self.pipeline_, params=self.best_params
-            )
+            self.pipeline_._update_kwargs(params=self.best_params)
             self.pipeline_.fit(X, y, sample_weight)
 
-    def predict(self, X: PandasDataFrameType) -> PandasSeriesType:
+    def predict(self, X: Union[PandasDataFrameType, dict]) -> PandasSeriesType:
         """
         Predict using the optimised pipeline.
 
         Parameters
         ----------
-        X : PandasDataFrameType
-            The dataset.
+        X : Union[PandasDataFrameType, dict]
+            The dataset or dictionary of datasets for each pipeline step.
 
         Returns
         -------
@@ -182,11 +183,12 @@ class BayesSearchCV:
             The prediction of the pipeline.
         """
 
+        utils.check_allowed_types(X, 'X', [PandasDataFrame, Dictionary])
         return self.pipeline_.predict(X)
 
     def fit_predict(self,
-                    X: PandasDataFrameType,
-                    y: PandasSeriesType,
+                    X: Union[PandasDataFrameType, dict],
+                    y: Union[PandasSeriesType, dict],
                     sample_weight=None) -> PandasSeriesType:
         """
         Optimises the parameters of the given pipeline, then generates the 
@@ -194,12 +196,14 @@ class BayesSearchCV:
 
         Parameters
         ----------
-        X : PandasDataFrameType
-            The dataset.
-        y : PandasSeriesType
-            The binary target column.
-        sample_weight : PandasSeriesType, optional
-            Row-wise weights to apply. Defaults to None.
+        X : Union[PandasDataFrameType, dict]
+            The dataset or dictionary of datasets for each pipeline step.
+        y : Union[PandasSeriesType, dict]
+            The binary target column or dictionary of binary target columns
+            for each pipeline step.
+        sample_weight : Union[PandasSeriesType, dict], optional
+            Row-wise weights or dictionary of row-wise weights for each 
+            pipeline step.. Defaults to None.
 
         Returns
         -------
@@ -237,7 +241,7 @@ class BayesSearchCV:
         """
 
         params_iter, pipeline, cv_datasets = objective_inputs
-        pipeline = self._inject_params_into_pipeline(pipeline, params_iter)
+        pipeline._update_kwargs(params=params_iter)
         # Fit/predict/score on each fold
         with Parallel(n_jobs=self.num_cores) as parallel:
             scores_over_folds = parallel(delayed(self._fit_predict_on_fold)(
@@ -270,36 +274,68 @@ class BayesSearchCV:
                     "<class 'iguanas.space.spaces.Choice'>"
                 ])
 
-    @staticmethod
-    def _generate_cv_datasets(X: PandasDataFrameType,
-                              y: PandasSeriesType,
-                              sample_weight: PandasSeriesType,
+    def _generate_cv_datasets(self,
+                              X: Union[PandasDataFrameType, dict],
+                              y: Union[PandasSeriesType, dict],
+                              sample_weight: Union[PandasSeriesType, dict],
                               cv: int) -> dict:
         """Generates the cross validation datasets for each fold."""
 
+        # If X or y are dicts, use first dataset in dict to calc folds
+        X_ = list(X.values())[0] if isinstance(X, dict) else X
+        y_ = list(y.values())[0] if isinstance(y, dict) else y
         cv_datasets = {}
         skf = StratifiedKFold(
             n_splits=cv,
             random_state=0,
             shuffle=True
         )
-        skf.get_n_splits(X, y)
+        skf.get_n_splits(X_, y_)
         folds = {
-            fold_idx: (train_idxs, val_idxs) for fold_idx, (train_idxs, val_idxs) in enumerate(skf.split(X, y))
+            fold_idx: (train_idxs, val_idxs) for fold_idx, (train_idxs, val_idxs) in enumerate(skf.split(X_, y_))
         }
         for fold_idx, (train_idxs, val_idxs) in folds.items():
-            X_train = X.iloc[train_idxs]
-            X_val = X.iloc[val_idxs]
-            y_train = y.iloc[train_idxs]
-            y_val = y.iloc[val_idxs]
+            X_train, X_val = self._split_df_into_train_and_val(
+                df=X, train_idxs=train_idxs, val_idxs=val_idxs
+            )
+            y_train, y_val = self._split_df_into_train_and_val(
+                df=y, train_idxs=train_idxs, val_idxs=val_idxs
+            )
             if sample_weight is None:
                 sample_weight_train = None
                 sample_weight_val = None
             else:
-                sample_weight_train = sample_weight.iloc[train_idxs]
-                sample_weight_val = sample_weight.iloc[val_idxs]
+                sample_weight_train, sample_weight_val = self._split_df_into_train_and_val(
+                    df=sample_weight, train_idxs=train_idxs, val_idxs=val_idxs
+                )
             cv_datasets[fold_idx] = X_train, X_val, y_train, y_val, sample_weight_train, sample_weight_val
         return cv_datasets
+
+    @staticmethod
+    def _split_df_into_train_and_val(df: Union[PandasSeriesType,
+                                               PandasDataFrameType, dict],
+                                     train_idxs: np.ndarray,
+                                     val_idxs: np.ndarray) -> Tuple[Union[
+                                         PandasSeriesType,
+                                         PandasDataFrameType, dict]]:
+        """
+        Splits a dataset or dictionary of datasets into training and validation
+        sets.
+        """
+
+        if isinstance(df, (pd.Series, pd.DataFrame)):
+            df_train = df.iloc[train_idxs]
+            df_val = df.iloc[val_idxs]
+        elif isinstance(df, dict):
+            df_train = {
+                step_tag: dataset.iloc[train_idxs] for step_tag, dataset in df.items()
+            }
+            df_val = {
+                step_tag: dataset.iloc[val_idxs] for step_tag, dataset in df.items()
+            }
+        else:
+            raise TypeError('`df` must be a Pandas Series/DataFrame or a dict')
+        return df_train, df_val
 
     @staticmethod
     def _convert_search_spaces_to_hyperopt(search_spaces: dict) -> dict:
@@ -315,16 +351,6 @@ class BayesSearchCV:
                     label=f'{step_tag}__{param}'
                 )
         return search_spaces_
-
-    @staticmethod
-    def _inject_params_into_pipeline(pipeline: LinearPipeline,
-                                     params: dict) -> LinearPipeline:
-        """Injects the given parameters into the pipeline."""
-
-        for step_tag, step in pipeline.steps:
-            if step_tag in params.keys():
-                step.__dict__.update(params[step_tag])
-        return pipeline
 
     @staticmethod
     def _fit_predict_on_fold(metric: Callable,
@@ -343,10 +369,17 @@ class BayesSearchCV:
 
         try:
             X_train, X_val, y_train, y_val, sample_weight_train, sample_weight_val = datasets
-            pipeline.fit(
-                X_train, y_train, sample_weight_train
-            )
+            pipeline.fit(X_train, y_train, sample_weight_train)
             y_pred_val = pipeline.predict(X_val)
+            # If y_val or sample_weight_val are dicts, extract the dataset
+            # corresponding to the final pipeline step, so the score of the
+            # pipeline predictor can be calculated
+            y_val = utils.return_dataset_if_dict(
+                step_tag=pipeline.steps_[-1][0], df=y_val
+            )
+            sample_weight_val = utils.return_dataset_if_dict(
+                step_tag=pipeline.steps_[-1][0], df=sample_weight_val
+            )
             fold_score = metric(y_pred_val, y_val, sample_weight_val)
         except DataFrameSizeError:
             if error_score == 'raise':
