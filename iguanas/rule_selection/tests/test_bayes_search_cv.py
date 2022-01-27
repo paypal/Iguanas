@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from hyperopt import hp
 from sklearn.ensemble import RandomForestClassifier
+from copy import deepcopy
 
 from iguanas.rule_generation import RuleGeneratorDT, RuleGeneratorOpt
 from iguanas.rule_optimisation import BayesianOptimiser
@@ -11,7 +12,7 @@ from iguanas.metrics import FScore, JaccardSimilarity, Precision
 from iguanas.rule_selection import SimpleFilter, CorrelatedFilter, GreedyFilter, BayesSearchCV
 from iguanas.correlation_reduction import AgglomerativeClusteringReducer
 from iguanas.rbs import RBSOptimiser, RBSPipeline
-from iguanas.pipeline import LinearPipeline, ClassAccessor
+from iguanas.pipeline import LinearPipeline, ParallelPipeline, ClassAccessor
 from iguanas.rule_generation import RuleGeneratorDT
 from iguanas.space import UniformFloat, UniformInteger, Choice
 
@@ -381,6 +382,219 @@ def test_fit_predict_rule_opt(_create_data, _instantiate_classes):
         assert f1.fit(y_pred, y, sample_weight) == 0.3243243243243243
 
 
+def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
+    X, y, sample_weight = _create_data
+    rg_dt, _, ro, sf, cf, _, rbs = _instantiate_classes
+    # Create set of non-fraud rules for optimisation
+    rule_strings_nonfraud = {
+        'NonFraudRule1': "(X['A']<0)&(X['C']<0)",
+        'NonFraudRule2': "(X['B']<0)&(X['D']<0)",
+        'NonFraudRule3': "(X['D']<0)",
+        'NonFraudRule4': "(X['C']<0)"
+    }
+    rules_nonfraud = Rules(rule_strings=rule_strings_nonfraud)
+    rule_lambdas_nonfraud = rules_nonfraud.as_rule_lambdas(
+        as_numpy=False, with_kwargs=True)
+    ro_nonfraud = BayesianOptimiser(
+        rule_lambdas=rule_lambdas_nonfraud,
+        lambda_kwargs=rules_nonfraud.lambda_kwargs,
+        metric=f1.fit,
+        n_iter=5
+    )
+    # Define search spaces
+    search_spaces = {
+        'rg_fraud': {
+            'n_total_conditions': UniformInteger(1, 5),
+            'target_feat_corr_types': Choice([None, 'Infer'])
+        },
+        'rg_nonfraud': {
+            'n_total_conditions': UniformInteger(1, 5),
+            'target_feat_corr_types': Choice([None, 'Infer'])
+        },
+        'sf_fraud': {
+            'threshold': UniformFloat(0, 1)
+        },
+        'sf_nonfraud': {
+            'threshold': UniformFloat(0, 1)
+        },
+        'cf_fraud': {
+            'threshold': UniformFloat(0, 1)
+        },
+        'cf_nonfraud': {
+            'threshold': UniformFloat(0, 1)
+        },
+    }
+    # RBSOptimiser
+    rbso = RBSOptimiser(
+        pipeline=RBSPipeline(
+            config=[],
+            final_decision=0,
+        ),
+        metric=f1.fit,
+        n_iter=10,
+        pos_pred_rules=ClassAccessor(
+            class_tag='cf_fraud',
+            class_attribute='rules_to_keep'
+        ),
+        neg_pred_rules=ClassAccessor(
+            class_tag='cf_nonfraud',
+            class_attribute='rules_to_keep'
+        )
+    )
+    # Set up pipeline
+    # Fraud ----------
+    rg_fraud = deepcopy(rg_dt)
+    rg_fraud.rule_name_prefix = 'Fraud'
+    sf_fraud = deepcopy(sf)
+    cf_fraud = deepcopy(cf)
+    pp_fraud = ParallelPipeline(
+        steps=[
+            ('rg_fraud', rg_fraud),
+            ('ro_fraud', ro)
+        ],
+        num_cores=2
+    )
+    lp_fraud = LinearPipeline(
+        steps=[
+            ('pp_fraud', pp_fraud),
+            ('sf_fraud', sf_fraud),
+            ('cf_fraud', cf_fraud)
+        ]
+    )
+    # Nonfraud ----------
+    rg_nonfraud = deepcopy(rg_dt)
+    rg_nonfraud.rule_name_prefix = 'NonFraud'
+    sf_nonfraud = deepcopy(sf)
+    cf_nonfraud = deepcopy(cf)
+    pp_nonfraud = ParallelPipeline(
+        steps=[
+            ('rg_nonfraud', rg_nonfraud),
+            ('ro_nonfraud', ro_nonfraud)
+        ],
+        num_cores=2
+    )
+    lp_nonfraud = LinearPipeline(
+        steps=[
+            ('pp_nonfraud', pp_nonfraud),
+            ('sf_nonfraud', sf_nonfraud),
+            ('cf_nonfraud', cf_nonfraud)
+        ]
+    )
+    # Overall
+    pp_overall = ParallelPipeline(
+        steps=[
+            ('lp_fraud', lp_fraud),
+            ('lp_nonfraud', lp_nonfraud)
+        ]
+    )
+    lp_overall = LinearPipeline(
+        steps=[
+            ('pp_overall', pp_overall),
+            ('rbso', deepcopy(rbso))
+        ]
+    )
+    # Bayes Search CV
+    bs = BayesSearchCV(
+        pipeline=lp_overall,
+        search_spaces=search_spaces,
+        metric=f1.fit,
+        error_score=0,
+        cv=3,
+        n_iter=10,
+        verbose=1,
+        num_cores=3
+    )
+    # Tests (using num_cores=3 so warnings are supressed)
+    # Test fit/predict/fit_predict, no sample_weight
+    bs.fit(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        },
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        }
+    )
+    assert bs.best_score == 0.30071154898741104
+    assert bs.best_index == 3
+    assert bs.best_params == {
+        'cf_fraud': {'threshold': 0.6420746106206111},
+        'cf_nonfraud': {'threshold': 0.34212702531355066},
+        'rg_fraud': {'n_total_conditions': 2.0, 'target_feat_corr_types': None},
+        'rg_nonfraud': {'n_total_conditions': 5.0, 'target_feat_corr_types': None},
+        'sf_fraud': {'threshold': 0.05789784369353024},
+        'sf_nonfraud': {'threshold': 0.5286917420754508}
+    }
+    assert bs.cv_results.shape == (10, 13)
+    y_pred = bs.predict(X)
+    assert y_pred.mean() == 0.63
+    assert f1.fit(y_pred, y) == 0.24657534246575338
+    y_pred = bs.fit_predict(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        },
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        }
+    )
+    assert y_pred.mean() == 0.63
+    assert f1.fit(y_pred, y) == 0.24657534246575338
+    # Test fit/predict/fit_predict, sample_weight given
+    bs.fit(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        },
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        },
+        sample_weight={
+            'lp_fraud': sample_weight,
+            'lp_nonfraud': None,
+            'rbso': sample_weight
+        }
+    )
+    assert bs.best_score == 0.345882074914333
+    assert bs.best_index == 3
+    assert bs.best_params == {
+        'cf_fraud': {'threshold': 0.6420746106206111},
+        'cf_nonfraud': {'threshold': 0.34212702531355066},
+        'rg_fraud': {'n_total_conditions': 2.0, 'target_feat_corr_types': None},
+        'rg_nonfraud': {'n_total_conditions': 5.0, 'target_feat_corr_types': None},
+        'sf_fraud': {'threshold': 0.05789784369353024},
+        'sf_nonfraud': {'threshold': 0.5286917420754508}
+    }
+    assert bs.cv_results.shape == (10, 13)
+    y_pred = bs.predict(X)
+    assert y_pred.mean() == 0.35
+    assert f1.fit(y_pred, y) == 0.3111111111111111
+    y_pred = bs.fit_predict(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        },
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        },
+        sample_weight={
+            'lp_fraud': sample_weight,
+            'lp_nonfraud': None,
+            'rbso': sample_weight
+        }
+    )
+    assert y_pred.mean() == 0.35
+    assert f1.fit(y_pred, y) == 0.3111111111111111
+
+
 def test_optimise_params(_cv_datasets, _instantiate_lp_and_bs):
     exp_best_params = {
         'n_iter': 13.0, 'n_total_conditions': 3.0, 'target_feat_corr_types': 0
@@ -507,17 +721,6 @@ def test_convert_search_spaces_to_hyperopt(_instantiate_lp_and_bs):
         for param, param_value in step_params.items():
             assert type(param_value) == type(
                 exp_search_spaces[step_tag][param])
-
-
-def test_inject_params_into_pipeline(_instantiate_lp_and_bs):
-    lp, bs, _ = _instantiate_lp_and_bs
-    params = {
-        'rg_dt': {
-            'n_total_conditions': 10
-        }
-    }
-    pipeline = bs._inject_params_into_pipeline(lp, params)
-    assert pipeline.get_params()['rg_dt']['n_total_conditions'] == 10
 
 
 def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,

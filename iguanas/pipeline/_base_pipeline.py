@@ -2,6 +2,7 @@ from copy import deepcopy
 from iguanas.pipeline.class_accessor import ClassAccessor
 from iguanas.utils.typing import PandasDataFrameType
 import iguanas.utils.utils as utils
+from iguanas.exceptions import DataFrameSizeError
 
 
 class _BasePipeline:
@@ -49,7 +50,6 @@ class _BasePipeline:
         step.fit(X, y, sample_weight)
 
     def _pipeline_transform(self, step_tag, step, X):
-        # print(step_tag)
         step = self._check_accessor(step)
         X = utils.return_dataset_if_dict(step_tag=step_tag, df=X)
         X = step.transform(X)
@@ -61,7 +61,6 @@ class _BasePipeline:
         return step.predict(X)
 
     def _pipeline_fit_transform(self, step_tag, step, X, y, sample_weight):
-        # print(step_tag)
         step = self._check_accessor(step)
         X, y, sample_weight = [
             utils.return_dataset_if_dict(
@@ -89,13 +88,6 @@ class _BasePipeline:
                 step.__dict__[param] = value.get(pipeline_params)
         return step
 
-    # @ staticmethod
-    # def _return_dataset_if_dict(step_tag, df):
-    #     if isinstance(df, dict) and step_tag in df.keys():
-    #         return df[step_tag]
-    #     else:
-    #         return df
-
     @ staticmethod
     def _exception_if_no_cols_in_X(X: PandasDataFrameType, step_tag: str):
         """Raises an exception if `X` has no columns."""
@@ -103,10 +95,3 @@ class _BasePipeline:
             raise DataFrameSizeError(
                 f'`X` has been reduced to zero columns after the `{step_tag}` step in the pipeline.'
             )
-
-
-class DataFrameSizeError(Exception):
-    """
-    Custom exception for when `X` has no columns.
-    """
-    pass

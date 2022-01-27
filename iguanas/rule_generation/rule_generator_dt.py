@@ -5,6 +5,7 @@ import iguanas.utils as utils
 from iguanas.rule_generation._base_generator import _BaseGenerator
 from iguanas.utils.types import PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasSeriesType, PandasDataFrameType
+from iguanas.exceptions import NoRulesError
 from typing import Union, Callable, List, Set, Tuple
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -180,7 +181,8 @@ class RuleGeneratorDT(_BaseGenerator):
         self.rule_strings = dict((self._generate_rule_name(), rule_string)
                                  for rule_string in rule_strings_set)
         if not self.rule_strings:
-            raise Exception(
+            # raise Exception(
+            raise NoRulesError(
                 'No rules could be generated. Try changing the class parameters.')
         X_rules = self.transform(X=X)
         return X_rules

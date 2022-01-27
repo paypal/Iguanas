@@ -8,7 +8,7 @@ from copy import deepcopy
 import pandas as pd
 import warnings
 from iguanas.pipeline import LinearPipeline
-from iguanas.pipeline._base_pipeline import DataFrameSizeError
+from iguanas.exceptions import DataFrameSizeError, NoRulesError
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.utils.types import PandasDataFrame, PandasSeries, Dictionary
 import iguanas.utils as utils
@@ -17,16 +17,16 @@ from iguanas.space import Choice
 
 class BayesSearchCV:
     """
-    Optimises the parameters of a pipeline using a user-defined set of 
+    Optimises the parameters of a pipeline using a user-defined set of
     search spaces in conjuncion with Bayesian Optimisation.
 
     The data is first split into cross validation datasets. For each fold, the
     Bayesian optimiser chooses a set of parameters (from the ranges provided),
-    applies the pipeline's `fit` method to the training set, then applies the 
+    applies the pipeline's `fit` method to the training set, then applies the
     `predict` method to the validation set. The pipeline's prediction is scored
-    using the `metric` function, and these scores are averaged across the 
+    using the `metric` function, and these scores are averaged across the
     folds. New parameter sets are chosen and applied until `n_iter` is reached.
-    The parameter setwith the highest mean score is deemed to be the best 
+    The parameter setwith the highest mean score is deemed to be the best
     performing.
 
     Parameters
@@ -36,10 +36,10 @@ class BayesSearchCV:
         must include a `predict` method, which utilises a set of rules to make
         a prediction on a binary target.
     search_spaces : Dict[str, dict]
-        The search spaces for each relevant parameter of each step in the 
+        The search spaces for each relevant parameter of each step in the
         pipeline. Each key should correspond to the tag used for the relevant
-        pipeline step; each value should be a dictionary of the parameters 
-        (keys) and their search spaces (values). Search spaces should be 
+        pipeline step; each value should be a dictionary of the parameters
+        (keys) and their search spaces (values). Search spaces should be
         defined using the classes in `iguanas.space`.
     metric : Callable
         The metric used to optimise the pipeline.
@@ -48,30 +48,30 @@ class BayesSearchCV:
     n_iter : int
         The number of iterations that the optimiser should perform.
     refit : bool, optional
-        Refit the best pipeline using the entire dataset. Must be set to True 
-        if predictions need to be made using the best pipeline. Defaults to 
+        Refit the best pipeline using the entire dataset. Must be set to True
+        if predictions need to be made using the best pipeline. Defaults to
         True.
     algorithm : Callable, optional
         The algorithm leveraged by hyperopt's `fmin` function, which optimises
-        the rules. Defaults to tpe.suggest, which corresponds to 
+        the rules. Defaults to tpe.suggest, which corresponds to
         Tree-of-Parzen-Estimator.
     error_score : Union[str, float], optional
-        Value to assign to the score of a validation fold if an error occurs 
-        in the pipeline fitting. If set to ‘raise’, the error is raised. If a 
+        Value to assign to the score of a validation fold if an error occurs
+        in the pipeline fitting. If set to ‘raise’, the error is raised. If a
         numeric value is given, a warning is raised. This parameter does not
         affect the refit step, which will always raise the error. Defaults to
         'raise'.
     num_cores : int, optional
-        Number of cores to use when fitting a given parameter set. Should be 
+        Number of cores to use when fitting a given parameter set. Should be
         set to <= `cv`. Defaults to 1.
     verbose : int, optional
-        Controls the verbosity - the higher, the more messages. >0 : shows the 
+        Controls the verbosity - the higher, the more messages. >0 : shows the
         overall progress of the optimisation process. Defaults to 0.
 
     Attributes
     ----------
     cv_results : PandasDataFrameType
-        Shows the scores per fold, mean score and standard deviation of the 
+        Shows the scores per fold, mean score and standard deviation of the
         score for each trialled parameter set.
     best_score : float
         The best mean score achieved.
@@ -127,7 +127,7 @@ class BayesSearchCV:
             The binary target column or dictionary of binary target columns
             for each pipeline step.
         sample_weight : Union[PandasSeriesType, dict], optional
-            Row-wise weights or dictionary of row-wise weights for each 
+            Row-wise weights or dictionary of row-wise weights for each
             pipeline step.. Defaults to None.
         """
 
@@ -191,7 +191,7 @@ class BayesSearchCV:
                     y: Union[PandasSeriesType, dict],
                     sample_weight=None) -> PandasSeriesType:
         """
-        Optimises the parameters of the given pipeline, then generates the 
+        Optimises the parameters of the given pipeline, then generates the
         optimised pipeline's prediction on the dataset.
 
         Parameters
@@ -202,7 +202,7 @@ class BayesSearchCV:
             The binary target column or dictionary of binary target columns
             for each pipeline step.
         sample_weight : Union[PandasSeriesType, dict], optional
-            Row-wise weights or dictionary of row-wise weights for each 
+            Row-wise weights or dictionary of row-wise weights for each
             pipeline step.. Defaults to None.
 
         Returns
@@ -262,7 +262,7 @@ class BayesSearchCV:
     @staticmethod
     def _check_search_spaces_type(search_spaces: dict) -> None:
         """
-        Checks that values of search_spaces are the correct type - 
+        Checks that values of search_spaces are the correct type -
         UniformInteger, UniformFloat or Choice
         """
 
@@ -323,24 +323,32 @@ class BayesSearchCV:
         sets.
         """
 
-        if isinstance(df, (pd.Series, pd.DataFrame)):
-            df_train = df.iloc[train_idxs]
-            df_val = df.iloc[val_idxs]
-        elif isinstance(df, dict):
-            df_train = {
-                step_tag: dataset.iloc[train_idxs] for step_tag, dataset in df.items()
-            }
-            df_val = {
-                step_tag: dataset.iloc[val_idxs] for step_tag, dataset in df.items()
-            }
-        else:
-            raise TypeError('`df` must be a Pandas Series/DataFrame or a dict')
+        def _splitter(df, idxs):
+            # If the data is a Pandas data object, return the filtered object
+            if isinstance(df, (pd.Series, pd.DataFrame)):
+                return df.iloc[idxs]
+            # If the data is a dict, loop through the dict and filter the
+            # Pandas data objects
+            elif isinstance(df, dict):
+                df_dict = {}
+                for step_tag, dataset in df.items():
+                    if dataset is None:
+                        df_dict[step_tag] = None
+                    else:
+                        df_dict[step_tag] = dataset.iloc[idxs]
+                return df_dict
+            else:
+                raise TypeError(
+                    '`df` must be a Pandas Series/DataFrame or a dict')
+        df_train, df_val = (
+            _splitter(df, idxs) for idxs in [train_idxs, val_idxs]
+        )
         return df_train, df_val
 
-    @staticmethod
+    @ staticmethod
     def _convert_search_spaces_to_hyperopt(search_spaces: dict) -> dict:
         """
-        Converts ranges in the search_spaces that are stored using 
+        Converts ranges in the search_spaces that are stored using
         `iguanas.space.spaces` types into hyperopt's stochastic expressions.
         """
 
@@ -352,7 +360,7 @@ class BayesSearchCV:
                 )
         return search_spaces_
 
-    @staticmethod
+    @ staticmethod
     def _fit_predict_on_fold(metric: Callable,
                              error_score: Union[str, float],
                              datasets: list,
@@ -360,10 +368,10 @@ class BayesSearchCV:
                              params_iter: dict,
                              fold_idx: int) -> float:
         """
-        Tries to to fit the pipeline (using a given parameter set) on the 
-        training set, then apply it to the validation set. If no rules remain 
-        after any of the stages of the pipeline, an error is thrown (if 
-        `self.error_score` == 'raise') or the score for the pipeline for that 
+        Tries to to fit the pipeline (using a given parameter set) on the
+        training set, then apply it to the validation set. If no rules remain
+        after any of the stages of the pipeline, an error is thrown (if
+        `self.error_score` == 'raise') or the score for the pipeline for that
         validation set is set to `self.error_score`.
         """
 
@@ -381,7 +389,7 @@ class BayesSearchCV:
                 step_tag=pipeline.steps_[-1][0], df=sample_weight_val
             )
             fold_score = metric(y_pred_val, y_val, sample_weight_val)
-        except DataFrameSizeError:
+        except (DataFrameSizeError, NoRulesError):
             if error_score == 'raise':
                 raise Exception(
                     f"""No rules remaining for: Pipeline parameter set = {params_iter}; Fold index = {fold_idx}."""
@@ -393,12 +401,12 @@ class BayesSearchCV:
                 fold_score = error_score
         return fold_score
 
-    @staticmethod
+    @ staticmethod
     def _update_cv_results(cv_results: dict, params_iter: dict,
                            fold_idxs: List[int], scores_over_folds: np.ndarray,
                            mean_score: float, std_dev_score: float) -> dict:
         """
-        Updates the cv_results dictionary with the results for the given 
+        Updates the cv_results dictionary with the results for the given
         parameter set.
         """
 
@@ -416,11 +424,11 @@ class BayesSearchCV:
         })
         return cv_results
 
-    @staticmethod
+    @ staticmethod
     def _reformat_best_params(best_params: dict, search_spaces: dict) -> dict:
         """
-        Reformats the output of hyperopt's fmin function into the same 
-        dictionary format that is used to define the search_spaces. This allows 
+        Reformats the output of hyperopt's fmin function into the same
+        dictionary format that is used to define the search_spaces. This allows
         the best parameters to be injected back into the pipeline.
         """
 
@@ -445,11 +453,11 @@ class BayesSearchCV:
                         step_tag][param] = value.options[best_choice_idx]
         return best_params_
 
-    @staticmethod
+    @ staticmethod
     def _format_cv_results(cv_results: dict) -> PandasDataFrameType:
         """
         Formats the cv_results dictionary into a Pandas Dataframe, and sorts by
-        MeanScore descending, StdDevScore ascending.        
+        MeanScore descending, StdDevScore ascending.
         """
 
         cv_results = pd.DataFrame(cv_results)
