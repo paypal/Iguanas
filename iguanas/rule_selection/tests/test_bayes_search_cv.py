@@ -452,7 +452,6 @@ def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
             ('rg_fraud', rg_fraud),
             ('ro_fraud', ro)
         ],
-        num_cores=2
     )
     lp_fraud = LinearPipeline(
         steps=[
@@ -471,7 +470,6 @@ def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
             ('rg_nonfraud', rg_nonfraud),
             ('ro_nonfraud', ro_nonfraud)
         ],
-        num_cores=2
     )
     lp_nonfraud = LinearPipeline(
         steps=[
@@ -528,7 +526,12 @@ def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
         'sf_nonfraud': {'threshold': 0.5286917420754508}
     }
     assert bs.cv_results.shape == (10, 13)
-    y_pred = bs.predict(X)
+    y_pred = bs.predict(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        }
+    )
     assert y_pred.mean() == 0.63
     assert f1.fit(y_pred, y) == 0.24657534246575338
     y_pred = bs.fit_predict(
@@ -572,7 +575,12 @@ def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
         'sf_nonfraud': {'threshold': 0.5286917420754508}
     }
     assert bs.cv_results.shape == (10, 13)
-    y_pred = bs.predict(X)
+    y_pred = bs.predict(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        }
+    )
     assert y_pred.mean() == 0.35
     assert f1.fit(y_pred, y) == 0.3111111111111111
     y_pred = bs.fit_predict(
