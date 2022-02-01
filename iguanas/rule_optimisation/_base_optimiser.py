@@ -34,8 +34,6 @@ class _BaseOptimiser(Rules):
                  lambda_kwargs: Dict[str, Dict[str, float]],
                  metric: Callable):
         Rules.__init__(self, rule_strings={})
-        # self.orig_rule_lambdas = rule_lambdas.copy()
-        # self.orig_lambda_kwargs = lambda_kwargs.copy()
         self.orig_rule_lambdas = rule_lambdas
         self.orig_lambda_kwargs = lambda_kwargs
         self.metric = metric

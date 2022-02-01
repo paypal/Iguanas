@@ -129,7 +129,6 @@ class BayesianOptimiser(_BaseOptimiser):
             lambda_kwargs=self.orig_lambda_kwargs.copy(),
         )
         _ = self.orig_rules.as_rule_strings(as_numpy=False)
-        print(_)
         if self.verbose > 0:
             print(
                 '--- Checking for rules with features that are missing in `X` ---')
@@ -229,7 +228,6 @@ class BayesianOptimiser(_BaseOptimiser):
             )
         opt_rule_strings = dict(
             zip(rule_lambdas.keys(), opt_rule_strings_list))
-        print(opt_rule_strings)
         return opt_rule_strings
 
     def _optimise_single_rule(self, rule_name, rule_lambda, lambda_kwargs, X, y,
@@ -361,10 +359,8 @@ class BayesianOptimiser(_BaseOptimiser):
         Converts threshold values based on integer columns into integer 
         format.
         """
-        print('INT COLS: ', int_cols)
         for feature, value in opt_thresholds.items():
             col = feature.split('%')[0]
             if col in int_cols:
                 opt_thresholds[feature] = int(value)
-        print('OPT THRESHOLDS:', opt_thresholds)
         return opt_thresholds
