@@ -2,7 +2,6 @@ import pytest
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from copy import deepcopy
 from iguanas.pipeline._base_pipeline import DataFrameSizeError
 from iguanas.rule_generation import RuleGeneratorDT, RuleGeneratorOpt
 from iguanas.rule_optimisation import BayesianOptimiser
@@ -11,7 +10,7 @@ from iguanas.metrics import FScore, JaccardSimilarity, Precision
 from iguanas.rule_selection import SimpleFilter, CorrelatedFilter, GreedyFilter
 from iguanas.correlation_reduction import AgglomerativeClusteringReducer
 from iguanas.rbs import RBSOptimiser, RBSPipeline
-from iguanas.pipeline import LinearPipeline, ParallelPipeline, ClassAccessor
+from iguanas.pipeline import LinearPipeline, ClassAccessor
 
 f1 = FScore(1)
 js = JaccardSimilarity()
@@ -239,39 +238,3 @@ def test_fit_transform(_create_data, _instantiate_classes):
     assert len(lp.get_params()['sf']['rules_to_keep']) == 4
     assert len(lp.get_params()['cf']['rules_to_keep']) == 4
     assert len(lp.get_params()['gf']['rules_to_keep']) == 1
-
-
-def test_get_params(_instantiate_classes):
-    _, _, _, sf, _, _, _ = _instantiate_classes
-    steps = [
-        ('sf', sf),
-    ]
-    lp = LinearPipeline(steps)
-    params = lp.get_params()
-    assert params['sf']['threshold'] == 0.05
-    assert params['sf']['operator'] == '>='
-    assert str(params['sf']['metric']
-               ) == '<bound method FScore.fit of FScore with beta=1>'
-    assert params['sf']['rules_to_keep'] == []
-
-
-def test_check_accessor(_instantiate_classes):
-    _, _, _, sf, _, _, rbs = _instantiate_classes
-    ca = ClassAccessor('sf', 'rules_to_keep')
-    sf.rules_to_keep = ['Rule1']
-    rbs.pos_pred_rules = ca
-    steps = [
-        ('sf', sf),
-        ('rbs', rbs)
-    ]
-    lp = LinearPipeline(steps)
-    for _, step in lp.steps:
-        lp._check_accessor(step)
-    assert rbs.pos_pred_rules == ['Rule1']
-
-
-def test_exception_if_no_cols_in_X():
-    X = pd.DataFrame([])
-    lp = LinearPipeline([])
-    with pytest.raises(DataFrameSizeError, match='`X` has been reduced to zero columns after the `rg` step in the pipeline.'):
-        lp._exception_if_no_cols_in_X(X, 'rg')

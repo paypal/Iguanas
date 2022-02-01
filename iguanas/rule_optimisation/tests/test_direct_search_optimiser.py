@@ -1580,6 +1580,7 @@ def _fit(rule_lambdas, lambda_kwargs, X, y, sample_weight, metric, exp_rule_stri
                 verbose=1,
                 method=method,
             )
+            print(ro.orig_rule_lambdas)
             assert ro.__repr__() == 'DirectSearchOptimiser object with 10 rules to optimise'
             if fit_transform:
                 X_rules = ro.fit_transform(

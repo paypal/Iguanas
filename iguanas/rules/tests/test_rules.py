@@ -39,7 +39,7 @@ def _rule_dicts():
                                                   'value': 120.0},
                                                  {'field': 'payer_id_sum_approved_txn_amt_per_paypalid_30day',
                                                   'operator': 'less_or_equal',
-                                                  'value': 500.0}]},
+                                                  'value': 500}]},
                                       {'field': 'num_items', 'operator': 'equal', 'value': 1.0}]},
                   'Rule2': {'condition': 'AND',
                             'rules': [{'field': 'ml_cc_v0', 'operator': 'less', 'value': 0.315},
@@ -89,7 +89,7 @@ def _rule_dicts():
 
 @pytest.fixture
 def _rule_strings_pandas():
-    rule_strings = {'Rule1': "((X['payer_id_sum_approved_txn_amt_per_paypalid_1day']>=60.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_7day']>120.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_30day']<=500.0))&(X['num_items']==1.0)",
+    rule_strings = {'Rule1': "((X['payer_id_sum_approved_txn_amt_per_paypalid_1day']>=60.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_7day']>120.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_30day']<=500))&(X['num_items']==1.0)",
                     'Rule2': "(X['ml_cc_v0']<0.315)&((X['method_clean']=='checkout')|(X['method_clean'].str.startswith('checkout', na=False))|(X['method_clean'].str.endswith('checkout', na=False))|(X['method_clean'].str.contains('checkout', na=False, regex=False))|(~X['ip_address'].isna())|(X['ip_isp'].fillna('')!=''))",
                     'Rule3': "(~X['method_clean'].str.startswith('checkout', na=False))&(~X['method_clean'].str.endswith('checkout', na=False))&(~X['method_clean'].str.contains('checkout', na=False, regex=False))&((X['ip_address'].isna())|(X['ip_isp'].fillna('')==''))",
                     'Rule4': "(X['forwarder_address']==True)&(X['is_shipping_billing_address_same']==False)",
@@ -100,7 +100,7 @@ def _rule_strings_pandas():
 
 @pytest.fixture
 def _rule_strings_numpy():
-    rule_strings = {'Rule1': "((X['payer_id_sum_approved_txn_amt_per_paypalid_1day'].to_numpy(na_value=np.nan)>=60.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_7day'].to_numpy(na_value=np.nan)>120.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_30day'].to_numpy(na_value=np.nan)<=500.0))&(X['num_items'].to_numpy(na_value=np.nan)==1.0)",
+    rule_strings = {'Rule1': "((X['payer_id_sum_approved_txn_amt_per_paypalid_1day'].to_numpy(na_value=np.nan)>=60.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_7day'].to_numpy(na_value=np.nan)>120.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_30day'].to_numpy(na_value=np.nan)<=500))&(X['num_items'].to_numpy(na_value=np.nan)==1.0)",
                     'Rule2': "(X['ml_cc_v0'].to_numpy(na_value=np.nan)<0.315)&((X['method_clean'].to_numpy(na_value=np.nan)=='checkout')|(X['method_clean'].str.startswith('checkout', na=False))|(X['method_clean'].str.endswith('checkout', na=False))|(X['method_clean'].str.contains('checkout', na=False, regex=False))|(~pd.isna(X['ip_address'].to_numpy(na_value=np.nan)))|(X['ip_isp'].fillna('')!=''))",
                     'Rule3': "(~X['method_clean'].str.startswith('checkout', na=False))&(~X['method_clean'].str.endswith('checkout', na=False))&(~X['method_clean'].str.contains('checkout', na=False, regex=False))&((pd.isna(X['ip_address'].to_numpy(na_value=np.nan)))|(X['ip_isp'].fillna('')==''))",
                     'Rule4': "(X['forwarder_address'].to_numpy(na_value=np.nan)==True)&(X['is_shipping_billing_address_same'].to_numpy(na_value=np.nan)==False)",
@@ -214,7 +214,6 @@ def test_as_rule_strings_starting_with_rule_lambdas_kwargs(_rule_lambdas_with_kw
     rule_strings_numpy = _rule_strings_numpy
     r = Rules(rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs)
     rule_strings = r.as_rule_strings(as_numpy=False)
-    print(type(rule_strings))
     assert rule_strings == rule_strings_pandas
     r = Rules(rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs)
     rule_strings = r.as_rule_strings(as_numpy=True)

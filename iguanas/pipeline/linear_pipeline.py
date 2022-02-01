@@ -23,6 +23,11 @@ class LinearPipeline(_BasePipeline):
         elements - the first element should be a string which refers to the 
         step; the second element should be the instantiated class which is run
         as part of the step. 
+
+    Attributes
+    ----------
+    steps_ : List[Tuple[str, object]]
+        The steps corresponding to the fitted pipeline.
     """
 
     def __init__(self, steps: List[Tuple[str, object]]):

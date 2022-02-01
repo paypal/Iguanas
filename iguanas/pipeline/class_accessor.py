@@ -1,5 +1,6 @@
 """Class for accessing a class attribute within a pipeline."""
-from typing import Union, List, Tuple, Dict
+from copy import deepcopy
+from typing import Union, Dict
 
 
 class ClassAccessor:
@@ -26,7 +27,6 @@ class ClassAccessor:
         self.class_attribute = class_attribute
 
     def get(self,
-            # steps=None
             pipeline_params: Dict[str, dict]
             ) -> Union[str, float, int, dict, list, tuple]:
         """
@@ -48,11 +48,11 @@ class ClassAccessor:
             If the `class_tag` cannot be found in `steps`.
         """
 
-        # for tag, class_ in steps:
-        #     if tag == self.class_tag:
-        #         return class_.__dict__[self.class_attribute]
         if self.class_tag in pipeline_params.keys():
             return pipeline_params[self.class_tag][self.class_attribute]
         raise ValueError(
-            f'There are no steps in `pipeline` corresponding to `class_tag`={self.class_tag}'
+            f"There are no steps in `pipeline` corresponding to `class_tag`='{self.class_tag}'"
         )
+
+    def copy(self):
+        return deepcopy(self)

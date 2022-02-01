@@ -1,4 +1,5 @@
 """Optimises a set of rules using Bayesian Optimisation."""
+from copy import deepcopy
 from typing import Callable, Dict, List
 from hyperopt import hp, tpe, fmin
 from hyperopt.pyll import scope
@@ -88,7 +89,7 @@ class BayesianOptimiser(_BaseOptimiser):
         self.num_cores = num_cores
         self.kwargs = kwargs
         self.rule_strings = {}
-        self.rule_names = {}
+        self.rule_names = []
 
     def __repr__(self):
         if self.rule_strings == {}:
@@ -124,10 +125,11 @@ class BayesianOptimiser(_BaseOptimiser):
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [PandasSeries])
         self.orig_rules = Rules(
-            rule_lambdas=self.orig_rule_lambdas,
-            lambda_kwargs=self.orig_lambda_kwargs,
+            rule_lambdas=self.orig_rule_lambdas.copy(),
+            lambda_kwargs=self.orig_lambda_kwargs.copy(),
         )
         _ = self.orig_rules.as_rule_strings(as_numpy=False)
+        print(_)
         if self.verbose > 0:
             print(
                 '--- Checking for rules with features that are missing in `X` ---')
@@ -227,6 +229,7 @@ class BayesianOptimiser(_BaseOptimiser):
             )
         opt_rule_strings = dict(
             zip(rule_lambdas.keys(), opt_rule_strings_list))
+        print(opt_rule_strings)
         return opt_rule_strings
 
     def _optimise_single_rule(self, rule_name, rule_lambda, lambda_kwargs, X, y,
@@ -267,7 +270,6 @@ class BayesianOptimiser(_BaseOptimiser):
         Returns a dictionary of the space function (used in the optimiser) for 
         each feature in the dataset
         """
-
         space_funcs = {}
         for feature in all_rule_features:
             # If features contains %, means that there's more than one
@@ -359,9 +361,10 @@ class BayesianOptimiser(_BaseOptimiser):
         Converts threshold values based on integer columns into integer 
         format.
         """
-
+        print('INT COLS: ', int_cols)
         for feature, value in opt_thresholds.items():
             col = feature.split('%')[0]
             if col in int_cols:
                 opt_thresholds[feature] = int(value)
+        print('OPT THRESHOLDS:', opt_thresholds)
         return opt_thresholds

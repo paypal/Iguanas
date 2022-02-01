@@ -88,7 +88,7 @@ def _instantiate_classes():
     return rg_dt, ro, sf, cf, rbso
 
 
-def test_fit_transform():
+def test_fit_transform(_create_data, _instantiate_classes):
     X, y, _ = _create_data
     rg_dt, _, _, _, _ = _instantiate_classes
     rg_fraud = deepcopy(rg_dt)

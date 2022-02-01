@@ -14,7 +14,7 @@ import seaborn as sns
 
 class _BaseOptimiser(Rules):
     """
-    Base rule generator class. Main rule generator classes inherit from this 
+    Base rule optimiser class. Main rule optimiser classes inherit from this 
     one.
 
     Parameters
@@ -34,8 +34,10 @@ class _BaseOptimiser(Rules):
                  lambda_kwargs: Dict[str, Dict[str, float]],
                  metric: Callable):
         Rules.__init__(self, rule_strings={})
-        self.orig_rule_lambdas = rule_lambdas.copy()
-        self.orig_lambda_kwargs = lambda_kwargs.copy()
+        # self.orig_rule_lambdas = rule_lambdas.copy()
+        # self.orig_lambda_kwargs = lambda_kwargs.copy()
+        self.orig_rule_lambdas = rule_lambdas
+        self.orig_lambda_kwargs = lambda_kwargs
         self.metric = metric
 
     def fit_transform(self,

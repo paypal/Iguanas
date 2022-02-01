@@ -19,5 +19,5 @@ def test_error():
             'rules_to_keep': ['Rule1']
         }
     }
-    with pytest.raises(ValueError, match='There are no steps in `pipeline` corresponding to `class_tag`=sf3'):
+    with pytest.raises(ValueError, match="There are no steps in `pipeline` corresponding to `class_tag`='sf3'"):
         ca.get(pipeline_params)

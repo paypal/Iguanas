@@ -166,8 +166,8 @@ class DirectSearchOptimiser(_BaseOptimiser):
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [PandasSeries])
         self.orig_rules = Rules(
-            rule_lambdas=self.orig_rule_lambdas,
-            lambda_kwargs=self.orig_lambda_kwargs,
+            rule_lambdas=self.orig_rule_lambdas.copy(),
+            lambda_kwargs=self.orig_lambda_kwargs.copy(),
         )
         _ = self.orig_rules.as_rule_strings(as_numpy=False)
         if self.verbose > 0:

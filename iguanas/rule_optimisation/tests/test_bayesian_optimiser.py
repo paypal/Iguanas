@@ -180,6 +180,31 @@ def _instantiate(_create_inputs):
     return ro
 
 
+# def test_fit(_create_data, _instantiate, _expected_results, _expected_X_rules_mean):
+#     X, y, _ = _create_data
+#     exp_opt_rule_strings, _, exp_orig_rule_performances, _, exp_opt_rule_performances, _ = _expected_results
+#     exp_X_rules, _, _ = _expected_X_rules_mean
+#     ro = _instantiate
+#     assert ro.__repr__() == 'BayesianOptimiser object with 10 rules to optimise'
+#     with pytest.warns(UserWarning,
+#                       match="Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules") and \
+#             pytest.warns(UserWarning,
+#                          match="Rules `categoric`, `boolean`, `all_na` have no optimisable conditions - unable to optimise these rules") and \
+#             pytest.warns(UserWarning,
+#                          match="Rules `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules"):
+#         X_rules = ro.fit(X=X, y=y)
+#         assert ro.__repr__() == 'BayesianOptimiser object with 5 rules optimised'
+#         pd.testing.assert_series_equal(
+#             X_rules.mean().sort_index(), exp_X_rules.sort_index())
+#         assert ro.rule_strings == exp_opt_rule_strings
+#         assert ro.rule_names == list(exp_opt_rule_strings.keys())
+#         assert ro.orig_rule_performances == exp_orig_rule_performances
+#         assert ro.opt_rule_performances == exp_opt_rule_performances
+#         assert ro.rule_names_missing_features == ['missing_col']
+#         assert ro.rule_names_no_opt_conditions == [
+#             'categoric', 'boolean', 'all_na']
+#         assert ro.rule_names_zero_var_features == ['zero_var']
+
 def test_fit(_create_data, _instantiate, _expected_results, _expected_X_rules_mean):
     X, y, _ = _create_data
     exp_opt_rule_strings, _, exp_orig_rule_performances, _, exp_opt_rule_performances, _ = _expected_results
@@ -193,6 +218,26 @@ def test_fit(_create_data, _instantiate, _expected_results, _expected_X_rules_me
             pytest.warns(UserWarning,
                          match="Rules `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules"):
         X_rules = ro.fit(X=X, y=y)
+        assert ro.__repr__() == 'BayesianOptimiser object with 5 rules optimised'
+        pd.testing.assert_series_equal(
+            X_rules.mean().sort_index(), exp_X_rules.sort_index())
+        assert ro.rule_strings == exp_opt_rule_strings
+        assert ro.rule_names == list(exp_opt_rule_strings.keys())
+        assert ro.orig_rule_performances == exp_orig_rule_performances
+        assert ro.opt_rule_performances == exp_opt_rule_performances
+        assert ro.rule_names_missing_features == ['missing_col']
+        assert ro.rule_names_no_opt_conditions == [
+            'categoric', 'boolean', 'all_na']
+        assert ro.rule_names_zero_var_features == ['zero_var']
+        print('----FIT_TRANSFORM----')
+        print(X.dtypes['A'])
+        print('--------------------')
+        print(
+            {
+                rn: rl(**ro.orig_lambda_kwargs[rn]) for rn, rl in ro.orig_rule_lambdas.items()
+            }
+        )
+        X_rules = ro.fit_transform(X=X, y=y)
         assert ro.__repr__() == 'BayesianOptimiser object with 5 rules optimised'
         pd.testing.assert_series_equal(
             X_rules.mean().sort_index(), exp_X_rules.sort_index())
