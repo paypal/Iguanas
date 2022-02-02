@@ -238,3 +238,130 @@ def test_fit_transform(_create_data, _instantiate_classes):
     assert len(lp.get_params()['sf']['rules_to_keep']) == 4
     assert len(lp.get_params()['cf']['rules_to_keep']) == 4
     assert len(lp.get_params()['gf']['rules_to_keep']) == 1
+
+
+def test_fit_predict_use_init_data(_create_data, _instantiate_classes):
+    X, y, sample_weight = _create_data
+    rg_dt, _, _, _, _, _, _ = _instantiate_classes
+    ro = BayesianOptimiser(
+        rule_lambdas=ClassAccessor(
+            class_tag='rg_dt',
+            class_attribute='rule_lambdas'
+        ),
+        lambda_kwargs=ClassAccessor(
+            class_tag='rg_dt',
+            class_attribute='lambda_kwargs'
+        ),
+        metric=f1.fit,
+        n_iter=5
+    )
+    rg_dt._today = '20220201'
+    expected_rule_strings = {
+        'RGDT_Rule_20220201_0': "(X['A']==False)&(X['B']<=6)&(X['C']>0.6177501837002377)",
+        'RGDT_Rule_20220201_1': "(X['A']==False)&(X['B']<=2)&(X['D']==False)",
+        'RGDT_Rule_20220201_2': "(X['A']==False)&(X['B']<=2)&(X['B']>=2)&(X['D']==False)",
+        'RGDT_Rule_20220201_3': "(X['A']==False)&(X['B']<=4)&(X['C']>0.84748)&(X['D']==True)",
+        'RGDT_Rule_20220201_4': "(X['A']==False)&(X['B']<=3)&(X['B']>=0)&(X['C']<=0.6610314524532597)",
+        'RGDT_Rule_20220201_5': "(X['A']==False)&(X['B']<=6)&(X['B']>=2)&(X['C']>0.82191)",
+        'RGDT_Rule_20220201_6': "(X['A']==False)&(X['B']<=7)&(X['C']>0.85766)&(X['D']==False)",
+        'RGDT_Rule_20220201_7': "(X['A']==False)&(X['B']<=7)&(X['B']>=1)&(X['D']==False)",
+        'RGDT_Rule_20220201_8': "(X['A']==False)&(X['B']>=1)&(X['C']>0.84748)&(X['D']==True)",
+        'RGDT_Rule_20220201_9': "(X['A']==False)&(X['B']>=2)&(X['D']==False)",
+        'RGDT_Rule_20220201_10': "(X['A']==False)&(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)",
+        'RGDT_Rule_20220201_11': "(X['A']==False)&(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)",
+        'RGDT_Rule_20220201_12': "(X['A']==False)&(X['C']<=0.65965)&(X['D']==False)",
+        'RGDT_Rule_20220201_13': "(X['A']==False)&(X['C']<=0.663337811583689)&(X['D']==False)",
+        'RGDT_Rule_20220201_14': "(X['A']==False)&(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)",
+        'RGDT_Rule_20220201_15': "(X['A']==False)&(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)&(X['D']==False)",
+        'RGDT_Rule_20220201_16': "(X['A']==False)&(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)&(X['D']==False)",
+        'RGDT_Rule_20220201_17': "(X['A']==False)&(X['C']>0.80832)&(X['D']==True)",
+        'RGDT_Rule_20220201_18': "(X['A']==False)&(X['C']>0.6177501837002377)&(X['D']==False)",
+        'RGDT_Rule_20220201_19': "(X['A']==False)&(X['C']>0.6177501837002377)",
+        'RGDT_Rule_20220201_20': "(X['A']==False)&(X['C']>0.6177501837002377)&(X['D']==False)",
+        'RGDT_Rule_20220201_21': "(X['A']==False)&(X['C']>0.6177501837002377)&(X['D']==False)",
+        'RGDT_Rule_20220201_22': "(X['A']==True)&(X['B']<=6)&(X['C']<=0.663337811583689)",
+        'RGDT_Rule_20220201_23': "(X['A']==True)&(X['B']<=6)&(X['C']<=0.50532)",
+        'RGDT_Rule_20220201_24': "(X['A']==True)&(X['B']<=7)&(X['C']>0.2740656256979518)&(X['D']==False)",
+        'RGDT_Rule_20220201_25': "(X['A']==True)&(X['B']>=0)&(X['C']<=0.6610314524532597)&(X['D']==False)",
+        'RGDT_Rule_20220201_26': "(X['A']==True)&(X['C']<=0.5315)&(X['C']>0.46073)&(X['D']==False)",
+        'RGDT_Rule_20220201_27': "(X['A']==True)&(X['C']<=0.663337811583689)&(X['D']==False)",
+        'RGDT_Rule_20220201_28': "(X['A']==True)&(X['C']<=0.9194077847929631)&(X['C']>0.2740656256979518)&(X['D']==False)",
+        'RGDT_Rule_20220201_29': "(X['A']==True)&(X['C']<=0.65082)&(X['C']>0.63671)&(X['D']==False)",
+        'RGDT_Rule_20220201_30': "(X['B']<=7)&(X['C']>0.2740656256979518)",
+        'RGDT_Rule_20220201_31': "(X['B']<=5)&(X['C']<=0.51004)&(X['C']>0.45317)&(X['D']==False)",
+        'RGDT_Rule_20220201_32': "(X['B']<=7)&(X['B']>=2)&(X['C']<=0.52794)&(X['D']==False)",
+        'RGDT_Rule_20220201_33': "(X['B']<=7)&(X['B']>=2)&(X['C']>0.52794)&(X['D']==False)",
+        'RGDT_Rule_20220201_34': "(X['B']<=3)&(X['B']>=0)&(X['C']<=0.6610314524532597)&(X['D']==False)",
+        'RGDT_Rule_20220201_35': "(X['B']<=6)&(X['C']<=0.663337811583689)&(X['D']==False)",
+        'RGDT_Rule_20220201_36': "(X['B']<=8)&(X['C']<=0.65965)&(X['C']>0.62615)&(X['D']==False)",
+        'RGDT_Rule_20220201_37': "(X['B']>=0)&(X['C']<=0.6610314524532597)&(X['D']==False)",
+        'RGDT_Rule_20220201_38': "(X['B']>=4)&(X['C']<=0.9194077847929631)&(X['C']>0.2740656256979518)&(X['D']==False)",
+        'RGDT_Rule_20220201_39': "(X['C']<=0.663337811583689)",
+        'RGDT_Rule_20220201_40': "(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)",
+        'RGDT_Rule_20220201_41': "(X['C']<=0.65965)&(X['C']>0.64871)",
+        'RGDT_Rule_20220201_42': "(X['C']<=0.87533)&(X['C']>0.84487)"
+    }
+    expected_rule_strings_weights = {
+        'RGDT_Rule_20220201_0': "(X['A']==False)&(X['B']<=6)&(X['C']>0.6177501837002377)",
+        'RGDT_Rule_20220201_1': "(X['A']==False)&(X['B']<=2)&(X['D']==False)",
+        'RGDT_Rule_20220201_2': "(X['A']==False)&(X['B']<=7)&(X['B']>=1)&(X['D']==False)",
+        'RGDT_Rule_20220201_3': "(X['A']==False)&(X['B']<=4)&(X['C']>0.80832)&(X['D']==True)",
+        'RGDT_Rule_20220201_4': "(X['A']==False)&(X['B']<=4)&(X['C']>0.84748)&(X['D']==True)",
+        'RGDT_Rule_20220201_5': "(X['A']==False)&(X['B']<=3)&(X['B']>=0)&(X['C']<=0.6610314524532597)",
+        'RGDT_Rule_20220201_6': "(X['A']==False)&(X['B']<=6)&(X['B']>=2)&(X['C']>0.82191)",
+        'RGDT_Rule_20220201_7': "(X['A']==False)&(X['B']<=7)&(X['C']>0.85766)&(X['D']==False)",
+        'RGDT_Rule_20220201_8': "(X['A']==False)&(X['B']<=7)&(X['C']>0.2740656256979518)&(X['D']==False)",
+        'RGDT_Rule_20220201_9': "(X['A']==False)&(X['B']>=2)&(X['D']==False)",
+        'RGDT_Rule_20220201_10': "(X['A']==False)&(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)",
+        'RGDT_Rule_20220201_11': "(X['A']==False)&(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)",
+        'RGDT_Rule_20220201_12': "(X['A']==False)&(X['C']<=0.65965)&(X['D']==False)",
+        'RGDT_Rule_20220201_13': "(X['A']==False)&(X['C']<=0.66179)&(X['D']==False)",
+        'RGDT_Rule_20220201_14': "(X['A']==False)&(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)",
+        'RGDT_Rule_20220201_15': "(X['A']==False)&(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)&(X['D']==False)",
+        'RGDT_Rule_20220201_16': "(X['A']==False)&(X['C']>0.3866744253009945)&(X['D']==False)",
+        'RGDT_Rule_20220201_17': "(X['A']==False)&(X['C']>0.6177501837002377)",
+        'RGDT_Rule_20220201_18': "(X['A']==False)&(X['C']>0.3866744253009945)&(X['D']==False)",
+        'RGDT_Rule_20220201_19': "(X['A']==True)&(X['B']<=6)&(X['C']<=0.663337811583689)",
+        'RGDT_Rule_20220201_20': "(X['A']==True)&(X['B']<=7)&(X['B']>=1)&(X['D']==False)",
+        'RGDT_Rule_20220201_21': "(X['A']==True)&(X['B']<=6)&(X['C']<=0.50532)",
+        'RGDT_Rule_20220201_22': "(X['A']==True)&(X['B']<=7)&(X['C']>0.2740656256979518)&(X['D']==False)",
+        'RGDT_Rule_20220201_23': "(X['A']==True)&(X['B']>=0)&(X['C']<=0.6610314524532597)&(X['D']==False)",
+        'RGDT_Rule_20220201_24': "(X['A']==True)&(X['C']<=0.663337811583689)&(X['D']==False)",
+        'RGDT_Rule_20220201_25': "(X['A']==True)&(X['C']<=0.9194077847929631)&(X['C']>0.2740656256979518)&(X['D']==False)",
+        'RGDT_Rule_20220201_26': "(X['B']<=7)&(X['C']>0.2740656256979518)",
+        'RGDT_Rule_20220201_27': "(X['B']<=8)&(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)&(X['D']==False)",
+        'RGDT_Rule_20220201_28': "(X['B']<=3)&(X['B']>=0)&(X['C']<=0.6610314524532597)&(X['D']==False)",
+        'RGDT_Rule_20220201_29': "(X['B']<=7)&(X['B']>=2)&(X['C']>0.52794)&(X['D']==False)",
+        'RGDT_Rule_20220201_30': "(X['B']<=8)&(X['B']>=2)&(X['C']<=0.84487)&(X['D']==False)",
+        'RGDT_Rule_20220201_31': "(X['B']<=6)&(X['C']<=0.663337811583689)&(X['D']==False)",
+        'RGDT_Rule_20220201_32': "(X['B']<=8)&(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)&(X['D']==False)",
+        'RGDT_Rule_20220201_33': "(X['B']>=0)&(X['C']<=0.6610314524532597)&(X['D']==False)",
+        'RGDT_Rule_20220201_34': "(X['B']>=4)&(X['C']<=0.9194077847929631)&(X['C']>0.2740656256979518)&(X['D']==False)",
+        'RGDT_Rule_20220201_35': "(X['C']<=0.663337811583689)",
+        'RGDT_Rule_20220201_36': "(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)",
+        'RGDT_Rule_20220201_37': "(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)",
+        'RGDT_Rule_20220201_38': "(X['C']<=0.85767)&(X['C']>0.84748)&(X['D']==True)",
+        'RGDT_Rule_20220201_39': "(X['C']<=1.1179668118672983)&(X['C']>0.3866744253009945)"
+    }
+    steps = [
+        ('rg_dt', rg_dt),
+        ('ro', ro)
+    ]
+    lp = LinearPipeline(
+        steps=steps,
+        use_init_data=['ro']
+    )
+    # No sample_weight
+    lp.fit(X, y)
+    assert lp.get_params()['ro']['rule_strings'] == expected_rule_strings
+    X_rules = lp.fit_transform(X, y)
+    assert lp.get_params()['ro']['rule_strings'] == expected_rule_strings
+    assert X_rules.sum().sum() == 871
+    # sample_weight provided
+    lp.fit(X, y, sample_weight)
+    assert lp.get_params()[
+        'ro']['rule_strings'] == expected_rule_strings_weights
+    X_rules = lp.fit_transform(X, y, sample_weight)
+    assert lp.get_params()[
+        'ro']['rule_strings'] == expected_rule_strings_weights
+    assert X_rules.sum().sum() == 1178

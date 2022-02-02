@@ -2,6 +2,8 @@ from copy import deepcopy
 from typing import List, Tuple, Union
 from iguanas.pipeline._base_pipeline import _BasePipeline
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
+from iguanas.utils.types import PandasDataFrame, PandasSeries, Dictionary
+import iguanas.utils.utils as utils
 import pandas as pd
 
 
@@ -55,6 +57,11 @@ class ParallelPipeline(_BasePipeline):
             The transformed dataset.
         """
 
+        utils.check_allowed_types(X, 'X', [PandasDataFrame, Dictionary])
+        utils.check_allowed_types(y, 'y', [PandasSeries, Dictionary])
+        if sample_weight is not None:
+            utils.check_allowed_types(
+                sample_weight, 'sample_weight', [PandasSeries, Dictionary])
         self.steps_ = deepcopy(self.steps)
         X_rules_list = []
         for step_tag, step in self.steps_:
@@ -90,6 +97,7 @@ class ParallelPipeline(_BasePipeline):
             The transformed dataset.
         """
 
+        utils.check_allowed_types(X, 'X', [PandasDataFrame, Dictionary])
         X_rules_list = []
         for step_tag, step in self.steps_:
             X_rules_list.append(

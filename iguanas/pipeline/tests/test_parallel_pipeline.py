@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from copy import deepcopy
-from iguanas.pipeline._base_pipeline import DataFrameSizeError
 from iguanas.rule_generation import RuleGeneratorDT
 from iguanas.rule_optimisation import BayesianOptimiser
 from iguanas.rules import Rules
