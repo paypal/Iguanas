@@ -28,11 +28,18 @@ class GreedyFilter(_BaseFilter):
     verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : shows the
         progress of the filtering process. Defaults to 0.
+    rules : Rules, optional
+        An Iguanas `Rules` object containing the rules that need to be 
+        filtered. If provided, the rules within the object will be filtered. 
+        Defaults to None.
 
     Attributes
     ----------
     rules_to_keep : List[str]
-        List of rules which give the best combined performance.
+        List of rules which remain after the filter has been applied.
+    rules : Rules
+        The Iguanas `Rules` object containing the rules which remain after the
+        filter has been applied.
     score : float
         The combined performance (i.e. the value of `metric`) of the rules
         which give the best combined performance.
@@ -41,11 +48,12 @@ class GreedyFilter(_BaseFilter):
     def __init__(self,
                  metric: Callable,
                  sorting_metric: Callable,
+                 rules=None,
                  verbose=0):
 
         self.metric = metric
         self.sorting_metric = sorting_metric
-        _BaseFilter.__init__(self, rules_to_keep=[])
+        _BaseFilter.__init__(self, rules_to_keep=[], rules=rules)
         self.verbose = verbose
 
     def __repr__(self):
