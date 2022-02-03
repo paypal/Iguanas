@@ -234,7 +234,11 @@ class _BasePipeline:
                 if isinstance(value, (list, tuple)):
                     _check_accessor_iterable(value, pipeline_params)
                 elif isinstance(value, ClassAccessor):
-                    iterable[idx] = value.get(pipeline_params)
+                    try:
+                        iterable[idx] = value.get(pipeline_params)
+                    except TypeError:
+                        raise TypeError(
+                            '`ClassAccessor` object must be within a mutable iterable.')
 
         step_param_dict = step.__dict__
         for param, value in step_param_dict.items():

@@ -178,6 +178,7 @@ def test_check_accessor(_instantiate_classes):
     _, _, sf, _, rbso = _instantiate_classes
     ca = ClassAccessor('sf', 'rules_to_keep')
     sf.rules_to_keep = ['Rule1']
+    # Check when ClassAccessor is parameter
     rbso = RBSOptimiser(
         pipeline=RBSPipeline(
             config=[],
@@ -195,6 +196,57 @@ def test_check_accessor(_instantiate_classes):
     for _, step in lp.steps:
         lp._check_accessor(step)
     assert rbso.pos_pred_rules == ['Rule1']
+    # Check when ClassAccessor is within list (that is a parameter)
+    rbso = RBSOptimiser(
+        pipeline=RBSPipeline(
+            config=[
+                [
+                    0, ClassAccessor(
+                        class_tag='sf',
+                        class_attribute='rules_to_keep'
+                    )
+                ]
+            ],
+            final_decision=0,
+        ),
+        metric=f1.fit,
+        n_iter=10
+    )
+    steps = [
+        ('sf', sf),
+        ('rbs', rbso)
+    ]
+    lp = LinearPipeline(steps)
+    for _, step in lp.steps:
+        lp._check_accessor(step)
+    assert rbso.config == [[0, ['Rule1']]]
+
+
+def test_check_accessor_exception(_instantiate_classes):
+    _, _, sf, _, _ = _instantiate_classes
+    rbso = RBSOptimiser(
+        pipeline=RBSPipeline(
+            config=[
+                (
+                    0, ClassAccessor(
+                        class_tag='sf',
+                        class_attribute='rules_to_keep'
+                    )
+                )
+            ],
+            final_decision=0,
+        ),
+        metric=f1.fit,
+        n_iter=10
+    )
+    steps = [
+        ('sf', sf),
+        ('rbs', rbso)
+    ]
+    lp = LinearPipeline(steps)
+    with pytest.raises(TypeError, match='`ClassAccessor` object must be within a mutable iterable.'):
+        for _, step in lp.steps:
+            lp._check_accessor(step)
 
 
 def test_exception_if_no_cols_in_X():
