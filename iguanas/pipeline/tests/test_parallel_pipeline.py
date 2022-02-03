@@ -123,7 +123,7 @@ def test_fit_transform(_create_data, _instantiate_classes):
     assert X_rules.shape == (100, 56)
 
 
-def test_fit_predict_with_parallel_pipeline(_create_data, _instantiate_classes):
+def test_fit_predict_linear_and_parallel(_create_data, _instantiate_classes):
     X, y, sample_weight = _create_data
     rg_dt, ro, sf, cf, rbso = _instantiate_classes
     # Create set of non-fraud rules for optimisation
@@ -309,3 +309,106 @@ def test_fit_predict_with_parallel_pipeline(_create_data, _instantiate_classes):
     )
     assert y_pred.mean() == 0.29
     assert f1.fit(y_pred, y, sample_weight) == 0.43636363636363634
+
+
+def test_fit_predict_class_accessor_in_list(_create_data, _instantiate_classes):
+    X, y, sample_weight = _create_data
+    rg_dt, _, _, cf, _ = _instantiate_classes
+    rbso = RBSOptimiser(
+        pipeline=RBSPipeline(
+            config=[
+                [
+                    0, ClassAccessor(
+                        class_tag='cf_nonfraud',
+                        class_attribute='rules_to_keep'
+                    )
+                ],
+                [
+                    1, ClassAccessor(
+                        class_tag='cf_fraud',
+                        class_attribute='rules_to_keep'
+                    )
+                ],
+            ],
+            final_decision=0,
+        ),
+        metric=f1.fit,
+        n_iter=50
+    )
+    rg_fraud = deepcopy(rg_dt)
+    rg_fraud.rule_name_prefix = 'Fraud'
+    rg_nonfraud = deepcopy(rg_dt)
+    rg_nonfraud.rule_name_prefix = 'NonFraud'
+    lp_fraud = LinearPipeline(
+        steps=[
+            ('rg_fraud', rg_fraud),
+            ('cf_fraud', cf)
+        ]
+    )
+    lp_nonfraud = LinearPipeline(
+        steps=[
+            ('rg_nonfraud', rg_nonfraud),
+            ('cf_nonfraud', cf)
+        ]
+    )
+    pp = ParallelPipeline(
+        steps=[
+            ('lp_fraud', lp_fraud),
+            ('lp_nonfraud', lp_nonfraud)
+        ])
+    lp = LinearPipeline(
+        steps=[
+            ('pp', pp),
+            ('rbso', rbso)
+        ]
+    )
+    # Without sample_weight
+    lp.fit(
+        X=X,
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        }
+    )
+    y_pred = lp.predict(X)
+    assert y_pred.sum() == 33
+    y_pred = lp.fit_predict(
+        X=X,
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        }
+    )
+    assert y_pred.sum() == 33
+    # With sample_weight
+    lp.fit(
+        X=X,
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        },
+        sample_weight={
+            'lp_fraud': sample_weight,
+            'lp_nonfraud': None,
+            'rbso': sample_weight
+        }
+    )
+    y_pred = lp.predict(X)
+    assert y_pred.sum() == 27
+    y_pred = lp.fit_predict(
+        X=X,
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        },
+        sample_weight={
+            'lp_fraud': sample_weight,
+            'lp_nonfraud': None,
+            'rbso': sample_weight
+        }
+    )
+    assert y_pred.sum() == 27

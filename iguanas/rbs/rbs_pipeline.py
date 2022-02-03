@@ -39,7 +39,7 @@ class RBSPipeline:
     """
 
     def __init__(self,
-                 config: Union[List[Tuple[int, list]], List[List[int, list]]],
+                 config: Union[List[Tuple[int, list]], List[list]],
                  final_decision: int) -> None:
         if not isinstance(config, list):
             raise ValueError('`config` must be a list')
