@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict
 from iguanas.pipeline.class_accessor import ClassAccessor
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 import iguanas.utils.utils as utils
@@ -220,9 +220,35 @@ class _BasePipeline:
         and injects it into the parameter.
         """
 
+        def _check_accessor_iterable(iterable: Union[list, tuple],
+                                     pipeline_params: Dict[str, dict]) -> None:
+            """
+            Iterates through an iterable - if the element is another iterable, 
+            _check_accessor_iterable is called again. If the the element is a
+            CheckAccessor, its `get` method is called (which extracts the given
+            attribute from the given step in the pipeline) - this attribute is
+            then assigned in place of the original element.
+            """
+
+            for idx, value in enumerate(iterable):
+                if isinstance(value, (list, tuple)):
+                    _check_accessor_iterable(value, pipeline_params)
+                elif isinstance(value, ClassAccessor):
+                    iterable[idx] = value.get(pipeline_params)
+
         step_param_dict = step.__dict__
         for param, value in step_param_dict.items():
-            if isinstance(value, ClassAccessor):
+            # If parameter value is an instantiated class, but not a
+            # ClassAccessor, call _check_accessor again
+            if hasattr(value, '__dict__') and value.__dict__ and not isinstance(value, ClassAccessor):
+                self._check_accessor(value)
+            # If parameter value is a list or tuple, call
+            # _check_accessor_iterable
+            elif isinstance(value, (list, tuple)):
+                pipeline_params = self.get_params()
+                _check_accessor_iterable(value, pipeline_params)
+            # If the parameter value is a ClassAccessor, call its get method
+            elif isinstance(value, ClassAccessor):
                 pipeline_params = self.get_params()
                 step.__dict__[param] = value.get(pipeline_params)
         return step

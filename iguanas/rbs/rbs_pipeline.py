@@ -2,10 +2,9 @@
 import pandas as pd
 import numpy as np
 import iguanas.utils as utils
-from iguanas.utils.types import PandasDataFrame, PandasSeries
+from iguanas.utils.types import PandasDataFrame
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
-from typing import List, Tuple
-from joblib import Parallel, delayed
+from typing import List, Tuple, Union
 
 
 class RBSPipeline:
@@ -40,16 +39,14 @@ class RBSPipeline:
     """
 
     def __init__(self,
-                 config: List[Tuple[int, list]],
-                 final_decision: int,
-                 num_cores=1) -> None:
+                 config: Union[List[Tuple[int, list]], List[List[int, list]]],
+                 final_decision: int) -> None:
         if not isinstance(config, list):
             raise ValueError('`config` must be a list')
         if final_decision not in [0, 1]:
             raise ValueError('`final_decision` must be either 0 or 1')
         self.config = config
         self.final_decision = final_decision
-        self.num_cores = num_cores
 
     def predict(self,
                 X_rules: PandasDataFrameType) -> PandasSeriesType:

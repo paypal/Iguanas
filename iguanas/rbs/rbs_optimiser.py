@@ -65,13 +65,11 @@ class RBSOptimiser(RBSPipeline):
                  pos_pred_rules=None,
                  neg_pred_rules=None,
                  verbose=0,
-                 num_cores=1,
                  **kwargs) -> None:
         RBSPipeline.__init__(
             self,
             config=deepcopy(pipeline.config),
             final_decision=pipeline.final_decision,
-            num_cores=num_cores
         )
         self.metric = metric
         self.n_iter = n_iter
