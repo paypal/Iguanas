@@ -25,13 +25,13 @@ class GreedyFilter(_BaseFilter):
     sorting_metric : Callable
         The method/function used calculate the performance metric by which the
         rules are sorted.
-    verbose : int, optional
-        Controls the verbosity - the higher, the more messages. >0 : shows the
-        progress of the filtering process. Defaults to 0.
     rules : Rules, optional
         An Iguanas `Rules` object containing the rules that need to be 
         filtered. If provided, the rules within the object will be filtered. 
         Defaults to None.
+    verbose : int, optional
+        Controls the verbosity - the higher, the more messages. >0 : shows the
+        progress of the filtering process. Defaults to 0.
 
     Attributes
     ----------

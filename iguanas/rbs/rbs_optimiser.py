@@ -36,6 +36,10 @@ class RBSOptimiser(RBSPipeline):
         The list of rules that predict a negative case (i.e. 0). This parameter 
         and/or `pos_pred_rules` must be given when the `config` parameter in 
         the `pipeline` is an empty list. Defaults to None.    
+    rules : Rules, optional
+        An Iguanas `Rules` object containing the rules that need to be 
+        filtered. If provided, the rules within the object will be filtered. 
+        Defaults to None.
     verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : shows the 
         overall progress of the optimisation process. Defaults to 0.
@@ -64,6 +68,7 @@ class RBSOptimiser(RBSPipeline):
                  algorithm=tpe.suggest,
                  pos_pred_rules=None,
                  neg_pred_rules=None,
+                 rules=None,
                  verbose=0,
                  **kwargs) -> None:
         RBSPipeline.__init__(
@@ -76,6 +81,7 @@ class RBSOptimiser(RBSPipeline):
         self.algorithm = algorithm
         self.pos_pred_rules = [] if pos_pred_rules is None else pos_pred_rules
         self.neg_pred_rules = [] if neg_pred_rules is None else neg_pred_rules
+        self.rules = deepcopy(rules)
         self.verbose = verbose
         self.kwargs = kwargs
         self.orig_config = deepcopy(pipeline.config)
@@ -117,6 +123,9 @@ class RBSOptimiser(RBSPipeline):
         self.rules_to_keep = [
             rule for stage in self.config for rule in stage[1]
         ]
+        # If `rules` given, filter it
+        if self.rules is not None:
+            self.rules.filter_rules(include=self.rules_to_keep)
 
     def fit_predict(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
                     sample_weight=None) -> PandasSeriesType:

@@ -64,6 +64,10 @@ class BayesSearchCV:
     num_cores : int, optional
         Number of cores to use when fitting a given parameter set. Should be
         set to <= `cv`. Defaults to 1.
+    sample_weight_in_val : bool, optional
+        Whether the `sample_weight` should be used when calculating the 
+        `metric` on the validation fold. If True, the `sample_weight` is used.
+        Defaults to False.
     verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : shows the
         overall progress of the optimisation process. Defaults to 0.
@@ -92,6 +96,7 @@ class BayesSearchCV:
                  refit=True,
                  algorithm=tpe.suggest,
                  error_score='raise',
+                 sample_weight_in_val=False,
                  num_cores=1,
                  verbose=0,
                  **kwargs) -> None:
@@ -108,6 +113,7 @@ class BayesSearchCV:
         self.refit = refit
         self.algorithm = algorithm
         self.error_score = error_score
+        self.sample_weight_in_val = sample_weight_in_val
         self.num_cores = num_cores
         self.verbose = verbose
         self.kwargs = kwargs
@@ -246,7 +252,7 @@ class BayesSearchCV:
         with Parallel(n_jobs=self.num_cores) as parallel:
             scores_over_folds = parallel(delayed(self._fit_predict_on_fold)(
                 self.metric, self.error_score, datasets, pipeline, params_iter,
-                fold_idx) for fold_idx, datasets in cv_datasets.items()
+                fold_idx, self.sample_weight_in_val) for fold_idx, datasets in cv_datasets.items()
             )
         scores_over_folds = np.array(scores_over_folds)
         mean_score = scores_over_folds.mean()
@@ -366,7 +372,8 @@ class BayesSearchCV:
                              datasets: list,
                              pipeline: LinearPipeline,
                              params_iter: dict,
-                             fold_idx: int) -> float:
+                             fold_idx: int,
+                             sample_weight_in_val: bool) -> float:
         """
         Tries to to fit the pipeline (using a given parameter set) on the
         training set, then apply it to the validation set. If no rules remain
@@ -388,7 +395,12 @@ class BayesSearchCV:
             sample_weight_val = utils.return_dataset_if_dict(
                 step_tag=pipeline.steps_[-1][0], df=sample_weight_val
             )
-            fold_score = metric(y_pred_val, y_val, sample_weight_val)
+            # If sample_weight_in_val is True, use the sample_weight_val in the
+            # metric calculation
+            if sample_weight_in_val:
+                fold_score = metric(y_pred_val, y_val, sample_weight_val)
+            else:
+                fold_score = metric(y_pred_val, y_val)
         except (DataFrameSizeError, NoRulesError):
             if error_score == 'raise':
                 raise Exception(

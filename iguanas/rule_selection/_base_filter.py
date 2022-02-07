@@ -4,6 +4,7 @@ Base rule filter class. Main filter classes inherit from this one.
 from iguanas.rules.rules import Rules
 from iguanas.utils.typing import PandasDataFrameType
 from typing import List
+from copy import deepcopy
 
 
 class _BaseFilter:
@@ -25,7 +26,7 @@ class _BaseFilter:
                  rules: Rules) -> None:
 
         self.rules_to_keep = rules_to_keep
-        self.rules = rules
+        self.rules = deepcopy(rules)
 
     def transform(self, X_rules: PandasDataFrameType) -> PandasDataFrameType:
         """

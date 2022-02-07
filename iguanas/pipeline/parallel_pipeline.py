@@ -26,6 +26,8 @@ class ParallelPipeline(_BasePipeline):
     ----------
     steps_ : List[Tuple[str, object]]
         The steps corresponding to the fitted pipeline.
+    rule_names : List[str]
+        The names of the rules in the concatenated output.
     """
 
     def __init__(self,
@@ -71,6 +73,7 @@ class ParallelPipeline(_BasePipeline):
                 )
             )
         X_rules = pd.concat(X_rules_list, axis=1)
+        self.rule_names = X_rules.columns.tolist()
         return X_rules
 
     def transform(self,
@@ -106,4 +109,5 @@ class ParallelPipeline(_BasePipeline):
                 )
             )
         X_rules = pd.concat(X_rules_list, axis=1)
+        self.rule_names = X_rules.columns.tolist()
         return X_rules

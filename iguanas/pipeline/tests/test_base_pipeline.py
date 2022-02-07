@@ -470,19 +470,13 @@ def test_get_params(_instantiate_classes):
         ]
     )
     lp_params = lp.get_params()
-    param_classes = [
-        "<class 'sklearn.ensemble._forest.RandomForestClassifier'>",
-        "<class 'method'>",
-        "<class 'iguanas.correlation_reduction.agglomerative_clustering_reducer.AgglomerativeClusteringReducer'>",
-        "<class 'iguanas.pipeline.class_accessor.ClassAccessor'>"
-    ]
-    for step_tag, step in (('rg_dt', rg_dt), ('ro', ro), ('sf', sf), ('cf', cf), ('rbso', rbso)):
-        for param, param_value in step.__dict__.items():
-            if str(type(param_value)) in param_classes:
-                assert str(type(lp_params[step_tag][param])) == str(
-                    type(step.__dict__[param]))
-            else:
-                assert lp_params[step_tag][param] == step.__dict__[param]
+    assert len(lp_params) == 6
+    assert lp_params['rg_dt'].keys() == rg_dt.__dict__.keys()
+    assert lp_params['ro'].keys() == ro.__dict__.keys()
+    assert lp_params['pp'].keys() == pp.__dict__.keys()
+    assert lp_params['sf'].keys() == sf.__dict__.keys()
+    assert lp_params['cf'].keys() == cf.__dict__.keys()
+    assert lp_params['rbso'].keys() == rbso.__dict__.keys()
 
 
 def test_pipeline_fit(_create_data, _instantiate_classes):

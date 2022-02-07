@@ -38,13 +38,13 @@ class _BasePipeline:
         pipeline_params = {}
         steps_ = self.steps if self.steps_ is None else self.steps_
         for step_tag, step in steps_:
-            # If step inherits from _BasePipeline, call its get_params
+            step_param_dict = deepcopy(step.__dict__)
+            pipeline_params[step_tag] = step_param_dict
+            # If step inherits from _BasePipeline, call its get_params to get
+            # the parameters each class in the pipeline
             if issubclass(step.__class__, _BasePipeline):
                 step_param_dict = step.get_params()
                 pipeline_params.update(step_param_dict)
-            else:
-                step_param_dict = deepcopy(step.__dict__)
-                pipeline_params[step_tag] = step_param_dict
         return pipeline_params
 
     def _update_kwargs(self, params: dict) -> None:

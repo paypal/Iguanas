@@ -94,14 +94,14 @@ def test_fit_transform(_create_data, _instantiate_classes):
     rg_fraud.rule_name_prefix = 'Fraud'
     rg_nonfraud = deepcopy(rg_dt)
     rg_nonfraud.rule_name_prefix = 'NonFraud'
-    pp_fraud = ParallelPipeline(
+    pp = ParallelPipeline(
         steps=[
             ('rg_fraud', rg_fraud),
             ('rg_nonfraud', rg_nonfraud)
         ],
     )
     # Test fit_transform
-    X_rules = pp_fraud.fit_transform(
+    X_rules = pp.fit_transform(
         X={
             'rg_fraud': X[['A', 'B']],
             'rg_nonfraud': X[['C', 'D']]
@@ -112,8 +112,9 @@ def test_fit_transform(_create_data, _instantiate_classes):
         })
     assert X_rules.sum().sum() == 845
     assert X_rules.shape == (100, 56)
+    assert len(pp.rule_names) == 56
     # Test transform
-    X_rules = pp_fraud.transform(
+    X_rules = pp.transform(
         X={
             'rg_fraud': X[['A', 'B']],
             'rg_nonfraud': X[['C', 'D']]
@@ -121,3 +122,4 @@ def test_fit_transform(_create_data, _instantiate_classes):
     )
     assert X_rules.sum().sum() == 845
     assert X_rules.shape == (100, 56)
+    assert len(pp.rule_names) == 56
