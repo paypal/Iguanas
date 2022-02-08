@@ -4,6 +4,7 @@ from iguanas.pipeline._base_pipeline import _BasePipeline
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.utils.types import PandasDataFrame, PandasSeries, Dictionary
 import iguanas.utils.utils as utils
+from iguanas.rules import Rules
 import pandas as pd
 
 
@@ -66,13 +67,16 @@ class ParallelPipeline(_BasePipeline):
                 sample_weight, 'sample_weight', [PandasSeries, Dictionary])
         self.steps_ = deepcopy(self.steps)
         X_rules_list = []
+        rules_list = []
         for step_tag, step in self.steps_:
             X_rules_list.append(
                 self._pipeline_fit_transform(
                     step_tag, step, X, y, sample_weight
                 )
             )
+            rules_list.append(step.rules)
         X_rules = pd.concat(X_rules_list, axis=1)
+        self.rules = self._concat_rules(rules_list)
         self.rule_names = X_rules.columns.tolist()
         return X_rules
 
@@ -102,12 +106,31 @@ class ParallelPipeline(_BasePipeline):
 
         utils.check_allowed_types(X, 'X', [PandasDataFrame, Dictionary])
         X_rules_list = []
+        rules_list = []
         for step_tag, step in self.steps_:
             X_rules_list.append(
                 self._pipeline_transform(
                     step_tag, step, X
                 )
             )
+            rules_list.append(step.rules)
         X_rules = pd.concat(X_rules_list, axis=1)
+        self.rules = self._concat_rules(rules_list)
         self.rule_names = X_rules.columns.tolist()
         return X_rules
+
+    @staticmethod
+    def _concat_rules(rules_list: List[Rules]):
+        if all([rule is None for rule in rules_list]):
+            return None
+        elif None in rules_list:
+            raise TypeError(
+                """
+                One or more of the classes in the pipeline has `None` assigned to 
+                the `rules` parameter, whereas other classes in the pipeline have 
+                the `rules` parameter populated. Either set all to `None` or 
+                provide the `rules` parameter for all classes.
+                """
+            )
+        else:
+            return sum(rules_list)

@@ -123,7 +123,7 @@ def test_fit(create_data, rg_instantiated):
         pd.testing.assert_series_equal(X_rules.sum(), exp_results[i])
         assert rg.rule_names == exp_results[i].index.tolist() == list(
             rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == list(
-            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys())
+                rg.rules.rule_strings.keys())
 
 
 def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):

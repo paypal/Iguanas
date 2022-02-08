@@ -96,6 +96,13 @@ class Rules(RuleApplier):
             lambda_kwargs=lambda_kwargs, lambda_args=lambda_args
         )
 
+    def __radd__(self, other):
+        # If first element of iterable, just return self
+        if other == 0:
+            return self
+        else:
+            return self.__add__(other)
+
     def __repr__(self):
         rules_lens = [
             len(self.rule_dicts),
