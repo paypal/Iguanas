@@ -1,5 +1,4 @@
 
-from matplotlib.lines import Line2D
 import pytest
 import pandas as pd
 import numpy as np
