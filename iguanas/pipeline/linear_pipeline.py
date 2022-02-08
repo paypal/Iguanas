@@ -35,6 +35,9 @@ class LinearPipeline(_BasePipeline):
     ----------
     steps_ : List[Tuple[str, object]]
         The steps corresponding to the fitted pipeline.
+    rules : Rules
+        The Rules object containing the rules produced from fitting the 
+        pipeline.
     """
 
     def __init__(self,
@@ -86,6 +89,7 @@ class LinearPipeline(_BasePipeline):
             step_tag=final_step_tag, step=final_step, X=X, y=y,
             sample_weight=sample_weight
         )
+        self.rules = final_step.rules
 
     def predict(self, X: Union[PandasDataFrameType, dict]) -> PandasSeriesType:
         """

@@ -19,11 +19,15 @@ class _BasePipeline:
     ----------
     steps_ : List[Tuple[str, object]]
         The steps corresponding to the fitted pipeline.
+    rules : Rules
+        The Rules object containing the rules produced from fitting the 
+        pipeline.
     """
 
     def __init__(self, steps: List[Tuple[str, object]]) -> None:
         self.steps = steps
         self.steps_ = None
+        self.rules = None
 
     def get_params(self) -> dict:
         """

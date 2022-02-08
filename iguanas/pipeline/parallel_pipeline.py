@@ -29,6 +29,9 @@ class ParallelPipeline(_BasePipeline):
         The steps corresponding to the fitted pipeline.
     rule_names : List[str]
         The names of the rules in the concatenated output.
+    rules : Rules
+        The Rules object containing the rules produced from fitting the 
+        pipeline.
     """
 
     def __init__(self,
