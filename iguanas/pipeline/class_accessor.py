@@ -53,6 +53,3 @@ class ClassAccessor:
         raise ValueError(
             f"There are no steps in `pipeline` corresponding to `class_tag`='{self.class_tag}'"
         )
-
-    def copy(self):
-        return deepcopy(self)

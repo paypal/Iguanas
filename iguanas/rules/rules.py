@@ -86,6 +86,16 @@ class Rules(RuleApplier):
             self, rule_strings=self.rule_strings,
         )
 
+    def __add__(self, other):
+        rule_dicts = {**self.rule_dicts, **other.rule_dicts}
+        rule_strings = {**self.rule_strings, **other.rule_strings}
+        lambda_kwargs = {**self.lambda_kwargs, **other.lambda_kwargs}
+        lambda_args = {**self.lambda_args, **other.lambda_args}
+        return Rules(
+            rule_dicts=rule_dicts, rule_strings=rule_strings,
+            lambda_kwargs=lambda_kwargs, lambda_args=lambda_args
+        )
+
     def __repr__(self):
         rules_lens = [
             len(self.rule_dicts),

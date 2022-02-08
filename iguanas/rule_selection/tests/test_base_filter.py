@@ -28,7 +28,7 @@ def test_transform(_create_data):
     bf = _BaseFilter(rules_to_keep=['A'], rules=rules)
     X_rules_ = bf.transform(X_rules)
     pd.testing.assert_frame_equal(X_rules_, X_rules[['A']])
-    assert bf.rule_strings == {'A': "X['a']>1"}
+    assert bf.rules.rule_strings == {'A': "X['a']>1"}
 
 
 def test_fit_transform(_create_data):
@@ -51,4 +51,4 @@ def test_fit_transform(_create_data):
     bf.fit = lambda X_rules, y, sample_weight: None
     X_rules_ = bf.fit_transform(X_rules)
     pd.testing.assert_frame_equal(X_rules_, X_rules[['A']])
-    assert bf.rule_strings == {'A': "X['a']>1"}
+    assert bf.rules.rule_strings == {'A': "X['a']>1"}

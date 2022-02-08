@@ -151,6 +151,13 @@ def _rule_lambdas_with_args():
     return rule_lambdas, lambda_args
 
 
+def test_add():
+    rules1 = Rules(rule_strings={'Rule1': "X['A']>0"})
+    rules2 = Rules(rule_strings={'Rule2': "X['B']>0"})
+    rules = rules1 + rules2
+    assert rules.rule_strings == {'Rule1': "X['A']>0", 'Rule2': "X['B']>0"}
+
+
 def test_repr(_rule_strings_pandas):
     rule_strings_pandas = _rule_strings_pandas
     r = Rules(rule_strings=rule_strings_pandas)
