@@ -1587,7 +1587,7 @@ def _fit(rule_lambdas, lambda_kwargs, X, y, sample_weight, metric, exp_rule_stri
             else:
                 X_rules = ro.fit(X=X, y=y, sample_weight=sample_weight)
             assert ro.__repr__() == 'DirectSearchOptimiser object with 5 rules optimised'
-            assert ro.rule_strings == exp_rule_strings[method]
+            assert ro.rule_strings == ro.rules.rule_strings == exp_rule_strings[method]
             assert ro.rule_names == list(exp_rule_strings[method].keys())
             assert X_rules.mean().to_dict() == exp_X_rules_mean[method]
             assert ro.orig_rule_performances == exp_orig_rule_performances

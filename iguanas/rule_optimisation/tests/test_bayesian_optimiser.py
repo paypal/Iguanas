@@ -200,7 +200,7 @@ def test_fit_and_fit_transform(_create_data, _instantiate, _expected_results, _e
             assert ro.__repr__() == 'BayesianOptimiser object with 5 rules optimised'
             pd.testing.assert_series_equal(
                 X_rules.mean().sort_index(), exp_X_rules.sort_index())
-            assert ro.rule_strings == exp_opt_rule_strings
+            assert ro.rule_strings == ro.rules.rule_strings == exp_opt_rule_strings
             assert ro.rule_names == list(exp_opt_rule_strings.keys())
             assert ro.orig_rule_performances == exp_orig_rule_performances
             assert ro.opt_rule_performances == exp_opt_rule_performances
@@ -225,7 +225,7 @@ def test_fit_weighted(_create_data, _instantiate, _expected_results,
         X_rules = ro.fit(X=X, y=y, sample_weight=sample_weight)
         pd.testing.assert_series_equal(
             X_rules.mean().sort_index(), exp_X_rules.sort_index())
-        assert ro.rule_strings == exp_opt_rule_strings
+        assert ro.rule_strings == ro.rules.rule_strings == exp_opt_rule_strings
         assert ro.rule_names == list(exp_opt_rule_strings.keys())
         assert ro.orig_rule_performances == exp_orig_rule_performances
         assert ro.opt_rule_performances == exp_opt_rule_performances
@@ -252,7 +252,7 @@ def test_fit_unlabelled(_create_data, _instantiate,
         X_rules = ro.fit(X=X)
         pd.testing.assert_series_equal(
             X_rules.mean().sort_index(), exp_X_rules.sort_index())
-        assert ro.rule_strings == exp_opt_rule_strings
+        assert ro.rule_strings == ro.rules.rule_strings == exp_opt_rule_strings
         assert ro.rule_names == list(exp_opt_rule_strings.keys())
         assert ro.orig_rule_performances == exp_orig_rule_performances
         assert ro.opt_rule_performances == exp_opt_rule_performances

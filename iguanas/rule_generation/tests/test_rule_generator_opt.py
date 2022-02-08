@@ -264,7 +264,8 @@ def test_fit(create_data, rg_instantiated):
         assert X_rules.shape == exp_results[i][0]
         assert X_rules.sum().sum() == exp_results[i][1]
         assert rg.rule_names == X_rules.columns.tolist() == list(
-            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys())
+            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == list(
+                rg.rules.rule_strings.keys())
 
 
 def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated, fs_instantiated):
@@ -280,7 +281,8 @@ def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated, fs_insta
         assert X_rules.shape == exp_results[i][0]
         assert X_rules.sum().sum() == exp_results[i][1]
         assert rg.rule_names == X_rules.columns.tolist() == list(
-            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys())
+            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == list(
+                rg.rules.rule_strings.keys())
         assert len(
             [l for l in list(rg.rule_strings.values()) if "X['email_alpharatio']>" in l]) == 0
         assert len(
@@ -313,7 +315,8 @@ def test_fit_target_feat_corr_types_provided(create_data, rg_instantiated, fs_in
         assert X_rules.shape == exp_results[i][0]
         assert X_rules.sum().sum() == exp_results[i][1]
         assert rg.rule_names == X_rules.columns.tolist() == list(
-            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys())
+            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == list(
+                rg.rules.rule_strings.keys())
         assert len(
             [l for l in list(rg.rule_strings.values()) if "X['email_alpharatio']>" in l]) == 0
         assert len(

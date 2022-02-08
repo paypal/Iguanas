@@ -109,16 +109,13 @@ class ParallelPipeline(_BasePipeline):
 
         utils.check_allowed_types(X, 'X', [PandasDataFrame, Dictionary])
         X_rules_list = []
-        rules_list = []
         for step_tag, step in self.steps_:
             X_rules_list.append(
                 self._pipeline_transform(
                     step_tag, step, X
                 )
             )
-            rules_list.append(step.rules)
         X_rules = pd.concat(X_rules_list, axis=1)
-        self.rules = self._concat_rules(rules_list)
         self.rule_names = X_rules.columns.tolist()
         return X_rules
 

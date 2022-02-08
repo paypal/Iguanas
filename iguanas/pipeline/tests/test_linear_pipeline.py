@@ -357,6 +357,7 @@ def test_fit_predict_use_init_data(_create_data, _instantiate_classes):
     X_rules = lp.fit_transform(X, y)
     assert lp.get_params()['ro']['rule_strings'] == expected_rule_strings
     assert X_rules.sum().sum() == 871
+    assert lp.rules.rule_strings == expected_rule_strings
     # sample_weight provided
     lp.fit(X, y, sample_weight)
     assert lp.get_params()[
@@ -365,3 +366,4 @@ def test_fit_predict_use_init_data(_create_data, _instantiate_classes):
     assert lp.get_params()[
         'ro']['rule_strings'] == expected_rule_strings_weights
     assert X_rules.sum().sum() == 1178
+    assert lp.rules.rule_strings == expected_rule_strings_weights
