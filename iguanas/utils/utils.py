@@ -593,7 +593,24 @@ def is_type(x: object, types: List[str]) -> bool:
     return x_type in types
 
 
-def return_dataset_if_dict(step_tag, df):
+def return_dataset_if_dict(step_tag: str,
+                           df: Union[dict, PandasDataFrameType]) -> PandasDataFrameType:
+    """
+    If `df` is a dict, then the dataframe for the given step in a pipeline is
+    extracted from the dict; else, just return `df`.
+
+    Parameters
+    ----------
+    step_tag : str
+        The tag corresponding to the pipeline step.
+    df : Union[dict, PandasDataFrameType]
+        The dataset or dictionary of datasets.
+
+    Returns
+    -------
+    PandasDataFrameType
+        The dataset for the pipeline step.
+    """
     if isinstance(df, dict) and step_tag in df.keys():
         return df[step_tag]
     else:

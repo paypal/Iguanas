@@ -58,8 +58,16 @@ class RuleGeneratorDTSpark(_BaseGenerator):
     rule_strings : Dict[str, str]
         The generated rules, defined using the standard Iguanas string 
         format (values) and their names (keys).   
+    rule_lambdas : Dict[str, object]
+        The generated rules, defined using the standard Iguanas lambda 
+        expression format (values) and their names (keys).   
+    lambda_kwargs : Dict[str, object]
+        The keyword arguments for the generated rules defined using the 
+        standard Iguanas lambda expression format.
+    rules : Rules
+        The Rules object containing the generated rules.
     rule_names : List[str]
-        The names of the generated rules. 
+        The names of the generated rules.
     """
 
     def __init__(self, metric: Callable,
@@ -145,13 +153,7 @@ class RuleGeneratorDTSpark(_BaseGenerator):
             tree_ensemble=trained_tree_ensemble, columns_int=columns_int,
             columns_cat=columns_cat,
         )
-        self.rule_names = list(self.rule_strings.keys())
-        # Convert generated rules into lambda format. Set rule_lambdas to an
-        # empty dict first, prevents errors when running fit more than once.
-        self.rule_lambdas = {}
-        self.rule_lambdas = self.as_rule_lambdas(
-            as_numpy=False, with_kwargs=True
-        )
+        self._generate_other_rule_formats()
         return X_rules
 
     def _extract_rules_from_ensemble(self, X: KoalasDataFrameType, y: KoalasSeriesType,

@@ -105,3 +105,15 @@ def test_remove_misaligned_conditions(rg_instantiated):
     )
     assert all([a == b for a, b in zip(
         cleaned_branch_conditions, expected_result)])
+
+
+def test_generate_other_rule_formats(rg_instantiated):
+    rg, _ = rg_instantiated
+    rg.rule_strings = {'Rule1': "(X['A']>1)"}
+    rg._generate_other_rule_formats()
+    assert rg.rule_names == ['Rule1']
+    assert rg.rule_lambdas['Rule1'](
+        **rg.lambda_kwargs['Rule1']) == "(X['A']>1)"
+    assert rg.rules.rule_strings == {'Rule1': "(X['A']>1)"}
+    assert rg.rules.rule_lambdas['Rule1'](
+        **rg.rules.lambda_kwargs['Rule1']) == "(X['A']>1)"

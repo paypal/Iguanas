@@ -284,3 +284,20 @@ class _BaseOptimiser(Rules):
                 opt_rule_performances[rule_name] = orig_rule_performances[rule_name]
                 opt_X_rules[rule_name] = orig_X_rules[rule_name]
         return opt_rule_strings, opt_rule_performances, opt_X_rules
+
+    def _generate_other_rule_formats(self) -> None:
+        """Generates other rule formats from `self.rule_strings`"""
+
+        # Generate rule names
+        self.rule_names = list(self.rule_strings.keys())
+        # Convert generated rules into lambda format. Set rule_lambdas to an
+        # empty dict first, prevents errors when running fit more than once.
+        self.rule_lambdas = {}
+        self.rule_lambdas = self.as_rule_lambdas(
+            as_numpy=False, with_kwargs=True
+        )
+        # Generate rules object
+        self.rules = Rules(
+            rule_strings=self.rule_strings, rule_lambdas=self.rule_lambdas,
+            lambda_kwargs=self.lambda_kwargs
+        )

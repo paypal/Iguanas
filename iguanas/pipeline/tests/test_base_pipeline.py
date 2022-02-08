@@ -535,8 +535,8 @@ def test_pipeline_fit(_create_data, _instantiate_classes):
 
 def test_check_accessor(_instantiate_classes):
     _, _, sf, _, rbso = _instantiate_classes
-    ca = ClassAccessor('sf', 'rules_to_keep')
     sf.rules_to_keep = ['Rule1']
+    ca = ClassAccessor('sf', 'rules_to_keep')
     # Check when ClassAccessor is parameter
     rbso = RBSOptimiser(
         pipeline=RBSPipeline(
@@ -556,14 +556,15 @@ def test_check_accessor(_instantiate_classes):
         lp._check_accessor(step)
     assert rbso.pos_pred_rules == ['Rule1']
     # Check when ClassAccessor is within list (that is a parameter)
+    ca = ClassAccessor(
+        class_tag='sf',
+        class_attribute='rules_to_keep'
+    )
     rbso = RBSOptimiser(
         pipeline=RBSPipeline(
             config=[
                 [
-                    0, ClassAccessor(
-                        class_tag='sf',
-                        class_attribute='rules_to_keep'
-                    )
+                    0, ca
                 ]
             ],
             final_decision=0,
