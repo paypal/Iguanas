@@ -479,6 +479,43 @@ def test_get_params(_instantiate_classes):
     assert lp_params['rbso'].keys() == rbso.__dict__.keys()
 
 
+def test_update_kwargs(_instantiate_classes):
+    rg_dt, ro, sf, _, _ = _instantiate_classes
+    pp = ParallelPipeline(
+        steps=[
+            ('rg_dt', rg_dt),
+            ('ro', ro)
+        ]
+    )
+    lp = LinearPipeline(
+        steps=[
+            ('pp', pp),
+            ('sf', sf)
+        ]
+    )
+    # Test updating step in parent pipeline
+    lp._update_kwargs({
+        'sf': {
+            'threshold': 1
+        }
+    })
+    assert lp.steps[1][1].threshold == 1
+    # Test updating step in child pipeline
+    lp._update_kwargs({
+        'rg_dt': {
+            'n_total_conditions': 20
+        }
+    })
+    assert lp.steps[0][1].steps[0][1].n_total_conditions == 20
+    # Test error
+    with pytest.raises(ValueError, match="Parameter `not_existing` not found in keyword arguments for class in step `rg_dt`"):
+        lp._update_kwargs({
+            'rg_dt': {
+                'not_existing': 20
+            }
+        })
+
+
 def test_pipeline_fit(_create_data, _instantiate_classes):
     X, y, sample_weight = _create_data
     rg_dt, _, _, _, _ = _instantiate_classes
