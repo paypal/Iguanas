@@ -68,6 +68,12 @@ class _BasePipeline:
             if issubclass(step.__class__, _BasePipeline):
                 step._update_kwargs(params)
             if step_tag in params.keys():
+                # If a parameter in `params` is not in the keyword arguments
+                # of the class (excl when kwargs is present), raise exception
+                for param in params[step_tag].keys():
+                    if param not in step.__dict__.keys() and 'kwargs' not in step.__dict__.keys():
+                        raise ValueError(
+                            f'Parameter `{param}` not found in keyword arguments for class in step `{step_tag}`')
                 step.__dict__.update(params[step_tag])
 
     def _pipeline_fit(self,
