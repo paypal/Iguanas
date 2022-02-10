@@ -12,7 +12,7 @@ def _create_data():
         'Approve2': [0, 1, 0, 0, 0],
         'Decline': [1, 1, 1, 0, 0],
         'Approve3': [1, 1, 1, 1, 0],
-    })
+    }, index=['a', 'b', 'c', 'd', 'e'])
     return X
 
 
@@ -33,13 +33,16 @@ def _instantiate():
 
 
 def test_predict(_create_data, _instantiate):
-    y_pred_exp = pd.Series([0, 0, 1, 0, 1])
+    y_pred_exp = pd.Series([0, 0, 1, 0, 1], index=['a', 'b', 'c', 'd', 'e'])
     X = _create_data
     rbsp = _instantiate
     y_pred = rbsp.predict(X)
     assert all(y_pred_exp == y_pred)
+    assert y_pred.name is None
+    # Test predict after class already instantiated
     y_pred = rbsp.predict(X)
     assert all(y_pred_exp == y_pred)
+    assert y_pred.name is None
 
 
 def test_get_stage_level_preds(_create_data, _instantiate):
@@ -73,7 +76,7 @@ def test_get_stage_level_preds(_create_data, _instantiate):
 
 
 def test_get_pipeline_pred(_instantiate):
-    y_pred_exp = pd.Series([0, 0, 1, 0, 1])
+    y_pred_exp = pd.Series([0, 0, 1, 0, 1], index=['a', 'b', 'c', 'd', 'e'])
     stage_level_preds = pd.DataFrame([
         [-1, 1, -1],
         [-1, 1, -1],
@@ -86,8 +89,10 @@ def test_get_pipeline_pred(_instantiate):
     ]
     )
     rbsp = _instantiate
-    y_pred = rbsp._get_pipeline_pred(stage_level_preds, 5)
+    y_pred = rbsp._get_pipeline_pred(
+        stage_level_preds, ['a', 'b', 'c', 'd', 'e'])
     assert all(y_pred == y_pred_exp)
+    assert y_pred.name is None
 
 
 def test_errors(_create_data):
