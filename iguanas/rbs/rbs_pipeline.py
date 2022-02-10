@@ -65,10 +65,8 @@ class RBSPipeline:
         """
 
         utils.check_allowed_types(X_rules, 'X_rules', [PandasDataFrame])
-        # num_rows = len(X_rules)
         stage_level_preds = self._get_stage_level_preds(X_rules, self.config)
-        y_pred = self._get_pipeline_pred(
-            stage_level_preds, X_rules.index)  # num_rows)
+        y_pred = self._get_pipeline_pred(stage_level_preds, X_rules.index)
         return y_pred
 
     @staticmethod
@@ -99,13 +97,11 @@ class RBSPipeline:
         return stage_level_preds
 
     def _get_pipeline_pred(self, stage_level_preds: PandasDataFrameType,
-                           #    num_rows: int
-                           idx
+                           idx: list
                            ) -> PandasSeriesType:
         """Returns the predictions of the pipeline"""
 
         if stage_level_preds is None:
-            # return np.ones(num_rows) * self.final_decision
             return pd.Series(np.ones(len(idx)) * self.final_decision, index=idx)
         for stage_idx in range(0, stage_level_preds.shape[1]):
             if stage_idx == 0:
