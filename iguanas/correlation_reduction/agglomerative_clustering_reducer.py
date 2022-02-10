@@ -69,6 +69,12 @@ class AgglomerativeClusteringReducer:
         self.print_clustermap = print_clustermap
         self.columns_to_keep = []
 
+    def __repr__(self):
+        if self.columns_to_keep:
+            return f'AgglomerativeClusteringReducer object with {len(self.columns_to_keep)} columns to keep'
+        else:
+            return f'AgglomerativeClusteringReducer(threshold={self.threshold}, strategy={self.strategy}, similarity_function={self.similarity_function}, metric={self.metric}, print_clustermap={self.print_clustermap})'
+
     def fit(self, X: PandasDataFrameType, y=None, sample_weight=None) -> None:
         """
         Calculates the similar columns in the dataset X.

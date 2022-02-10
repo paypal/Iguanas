@@ -167,7 +167,22 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
             'threshold': UniformFloat(0, 1),
         },
         'cf': {
-            'threshold': UniformFloat(0, 1)
+            'correlation_reduction_class': Choice(
+                [
+                    AgglomerativeClusteringReducer(
+                        threshold=0.9,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    ),
+                    AgglomerativeClusteringReducer(
+                        threshold=0.95,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    )
+                ]
+            )
         },
         'gf': {
             'metric': Choice([p.fit, f1.fit])
@@ -198,7 +213,7 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
         bs.fit(X, y)
         assert bs.best_score == 0.22857142857142856
         assert bs.best_index == 2
-        assert bs.best_params['cf']['threshold'] == 0.08174388306233471
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.95
         assert str(bs.best_params['gf']['metric']
                    ) == '<bound method Precision.fit of Precision>'
         assert bs.best_params['rbs']['n_iter'] == 15.0
@@ -216,42 +231,42 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
         # sample_weight_in_val = False
         bs.sample_weight_in_val = False
         bs.fit(X, y, sample_weight)
-        assert bs.best_score == 0.25
-        assert bs.best_index == 4
-        assert bs.best_params['cf']['threshold'] == 0.1342082233571794
+        assert bs.best_score == 0.22857142857142856
+        assert bs.best_index == 2
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.95
         assert str(bs.best_params['gf']['metric']
-                   ) == '<bound method FScore.fit of FScore with beta=1>'
-        assert bs.best_params['rbs']['n_iter'] == 12.0
-        assert bs.best_params['rg_dt']['n_total_conditions'] == 4.0
+                   ) == '<bound method Precision.fit of Precision>'
+        assert bs.best_params['rbs']['n_iter'] == 15.0
+        assert bs.best_params['rg_dt']['n_total_conditions'] == 5.0
         assert bs.best_params['rg_dt']['target_feat_corr_types'] is None
-        assert bs.best_params['sf']['threshold'] == 0.1474198119511717
+        assert bs.best_params['sf']['threshold'] == 0.2583716619727481
         assert bs.cv_results.shape == (5, 11)
         y_pred = bs.predict(X)
-        assert y_pred.mean() == 0.1
-        assert f1.fit(y_pred, y) == 0.8000000000000002
+        assert y_pred.mean() == 0.02
+        assert f1.fit(y_pred, y) == 0.33333333333333337
         y_pred = bs.fit_predict(X, y, sample_weight)
-        assert y_pred.mean() == 0.1
-        assert f1.fit(y_pred, y) == 0.8000000000000002
+        assert y_pred.mean() == 0.02
+        assert f1.fit(y_pred, y) == 0.33333333333333337
         # Test fit/predict/fit_predict, sample_weight given and
         # sample_weight_in_val = True
         bs.sample_weight_in_val = True
         bs.fit(X, y, sample_weight)
-        assert bs.best_score == 0.3015873015873016
-        assert bs.best_index == 4
-        assert bs.best_params['cf']['threshold'] == 0.1342082233571794
+        assert bs.best_score == 0.2545454545454546
+        assert bs.best_index == 2
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.95
         assert str(bs.best_params['gf']['metric']
-                   ) == '<bound method FScore.fit of FScore with beta=1>'
-        assert bs.best_params['rbs']['n_iter'] == 12.0
-        assert bs.best_params['rg_dt']['n_total_conditions'] == 4.0
+                   ) == '<bound method Precision.fit of Precision>'
+        assert bs.best_params['rbs']['n_iter'] == 15.0
+        assert bs.best_params['rg_dt']['n_total_conditions'] == 5.0
         assert bs.best_params['rg_dt']['target_feat_corr_types'] is None
-        assert bs.best_params['sf']['threshold'] == 0.1474198119511717
+        assert bs.best_params['sf']['threshold'] == 0.2583716619727481
         assert bs.cv_results.shape == (5, 11)
         y_pred = bs.predict(X)
-        assert y_pred.mean() == 0.1
-        assert f1.fit(y_pred, y, sample_weight) == 0.8421052631578948
+        assert y_pred.mean() == 0.02
+        assert f1.fit(y_pred, y, sample_weight) == 0.33333333333333337
         y_pred = bs.fit_predict(X, y, sample_weight)
-        assert y_pred.mean() == 0.1
-        assert f1.fit(y_pred, y, sample_weight) == 0.8421052631578948
+        assert y_pred.mean() == 0.02
+        assert f1.fit(y_pred, y, sample_weight) == 0.33333333333333337
 
 
 def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
@@ -265,7 +280,22 @@ def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
             'threshold': UniformFloat(0, 1),
         },
         'cf': {
-            'threshold': UniformFloat(0, 1)
+            'correlation_reduction_class': Choice(
+                [
+                    AgglomerativeClusteringReducer(
+                        threshold=0.9,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    ),
+                    AgglomerativeClusteringReducer(
+                        threshold=0.95,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    )
+                ]
+            )
         },
         'gf': {
             'metric': Choice([p.fit, f1.fit])
@@ -298,7 +328,7 @@ def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
         assert bs.best_index == 4
         assert bs.best_params['rg_opt']['n_total_conditions'] == 4.0
         assert bs.best_params['sf']['threshold'] == 0.1474198119511717
-        assert bs.best_params['cf']['threshold'] == 0.1342082233571794
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.95
         assert str(bs.best_params['gf']['metric']
                    ) == '<bound method FScore.fit of FScore with beta=1>'
         assert bs.best_params['rbs']['n_iter'] == 12.0
@@ -317,11 +347,11 @@ def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
         # sample_weight_in_val = False
         bs.sample_weight_in_val = False
         bs.fit(X, y, sample_weight)
-        assert bs.best_score == 0.2685185185185185
+        assert bs.best_score == 0.27777777777777773
         assert bs.best_index == 4
         assert bs.best_params['rg_opt']['n_total_conditions'] == 4.0
         assert bs.best_params['sf']['threshold'] == 0.1474198119511717
-        assert bs.best_params['cf']['threshold'] == 0.1342082233571794
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.95
         assert str(bs.best_params['gf']['metric']
                    ) == '<bound method FScore.fit of FScore with beta=1>'
         assert bs.best_params['rbs']['n_iter'] == 12.0
@@ -340,11 +370,11 @@ def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
         # sample_weight_in_val = True
         bs.sample_weight_in_val = True
         bs.fit(X, y, sample_weight)
-        assert bs.best_score == 0.3619909502262444
+        assert bs.best_score == 0.3705379587732529
         assert bs.best_index == 4
         assert bs.best_params['rg_opt']['n_total_conditions'] == 4.0
         assert bs.best_params['sf']['threshold'] == 0.1474198119511717
-        assert bs.best_params['cf']['threshold'] == 0.1342082233571794
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.95
         assert str(bs.best_params['gf']['metric']
                    ) == '<bound method FScore.fit of FScore with beta=1>'
         assert bs.best_params['rbs']['n_iter'] == 12.0
@@ -372,7 +402,22 @@ def test_fit_predict_rule_opt(_create_data, _instantiate_classes):
             'threshold': UniformFloat(0, 1),
         },
         'cf': {
-            'threshold': UniformFloat(0, 1)
+            'correlation_reduction_class': Choice(
+                [
+                    AgglomerativeClusteringReducer(
+                        threshold=0.9,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    ),
+                    AgglomerativeClusteringReducer(
+                        threshold=0.95,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    )
+                ]
+            )
         },
         'gf': {
             'metric': Choice([p.fit, f1.fit])
@@ -403,7 +448,7 @@ def test_fit_predict_rule_opt(_create_data, _instantiate_classes):
         bs.fit(X, y)
         assert bs.best_score == 0.09042145593869733
         assert bs.best_index == 9
-        assert bs.best_params['cf']['threshold'] == 0.933434993006217
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.9
         assert str(bs.best_params['gf']['metric']
                    ) == '<bound method FScore.fit of FScore with beta=1>'
         assert bs.best_params['rbs']['n_iter'] == 13.0
@@ -423,7 +468,7 @@ def test_fit_predict_rule_opt(_create_data, _instantiate_classes):
         bs.fit(X, y, sample_weight)
         assert bs.best_score == 0.1660486960820665
         assert bs.best_index == 9
-        assert bs.best_params['cf']['threshold'] == 0.933434993006217
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.9
         assert str(bs.best_params['gf']['metric']
                    ) == '<bound method FScore.fit of FScore with beta=1>'
         assert bs.best_params['rbs']['n_iter'] == 13.0
@@ -443,7 +488,7 @@ def test_fit_predict_rule_opt(_create_data, _instantiate_classes):
         bs.fit(X, y, sample_weight)
         assert bs.best_score == 0.2756485534322622
         assert bs.best_index == 9
-        assert bs.best_params['cf']['threshold'] == 0.933434993006217
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.9
         assert str(bs.best_params['gf']['metric']
                    ) == '<bound method FScore.fit of FScore with beta=1>'
         assert bs.best_params['rbs']['n_iter'] == 13.0
@@ -495,10 +540,40 @@ def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
             'threshold': UniformFloat(0, 1)
         },
         'cf_fraud': {
-            'threshold': UniformFloat(0, 1)
+            'correlation_reduction_class': Choice(
+                [
+                    AgglomerativeClusteringReducer(
+                        threshold=0.9,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    ),
+                    AgglomerativeClusteringReducer(
+                        threshold=0.95,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    )
+                ]
+            )
         },
         'cf_nonfraud': {
-            'threshold': UniformFloat(0, 1)
+            'correlation_reduction_class': Choice(
+                [
+                    AgglomerativeClusteringReducer(
+                        threshold=0.9,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    ),
+                    AgglomerativeClusteringReducer(
+                        threshold=0.95,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    )
+                ]
+            )
         },
     }
     # RBSOptimiser
@@ -592,16 +667,26 @@ def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
             'rbso': y
         }
     )
-    assert bs.best_score == 0.30071154898741104
+    assert bs.best_score == 0.21543016370602575
     assert bs.best_index == 3
-    assert bs.best_params == {
-        'cf_fraud': {'threshold': 0.6420746106206111},
-        'cf_nonfraud': {'threshold': 0.34212702531355066},
-        'rg_fraud': {'n_total_conditions': 2.0, 'target_feat_corr_types': None},
-        'rg_nonfraud': {'n_total_conditions': 5.0, 'target_feat_corr_types': None},
-        'sf_fraud': {'threshold': 0.05789784369353024},
-        'sf_nonfraud': {'threshold': 0.5286917420754508}
+    # assert bs.best_params == {
+    #     'cf_fraud': {'threshold': 0.6420746106206111},
+    #     'cf_nonfraud': {'threshold': 0.34212702531355066},
+    #     'rg_fraud': {'n_total_conditions': 2.0, 'target_feat_corr_types': None},
+    #     'rg_nonfraud': {'n_total_conditions': 5.0, 'target_feat_corr_types': None},
+    #     'sf_fraud': {'threshold': 0.05789784369353024},
+    #     'sf_nonfraud': {'threshold': 0.5286917420754508}
+    # }
+    assert bs.best_params['cf_fraud']['correlation_reduction_class'].threshold == 0.95
+    assert bs.best_params['cf_nonfraud']['correlation_reduction_class'].threshold == 0.9
+    assert bs.best_params['rg_fraud'] == {
+        'n_total_conditions': 2.0, 'target_feat_corr_types': None
     }
+    assert bs.best_params['rg_nonfraud'] == {
+        'n_total_conditions': 5.0, 'target_feat_corr_types': None
+    }
+    assert bs.best_params['sf_fraud'] == {'threshold': 0.05789784369353024}
+    assert bs.best_params['sf_nonfraud'] == {'threshold': 0.5286917420754508}
     assert bs.cv_results.shape == (10, 13)
     y_pred = bs.predict(
         X={
@@ -643,16 +728,24 @@ def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
             'rbso': sample_weight
         }
     )
-    assert bs.best_score == 0.21563218390804598
-    assert bs.best_index == 3
-    assert bs.best_params == {
-        'cf_fraud': {'threshold': 0.6420746106206111},
-        'cf_nonfraud': {'threshold': 0.34212702531355066},
-        'rg_fraud': {'n_total_conditions': 2.0, 'target_feat_corr_types': None},
-        'rg_nonfraud': {'n_total_conditions': 5.0, 'target_feat_corr_types': None},
-        'sf_fraud': {'threshold': 0.05789784369353024},
-        'sf_nonfraud': {'threshold': 0.5286917420754508}
-    }
+    assert bs.best_score == 0.21843434343434343
+    assert bs.best_index == 5
+    # assert bs.best_params == {
+    #     'cf_fraud': {'threshold': 0.6420746106206111},
+    #     'cf_nonfraud': {'threshold': 0.34212702531355066},
+    #     'rg_fraud': {'n_total_conditions': 2.0, 'target_feat_corr_types': None},
+    #     'rg_nonfraud': {'n_total_conditions': 5.0, 'target_feat_corr_types': None},
+    #     'sf_fraud': {'threshold': 0.05789784369353024},
+    #     'sf_nonfraud': {'threshold': 0.5286917420754508}
+    # }
+    assert bs.best_params['cf_fraud']['correlation_reduction_class'].threshold == 0.9
+    assert bs.best_params['cf_nonfraud']['correlation_reduction_class'].threshold == 0.95
+    assert bs.best_params['rg_fraud'] == {
+        'n_total_conditions': 2.0, 'target_feat_corr_types': 'Infer'}
+    assert bs.best_params['rg_nonfraud'] == {
+        'n_total_conditions': 4.0, 'target_feat_corr_types': None}
+    assert bs.best_params['sf_fraud'] == {'threshold': 0.24333593546839893}
+    assert bs.best_params['sf_nonfraud'] == {'threshold': 0.2325140282302649}
     assert bs.cv_results.shape == (10, 13)
     y_pred = bs.predict(
         X={
@@ -660,8 +753,8 @@ def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
             'lp_nonfraud': X,
         }
     )
-    assert y_pred.mean() == 0.35
-    assert f1.fit(y_pred, y) == 0.3111111111111111
+    assert y_pred.mean() == 0.27
+    assert f1.fit(y_pred, y) == 0.32432432432432434
     y_pred = bs.fit_predict(
         X={
             'lp_fraud': X,
@@ -678,8 +771,8 @@ def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
             'rbso': sample_weight
         }
     )
-    assert y_pred.mean() == 0.35
-    assert f1.fit(y_pred, y) == 0.3111111111111111
+    assert y_pred.mean() == 0.27
+    assert f1.fit(y_pred, y) == 0.32432432432432434
     # Test fit/predict/fit_predict, sample_weight given and
     # sample_weight_in_val = True
     bs.sample_weight_in_val = True
@@ -699,16 +792,24 @@ def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
             'rbso': sample_weight
         }
     )
-    assert bs.best_score == 0.345882074914333
+    assert bs.best_score == 0.32174934489925
     assert bs.best_index == 3
-    assert bs.best_params == {
-        'cf_fraud': {'threshold': 0.6420746106206111},
-        'cf_nonfraud': {'threshold': 0.34212702531355066},
-        'rg_fraud': {'n_total_conditions': 2.0, 'target_feat_corr_types': None},
-        'rg_nonfraud': {'n_total_conditions': 5.0, 'target_feat_corr_types': None},
-        'sf_fraud': {'threshold': 0.05789784369353024},
-        'sf_nonfraud': {'threshold': 0.5286917420754508}
-    }
+    # assert bs.best_params == {
+    #     'cf_fraud': {'threshold': 0.6420746106206111},
+    #     'cf_nonfraud': {'threshold': 0.34212702531355066},
+    #     'rg_fraud': {'n_total_conditions': 2.0, 'target_feat_corr_types': None},
+    #     'rg_nonfraud': {'n_total_conditions': 5.0, 'target_feat_corr_types': None},
+    #     'sf_fraud': {'threshold': 0.05789784369353024},
+    #     'sf_nonfraud': {'threshold': 0.5286917420754508}
+    # }
+    assert bs.best_params['cf_fraud']['correlation_reduction_class'].threshold == 0.95
+    assert bs.best_params['cf_nonfraud']['correlation_reduction_class'].threshold == 0.9
+    assert bs.best_params['rg_fraud'] == {
+        'n_total_conditions': 2.0, 'target_feat_corr_types': None}
+    assert bs.best_params['rg_nonfraud'] == {
+        'n_total_conditions': 5.0, 'target_feat_corr_types': None}
+    assert bs.best_params['sf_fraud'] == {'threshold': 0.05789784369353024}
+    assert bs.best_params['sf_nonfraud'] == {'threshold': 0.5286917420754508}
     assert bs.cv_results.shape == (10, 13)
     y_pred = bs.predict(
         X={
@@ -1060,7 +1161,22 @@ def test_error(_create_data, _instantiate_classes):
             'threshold': UniformFloat(0, 1),
         },
         'cf': {
-            'threshold': UniformFloat(0, 1)
+            'correlation_reduction_class': Choice(
+                [
+                    AgglomerativeClusteringReducer(
+                        threshold=0.9,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    ),
+                    AgglomerativeClusteringReducer(
+                        threshold=0.95,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    )
+                ]
+            )
         },
         'gf': {
             'metric': Choice([p.fit, f1.fit])
