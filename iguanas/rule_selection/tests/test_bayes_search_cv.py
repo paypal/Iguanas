@@ -1,4 +1,5 @@
 import pytest
+import re
 import pandas as pd
 import numpy as np
 from hyperopt import hp
@@ -669,14 +670,6 @@ def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
     )
     assert bs.best_score == 0.21543016370602575
     assert bs.best_index == 3
-    # assert bs.best_params == {
-    #     'cf_fraud': {'threshold': 0.6420746106206111},
-    #     'cf_nonfraud': {'threshold': 0.34212702531355066},
-    #     'rg_fraud': {'n_total_conditions': 2.0, 'target_feat_corr_types': None},
-    #     'rg_nonfraud': {'n_total_conditions': 5.0, 'target_feat_corr_types': None},
-    #     'sf_fraud': {'threshold': 0.05789784369353024},
-    #     'sf_nonfraud': {'threshold': 0.5286917420754508}
-    # }
     assert bs.best_params['cf_fraud']['correlation_reduction_class'].threshold == 0.95
     assert bs.best_params['cf_nonfraud']['correlation_reduction_class'].threshold == 0.9
     assert bs.best_params['rg_fraud'] == {
@@ -730,14 +723,6 @@ def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
     )
     assert bs.best_score == 0.21843434343434343
     assert bs.best_index == 5
-    # assert bs.best_params == {
-    #     'cf_fraud': {'threshold': 0.6420746106206111},
-    #     'cf_nonfraud': {'threshold': 0.34212702531355066},
-    #     'rg_fraud': {'n_total_conditions': 2.0, 'target_feat_corr_types': None},
-    #     'rg_nonfraud': {'n_total_conditions': 5.0, 'target_feat_corr_types': None},
-    #     'sf_fraud': {'threshold': 0.05789784369353024},
-    #     'sf_nonfraud': {'threshold': 0.5286917420754508}
-    # }
     assert bs.best_params['cf_fraud']['correlation_reduction_class'].threshold == 0.9
     assert bs.best_params['cf_nonfraud']['correlation_reduction_class'].threshold == 0.95
     assert bs.best_params['rg_fraud'] == {
@@ -794,14 +779,6 @@ def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
     )
     assert bs.best_score == 0.32174934489925
     assert bs.best_index == 3
-    # assert bs.best_params == {
-    #     'cf_fraud': {'threshold': 0.6420746106206111},
-    #     'cf_nonfraud': {'threshold': 0.34212702531355066},
-    #     'rg_fraud': {'n_total_conditions': 2.0, 'target_feat_corr_types': None},
-    #     'rg_nonfraud': {'n_total_conditions': 5.0, 'target_feat_corr_types': None},
-    #     'sf_fraud': {'threshold': 0.05789784369353024},
-    #     'sf_nonfraud': {'threshold': 0.5286917420754508}
-    # }
     assert bs.best_params['cf_fraud']['correlation_reduction_class'].threshold == 0.95
     assert bs.best_params['cf_nonfraud']['correlation_reduction_class'].threshold == 0.9
     assert bs.best_params['rg_fraud'] == {
@@ -1202,5 +1179,5 @@ def test_error(_create_data, _instantiate_classes):
         error_score='raise',
         verbose=0
     )
-    with pytest.raises(Exception, match="No rules remaining for: Pipeline parameter set = {'cf': {'threshold': 0.1955964101622225}, 'gf': {'metric': <bound method Precision.fit of Precision>}, 'rbs': {'n_iter': 12.0}, 'ro': {'metric': <bound method Precision.fit of Precision>}, 'sf': {'threshold': 0.4860473230215504}}; Fold index = 0."):
+    with pytest.raises(Exception, match=re.escape("No rules remaining for: Pipeline parameter set = {'cf': {'correlation_reduction_class': AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=<bound method JaccardSimilarity.fit of JaccardSimilarity>, metric=<bound method FScore.fit of FScore with beta=1>, print_clustermap=False)}, 'gf': {'metric': <bound method Precision.fit of Precision>}, 'rbs': {'n_iter': 12.0}, 'ro': {'metric': <bound method Precision.fit of Precision>}, 'sf': {'threshold': 0.4860473230215504}}; Fold index = 0.")):
         bs.fit(X, y)
