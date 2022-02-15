@@ -19,12 +19,13 @@ setuptools.setup(
         # 'category-encoders==2.0.0', 'matplotlib==3.*', 'seaborn==0.9.0',
         # 'numpy>=1.21', 'pandas==1.1.4', 'hyperopt==0.2.5', 'joblib==1.1.*',
         # 'scikit-learn==0.23.2', 'scipy==1.*'
+
         'category-encoders>=2.0.0',
         # 'matplotlib==3.*',
         'seaborn>=0.9.0',
         'numpy>=1.21',
         'pandas>=1.1.4',
-        'hyperopt>=0.2.5',
+        'hyperopt==0.2.5',
         'joblib>=1.1.*',
         'scikit-learn>=0.23.2',
         # 'scipy==1.*'
