@@ -938,6 +938,47 @@ def test_generate_cv_datasets(_create_data, _instantiate_lp_and_bs):
     assert results == exp_results
 
 
+def test_split_df_into_train_and_val(_instantiate_lp_and_bs, _create_data):
+    _, bs, _ = _instantiate_lp_and_bs
+    X, y, _ = _create_data
+    # Test when dataframe given
+    X_train, X_val = bs._split_df_into_train_and_val(
+        X, list(range(50)), list(range(50, 100))
+    )
+    assert X_train.sum().sum() == 269.58142001682694
+    assert X_val.sum().sum() == 313.9823981250532
+    # Test when series given
+    y_train, y_val = bs._split_df_into_train_and_val(
+        y, list(range(50)), list(range(50, 100))
+    )
+    assert y_train.sum() == 5
+    assert y_val.sum() == 5
+    # Test when dict given
+    df_dict = {
+        'step_A': X[['A', 'B']],
+        'step_B': X[['C', 'D']],
+        'step_C': None
+    }
+    df_train, df_val = bs._split_df_into_train_and_val(
+        df_dict, list(range(50)), list(range(50, 100))
+    )
+    assert df_train['step_A'].sum().sum() == 216
+    assert df_train['step_A'].columns.tolist() == ['A', 'B']
+    assert df_train['step_B'].sum().sum() == 53.581420016826925
+    assert df_train['step_B'].columns.tolist() == ['C', 'D']
+    assert df_train['step_C'] is None
+    assert df_val['step_A'].sum().sum() == 261
+    assert df_val['step_A'].columns.tolist() == ['A', 'B']
+    assert df_val['step_B'].sum().sum() == 52.98239812505319
+    assert df_val['step_B'].columns.tolist() == ['C', 'D']
+    assert df_val['step_C'] is None
+    # Test error
+    with pytest.raises(TypeError, match='`df` must be a Pandas Series/DataFrame or a dict'):
+        bs._split_df_into_train_and_val(
+            [], list(range(50)), list(range(50, 100))
+        )
+
+
 def test_convert_search_spaces_to_hyperopt(_instantiate_lp_and_bs):
     _, bs, exp_search_spaces = _instantiate_lp_and_bs
     search_spaces_ = bs._convert_search_spaces_to_hyperopt(bs.search_spaces)

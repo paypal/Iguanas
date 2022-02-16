@@ -290,6 +290,8 @@ def test_optimise_rules(_create_data, _instantiate, _expected_results):
         'C%0': hp.uniform('C%0', X['C'].min(), X['C'].max()),
         'C': hp.uniform('C', X['C'].min(), X['C'].max())
     }
+    # Add verbose = 1 to test utils.return_progress_ready_range
+    ro.verbose = 1
     for exp_result, w in zip([exp_opt_rule_strings, exp_opt_rule_strings_weighted], [None, sample_weight]):
         opt_rule_strings = ro._optimise_rules(rule_lambdas=ro.orig_rule_lambdas, lambda_kwargs=ro.orig_lambda_kwargs,
                                               X=X, y=y, sample_weight=w,
