@@ -338,9 +338,10 @@
             <span class="p">)</span>
             <span class="n">list_of_rule_string_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dt_rule_strings_set</span><span class="p">)</span>
         <span class="n">rule_strings_set</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">list_of_rule_string_sets</span><span class="p">))</span>
-        <span class="c1"># self.rule_strings = dict((self._generate_rule_name_dt(), rule_string)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate_rule_name</span><span class="p">(),</span> <span class="n">rule_string</span><span class="p">)</span>
-                                 <span class="k">for</span> <span class="n">rule_string</span> <span class="ow">in</span> <span class="n">rule_strings_set</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate_rule_name</span><span class="p">(),</span> <span class="n">rule_string</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">rule_string</span> <span class="ow">in</span> <span class="n">rule_strings_set</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="s1">&#39;No rules could be generated. Try changing the class parameters.&#39;</span><span class="p">)</span>
