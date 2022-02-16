@@ -18,7 +18,6 @@ setuptools.setup(
     install_requires=[
         'category-encoders>=2.0.0',
         'seaborn>=0.9.0',
-        # 'numpy>=1.21',
         'pandas>=1.1.4',
         'hyperopt==0.2.5',
         'joblib>=1.1.0',
