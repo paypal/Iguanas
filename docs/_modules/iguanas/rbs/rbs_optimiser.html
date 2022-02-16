@@ -196,6 +196,10 @@
 <span class="sd">        The list of rules that predict a negative case (i.e. 0). This parameter </span>
 <span class="sd">        and/or `pos_pred_rules` must be given when the `config` parameter in </span>
 <span class="sd">        the `pipeline` is an empty list. Defaults to None.    </span>
+<span class="sd">    rules : Rules, optional</span>
+<span class="sd">        An Iguanas `Rules` object containing the rules that need to be </span>
+<span class="sd">        filtered. If provided, the rules within the object will be filtered. </span>
+<span class="sd">        Defaults to None.</span>
 <span class="sd">    verbose : int, optional</span>
 <span class="sd">        Controls the verbosity - the higher, the more messages. &gt;0 : shows the </span>
 <span class="sd">        overall progress of the optimisation process. Defaults to 0.</span>
@@ -224,20 +228,20 @@
                  <span class="n">algorithm</span><span class="o">=</span><span class="n">tpe</span><span class="o">.</span><span class="n">suggest</span><span class="p">,</span>
                  <span class="n">pos_pred_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">neg_pred_rules</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rules</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                 <span class="n">num_cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">RBSPipeline</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">config</span><span class="o">=</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">config</span><span class="p">),</span>
             <span class="n">final_decision</span><span class="o">=</span><span class="n">pipeline</span><span class="o">.</span><span class="n">final_decision</span><span class="p">,</span>
-            <span class="n">num_cores</span><span class="o">=</span><span class="n">num_cores</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">=</span> <span class="n">n_iter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">=</span> <span class="n">algorithm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pos_pred_rules</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">pos_pred_rules</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">pos_pred_rules</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">neg_pred_rules</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">neg_pred_rules</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">neg_pred_rules</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">rules</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">orig_config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
@@ -278,7 +282,10 @@
         <span class="c1"># Create list of final rules present in pipeline</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rules_to_keep</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">rule</span> <span class="k">for</span> <span class="n">stage</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">stage</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="p">]</span></div>
+        <span class="p">]</span>
+        <span class="c1"># If `rules` given, filter it</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">filter_rules</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rules_to_keep</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="RBSOptimiser.fit_predict"><a class="viewcode-back" href="../../../api/api/iguanas.rbs.RBSOptimiser.html#iguanas.rbs.RBSOptimiser.fit_predict">[docs]</a>    <span class="k">def</span> <span class="nf">fit_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
                     <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>

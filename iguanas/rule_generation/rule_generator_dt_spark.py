@@ -178,9 +178,10 @@ class RuleGeneratorDTSpark(_BaseGenerator):
             )
             list_of_rule_string_sets.append(dt_rule_strings_set)
         rule_strings_set = sorted(set().union(*list_of_rule_string_sets))
-        # self.rule_strings = dict((self._generate_rule_name_dt(), rule_string)
-        self.rule_strings = dict((self._generate_rule_name(), rule_string)
-                                 for rule_string in rule_strings_set)
+        self.rule_strings = dict(
+            (self._generate_rule_name(), rule_string)
+            for rule_string in rule_strings_set
+        )
         if not self.rule_strings:
             raise Exception(
                 'No rules could be generated. Try changing the class parameters.')

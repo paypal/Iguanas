@@ -1,0 +1,10 @@
+﻿:mod:`iguanas.pipeline`.ParallelPipeline
+===============================================
+
+.. currentmodule:: iguanas.pipeline
+
+.. autoclass:: ParallelPipeline
+
+.. raw:: html
+
+    <div class="clearer"></div>

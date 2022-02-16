@@ -160,17 +160,20 @@
   <h1>Source code for iguanas.pipeline.linear_pipeline</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Class for creating a Linear Pipeline.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
-<span class="kn">from</span> <span class="nn">iguanas.pipeline.class_accessor</span> <span class="kn">import</span> <span class="n">ClassAccessor</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">iguanas.pipeline._base_pipeline</span> <span class="kn">import</span> <span class="n">_BasePipeline</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasSeriesType</span>
+<span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">,</span> <span class="n">ClassList</span><span class="p">,</span> <span class="n">ClassNoneType</span>
+<span class="kn">import</span> <span class="nn">iguanas.utils.utils</span> <span class="k">as</span> <span class="nn">utils</span>
 
 
-<div class="viewcode-block" id="LinearPipeline"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline">[docs]</a><span class="k">class</span> <span class="nc">LinearPipeline</span><span class="p">:</span>
+<div class="viewcode-block" id="LinearPipeline"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline">[docs]</a><span class="k">class</span> <span class="nc">LinearPipeline</span><span class="p">(</span><span class="n">_BasePipeline</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generates a pipeline, which is a sequence of steps which are applied </span>
+<span class="sd">    Generates a linear pipeline, which is a sequence of steps which are applied </span>
 <span class="sd">    sequentially to a dataset. Each step should be an instantiated class with </span>
 <span class="sd">    both `fit` and `transform` methods. The final step should be an </span>
-<span class="sd">    instantiated class with both `fit` and `predict` methods.</span>
+<span class="sd">    instantiated class with either `fit` and `tranform` methods or `fit` and</span>
+<span class="sd">    `predict` methods.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -180,53 +183,145 @@
 <span class="sd">        elements - the first element should be a string which refers to the </span>
 <span class="sd">        step; the second element should be the instantiated class which is run</span>
 <span class="sd">        as part of the step. </span>
+<span class="sd">    use_init_data : List[str], optional</span>
+<span class="sd">        Use to denote steps that come after the first step which require the </span>
+<span class="sd">        initial dataset `X` to be used as the input to the `fit` method. For </span>
+<span class="sd">        example, if a rule optimiser class is placed after a rule generator </span>
+<span class="sd">        class in the pipeline, the tag for the rule optimiser should be added </span>
+<span class="sd">        to the `use_init_data` list, as the rule optimiser requires the initial</span>
+<span class="sd">        dataset to optimise the rules. Defaults to None.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    steps_ : List[Tuple[str, object]]</span>
+<span class="sd">        The steps corresponding to the fitted pipeline.</span>
+<span class="sd">    rules : Rules</span>
+<span class="sd">        The Rules object containing the rules produced from fitting the </span>
+<span class="sd">        pipeline.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="n">steps</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">steps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+                 <span class="n">use_init_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">_BasePipeline</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span>
+            <span class="n">use_init_data</span><span class="p">,</span> <span class="s1">&#39;use_init_data&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">ClassList</span><span class="p">,</span> <span class="n">ClassNoneType</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_init_data</span> <span class="o">=</span> <span class="n">use_init_data</span>
 
 <div class="viewcode-block" id="LinearPipeline.fit"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-            <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
-            <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+            <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+            <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasSeriesType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
             <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sequentially runs the `fit_transform` methods of each step in the </span>
+<span class="sd">        Sequentially runs the `fit_transform` method of each step in the </span>
 <span class="sd">        pipeline, except for the last step, where the `fit` method is run.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        X : PandasDataFrameType</span>
-<span class="sd">            The dataset.</span>
-<span class="sd">        y : PandasSeriesType</span>
-<span class="sd">            The binary target column.</span>
-<span class="sd">        sample_weight : PandasSeriesType, optional</span>
-<span class="sd">            Row-wise weights to apply. Defaults to None.</span>
+<span class="sd">        X : Union[PandasDataFrameType, dict]</span>
+<span class="sd">            The dataset or dictionary of datasets for each pipeline step.</span>
+<span class="sd">        y : Union[PandasSeriesType, dict]</span>
+<span class="sd">            The binary target column or dictionary of binary target columns</span>
+<span class="sd">            for each pipeline step.</span>
+<span class="sd">        sample_weight : Union[PandasSeriesType, dict], optional</span>
+<span class="sd">            Row-wise weights or dictionary of row-wise weights for each</span>
+<span class="sd">            pipeline step. Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span>
+                <span class="n">sample_weight</span><span class="p">,</span> <span class="s1">&#39;sample_weight&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
+        <span class="n">X_init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_copy_X_if_use_init_data</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_accessor</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">)</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_exception_if_no_cols_in_X</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">step_tag</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_X</span><span class="p">(</span><span class="n">step_tag</span><span class="o">=</span><span class="n">step_tag</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">X_init</span><span class="o">=</span><span class="n">X_init</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_fit_transform</span><span class="p">(</span>
+                <span class="n">step_tag</span><span class="o">=</span><span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span>
+            <span class="p">)</span>
+        <span class="n">final_step_tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">final_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">final_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_accessor</span><span class="p">(</span><span class="n">final_step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">)</span>
-        <span class="n">final_step</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="p">)</span></div>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_X</span><span class="p">(</span><span class="n">step_tag</span><span class="o">=</span><span class="n">final_step_tag</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">X_init</span><span class="o">=</span><span class="n">X_init</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_fit</span><span class="p">(</span>
+            <span class="n">step_tag</span><span class="o">=</span><span class="n">final_step_tag</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">final_step</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+            <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="n">final_step</span><span class="o">.</span><span class="n">rules</span></div>
+
+<div class="viewcode-block" id="LinearPipeline.predict"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sequentially runs the `transform` method of each step in the pipeline,</span>
+<span class="sd">        except for the last step, where the `predict` method is run. Note that</span>
+<span class="sd">        before using this method, you should first run either the `fit` or </span>
+<span class="sd">        `fit_predict` methods.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : Union[PandasDataFrameType, dict]</span>
+<span class="sd">            The dataset or dictionary of datasets for each pipeline step.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        PandasSeriesType</span>
+<span class="sd">            The prediction of the final step.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
+        <span class="n">X_init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_copy_X_if_use_init_data</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_X</span><span class="p">(</span><span class="n">step_tag</span><span class="o">=</span><span class="n">step_tag</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">X_init</span><span class="o">=</span><span class="n">X_init</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_transform</span><span class="p">(</span><span class="n">step_tag</span><span class="o">=</span><span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">final_step_tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">final_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_X</span><span class="p">(</span><span class="n">step_tag</span><span class="o">=</span><span class="n">final_step_tag</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">X_init</span><span class="o">=</span><span class="n">X_init</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_predict</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="n">final_step</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LinearPipeline.transform"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sequentially runs the `transform` method of each step in the pipeline.</span>
+<span class="sd">        Note that before using this method, you should first run either the </span>
+<span class="sd">        `fit` or `fit_transform` methods.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : Union[PandasDataFrameType, dict]</span>
+<span class="sd">            The dataset or dictionary of datasets for each pipeline step.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        PandasDataFrame</span>
+<span class="sd">            The transformed dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
+        <span class="n">X_init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_copy_X_if_use_init_data</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_X</span><span class="p">(</span><span class="n">step_tag</span><span class="o">=</span><span class="n">step_tag</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">X_init</span><span class="o">=</span><span class="n">X_init</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_transform</span><span class="p">(</span><span class="n">step_tag</span><span class="o">=</span><span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span></div>
 
 <div class="viewcode-block" id="LinearPipeline.fit_transform"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                      <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
-                      <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+                      <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+                      <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasSeriesType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
                       <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sequentially runs the `fit_transform` methods of each step in the </span>
+<span class="sd">        Sequentially runs the `fit_transform` method of each step in the </span>
 <span class="sd">        pipeline.</span>
 
-<span class="sd">        X : PandasDataFrameType</span>
-<span class="sd">            The dataset.</span>
-<span class="sd">        y : PandasSeriesType</span>
-<span class="sd">            The binary target column.</span>
-<span class="sd">        sample_weight : PandasSeriesType, optional</span>
-<span class="sd">            Row-wise weights to apply. Defaults to None.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : Union[PandasDataFrameType, dict]</span>
+<span class="sd">            The dataset or dictionary of datasets for each pipeline step.</span>
+<span class="sd">        y : Union[PandasSeriesType, dict]</span>
+<span class="sd">            The binary target column or dictionary of binary target columns</span>
+<span class="sd">            for each pipeline step.</span>
+<span class="sd">        sample_weight : Union[PandasSeriesType, dict], optional</span>
+<span class="sd">            Row-wise weights or dictionary of row-wise weights for each</span>
+<span class="sd">            pipeline step. Defaults to None.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -234,30 +329,28 @@
 <span class="sd">            The transformed dataset.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">:</span>
-            <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_accessor</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">)</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_exception_if_no_cols_in_X</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">step_tag</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">X</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="LinearPipeline.fit_predict"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline.fit_predict">[docs]</a>    <span class="k">def</span> <span class="nf">fit_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                    <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
-                    <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+                    <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+                    <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasSeriesType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
                     <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sequentially runs the `fit_transform` methods of each step in the </span>
+<span class="sd">        Sequentially runs the `fit_transform` method of each step in the </span>
 <span class="sd">        pipeline, except for the last step, where the `fit_predict` method is </span>
 <span class="sd">        run.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        X : PandasDataFrameType</span>
-<span class="sd">            The dataset.</span>
-<span class="sd">        y : PandasSeriesType</span>
-<span class="sd">            The binary target column.</span>
-<span class="sd">        sample_weight : PandasSeriesType, optional</span>
-<span class="sd">            Row-wise weights to apply. Defaults to None.</span>
+<span class="sd">        X : Union[PandasDataFrameType, dict]</span>
+<span class="sd">            The dataset or dictionary of datasets for each pipeline step.</span>
+<span class="sd">        y : Union[PandasSeriesType, dict]</span>
+<span class="sd">            The binary target column or dictionary of binary target columns</span>
+<span class="sd">            for each pipeline step.</span>
+<span class="sd">        sample_weight : Union[PandasSeriesType, dict], optional</span>
+<span class="sd">            Row-wise weights or dictionary of row-wise weights for each</span>
+<span class="sd">            pipeline step. Defaults to None.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -265,89 +358,37 @@
 <span class="sd">            The prediction of the final step.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_accessor</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">)</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_exception_if_no_cols_in_X</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">step_tag</span><span class="p">)</span>
-        <span class="n">final_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">final_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_accessor</span><span class="p">(</span><span class="n">final_step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">final_step</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LinearPipeline.predict"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_return_X</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">step_tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                  <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+                  <span class="n">X_init</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
+                      <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sequentially runs the `transform` methods of each step in the pipeline,</span>
-<span class="sd">        except for the last step, where the `predict` method is run. Note that</span>
-<span class="sd">        before using this method, you should first run either the `fit` or </span>
-<span class="sd">        `fit_predict` methods.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        X : PandasDataFrameType</span>
-<span class="sd">            The dataset.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        PandasSeriesType</span>
-<span class="sd">            The prediction of the final step.</span>
+<span class="sd">        If `use_init_data` is populated and `step_tag` is in `use_init_data`,</span>
+<span class="sd">        returns `X_init` (i.e. the initial dataset provided); else returns</span>
+<span class="sd">        `X`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">for</span> <span class="p">(</span><span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_exception_if_no_cols_in_X</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">step_tag</span><span class="p">)</span>
-        <span class="n">final_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">final_step</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_init_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">step_tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_init_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">X_init</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">X</span>
 
-<div class="viewcode-block" id="LinearPipeline.get_params"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline.get_params">[docs]</a>    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_copy_X_if_use_init_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                 <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
+                                     <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the parameters of each step in the pipeline.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dict</span>
-<span class="sd">            The parameters of each step in the pipeline.</span>
+<span class="sd">        If `use_init_data` is populated, copies `X` and returns it; else </span>
+<span class="sd">        returns None/</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">pipeline_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
-        <span class="n">steps_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span>
-        <span class="k">for</span> <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps_</span><span class="p">:</span>
-            <span class="n">step_param_dict</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">step_tag</span><span class="si">}</span><span class="s1">__</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">param</span><span class="p">,</span>
-                <span class="n">value</span> <span class="ow">in</span> <span class="n">step</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="p">}</span>
-            <span class="n">pipeline_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">step_param_dict</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">pipeline_params</span></div>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_check_accessor</span><span class="p">(</span><span class="n">step</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
-                        <span class="n">steps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Checks whether the any of the parameters in the given `step` is of type</span>
-<span class="sd">        ClassAccessor. If so, then it runs the ClassAccessor&#39;s `get` method,</span>
-<span class="sd">        which extracts the given attribute from the given step in the pipeline,</span>
-<span class="sd">        and injects it into the parameter.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">step_param_dict</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="vm">__dict__</span>
-        <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">step_param_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ClassAccessor</span><span class="p">):</span>
-                <span class="n">step</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">step</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_exception_if_no_cols_in_X</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">step_tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Raises an exception if `X` has no columns.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">DataFrameSizeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;`X` has been reduced to zero columns after the `</span><span class="si">{</span><span class="n">step_tag</span><span class="si">}</span><span class="s1">` step in the pipeline.&#39;</span>
-            <span class="p">)</span></div>
-
-
-<span class="k">class</span> <span class="nc">DataFrameSizeError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Custom exception for when `X` has no columns.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">pass</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_init_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
 </pre></div>
 
               </div>

@@ -290,7 +290,6 @@ class TestConvertProcessedConditionsToGeneral:
         }
         cleaned_strings = {}
         for rule_name, rule_comp in rule_components.items():
-            print(rule_comp)
             cleaned_string = c._add_null_condition_to_imputed_numeric_rule(
                 *rule_comp, imputed_values=imputed_values, X=X_processed)
             cleaned_strings[rule_name] = cleaned_string

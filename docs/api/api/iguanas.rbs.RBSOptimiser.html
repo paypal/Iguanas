@@ -275,6 +275,16 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.pipeline.ParallelPipeline.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.pipeline
+      </span>
+     </code>
+     .ParallelPipeline
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="iguanas.pipeline.ClassAccessor.html">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
@@ -657,7 +667,7 @@
 <h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">iguanas.rbs</span></code>.RBSOptimiser<a class="headerlink" href="#iguanas-rbs-rbsoptimiser" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="iguanas.rbs.RBSOptimiser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.rbs.</span></span><span class="sig-name descname"><span class="pre">RBSOptimiser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline:</span> <span class="pre">iguanas.rbs.rbs_pipeline.RBSPipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric:</span> <span class="pre">typing.Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_iter:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm=&lt;function</span> <span class="pre">suggest&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_pred_rules=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neg_pred_rules=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cores=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/rbs/rbs_optimiser.html#RBSOptimiser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rbs.RBSOptimiser" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.rbs.</span></span><span class="sig-name descname"><span class="pre">RBSOptimiser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline:</span> <span class="pre">iguanas.rbs.rbs_pipeline.RBSPipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric:</span> <span class="pre">typing.Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_iter:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm=&lt;function</span> <span class="pre">suggest&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_pred_rules=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neg_pred_rules=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/rbs/rbs_optimiser.html#RBSOptimiser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rbs.RBSOptimiser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Optimises the rules within an RBS Pipeline based on an optimisation 
 function. If the <cite>config</cite> parameter is an empty list, then the pipeline
 configuration is optimised from scratch; else, the rules included within
@@ -682,6 +692,10 @@ the <cite>pipeline</cite> is an empty list. Defaults to None.</p>
 <dt><strong>neg_pred_rules</strong><span class="classifier">List[str], optional</span></dt><dd><p>The list of rules that predict a negative case (i.e. 0). This parameter 
 and/or <cite>pos_pred_rules</cite> must be given when the <cite>config</cite> parameter in 
 the <cite>pipeline</cite> is an empty list. Defaults to None.</p>
+</dd>
+<dt><strong>rules</strong><span class="classifier">Rules, optional</span></dt><dd><p>An Iguanas <cite>Rules</cite> object containing the rules that need to be 
+filtered. If provided, the rules within the object will be filtered. 
+Defaults to None.</p>
 </dd>
 <dt><strong>verbose</strong><span class="classifier">int, optional</span></dt><dd><p>Controls the verbosity - the higher, the more messages. &gt;0 : shows the 
 overall progress of the optimisation process. Defaults to 0.</p>

@@ -13,4 +13,5 @@ Used to create an Iguanas pipeline.
    :template: class.rst
 
    LinearPipeline
+   ParallelPipeline
    ClassAccessor 

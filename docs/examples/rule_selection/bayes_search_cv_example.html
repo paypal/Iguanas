@@ -36,7 +36,7 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="shortcut icon" href="../../_static/iguanas_icon.png"/>
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Rules" href="../rules/index.html" />
+    <link rel="next" title="Advanced Bayes Search CV Example" href="advanced_bayes_search_cv_example.html" />
     <link rel="prev" title="Greedy Filter Example" href="greedy_filter_example.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="en">
@@ -228,6 +228,11 @@
      Linear Pipeline Example
     </a>
    </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../pipeline/parallel_pipeline_example.html">
+     Parallel Pipeline Example
+    </a>
+   </li>
   </ul>
  </li>
  <li class="toctree-l1 has-children">
@@ -378,6 +383,11 @@
    <li class="toctree-l2 current active">
     <a class="current reference internal" href="#">
      Bayes Search CV Example
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="advanced_bayes_search_cv_example.html">
+     Advanced Bayes Search CV Example
     </a>
    </li>
   </ul>
@@ -744,7 +754,7 @@ div.rendered_html tbody tr:hover {
 </style>
 <section id="Bayes-Search-CV-Example">
 <h1>Bayes Search CV Example<a class="headerlink" href="#Bayes-Search-CV-Example" title="Permalink to this headline">¶</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">BayesSearchCV</span></code> class is used to search for the best parameters for a given Iguanas Pipeline.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">BayesSearchCV</span></code> class is used to search for the set of hyperparameters that produce the best decision engine performance for a given Iguanas Pipeline, whilst also reducing the likelihood of overfitting.</p>
 <p>The process is as follows:</p>
 <ul class="simple">
 <li><p>Generate k-fold stratified cross validation datasets.</p></li>
@@ -757,6 +767,9 @@ div.rendered_html tbody tr:hover {
 </li>
 <li><p>Return the parameter set which generated the highest mean overall score across the validation datasets.</p></li>
 </ul>
+<p>In this example, we’ll consider the following workflow:</p>
+<center><p><img alt="ac620594f826429984e9d8fbe0fde64e" src="../../_images/workflow_example.png" /></p>
+</center><p>We’ll use the <code class="docutils literal notranslate"><span class="pre">BayesSearchCV</span></code> class to optimise the hyperparameters of the steps in this workflow, <strong>ensuring that we acquire the maximum F1 score for our decision engine.</strong></p>
 <hr class="docutils" />
 <section id="Import-packages">
 <h2>Import packages<a class="headerlink" href="#Import-packages" title="Permalink to this headline">¶</a></h2>
@@ -843,7 +856,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/jlaidler/venvs/iguanas_os_dev/lib/python3.8/site-packages/category_encoders/utils.py:21: FutureWarning: is_categorical is deprecated and will be removed in a future version.  Use is_categorical_dtype instead
+/Users/jlaidler/venvs/iguanas_dev/lib/python3.8/site-packages/category_encoders/utils.py:21: FutureWarning: is_categorical is deprecated and will be removed in a future version.  Use is_categorical_dtype instead
   elif pd.api.types.is_categorical(cols):
 </pre></div></div>
 </div>
@@ -851,43 +864,16 @@ div.rendered_html tbody tr:hover {
 </section>
 <section id="Set-up-pipeline">
 <h2>Set up pipeline<a class="headerlink" href="#Set-up-pipeline" title="Permalink to this headline">¶</a></h2>
-<p>Let’s say that we want to apply the following processes as part of our pipeline:</p>
-<ol class="arabic simple">
-<li><p>Rule generation step</p>
-<ul class="simple">
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">RuleGeneratorDT</span></code> to generate rules using the processed data.</p></li>
-</ul>
-</li>
-<li><p>Rule processing step</p>
-<ul class="simple">
-<li><p>Apply <code class="docutils literal notranslate"><span class="pre">SimpleFilter</span></code>.</p></li>
-<li><p>Apply <code class="docutils literal notranslate"><span class="pre">CorrelatedFilter</span></code>.</p></li>
-</ul>
-</li>
-<li><p>Rule predictor step</p>
-<ul class="simple">
-<li><p>Use the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> to optimise an <code class="docutils literal notranslate"><span class="pre">RBSPipeline</span></code> for F1 score. This will create a rule predictor.</p></li>
-</ul>
-</li>
-</ol>
-<p>However, we don’t know what pipeline hyperparameter values will generate the best F1 score for the final rule predictor. This is where the <code class="docutils literal notranslate"><span class="pre">BayesSearchCV</span></code> class comes in - <strong>it allows us to find the best pipeline hyperparameter values whilst also reducing the likelihood of overfitting.</strong></p>
-<p>Let’s first create the pipeline by instantiating the relevant classes:</p>
+<p>Before we can apply the <code class="docutils literal notranslate"><span class="pre">BayesSearchCV</span></code> class, we need to set up our pipeline. Let’s first instantiate the classes we’ll be using the our pipeline:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">f1</span> <span class="o">=</span> <span class="n">FScore</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">js</span> <span class="o">=</span> <span class="n">JaccardSimilarity</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Rule generation</span>
+<span></span><span class="c1"># Optimisation metric</span>
+<span class="n">f1</span> <span class="o">=</span> <span class="n">FScore</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Rule generation</span>
 <span class="n">generator</span> <span class="o">=</span> <span class="n">RuleGeneratorDT</span><span class="p">(</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
     <span class="n">n_total_conditions</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
@@ -896,12 +882,16 @@ div.rendered_html tbody tr:hover {
         <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span>
     <span class="p">)</span>
 <span class="p">)</span>
-<span class="c1"># Rule processing</span>
+
+<span class="c1"># Rule filter (performance-based)</span>
 <span class="n">simple_filterer</span> <span class="o">=</span> <span class="n">SimpleFilter</span><span class="p">(</span>
     <span class="n">threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
     <span class="n">operator</span><span class="o">=</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span>
 <span class="p">)</span>
+
+<span class="c1"># Rule filter (correlation-based)</span>
+<span class="n">js</span> <span class="o">=</span> <span class="n">JaccardSimilarity</span><span class="p">()</span>
 <span class="n">corr_filterer</span> <span class="o">=</span> <span class="n">CorrelatedFilter</span><span class="p">(</span>
     <span class="n">correlation_reduction_class</span><span class="o">=</span><span class="n">AgglomerativeClusteringReducer</span><span class="p">(</span>
         <span class="n">threshold</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
@@ -910,11 +900,14 @@ div.rendered_html tbody tr:hover {
         <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span>
     <span class="p">)</span>
 <span class="p">)</span>
-<span class="c1"># Rule predictor</span>
+
+<span class="c1"># Decision engine (to be optimised)</span>
 <span class="n">rbs_pipeline</span> <span class="o">=</span> <span class="n">RBSPipeline</span><span class="p">(</span>
     <span class="n">config</span><span class="o">=</span><span class="p">[],</span>
     <span class="n">final_decision</span><span class="o">=</span><span class="mi">0</span>
 <span class="p">)</span>
+
+<span class="c1"># Decision engine optimiser</span>
 <span class="n">rbs_optimiser</span> <span class="o">=</span> <span class="n">RBSOptimiser</span><span class="p">(</span>
     <span class="n">pipeline</span><span class="o">=</span><span class="n">rbs_pipeline</span><span class="p">,</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
@@ -922,19 +915,26 @@ div.rendered_html tbody tr:hover {
         <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;corr_filterer&#39;</span><span class="p">,</span>
         <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rules_to_keep&#39;</span>
     <span class="p">),</span>
+    <span class="n">rules</span><span class="o">=</span><span class="n">ClassAccessor</span><span class="p">(</span>
+        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;generator&#39;</span><span class="p">,</span>
+        <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rules&#39;</span>
+    <span class="p">),</span>
     <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p><strong>Note:</strong> the argument passed to the <code class="docutils literal notranslate"><span class="pre">pos_pred_rules</span></code> parameter in the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> class is a <code class="docutils literal notranslate"><span class="pre">ClassAccessor</span></code> object. This takes the names of the rules that remain after the <code class="docutils literal notranslate"><span class="pre">CorrelatedFilter</span></code> has been applied and passes it to the <code class="docutils literal notranslate"><span class="pre">pos_pred_rules</span></code> parameter of the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> class.</p>
+<p><strong>Note:</strong> The arguments passed to the <code class="docutils literal notranslate"><span class="pre">pos_pred_rules</span></code> and <code class="docutils literal notranslate"><span class="pre">rules</span></code> parameters in the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> class are <code class="docutils literal notranslate"><span class="pre">ClassAccessor</span></code> objects. This object extracts the specified attribute from the given class in the pipeline. This allows users to pass attributes from earlier steps in the pipeline as parameters of later steps in the pipeline.</p>
+<p>In this example, the names of the rules that are present after the <code class="docutils literal notranslate"><span class="pre">corr_filterer</span></code> step are passed to the <code class="docutils literal notranslate"><span class="pre">pos_pred_rules</span></code> parameter of the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> class - this is so the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> knows which rules predict positive cases (which, one might argue, doesn’t need to be specified in this example, as we only have one type of rule set. However, when you have a set of rules - some that predict positive cases and some that predict negative cases - you must specify which rules predict
+what case, using the <code class="docutils literal notranslate"><span class="pre">pos_pred_rules</span></code> and <code class="docutils literal notranslate"><span class="pre">neg_pred_rules</span></code> parameters).</p>
+<p>Also, the <code class="docutils literal notranslate"><span class="pre">rules</span></code> attribute created in the <code class="docutils literal notranslate"><span class="pre">generator</span></code> step are passed to the <code class="docutils literal notranslate"><span class="pre">rules</span></code> parameter of the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> class. This is so the rules remaining after the decision engine optimisation can be easily extracted from the trained pipeline.</p>
 <p>Now we can create the steps of our pipeline. Each step should be a tuple of two elements:</p>
 <ol class="arabic simple">
 <li><p>The first element should be a string which refers to the step.</p></li>
 <li><p>The second element should be the instantiated class which is run as part of the pipeline.</p></li>
 </ol>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -949,7 +949,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>Finally, we can instantiate our pipeline:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -962,7 +962,7 @@ div.rendered_html tbody tr:hover {
 <h2>Define the search space<a class="headerlink" href="#Define-the-search-space" title="Permalink to this headline">¶</a></h2>
 <p>Now we need to define the search space for each of the relevant parameters of our pipeline. To do this, we create a dictionary, where each key corresponds to the tag used for the relevant pipeline step. Each value should be a dictionary of the parameters (keys) and their search spaces (values). Search spaces should be defined using the classes in the <code class="docutils literal notranslate"><span class="pre">iguanas.space</span></code> module:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -978,7 +978,20 @@ div.rendered_html tbody tr:hover {
         <span class="s1">&#39;threshold&#39;</span><span class="p">:</span> <span class="n">UniformFloat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">},</span>
     <span class="s1">&#39;corr_filterer&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;threshold&#39;</span><span class="p">:</span> <span class="n">UniformFloat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="s1">&#39;correlation_reduction_class&#39;</span><span class="p">:</span> <span class="n">Choice</span><span class="p">([</span>
+            <span class="n">AgglomerativeClusteringReducer</span><span class="p">(</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;top_down&#39;</span><span class="p">,</span>
+                <span class="n">similarity_function</span><span class="o">=</span><span class="n">js</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
+                <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span>
+            <span class="p">),</span>
+            <span class="n">AgglomerativeClusteringReducer</span><span class="p">(</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+                <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;top_down&#39;</span><span class="p">,</span>
+                <span class="n">similarity_function</span><span class="o">=</span><span class="n">js</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
+                <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span>
+            <span class="p">)</span>
+        <span class="p">])</span>
     <span class="p">},</span>
 <span class="p">}</span>
 </pre></div>
@@ -999,7 +1012,7 @@ div.rendered_html tbody tr:hover {
 </li>
 <li><p><strong>corr_filterer</strong></p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">threshold</span></code>: Floats from 0 to 1</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">correlation_reduction_class</span></code>: <code class="docutils literal notranslate"><span class="pre">AgglomerativeClusteringReducer</span></code> classes with either a <code class="docutils literal notranslate"><span class="pre">threshold</span></code> of 0.5 or 0.9.</p></li>
 </ul>
 </li>
 </ul>
@@ -1008,7 +1021,7 @@ div.rendered_html tbody tr:hover {
 <h2>Optimise the pipeline hyperparameters<a class="headerlink" href="#Optimise-the-pipeline-hyperparameters" title="Permalink to this headline">¶</a></h2>
 <p>Now that we have our pipeline and search spaces defined, we can instantiate the <code class="docutils literal notranslate"><span class="pre">BayesSearchCV</span></code> class. We’ll split our data into 3 cross-validation datasets and try 20 different parameter sets:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1017,7 +1030,7 @@ div.rendered_html tbody tr:hover {
     <span class="n">search_spaces</span><span class="o">=</span><span class="n">search_spaces</span><span class="p">,</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
     <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-    <span class="n">n_iter</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
     <span class="n">num_cores</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
     <span class="n">error_score</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
@@ -1027,7 +1040,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>Finally, we can run the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method to optimise the hyperparameters of the pipeline:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1035,99 +1048,13 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
---- Optimising pipeline parameters ---
- 13%|█▎        | 2/15 [00:04&lt;00:23,  1.80s/trial, best loss: -0.6354597846910178]
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/Users/jlaidler/Documents/argo/iguanas/rule_selection/bayes_search_cv.py:349: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.20136504357069684}, &#39;generator&#39;: {&#39;n_total_conditions&#39;: 4.0, &#39;target_feat_corr_types&#39;: None}, &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.5309641649521473}}; Fold index = 1. The metric score for this parameter set &amp; fold will be set to 0
-  warnings.warn(
-/Users/jlaidler/Documents/argo/iguanas/rule_selection/bayes_search_cv.py:349: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.20136504357069684}, &#39;generator&#39;: {&#39;n_total_conditions&#39;: 4.0, &#39;target_feat_corr_types&#39;: None}, &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.5309641649521473}}; Fold index = 2. The metric score for this parameter set &amp; fold will be set to 0
-  warnings.warn(
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
- 27%|██▋       | 4/15 [00:12&lt;00:31,  2.84s/trial, best loss: -0.6354597846910178]
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/Users/jlaidler/Documents/argo/iguanas/rule_selection/bayes_search_cv.py:349: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.8788893237074139}, &#39;generator&#39;: {&#39;n_total_conditions&#39;: 1.0, &#39;target_feat_corr_types&#39;: None}, &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.5286917420754508}}; Fold index = 0. The metric score for this parameter set &amp; fold will be set to 0
-  warnings.warn(
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
- 47%|████▋     | 7/15 [00:15&lt;00:11,  1.43s/trial, best loss: -0.6354597846910178]
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/Users/jlaidler/Documents/argo/iguanas/rule_selection/bayes_search_cv.py:349: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.42667840038368754}, &#39;generator&#39;: {&#39;n_total_conditions&#39;: 3.0, &#39;target_feat_corr_types&#39;: &#39;Infer&#39;}, &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.8381663825532006}}; Fold index = 0. The metric score for this parameter set &amp; fold will be set to 0
-  warnings.warn(
-/Users/jlaidler/Documents/argo/iguanas/rule_selection/bayes_search_cv.py:349: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.42667840038368754}, &#39;generator&#39;: {&#39;n_total_conditions&#39;: 3.0, &#39;target_feat_corr_types&#39;: &#39;Infer&#39;}, &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.8381663825532006}}; Fold index = 1. The metric score for this parameter set &amp; fold will be set to 0
-  warnings.warn(
-/Users/jlaidler/Documents/argo/iguanas/rule_selection/bayes_search_cv.py:349: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.42667840038368754}, &#39;generator&#39;: {&#39;n_total_conditions&#39;: 3.0, &#39;target_feat_corr_types&#39;: &#39;Infer&#39;}, &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.8381663825532006}}; Fold index = 2. The metric score for this parameter set &amp; fold will be set to 0
-  warnings.warn(
-/Users/jlaidler/Documents/argo/iguanas/rule_selection/bayes_search_cv.py:349: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.48162604260652686}, &#39;generator&#39;: {&#39;n_total_conditions&#39;: 2.0, &#39;target_feat_corr_types&#39;: None}, &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.9671312248842996}}; Fold index = 0. The metric score for this parameter set &amp; fold will be set to 0
-  warnings.warn(
-/Users/jlaidler/Documents/argo/iguanas/rule_selection/bayes_search_cv.py:349: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.48162604260652686}, &#39;generator&#39;: {&#39;n_total_conditions&#39;: 2.0, &#39;target_feat_corr_types&#39;: None}, &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.9671312248842996}}; Fold index = 1. The metric score for this parameter set &amp; fold will be set to 0
-  warnings.warn(
-/Users/jlaidler/Documents/argo/iguanas/rule_selection/bayes_search_cv.py:349: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.48162604260652686}, &#39;generator&#39;: {&#39;n_total_conditions&#39;: 2.0, &#39;target_feat_corr_types&#39;: None}, &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.9671312248842996}}; Fold index = 2. The metric score for this parameter set &amp; fold will be set to 0
-  warnings.warn(
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
- 87%|████████▋ | 13/15 [00:23&lt;00:02,  1.05s/trial, best loss: -0.6354597846910178]
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/Users/jlaidler/Documents/argo/iguanas/rule_selection/bayes_search_cv.py:349: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.04431348538932778}, &#39;generator&#39;: {&#39;n_total_conditions&#39;: 5.0, &#39;target_feat_corr_types&#39;: None}, &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.5445334019103376}}; Fold index = 0. The metric score for this parameter set &amp; fold will be set to 0
-  warnings.warn(
-/Users/jlaidler/Documents/argo/iguanas/rule_selection/bayes_search_cv.py:349: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.04431348538932778}, &#39;generator&#39;: {&#39;n_total_conditions&#39;: 5.0, &#39;target_feat_corr_types&#39;: None}, &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.5445334019103376}}; Fold index = 1. The metric score for this parameter set &amp; fold will be set to 0
-  warnings.warn(
-/Users/jlaidler/Documents/argo/iguanas/rule_selection/bayes_search_cv.py:349: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.04431348538932778}, &#39;generator&#39;: {&#39;n_total_conditions&#39;: 5.0, &#39;target_feat_corr_types&#39;: None}, &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.5445334019103376}}; Fold index = 2. The metric score for this parameter set &amp; fold will be set to 0
-  warnings.warn(
-/Users/jlaidler/Documents/argo/iguanas/rule_selection/bayes_search_cv.py:349: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.36932379376669233}, &#39;generator&#39;: {&#39;n_total_conditions&#39;: 1.0, &#39;target_feat_corr_types&#39;: None}, &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.5552242499827413}}; Fold index = 0. The metric score for this parameter set &amp; fold will be set to 0
-  warnings.warn(
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-100%|██████████| 15/15 [00:24&lt;00:00,  1.61s/trial, best loss: -0.6965755602560381]
+--- Optimising pipeline parameters ---
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 20/20 [00:24&lt;00:00,  1.22s/trial, best loss: -0.6965755602560381]
 --- Refitting on entire dataset with best pipeline ---
 </pre></div></div>
 </div>
@@ -1135,7 +1062,7 @@ div.rendered_html tbody tr:hover {
 <h3>Outputs<a class="headerlink" href="#Outputs" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">fit</span></code> method doesn’t return anything. See the <code class="docutils literal notranslate"><span class="pre">Attributes</span></code> section in the class docstring for a description of each attribute generated:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1144,7 +1071,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1153,7 +1080,7 @@ div.rendered_html tbody tr:hover {
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1162,18 +1089,18 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;corr_filterer&#39;: {&#39;threshold&#39;: 0.13637152094471683},
- &#39;generator&#39;: {&#39;target_feat_corr_types&#39;: &#39;Infer&#39;},
- &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.6444172588081419}}
+{&#39;corr_filterer&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.5, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)},
+ &#39;generator&#39;: {&#39;n_total_conditions&#39;: 2.0, &#39;target_feat_corr_types&#39;: &#39;Infer&#39;},
+ &#39;simple_filterer&#39;: {&#39;threshold&#39;: 0.4860473230215504}}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1182,16 +1109,16 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-14
+0
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1200,7 +1127,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1223,7 +1150,7 @@ div.rendered_html tbody tr:hover {
     <tr style="text-align: right;">
       <th></th>
       <th>Params</th>
-      <th>corr_filterer__threshold</th>
+      <th>corr_filterer__correlation_reduction_class</th>
       <th>generator__n_total_conditions</th>
       <th>generator__target_feat_corr_types</th>
       <th>simple_filterer__threshold</th>
@@ -1235,9 +1162,21 @@ div.rendered_html tbody tr:hover {
   </thead>
   <tbody>
     <tr>
+      <th>0</th>
+      <td>{'corr_filterer': {'correlation_reduction_clas...</td>
+      <td>AgglomerativeClusteringReducer(threshold=0.5, ...</td>
+      <td>2.0</td>
+      <td>Infer</td>
+      <td>0.486047</td>
+      <td>[0, 1, 2]</td>
+      <td>[0.7092198581560283, 0.6842105263157895, 0.696...</td>
+      <td>0.696576</td>
+      <td>0.010212</td>
+    </tr>
+    <tr>
       <th>14</th>
-      <td>{'corr_filterer': {'threshold': 0.136371520944...</td>
-      <td>0.136372</td>
+      <td>{'corr_filterer': {'correlation_reduction_clas...</td>
+      <td>AgglomerativeClusteringReducer(threshold=0.5, ...</td>
       <td>5.0</td>
       <td>Infer</td>
       <td>0.644417</td>
@@ -1247,9 +1186,21 @@ div.rendered_html tbody tr:hover {
       <td>0.010212</td>
     </tr>
     <tr>
+      <th>19</th>
+      <td>{'corr_filterer': {'correlation_reduction_clas...</td>
+      <td>AgglomerativeClusteringReducer(threshold=0.5, ...</td>
+      <td>2.0</td>
+      <td>None</td>
+      <td>0.497632</td>
+      <td>[0, 1, 2]</td>
+      <td>[0.7092198581560283, 0.6615384615384615, 0.691...</td>
+      <td>0.687496</td>
+      <td>0.019695</td>
+    </tr>
+    <tr>
       <th>13</th>
-      <td>{'corr_filterer': {'threshold': 0.709546423751...</td>
-      <td>0.709546</td>
+      <td>{'corr_filterer': {'correlation_reduction_clas...</td>
+      <td>AgglomerativeClusteringReducer(threshold=0.9, ...</td>
       <td>2.0</td>
       <td>Infer</td>
       <td>0.388521</td>
@@ -1259,44 +1210,80 @@ div.rendered_html tbody tr:hover {
       <td>0.030745</td>
     </tr>
     <tr>
-      <th>0</th>
-      <td>{'corr_filterer': {'threshold': 0.291012698379...</td>
-      <td>0.291013</td>
-      <td>2.0</td>
-      <td>Infer</td>
-      <td>0.486047</td>
+      <th>18</th>
+      <td>{'corr_filterer': {'correlation_reduction_clas...</td>
+      <td>AgglomerativeClusteringReducer(threshold=0.5, ...</td>
+      <td>4.0</td>
+      <td>None</td>
+      <td>0.304850</td>
       <td>[0, 1, 2]</td>
-      <td>[0.6359447004608295, 0.6355140186915889, 0.634...</td>
-      <td>0.635460</td>
-      <td>0.000420</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>{'corr_filterer': {'threshold': 0.110728226805...</td>
-      <td>0.110728</td>
-      <td>2.0</td>
-      <td>Infer</td>
-      <td>0.510489</td>
-      <td>[0, 1, 2]</td>
-      <td>[0.6359447004608295, 0.6355140186915889, 0.634...</td>
-      <td>0.635460</td>
-      <td>0.000420</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>{'corr_filterer': {'threshold': 0.684872215972...</td>
-      <td>0.684872</td>
-      <td>2.0</td>
-      <td>Infer</td>
-      <td>0.369537</td>
-      <td>[0, 1, 2]</td>
-      <td>[0.6120689655172414, 0.6534653465346535, 0.611...</td>
-      <td>0.625548</td>
-      <td>0.019744</td>
+      <td>[0.6511627906976745, 0.5925925925925927, 0.694...</td>
+      <td>0.646224</td>
+      <td>0.041919</td>
     </tr>
   </tbody>
 </table>
 </div></div>
+</div>
+<p>To see the final optimised decision engine configuration and rule set, we first return the parameters of the trained pipeline (stored in the attribute <code class="docutils literal notranslate"><span class="pre">pipeline_</span></code>):</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pipeline_params</span> <span class="o">=</span> <span class="n">bs</span><span class="o">.</span><span class="n">pipeline_</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Then, to see the final optimised decision engine configuration, we filter to the <code class="docutils literal notranslate"><span class="pre">config</span></code> parameter of the <code class="docutils literal notranslate"><span class="pre">rbs_optimiser</span></code> step:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">final_config</span> <span class="o">=</span> <span class="n">pipeline_params</span><span class="p">[</span><span class="s1">&#39;rbs_optimiser&#39;</span><span class="p">][</span><span class="s1">&#39;config&#39;</span><span class="p">]</span>
+<span class="n">final_config</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[(1, [&#39;RGDT_Rule_20220210_18&#39;])]
+</pre></div></div>
+</div>
+<p>This shows us which rules should be used for the rejection step (decision <code class="docutils literal notranslate"><span class="pre">1</span></code>).</p>
+<p>To see the logic of our final set of rules, we filter to the <code class="docutils literal notranslate"><span class="pre">rules</span></code> parameter of the <code class="docutils literal notranslate"><span class="pre">rbs_optimiser</span></code> step:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">final_rules</span> <span class="o">=</span> <span class="n">bs</span><span class="o">.</span><span class="n">pipeline_</span><span class="o">.</span><span class="n">get_params</span><span class="p">()[</span><span class="s1">&#39;rbs_optimiser&#39;</span><span class="p">][</span><span class="s1">&#39;rules&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Then extract the <code class="docutils literal notranslate"><span class="pre">rule_strings</span></code> attribute:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">final_rules</span><span class="o">.</span><span class="n">rule_strings</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;RGDT_Rule_20220210_18&#39;: &#34;(X[&#39;Sex_male&#39;]==False)&#34;}
+</pre></div></div>
 </div>
 </section>
 </section>
@@ -1304,7 +1291,7 @@ div.rendered_html tbody tr:hover {
 <h2>Apply the optimised pipeline<a class="headerlink" href="#Apply-the-optimised-pipeline" title="Permalink to this headline">¶</a></h2>
 <p>We can apply our optimised pipeline to a new data set and make a prediction using the <code class="docutils literal notranslate"><span class="pre">predict</span></code> method:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1316,7 +1303,7 @@ div.rendered_html tbody tr:hover {
 <h3>Outputs<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">predict</span></code> method returns the prediction generated by class in the final step of the pipeline - in this case, the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code>:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1325,7 +1312,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1342,12 +1329,12 @@ PassengerId
 382    1
 141    1
 174    0
-Name: Stage=0, Decision=1, Length: 295, dtype: int64
+Length: 295, dtype: int64
 </pre></div></div>
 </div>
 <p>We can now calculate the F1 score of our optimised pipeline using the test data:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1357,7 +1344,7 @@ Name: Stage=0, Decision=1, Length: 295, dtype: int64
 </div>
 <p>Comparing this to our original, unoptimised pipeline:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1367,7 +1354,7 @@ Name: Stage=0, Decision=1, Length: 295, dtype: int64
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1376,11 +1363,13 @@ Name: Stage=0, Decision=1, Length: 295, dtype: int64
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Percentage improvement in F1 score: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">f1_opt</span><span class="o">-</span><span class="n">f1_init</span><span class="p">)</span><span class="o">/</span><span class="n">f1_init</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s1">%&#39;</span><span class="p">)</span>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;F1 score of original, unoptimised pipeline: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">f1_init</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;F1 score of optimised pipeline: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">f1_opt</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Percentage improvement in F1 score: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">f1_opt</span><span class="o">-</span><span class="n">f1_init</span><span class="p">)</span><span class="o">/</span><span class="n">f1_init</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s1">%&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1389,6 +1378,8 @@ Name: Stage=0, Decision=1, Length: 295, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+F1 score of original, unoptimised pipeline: 0.57
+F1 score of optimised pipeline: 0.74
 Percentage improvement in F1 score: 30.39%
 </pre></div></div>
 </div>

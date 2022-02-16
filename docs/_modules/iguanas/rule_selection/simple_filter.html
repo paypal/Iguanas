@@ -161,6 +161,7 @@
 <span></span><span class="sd">&quot;&quot;&quot;Filters rules based on performance metrics.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">iguanas.rule_selection._base_filter</span> <span class="kn">import</span> <span class="n">_BaseFilter</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">iguanas.rules.rules</span> <span class="kn">import</span> <span class="n">Rules</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span>
 
 <span class="n">FILTERING_FUNCTIONS</span> <span class="o">=</span> <span class="p">{</span>
@@ -185,23 +186,32 @@
 <span class="sd">    metric : Callable</span>
 <span class="sd">        The method/function which calculates the metric by which the rules are</span>
 <span class="sd">        filtered.    </span>
+<span class="sd">    rules : Rules, optional</span>
+<span class="sd">        An Iguanas `Rules` object containing the rules that need to be </span>
+<span class="sd">        filtered. If provided, the rules within the object will be filtered. </span>
+<span class="sd">        Defaults to None.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    rules_to_keep : List[str]</span>
 <span class="sd">        List of rules which remain after the filter has been applied.</span>
+<span class="sd">    rules : Rules</span>
+<span class="sd">        The Iguanas `Rules` object containing the rules which remain after the</span>
+<span class="sd">        filter has been applied.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                  <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
+                 <span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+                 <span class="n">rules</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
         <span class="k">if</span> <span class="n">operator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;=&#39;</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`operator` must be &#39;&gt;&#39;, &#39;&gt;=&#39;, &#39;&lt;&#39; or &#39;&lt;=&#39;&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="n">operator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span>
-        <span class="n">_BaseFilter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rules_to_keep</span><span class="o">=</span><span class="p">[])</span>
+        <span class="n">_BaseFilter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rules_to_keep</span><span class="o">=</span><span class="p">[],</span> <span class="n">rules</span><span class="o">=</span><span class="n">rules</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SimpleFilter.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_selection.SimpleFilter.html#iguanas.rule_selection.SimpleFilter.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
             <span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>

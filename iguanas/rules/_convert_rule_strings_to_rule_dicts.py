@@ -377,8 +377,6 @@ class _ConvertRuleStringsToRuleDicts:
             value = True
         elif value == 'False':
             value = False
-        # else:
-        #     value = float(value)
         elif '.' not in value:
             value = int(value)
         else:

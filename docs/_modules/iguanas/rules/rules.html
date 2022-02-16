@@ -246,6 +246,23 @@
             <span class="bp">self</span><span class="p">,</span> <span class="n">rule_strings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">,</span>
         <span class="p">)</span>
 
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">rule_dicts</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_dicts</span><span class="p">,</span> <span class="o">**</span><span class="n">other</span><span class="o">.</span><span class="n">rule_dicts</span><span class="p">}</span>
+        <span class="n">rule_strings</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">,</span> <span class="o">**</span><span class="n">other</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">}</span>
+        <span class="n">lambda_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">lambda_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">other</span><span class="o">.</span><span class="n">lambda_kwargs</span><span class="p">}</span>
+        <span class="n">lambda_args</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">lambda_args</span><span class="p">,</span> <span class="o">**</span><span class="n">other</span><span class="o">.</span><span class="n">lambda_args</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">Rules</span><span class="p">(</span>
+            <span class="n">rule_dicts</span><span class="o">=</span><span class="n">rule_dicts</span><span class="p">,</span> <span class="n">rule_strings</span><span class="o">=</span><span class="n">rule_strings</span><span class="p">,</span>
+            <span class="n">lambda_kwargs</span><span class="o">=</span><span class="n">lambda_kwargs</span><span class="p">,</span> <span class="n">lambda_args</span><span class="o">=</span><span class="n">lambda_args</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="c1"># If first element of iterable, just return self</span>
+        <span class="k">if</span> <span class="n">other</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">rules_lens</span> <span class="o">=</span> <span class="p">[</span>
             <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_dicts</span><span class="p">),</span>

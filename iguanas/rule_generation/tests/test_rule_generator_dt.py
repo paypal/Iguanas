@@ -118,7 +118,6 @@ def test_fit(create_data, rg_instantiated):
     X, y, _, _, _, weights = create_data
     rg, _ = rg_instantiated
     for i, w in enumerate([None, weights]):
-        print(i)
         X_rules = rg.fit(X, y, sample_weight=w)
         pd.testing.assert_series_equal(X_rules.sum(), exp_results[i])
         assert rg.rule_names == exp_results[i].index.tolist() == list(

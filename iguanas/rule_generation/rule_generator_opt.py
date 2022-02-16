@@ -258,8 +258,10 @@ class RuleGeneratorOpt(_BaseGenerator):
                 col for col in columns_cat if col in self.target_feat_corr_types['NegativeCorr']]
             cols_and_operators = list(zip(pos_corr_cat_feats, ['True'] * len(pos_corr_cat_feats))) + list(
                 zip(neg_corr_cat_feats, ['False'] * len(neg_corr_cat_feats)))
-            rule_strings = {self._generate_rule_name(): f"(X['{col}']=={operator})" for col,
-                            operator in cols_and_operators}
+            rule_strings = {
+                self._generate_rule_name(): f"(X['{col}']=={operator})"
+                for col, operator in cols_and_operators
+            }
             ara = RuleApplier(
                 rule_strings=rule_strings
             )

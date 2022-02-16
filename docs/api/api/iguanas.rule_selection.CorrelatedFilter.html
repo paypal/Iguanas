@@ -275,6 +275,16 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.pipeline.ParallelPipeline.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.pipeline
+      </span>
+     </code>
+     .ParallelPipeline
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="iguanas.pipeline.ClassAccessor.html">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
@@ -657,7 +667,7 @@
 <h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">iguanas.rule_selection</span></code>.CorrelatedFilter<a class="headerlink" href="#iguanas-rule-selection-correlatedfilter" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="iguanas.rule_selection.CorrelatedFilter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">CorrelatedFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">correlation_reduction_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="iguanas.correlation_reduction.AgglomerativeClusteringReducer.html#iguanas.correlation_reduction.AgglomerativeClusteringReducer" title="iguanas.correlation_reduction.agglomerative_clustering_reducer.AgglomerativeClusteringReducer"><span class="pre">iguanas.correlation_reduction.agglomerative_clustering_reducer.AgglomerativeClusteringReducer</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/rule_selection/correlated_filter.html#CorrelatedFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.CorrelatedFilter" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">CorrelatedFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">correlation_reduction_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="iguanas.correlation_reduction.AgglomerativeClusteringReducer.html#iguanas.correlation_reduction.AgglomerativeClusteringReducer" title="iguanas.correlation_reduction.agglomerative_clustering_reducer.AgglomerativeClusteringReducer"><span class="pre">iguanas.correlation_reduction.agglomerative_clustering_reducer.AgglomerativeClusteringReducer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/rule_selection/correlated_filter.html#CorrelatedFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.CorrelatedFilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Filters correlated rules based on a correlation reduction class (see the
 <cite>correlation_reduction</cite> sub-package).</p>
 <dl class="field-list simple">
@@ -665,11 +675,18 @@
 <dd class="field-odd"><dl class="simple">
 <dt><strong>correlation_reduction_class</strong><span class="classifier">AgglomerativeClusteringReducer</span></dt><dd><p>Instatiated class from the <cite>correlation_reduction</cite> sub-package.</p>
 </dd>
+<dt><strong>rules</strong><span class="classifier">Rules, optional</span></dt><dd><p>An Iguanas <cite>Rules</cite> object containing the rules that need to be 
+filtered. If provided, the rules within the object will be filtered. 
+Defaults to None.</p>
+</dd>
 </dl>
 </dd>
 <dt class="field-even">Attributes</dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>rules_to_keep</strong><span class="classifier">List[str]</span></dt><dd><p>List of rules which remain after correlated rules have been removed.</p>
+<dt><strong>rules_to_keep</strong><span class="classifier">List[str]</span></dt><dd><p>List of rules which remain after the filter has been applied.</p>
+</dd>
+<dt><strong>rules</strong><span class="classifier">Rules</span></dt><dd><p>The Iguanas <cite>Rules</cite> object containing the rules which remain after the
+filter has been applied.</p>
 </dd>
 </dl>
 </dd>

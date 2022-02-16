@@ -180,10 +180,11 @@ class RuleGeneratorDT(_BaseGenerator):
             ) for decision_tree in decision_trees
             )
         rule_strings_set = sorted(set().union(*list_of_rule_string_sets))
-        self.rule_strings = dict((self._generate_rule_name(), rule_string)
-                                 for rule_string in rule_strings_set)
+        self.rule_strings = dict(
+            (self._generate_rule_name(), rule_string)
+            for rule_string in rule_strings_set
+        )
         if not self.rule_strings:
-            # raise Exception(
             raise NoRulesError(
                 'No rules could be generated. Try changing the class parameters.')
         X_rules = self.transform(X=X)

@@ -185,6 +185,10 @@
 <span class="sd">    sorting_metric : Callable</span>
 <span class="sd">        The method/function used calculate the performance metric by which the</span>
 <span class="sd">        rules are sorted.</span>
+<span class="sd">    rules : Rules, optional</span>
+<span class="sd">        An Iguanas `Rules` object containing the rules that need to be </span>
+<span class="sd">        filtered. If provided, the rules within the object will be filtered. </span>
+<span class="sd">        Defaults to None.</span>
 <span class="sd">    verbose : int, optional</span>
 <span class="sd">        Controls the verbosity - the higher, the more messages. &gt;0 : shows the</span>
 <span class="sd">        progress of the filtering process. Defaults to 0.</span>
@@ -192,7 +196,10 @@
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    rules_to_keep : List[str]</span>
-<span class="sd">        List of rules which give the best combined performance.</span>
+<span class="sd">        List of rules which remain after the filter has been applied.</span>
+<span class="sd">    rules : Rules</span>
+<span class="sd">        The Iguanas `Rules` object containing the rules which remain after the</span>
+<span class="sd">        filter has been applied.</span>
 <span class="sd">    score : float</span>
 <span class="sd">        The combined performance (i.e. the value of `metric`) of the rules</span>
 <span class="sd">        which give the best combined performance.</span>
@@ -201,11 +208,12 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
                  <span class="n">sorting_metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+                 <span class="n">rules</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sorting_metric</span> <span class="o">=</span> <span class="n">sorting_metric</span>
-        <span class="n">_BaseFilter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rules_to_keep</span><span class="o">=</span><span class="p">[])</span>
+        <span class="n">_BaseFilter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rules_to_keep</span><span class="o">=</span><span class="p">[],</span> <span class="n">rules</span><span class="o">=</span><span class="n">rules</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

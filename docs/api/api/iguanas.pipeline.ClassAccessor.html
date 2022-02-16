@@ -37,7 +37,7 @@
     <link rel="shortcut icon" href="../../_static/iguanas_icon.png"/>
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Rules-Based System (RBS)" href="../rbs.html" />
-    <link rel="prev" title="iguanas.pipeline.LinearPipeline" href="iguanas.pipeline.LinearPipeline.html" />
+    <link rel="prev" title="iguanas.pipeline.ParallelPipeline" href="iguanas.pipeline.ParallelPipeline.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="en">
     
@@ -272,6 +272,16 @@
       </span>
      </code>
      .LinearPipeline
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.pipeline.ParallelPipeline.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.pipeline
+      </span>
+     </code>
+     .ParallelPipeline
     </a>
    </li>
    <li class="toctree-l2 current active">
@@ -674,12 +684,12 @@ in the pipeline to be passed to a class that appears later in the pipeline.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.pipeline.ClassAccessor.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/iguanas/pipeline/class_accessor.html#ClassAccessor.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.ClassAccessor.get" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/iguanas/pipeline/class_accessor.html#ClassAccessor.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.ClassAccessor.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extracts the given class attribute.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>steps</strong><span class="classifier">List[Tuple[str, object]]</span></dt><dd><p>The list of pipeline steps where the class is located.</p>
+<dt><strong>pipeline_params</strong><span class="classifier">Dict[str, dict]</span></dt><dd><p>The parameters of the pipeline containing the class attribute.</p>
 </dd>
 </dl>
 </dd>

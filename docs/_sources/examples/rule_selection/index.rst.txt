@@ -8,3 +8,4 @@ Rule Selection
     correlated_filter_example
     greedy_filter_example
     bayes_search_cv_example
+    advanced_bayes_search_cv_example

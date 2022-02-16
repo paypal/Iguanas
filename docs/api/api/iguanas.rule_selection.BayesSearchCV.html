@@ -275,6 +275,16 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.pipeline.ParallelPipeline.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.pipeline
+      </span>
+     </code>
+     .ParallelPipeline
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="iguanas.pipeline.ClassAccessor.html">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
@@ -657,16 +667,16 @@
 <h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">iguanas.rule_selection</span></code>.BayesSearchCV<a class="headerlink" href="#iguanas-rule-selection-bayessearchcv" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="iguanas.rule_selection.BayesSearchCV">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">BayesSearchCV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">pipeline:</span> <span class="pre">iguanas.pipeline.linear_pipeline.LinearPipeline,</span> <span class="pre">search_spaces:</span> <span class="pre">typing.Dict[str,</span> <span class="pre">dict],</span> <span class="pre">metric:</span> <span class="pre">typing.Callable,</span> <span class="pre">cv:</span> <span class="pre">int,</span> <span class="pre">n_iter:</span> <span class="pre">int,</span> <span class="pre">refit=True,</span> <span class="pre">algorithm=&lt;function</span> <span class="pre">suggest&gt;,</span> <span class="pre">error_score='raise',</span> <span class="pre">num_cores=1,</span> <span class="pre">verbose=0,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/rule_selection/bayes_search_cv.html#BayesSearchCV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.BayesSearchCV" title="Permalink to this definition">¶</a></dt>
-<dd><p>Optimises the parameters of a pipeline using a user-defined set of 
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">BayesSearchCV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">pipeline:</span> <span class="pre">iguanas.pipeline.linear_pipeline.LinearPipeline,</span> <span class="pre">search_spaces:</span> <span class="pre">typing.Dict[str,</span> <span class="pre">dict],</span> <span class="pre">metric:</span> <span class="pre">typing.Callable,</span> <span class="pre">cv:</span> <span class="pre">int,</span> <span class="pre">n_iter:</span> <span class="pre">int,</span> <span class="pre">refit=True,</span> <span class="pre">algorithm=&lt;function</span> <span class="pre">suggest&gt;,</span> <span class="pre">error_score='raise',</span> <span class="pre">sample_weight_in_val=False,</span> <span class="pre">num_cores=1,</span> <span class="pre">verbose=0,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/rule_selection/bayes_search_cv.html#BayesSearchCV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.BayesSearchCV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimises the parameters of a pipeline using a user-defined set of
 search spaces in conjuncion with Bayesian Optimisation.</p>
 <p>The data is first split into cross validation datasets. For each fold, the
 Bayesian optimiser chooses a set of parameters (from the ranges provided),
-applies the pipeline’s <cite>fit</cite> method to the training set, then applies the 
+applies the pipeline’s <cite>fit</cite> method to the training set, then applies the
 <cite>predict</cite> method to the validation set. The pipeline’s prediction is scored
-using the <cite>metric</cite> function, and these scores are averaged across the 
+using the <cite>metric</cite> function, and these scores are averaged across the
 folds. New parameter sets are chosen and applied until <cite>n_iter</cite> is reached.
-The parameter setwith the highest mean score is deemed to be the best 
+The parameter setwith the highest mean score is deemed to be the best
 performing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -675,10 +685,10 @@ performing.</p>
 must include a <cite>predict</cite> method, which utilises a set of rules to make
 a prediction on a binary target.</p>
 </dd>
-<dt><strong>search_spaces</strong><span class="classifier">Dict[str, dict]</span></dt><dd><p>The search spaces for each relevant parameter of each step in the 
+<dt><strong>search_spaces</strong><span class="classifier">Dict[str, dict]</span></dt><dd><p>The search spaces for each relevant parameter of each step in the
 pipeline. Each key should correspond to the tag used for the relevant
-pipeline step; each value should be a dictionary of the parameters 
-(keys) and their search spaces (values). Search spaces should be 
+pipeline step; each value should be a dictionary of the parameters
+(keys) and their search spaces (values). Search spaces should be
 defined using the classes in <cite>iguanas.space</cite>.</p>
 </dd>
 <dt><strong>metric</strong><span class="classifier">Callable</span></dt><dd><p>The metric used to optimise the pipeline.</p>
@@ -687,31 +697,35 @@ defined using the classes in <cite>iguanas.space</cite>.</p>
 </dd>
 <dt><strong>n_iter</strong><span class="classifier">int</span></dt><dd><p>The number of iterations that the optimiser should perform.</p>
 </dd>
-<dt><strong>refit</strong><span class="classifier">bool, optional</span></dt><dd><p>Refit the best pipeline using the entire dataset. Must be set to True 
-if predictions need to be made using the best pipeline. Defaults to 
+<dt><strong>refit</strong><span class="classifier">bool, optional</span></dt><dd><p>Refit the best pipeline using the entire dataset. Must be set to True
+if predictions need to be made using the best pipeline. Defaults to
 True.</p>
 </dd>
 <dt><strong>algorithm</strong><span class="classifier">Callable, optional</span></dt><dd><p>The algorithm leveraged by hyperopt’s <cite>fmin</cite> function, which optimises
-the rules. Defaults to tpe.suggest, which corresponds to 
+the rules. Defaults to tpe.suggest, which corresponds to
 Tree-of-Parzen-Estimator.</p>
 </dd>
-<dt><strong>error_score</strong><span class="classifier">Union[str, float], optional</span></dt><dd><p>Value to assign to the score of a validation fold if an error occurs 
-in the pipeline fitting. If set to ‘raise’, the error is raised. If a 
+<dt><strong>error_score</strong><span class="classifier">Union[str, float], optional</span></dt><dd><p>Value to assign to the score of a validation fold if an error occurs
+in the pipeline fitting. If set to ‘raise’, the error is raised. If a
 numeric value is given, a warning is raised. This parameter does not
 affect the refit step, which will always raise the error. Defaults to
 ‘raise’.</p>
 </dd>
-<dt><strong>num_cores</strong><span class="classifier">int, optional</span></dt><dd><p>Number of cores to use when fitting a given parameter set. Should be 
+<dt><strong>num_cores</strong><span class="classifier">int, optional</span></dt><dd><p>Number of cores to use when fitting a given parameter set. Should be
 set to &lt;= <cite>cv</cite>. Defaults to 1.</p>
 </dd>
-<dt><strong>verbose</strong><span class="classifier">int, optional</span></dt><dd><p>Controls the verbosity - the higher, the more messages. &gt;0 : shows the 
+<dt><strong>sample_weight_in_val</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether the <cite>sample_weight</cite> should be used when calculating the 
+<cite>metric</cite> on the validation fold. If True, the <cite>sample_weight</cite> is used.
+Defaults to False.</p>
+</dd>
+<dt><strong>verbose</strong><span class="classifier">int, optional</span></dt><dd><p>Controls the verbosity - the higher, the more messages. &gt;0 : shows the
 overall progress of the optimisation process. Defaults to 0.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Attributes</dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>cv_results</strong><span class="classifier">PandasDataFrameType</span></dt><dd><p>Shows the scores per fold, mean score and standard deviation of the 
+<dt><strong>cv_results</strong><span class="classifier">PandasDataFrameType</span></dt><dd><p>Shows the scores per fold, mean score and standard deviation of the
 score for each trialled parameter set.</p>
 </dd>
 <dt><strong>best_score</strong><span class="classifier">float</span></dt><dd><p>The best mean score achieved.</p>
@@ -727,16 +741,18 @@ score for each trialled parameter set.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.rule_selection.BayesSearchCV.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/iguanas/rule_selection/bayes_search_cv.html#BayesSearchCV.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.BayesSearchCV.fit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/iguanas/rule_selection/bayes_search_cv.html#BayesSearchCV.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.BayesSearchCV.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Optimises the parameters of the given pipeline.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">PandasDataFrameType</span></dt><dd><p>The dataset.</p>
+<dt><strong>X</strong><span class="classifier">Union[PandasDataFrameType, dict]</span></dt><dd><p>The dataset or dictionary of datasets for each pipeline step.</p>
 </dd>
-<dt><strong>y</strong><span class="classifier">PandasSeriesType</span></dt><dd><p>The binary target column.</p>
+<dt><strong>y</strong><span class="classifier">Union[PandasSeriesType, dict]</span></dt><dd><p>The binary target column or dictionary of binary target columns
+for each pipeline step.</p>
 </dd>
-<dt><strong>sample_weight</strong><span class="classifier">PandasSeriesType, optional</span></dt><dd><p>Row-wise weights to apply. Defaults to None.</p>
+<dt><strong>sample_weight</strong><span class="classifier">Union[PandasSeriesType, dict], optional</span></dt><dd><p>Row-wise weights or dictionary of row-wise weights for each
+pipeline step.. Defaults to None.</p>
 </dd>
 </dl>
 </dd>
@@ -745,12 +761,12 @@ score for each trialled parameter set.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.rule_selection.BayesSearchCV.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.series.Series</span></span></span><a class="reference internal" href="../../_modules/iguanas/rule_selection/bayes_search_cv.html#BayesSearchCV.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.BayesSearchCV.predict" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.series.Series</span></span></span><a class="reference internal" href="../../_modules/iguanas/rule_selection/bayes_search_cv.html#BayesSearchCV.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.BayesSearchCV.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict using the optimised pipeline.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">PandasDataFrameType</span></dt><dd><p>The dataset.</p>
+<dt><strong>X</strong><span class="classifier">Union[PandasDataFrameType, dict]</span></dt><dd><p>The dataset or dictionary of datasets for each pipeline step.</p>
 </dd>
 </dl>
 </dd>
@@ -765,17 +781,19 @@ score for each trialled parameter set.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.rule_selection.BayesSearchCV.fit_predict">
-<span class="sig-name descname"><span class="pre">fit_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.series.Series</span></span></span><a class="reference internal" href="../../_modules/iguanas/rule_selection/bayes_search_cv.html#BayesSearchCV.fit_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.BayesSearchCV.fit_predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Optimises the parameters of the given pipeline, then generates the 
+<span class="sig-name descname"><span class="pre">fit_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.series.Series</span></span></span><a class="reference internal" href="../../_modules/iguanas/rule_selection/bayes_search_cv.html#BayesSearchCV.fit_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.BayesSearchCV.fit_predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimises the parameters of the given pipeline, then generates the
 optimised pipeline’s prediction on the dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">PandasDataFrameType</span></dt><dd><p>The dataset.</p>
+<dt><strong>X</strong><span class="classifier">Union[PandasDataFrameType, dict]</span></dt><dd><p>The dataset or dictionary of datasets for each pipeline step.</p>
 </dd>
-<dt><strong>y</strong><span class="classifier">PandasSeriesType</span></dt><dd><p>The binary target column.</p>
+<dt><strong>y</strong><span class="classifier">Union[PandasSeriesType, dict]</span></dt><dd><p>The binary target column or dictionary of binary target columns
+for each pipeline step.</p>
 </dd>
-<dt><strong>sample_weight</strong><span class="classifier">PandasSeriesType, optional</span></dt><dd><p>Row-wise weights to apply. Defaults to None.</p>
+<dt><strong>sample_weight</strong><span class="classifier">Union[PandasSeriesType, dict], optional</span></dt><dd><p>Row-wise weights or dictionary of row-wise weights for each
+pipeline step.. Defaults to None.</p>
 </dd>
 </dl>
 </dd>
