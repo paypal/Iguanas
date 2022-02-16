@@ -33,7 +33,7 @@ setuptools.setup(
         ],
         'spark': [
             'koalas>=1.8.1',
-            # 'pyspark==3.1.2'
+            'pyspark>=3.1.2'
         ]
     },
     classifiers=[
