@@ -341,9 +341,13 @@ class BayesianOptimiser(_BaseOptimiser):
             return -result
 
         opt_thresholds = fmin(
-            fn=_objective, space=rule_space_funcs, algo=algorithm,
-            max_evals=n_iter, verbose=verbose > 1,
-            rstate=np.random.RandomState(0), **kwargs
+            fn=_objective,
+            space=rule_space_funcs,
+            algo=algorithm,
+            max_evals=n_iter,
+            verbose=verbose > 1,
+            rstate=np.random.RandomState(0),
+            **kwargs
         )
 
         # If rule_space_funcs contained constant values (due to min/max of

@@ -18,10 +18,10 @@ setuptools.setup(
     install_requires=[
         'category-encoders>=2.0.0',
         'seaborn>=0.9.0',
-        'numpy>=1.21',
+        # 'numpy>=1.21',
         'pandas>=1.1.4',
         'hyperopt==0.2.5',
-        'joblib>=1.1.*',
+        'joblib>=1.1.0',
         'scikit-learn>=0.23.2',
     ],
     extras_require={
@@ -31,7 +31,10 @@ setuptools.setup(
             'nbsphinx==0.8.7', 'pydata-sphinx-theme==0.7.2', 'nbmake==1.1',
             'pytest-cov==3.0.0', 'notebook==6.4.6', 'ipykernel==6.6.0'
         ],
-        'spark': ['koalas==1.8.1', 'pyspark==3.1.2']
+        'spark': [
+            'koalas>=1.8.1',
+            # 'pyspark==3.1.2'
+        ]
     },
     classifiers=[
         "Programming Language :: Python :: 3",
