@@ -1278,6 +1278,10 @@ def test_create_bounds(_create_data, _create_inputs):
         pytest.warns(
             UserWarning, match="Rules `missing_col` use features that are missing from `X` - unable to calculate `bounds` for these rules"):
         bounds = DirectSearchOptimiser.create_bounds(X, lambda_kwargs)
+        # Check `all_na` separately as np.nan != np.nan
+        np.testing.assert_array_equal(bounds['all_na'], exp_bounds['all_na'])
+        bounds.pop('all_na')
+        exp_bounds.pop('all_na')
         assert bounds == exp_bounds
 
 
@@ -1519,6 +1523,10 @@ def test_param_base_calc(_instantiate, _create_data, _create_inputs):
             X, lambda_kwargs, 'bounds',
             lambda X_min, X_max: list(zip(X_min, X_max))
         )
+    # Check `all_na` separately as np.nan != np.nan
+    np.testing.assert_array_equal(bounds['all_na'], exp_bounds['all_na'])
+    bounds.pop('all_na')
+    exp_bounds.pop('all_na')
     assert bounds == exp_bounds
 
 
