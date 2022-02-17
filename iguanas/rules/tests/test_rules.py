@@ -151,18 +151,70 @@ def _rule_lambdas_with_args():
     return rule_lambdas, lambda_args
 
 
-def test_add():
-    rules1 = Rules(rule_strings={'Rule1': "X['A']>0"})
-    rules2 = Rules(rule_strings={'Rule2': "X['B']>0"})
+def test_add_and_radd():
+    exp_rule_strings = {'Rule1': "X['A']>0", 'Rule2': "X['B']>0"}
+    exp_rule_dicts = {
+        'Rule1': {
+            'condition': 'AND', 'rules': [{
+                'field': 'A', 'operator': 'greater', 'value': 0
+            }]},
+        'Rule2': {
+            'condition': 'AND', 'rules': [{
+                'field': 'B', 'operator': 'greater', 'value': 0
+            }]}
+    }
+    rules1 = Rules(
+        rule_strings={'Rule1': "X['A']>0"},
+        rule_dicts={
+            'Rule1': {
+                'condition': 'AND', 'rules': [{
+                    'field': 'A', 'operator': 'greater', 'value': 0
+                }]}
+        },
+        rule_lambdas={'Rule1': lambda **kwargs: "X['A']>{A}".format(**kwargs)},
+        lambda_kwargs={'Rule1': {'A': 0}},
+    )
+    rules2 = Rules(
+        rule_strings={'Rule2': "X['B']>0"},
+        rule_dicts={
+            'Rule2': {
+                'condition': 'AND', 'rules': [{
+                    'field': 'B', 'operator': 'greater', 'value': 0
+                }]}
+        },
+        rule_lambdas={'Rule2': lambda **kwargs: "X['B']>{B}".format(**kwargs)},
+        lambda_kwargs={'Rule2': {'B': 0}},
+    )
+    # Test __add__
     rules = rules1 + rules2
-    assert rules.rule_strings == {'Rule1': "X['A']>0", 'Rule2': "X['B']>0"}
-
-
-def test_radd():
-    rules1 = Rules(rule_strings={'Rule1': "X['A']>0"})
-    rules2 = Rules(rule_strings={'Rule2': "X['B']>0"})
+    assert rules.rule_strings == exp_rule_strings
+    assert rules.rule_dicts == exp_rule_dicts
+    for r in ['Rule1', 'Rule2']:
+        assert rules.rule_lambdas[r](
+            **rules.lambda_kwargs[r]) == exp_rule_strings[r]
+    # Test __radd__
     rules = sum([rules1, rules2])
-    assert rules.rule_strings == {'Rule1': "X['A']>0", 'Rule2': "X['B']>0"}
+    assert rules.rule_strings == exp_rule_strings
+    assert rules.rule_dicts == exp_rule_dicts
+    for r in ['Rule1', 'Rule2']:
+        assert rules.rule_lambdas[r](
+            **rules.lambda_kwargs[r]) == exp_rule_strings[r]
+    # Test exception
+    with pytest.raises(ValueError, match=f"""Attempting to add rule sets with similar keys in `rule_dicts`. Similar keys are 'Rule1'."""):
+        rules = rules1 + rules1
+        rules = sum([rules1, rules1])
+    rules1.rule_dicts = {}
+    with pytest.raises(ValueError, match=f"""Attempting to add rule sets with similar keys in `rule_strings`. Similar keys are 'Rule1'."""):
+        rules = rules1 + rules1
+        rules = sum([rules1, rules1])
+    rules1.rule_strings = {}
+    with pytest.raises(ValueError, match=f"""Attempting to add rule sets with similar keys in `rule_lambdas`. Similar keys are 'Rule1'."""):
+        rules = rules1 + rules1
+        rules = sum([rules1, rules1])
+    rules1.rule_lambdas = {}
+    with pytest.raises(ValueError, match=f"""Attempting to add rule sets with similar keys in `lambda_kwargs`. Similar keys are 'Rule1'."""):
+        rules = rules1 + rules1
+        rules = sum([rules1, rules1])
 
 
 def test_repr(_rule_strings_pandas):
