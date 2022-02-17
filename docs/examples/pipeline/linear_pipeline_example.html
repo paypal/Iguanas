@@ -36,7 +36,7 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="shortcut icon" href="../../_static/iguanas_icon.png"/>
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Rules-Based System (RBS)" href="../rbs/index.html" />
+    <link rel="next" title="Parallel Pipeline Example" href="parallel_pipeline_example.html" />
     <link rel="prev" title="Pipeline" href="index.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="en">
@@ -228,6 +228,11 @@
      Linear Pipeline Example
     </a>
    </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="parallel_pipeline_example.html">
+     Parallel Pipeline Example
+    </a>
+   </li>
   </ul>
  </li>
  <li class="toctree-l1 has-children">
@@ -380,6 +385,11 @@
      Bayes Search CV Example
     </a>
    </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../rule_selection/advanced_bayes_search_cv_example.html">
+     Advanced Bayes Search CV Example
+    </a>
+   </li>
   </ul>
  </li>
  <li class="toctree-l1 has-children">
@@ -501,6 +511,11 @@
     </ul>
    </li>
   </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Using-the-initial-data-in-a-subsequent-pipeline-step">
+   Using the initial data in a subsequent pipeline step
+  </a>
  </li>
 </ul>
 
@@ -774,14 +789,23 @@ div.rendered_html tbody tr:hover {
 <section id="Linear-Pipeline-Example">
 <h1>Linear Pipeline Example<a class="headerlink" href="#Linear-Pipeline-Example" title="Permalink to this headline">¶</a></h1>
 <p>A Linear Pipeline is a sequence of steps that are applied sequentially to a dataset. Each step should be an instantiated class with both <code class="docutils literal notranslate"><span class="pre">fit</span></code> and <code class="docutils literal notranslate"><span class="pre">transform</span></code> methods. The final step should be an instantiated class with both <code class="docutils literal notranslate"><span class="pre">fit</span></code> and <code class="docutils literal notranslate"><span class="pre">predict</span></code> methods.</p>
-<p>Pipelines will usually have the following high-level structure:</p>
+<p>The below diagram shows the high level structure of a Linear Pipeline:</p>
+<center><p><img alt="cb93cfa0cae34e73951180924fcf24f4" src="../../_images/linear_pipeline_structure.png" /></p>
+</center><p>It is used to carry out multiple processes sequentially, using the output of the last step as the input to the next step. One such use case is when we want to:</p>
 <ol class="arabic simple">
-<li><p>Rule generation/optimisation step</p></li>
-<li><p>Rule processing steps</p></li>
-<li><p>Rule predictor step</p></li>
+<li><p>Generate a set of rules.</p></li>
+<li><p>Filter the rule set to remove those which are:</p>
+<ul class="simple">
+<li><p>Poorly performing.</p></li>
+<li><p>Correlated.</p></li>
+</ul>
+</li>
+<li><p>Use the resulting rule set to optimise a decision engine.</p></li>
 </ol>
-<p><strong>Note that currently, it is not possible to have a rule optimisation step after a rule generation step (i.e. to optimise rules that have been generated), but this feature is being developed!</strong></p>
-<p>This example shows how to create a pipeline to perform a set of given steps.</p>
+<p>An example of this workflow is shown below:</p>
+<center><p><img alt="edd1761c7a7b43a9b626fea84be42835" src="../../_images/linear_pipeline_example.png" /></p>
+</center><p>To create this workflow in Iguanas, each step will be added to a Linear Pipeline (whilst maintaining the order shown).</p>
+<p><strong>We’ll see how this workflow can be generated in the following example.</strong></p>
 <hr class="docutils" />
 <section id="Import-packages">
 <h2>Import packages<a class="headerlink" href="#Import-packages" title="Permalink to this headline">¶</a></h2>
@@ -791,6 +815,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">iguanas.rule_generation</span> <span class="kn">import</span> <span class="n">RuleGeneratorDT</span>
+<span class="kn">from</span> <span class="nn">iguanas.rule_optimisation</span> <span class="kn">import</span> <span class="n">BayesianOptimiser</span>
 <span class="kn">from</span> <span class="nn">iguanas.rule_selection</span> <span class="kn">import</span> <span class="n">SimpleFilter</span><span class="p">,</span> <span class="n">CorrelatedFilter</span>
 <span class="kn">from</span> <span class="nn">iguanas.metrics</span> <span class="kn">import</span> <span class="n">FScore</span><span class="p">,</span> <span class="n">Precision</span><span class="p">,</span> <span class="n">JaccardSimilarity</span>
 <span class="kn">from</span> <span class="nn">iguanas.rbs</span> <span class="kn">import</span> <span class="n">RBSOptimiser</span><span class="p">,</span> <span class="n">RBSPipeline</span>
@@ -864,7 +889,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/jlaidler/venvs/iguanas_os_dev/lib/python3.8/site-packages/category_encoders/utils.py:21: FutureWarning: is_categorical is deprecated and will be removed in a future version.  Use is_categorical_dtype instead
+/Users/jlaidler/venvs/iguanas_dev/lib/python3.8/site-packages/category_encoders/utils.py:21: FutureWarning: is_categorical is deprecated and will be removed in a future version.  Use is_categorical_dtype instead
   elif pd.api.types.is_categorical(cols):
 </pre></div></div>
 </div>
@@ -872,69 +897,51 @@ div.rendered_html tbody tr:hover {
 </section>
 <section id="Set-up-pipeline">
 <h2>Set up pipeline<a class="headerlink" href="#Set-up-pipeline" title="Permalink to this headline">¶</a></h2>
-<p>Let’s say that we want to apply the following processes as part of our pipeline:</p>
-<ol class="arabic simple">
-<li><p>Rule generation step</p>
-<ul class="simple">
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">RuleGeneratorDT</span></code> to generate rules using the processed data.</p></li>
-</ul>
-</li>
-<li><p>Rule processing step</p>
-<ul class="simple">
-<li><p>Apply <code class="docutils literal notranslate"><span class="pre">SimpleFilter</span></code>, keeping rules with F1 score &gt;= 0.1</p></li>
-<li><p>Apply <code class="docutils literal notranslate"><span class="pre">CorrelatedFilter</span></code>, removing rules with a Jaccard Similarity &gt;= 0.9</p></li>
-</ul>
-</li>
-<li><p>Rule predictor step</p>
-<ul class="simple">
-<li><p>Use the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> to optimise an <code class="docutils literal notranslate"><span class="pre">RBSPipeline</span></code> for F1 score. This will create a rule predictor.</p></li>
-</ul>
-</li>
-</ol>
-<p>To create a pipeline to do this, let’s first instantiate the relevant classes:</p>
+<p>To create the worflow shown at the beginning of the notebook, let’s first instantiate the classes for each step. We’ll optimise our decision engine to maximise the <strong>F1 score</strong>:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">f1</span> <span class="o">=</span> <span class="n">FScore</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">js</span> <span class="o">=</span> <span class="n">JaccardSimilarity</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Rule generation</span>
+<span></span><span class="c1"># Optimisation metric</span>
+<span class="n">f1</span> <span class="o">=</span> <span class="n">FScore</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Rule generation</span>
 <span class="n">generator</span> <span class="o">=</span> <span class="n">RuleGeneratorDT</span><span class="p">(</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
     <span class="n">n_total_conditions</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
     <span class="n">tree_ensemble</span><span class="o">=</span><span class="n">RandomForestClassifier</span><span class="p">(</span>
-        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span>
-    <span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">target_feat_corr_types</span><span class="o">=</span><span class="s1">&#39;Infer&#39;</span>
 <span class="p">)</span>
-<span class="c1"># Rule processing</span>
+
+<span class="c1"># Rule filter (performance-based)</span>
 <span class="n">simple_filterer</span> <span class="o">=</span> <span class="n">SimpleFilter</span><span class="p">(</span>
-    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="c1"># Filter out rules with an F1 score &lt; 0.1</span>
     <span class="n">operator</span><span class="o">=</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span>
 <span class="p">)</span>
+
+<span class="c1"># Rule filter (correlation-based)</span>
+<span class="n">js</span> <span class="o">=</span> <span class="n">JaccardSimilarity</span><span class="p">()</span>
 <span class="n">corr_filterer</span> <span class="o">=</span> <span class="n">CorrelatedFilter</span><span class="p">(</span>
     <span class="n">correlation_reduction_class</span><span class="o">=</span><span class="n">AgglomerativeClusteringReducer</span><span class="p">(</span>
-        <span class="n">threshold</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="c1"># Filter out rules in the same cluster with a Jaccard Similarity &gt;= 0.9</span>
         <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;top_down&#39;</span><span class="p">,</span>
         <span class="n">similarity_function</span><span class="o">=</span><span class="n">js</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
         <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span>
     <span class="p">)</span>
 <span class="p">)</span>
-<span class="c1"># Rule prediction</span>
+
+<span class="c1"># Decision engine (to be optimised)</span>
 <span class="n">rbs_pipeline</span> <span class="o">=</span> <span class="n">RBSPipeline</span><span class="p">(</span>
     <span class="n">config</span><span class="o">=</span><span class="p">[],</span>
     <span class="n">final_decision</span><span class="o">=</span><span class="mi">0</span>
 <span class="p">)</span>
+
+<span class="c1"># Decision engine optimiser</span>
 <span class="n">rbs_optimiser</span> <span class="o">=</span> <span class="n">RBSOptimiser</span><span class="p">(</span>
     <span class="n">pipeline</span><span class="o">=</span><span class="n">rbs_pipeline</span><span class="p">,</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
@@ -942,19 +949,26 @@ div.rendered_html tbody tr:hover {
         <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;corr_filterer&#39;</span><span class="p">,</span>
         <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rules_to_keep&#39;</span>
     <span class="p">),</span>
+    <span class="n">rules</span><span class="o">=</span><span class="n">ClassAccessor</span><span class="p">(</span>
+        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;generator&#39;</span><span class="p">,</span>
+        <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rules&#39;</span>
+    <span class="p">),</span>
     <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p><strong>Note:</strong> The argument passed to the <code class="docutils literal notranslate"><span class="pre">pos_pred_rules</span></code> parameter in the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> class is a <code class="docutils literal notranslate"><span class="pre">ClassAccessor</span></code> object. This takes the names of the rules that remain after the <code class="docutils literal notranslate"><span class="pre">CorrelatedFilter</span></code> has been applied and passes it to the <code class="docutils literal notranslate"><span class="pre">pos_pred_rules</span></code> parameter of the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> class.</p>
+<p><strong>Note:</strong> The arguments passed to the <code class="docutils literal notranslate"><span class="pre">pos_pred_rules</span></code> and <code class="docutils literal notranslate"><span class="pre">rules</span></code> parameters in the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> class are <code class="docutils literal notranslate"><span class="pre">ClassAccessor</span></code> objects. This object extracts the specified attribute from the given class in the pipeline. This allows users to pass attributes from earlier steps in the pipeline as parameters of later steps in the pipeline.</p>
+<p>In this example, the names of the rules that are present after the <code class="docutils literal notranslate"><span class="pre">corr_filterer</span></code> step are passed to the <code class="docutils literal notranslate"><span class="pre">pos_pred_rules</span></code> parameter of the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> class - this is so the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> knows which rules predict positive cases (which, one might argue, doesn’t need to be specified in this example, as we only have one type of rule set. However, when you have a set of rules - some that predict positive cases and some that predict negative cases - you must specify which rules predict
+what case, using the <code class="docutils literal notranslate"><span class="pre">pos_pred_rules</span></code> and <code class="docutils literal notranslate"><span class="pre">neg_pred_rules</span></code> parameters).</p>
+<p>Also, the <code class="docutils literal notranslate"><span class="pre">rules</span></code> attribute created in the <code class="docutils literal notranslate"><span class="pre">generator</span></code> step are passed to the <code class="docutils literal notranslate"><span class="pre">rules</span></code> parameter of the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code> class. This is so the rules remaining after the decision engine optimisation can be easily extracted from the trained pipeline.</p>
 <p>Now we can create the steps of our pipeline. Each step should be a tuple of two elements:</p>
 <ol class="arabic simple">
 <li><p>The first element should be a string which refers to the step.</p></li>
 <li><p>The second element should be the instantiated class which runs at that step.</p></li>
 </ol>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -969,7 +983,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>Finally, we can instantiate our pipeline:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -984,17 +998,60 @@ div.rendered_html tbody tr:hover {
 <h3><code class="docutils literal notranslate"><span class="pre">fit</span></code> method<a class="headerlink" href="#fit-method" title="Permalink to this headline">¶</a></h3>
 <p>By running the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method, we sequentially run the <code class="docutils literal notranslate"><span class="pre">fit_transform</span></code> methods of each step in the pipeline, except for the last step, where the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method is run:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">lp</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span></span><span class="n">lp</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span>
+    <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <section id="Outputs">
 <h4>Outputs<a class="headerlink" href="#Outputs" title="Permalink to this headline">¶</a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">fit</span></code> method doesn’t return anything. However, you can access the attributes of the fitted classes using the <code class="docutils literal notranslate"><span class="pre">get_params</span></code> method.</p>
+<p>To see the rules that remain after the decision engine optimisation, we can extract the <code class="docutils literal notranslate"><span class="pre">rules</span></code> attribute from the <code class="docutils literal notranslate"><span class="pre">rbs_optimiser</span></code> step in the trained pipeline:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">rules</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">get_params</span><span class="p">()[</span><span class="s1">&#39;rbs_optimiser&#39;</span><span class="p">][</span><span class="s1">&#39;rules&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Then access the <code class="docutils literal notranslate"><span class="pre">rule_strings</span></code> attribute to see the logic of each rule:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">rules</span><span class="o">.</span><span class="n">rule_strings</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;RGDT_Rule_20220208_0&#39;: &#34;(X[&#39;Age&#39;]&gt;14.5)&amp;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220208_5&#39;: &#34;(X[&#39;Embarked_C&#39;]==True)&amp;(X[&#39;Pclass&#39;]&lt;=1)&#34;,
+ &#39;RGDT_Rule_20220208_8&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;14.85)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220208_9&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;14.9771)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220208_13&#39;: &#34;(X[&#39;Fare&#39;]&gt;52.2771)&#34;,
+ &#39;RGDT_Rule_20220208_16&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=1)&amp;(X[&#39;Sex_male&#39;]==False)&#34;,
+ &#39;RGDT_Rule_20220208_17&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220208_18&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_male&#39;]==False)&#34;,
+ &#39;RGDT_Rule_20220208_19&#39;: &#34;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220208_20&#39;: &#34;(X[&#39;Sex_male&#39;]==False)&#34;,
+ &#39;RGDT_Rule_20220208_21&#39;: &#34;(X[&#39;SibSp&#39;]&gt;=1)&#34;}
+</pre></div></div>
+</div>
 </section>
 </section>
 <section id="fit_predict-method">
@@ -1005,7 +1062,11 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">y_pred_train</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span></span><span class="n">y_pred_train</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span>
+    <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1027,18 +1088,17 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-PassengerId
-7      1
-719    1
-686    1
-74     1
-883    1
+0      0
+1      0
+2      1
+3      1
+4      1
       ..
-107    1
-271    1
-861    1
-436    1
-103    0
+591    1
+592    0
+593    1
+594    1
+595    1
 Name: Stage=0, Decision=1, Length: 596, dtype: int64
 </pre></div></div>
 </div>
@@ -1074,18 +1134,17 @@ Name: Stage=0, Decision=1, Length: 596, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-PassengerId
-710    1
-440    1
-841    1
-721    1
-40     1
+0      1
+1      0
+2      0
+3      1
+4      1
       ..
-716    1
-526    1
-382    1
-141    1
-174    1
+290    0
+291    0
+292    1
+293    1
+294    0
 Name: Stage=0, Decision=1, Length: 295, dtype: int64
 </pre></div></div>
 </div>
@@ -1105,13 +1164,200 @@ Name: Stage=0, Decision=1, Length: 295, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.5651105651105651
+0.7038327526132405
 </pre></div></div>
 </div>
 <p>This approach is very powerful when optimising hyperparameters for the overall performance of a Rules-Based System - see the <code class="docutils literal notranslate"><span class="pre">BayesSearchCV</span></code> class in the <code class="docutils literal notranslate"><span class="pre">rule_selection</span></code> module for more information.</p>
 <hr class="docutils" />
 </section>
 </section>
+</section>
+<section id="Using-the-initial-data-in-a-subsequent-pipeline-step">
+<h2>Using the initial data in a subsequent pipeline step<a class="headerlink" href="#Using-the-initial-data-in-a-subsequent-pipeline-step" title="Permalink to this headline">¶</a></h2>
+<p>The example above assumes that each subsequent step is expecting the input to be the output from the former step. However, there are cases where you may want a subsequent step in a pipeline to use an attribute created from a former step, but the input to be the initial data.</p>
+<p>For example, consider the below workflow:</p>
+<img alt="title" src="../../_images/linear_pipeline_use_init_data_incorrect.png" />
+<p>This workflow would fail as part of a standard Linear Pipeline, since the rule optimisation step requires the initial dataset to optimise the rules - in this workflow, the output of the rule generation step (which is a dataset of the binary columns of the rules) would be passed to the <code class="docutils literal notranslate"><span class="pre">X</span></code> parameter of the rule optimiser’s <code class="docutils literal notranslate"><span class="pre">fit_transform</span></code> method, which would fail as the features in the rules would not be present in that dataset.</p>
+<p>Instead, we need to construct a workflow like so:</p>
+<img alt="title" src="../../_images/linear_pipeline_use_init_data.png" />
+<p>Here, we generate a rule set using the the processed data and the binary target. We then pass this rule set to the rule optimiser, but use the initial data as the input.</p>
+<p>We can create this workflow using the <code class="docutils literal notranslate"><span class="pre">use_init_data</span></code> parameter in the <code class="docutils literal notranslate"><span class="pre">LinearPipeline</span></code> class - let’s see how this can be done below:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Optimisation metric</span>
+<span class="n">f1</span> <span class="o">=</span> <span class="n">FScore</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Rule generation</span>
+<span class="n">generator</span> <span class="o">=</span> <span class="n">RuleGeneratorDT</span><span class="p">(</span>
+    <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
+    <span class="n">n_total_conditions</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">tree_ensemble</span><span class="o">=</span><span class="n">RandomForestClassifier</span><span class="p">(</span>
+        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">),</span>
+    <span class="n">target_feat_corr_types</span><span class="o">=</span><span class="s1">&#39;Infer&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Rule optimisation</span>
+<span class="n">optimiser</span> <span class="o">=</span> <span class="n">BayesianOptimiser</span><span class="p">(</span>
+    <span class="n">rule_lambdas</span><span class="o">=</span><span class="n">ClassAccessor</span><span class="p">(</span> <span class="c1"># Use a ClassAccessor to extract rule_lambdas from the generator step</span>
+        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;generator&#39;</span><span class="p">,</span>
+        <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rule_lambdas&#39;</span>
+    <span class="p">),</span>
+    <span class="n">lambda_kwargs</span><span class="o">=</span><span class="n">ClassAccessor</span><span class="p">(</span> <span class="c1"># Use a ClassAccessor to extract lambda_kwargs from the generator step</span>
+        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;generator&#39;</span><span class="p">,</span>
+        <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;lambda_kwargs&#39;</span>
+    <span class="p">),</span>
+    <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span>
+<span class="p">)</span>
+
+<span class="c1"># Decision engine (to be optimised)</span>
+<span class="n">rbs_pipeline</span> <span class="o">=</span> <span class="n">RBSPipeline</span><span class="p">(</span>
+    <span class="n">config</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">final_decision</span><span class="o">=</span><span class="mi">0</span>
+<span class="p">)</span>
+
+<span class="c1"># Decision engine optimiser</span>
+<span class="n">rbs_optimiser</span> <span class="o">=</span> <span class="n">RBSOptimiser</span><span class="p">(</span>
+    <span class="n">pipeline</span><span class="o">=</span><span class="n">rbs_pipeline</span><span class="p">,</span>
+    <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
+    <span class="n">pos_pred_rules</span><span class="o">=</span><span class="n">ClassAccessor</span><span class="p">(</span>
+        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;optimiser&#39;</span><span class="p">,</span>
+        <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rule_names&#39;</span>
+    <span class="p">),</span>
+    <span class="n">rules</span><span class="o">=</span><span class="n">ClassAccessor</span><span class="p">(</span>
+        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;optimiser&#39;</span><span class="p">,</span>
+        <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rules&#39;</span>
+    <span class="p">),</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now, when we set up our <code class="docutils literal notranslate"><span class="pre">LinearPipeline</span></code>, we need to specify that the <code class="docutils literal notranslate"><span class="pre">optimiser</span></code> step will use the initial dataset. We do this by adding the pipeline step tag to a list and passing that to the <code class="docutils literal notranslate"><span class="pre">use_init_data</span></code> parameter:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">steps</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;generator&#39;</span><span class="p">,</span> <span class="n">generator</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;optimiser&#39;</span><span class="p">,</span> <span class="n">optimiser</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;rbs_optimiser&#39;</span><span class="p">,</span> <span class="n">rbs_optimiser</span><span class="p">)</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span>
+    <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span>
+    <span class="n">use_init_data</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;optimiser&#39;</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now we can use the <code class="docutils literal notranslate"><span class="pre">LinearPipeline</span></code> methods outlined earlier in the notebook:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># fit method</span>
+<span class="n">lp</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span>
+    <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/jlaidler/Documents/Iguanas/iguanas/rule_optimisation/_base_optimiser.py:218: UserWarning: Rules `RGDT_Rule_20220208_6`, `RGDT_Rule_20220208_7`, `RGDT_Rule_20220208_12`, `RGDT_Rule_20220208_19`, `RGDT_Rule_20220208_20` have no optimisable conditions - unable to optimise these rules
+  warnings.warn(
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">rules</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">get_params</span><span class="p">()[</span><span class="s1">&#39;rbs_optimiser&#39;</span><span class="p">][</span><span class="s1">&#39;rules&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">rules</span><span class="o">.</span><span class="n">rule_strings</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;RGDT_Rule_20220208_1&#39;: &#34;(X[&#39;Age&#39;]&gt;10.941004768044909)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220208_2&#39;: &#34;(X[&#39;Age&#39;]&gt;47.0)&amp;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;52.2771)&#34;,
+ &#39;RGDT_Rule_20220208_4&#39;: &#34;(X[&#39;Age&#39;]&gt;10.941004768044909)&#34;,
+ &#39;RGDT_Rule_20220208_5&#39;: &#34;(X[&#39;Embarked_C&#39;]==True)&amp;(X[&#39;Pclass&#39;]&lt;=2)&#34;,
+ &#39;RGDT_Rule_20220208_8&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;14.85)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220208_9&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;14.9771)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220208_10&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;47.162206755851706)&#34;,
+ &#39;RGDT_Rule_20220208_15&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&#34;,
+ &#39;RGDT_Rule_20220208_16&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_male&#39;]==False)&#34;,
+ &#39;RGDT_Rule_20220208_17&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220208_18&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_male&#39;]==False)&#34;}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># fit_predict method</span>
+<span class="n">y_pred_train</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span>
+    <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/jlaidler/Documents/Iguanas/iguanas/rule_optimisation/_base_optimiser.py:218: UserWarning: Rules `RGDT_Rule_20220208_6`, `RGDT_Rule_20220208_7`, `RGDT_Rule_20220208_12`, `RGDT_Rule_20220208_19`, `RGDT_Rule_20220208_20` have no optimisable conditions - unable to optimise these rules
+  warnings.warn(
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># predict method</span>
+<span class="n">y_pred_test</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_test</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </section>
 </section>
 

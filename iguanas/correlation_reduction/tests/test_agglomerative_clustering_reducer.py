@@ -117,11 +117,15 @@ def test_fit(create_data, cos_sim, jacc_sim, expected_columns_to_keep):
             threshold, strategy, similarity_function, metric,
             print_clustermap=True
         )
+        assert fr.__repr__(
+        ) == f'AgglomerativeClusteringReducer(threshold={threshold}, strategy={strategy}, similarity_function={similarity_function}, metric={metric}, print_clustermap=True)'
         if metric is None:
             fr.fit(X)
         else:
             fr.fit(X, y)
         assert sorted(fr.columns_to_keep) == sorted(expected_results[i])
+        assert fr.__repr__(
+        ) == f'AgglomerativeClusteringReducer object with {len(fr.columns_to_keep)} columns to keep'
 
 
 def test_fit_2_cols(create_data, jacc_sim):

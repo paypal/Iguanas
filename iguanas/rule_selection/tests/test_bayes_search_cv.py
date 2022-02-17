@@ -1,9 +1,10 @@
 import pytest
+import re
 import pandas as pd
 import numpy as np
 from hyperopt import hp
 from sklearn.ensemble import RandomForestClassifier
-
+from copy import deepcopy
 from iguanas.rule_generation import RuleGeneratorDT, RuleGeneratorOpt
 from iguanas.rule_optimisation import BayesianOptimiser
 from iguanas.rules import Rules
@@ -11,7 +12,7 @@ from iguanas.metrics import FScore, JaccardSimilarity, Precision
 from iguanas.rule_selection import SimpleFilter, CorrelatedFilter, GreedyFilter, BayesSearchCV
 from iguanas.correlation_reduction import AgglomerativeClusteringReducer
 from iguanas.rbs import RBSOptimiser, RBSPipeline
-from iguanas.pipeline import LinearPipeline, ClassAccessor
+from iguanas.pipeline import LinearPipeline, ParallelPipeline, ClassAccessor
 from iguanas.rule_generation import RuleGeneratorDT
 from iguanas.space import UniformFloat, UniformInteger, Choice
 
@@ -166,7 +167,22 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
             'threshold': UniformFloat(0, 1),
         },
         'cf': {
-            'threshold': UniformFloat(0, 1)
+            'correlation_reduction_class': Choice(
+                [
+                    AgglomerativeClusteringReducer(
+                        threshold=0.9,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    ),
+                    AgglomerativeClusteringReducer(
+                        threshold=0.95,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    )
+                ]
+            )
         },
         'gf': {
             'metric': Choice([p.fit, f1.fit])
@@ -197,7 +213,7 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
         bs.fit(X, y)
         assert bs.best_score == 0.22857142857142856
         assert bs.best_index == 2
-        assert bs.best_params['cf']['threshold'] == 0.08174388306233471
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.95
         assert str(bs.best_params['gf']['metric']
                    ) == '<bound method Precision.fit of Precision>'
         assert bs.best_params['rbs']['n_iter'] == 15.0
@@ -211,24 +227,46 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
         y_pred = bs.fit_predict(X, y)
         assert y_pred.mean() == 0.02
         assert f1.fit(y_pred, y) == 0.33333333333333337
-        # Test fit/predict/fit_predict, sample_weight given
+        # Test fit/predict/fit_predict, sample_weight given and
+        # sample_weight_in_val = False
+        bs.sample_weight_in_val = False
         bs.fit(X, y, sample_weight)
-        assert bs.best_score == 0.3015873015873016
-        assert bs.best_index == 4
-        assert bs.best_params['cf']['threshold'] == 0.1342082233571794
+        assert bs.best_score == 0.22857142857142856
+        assert bs.best_index == 2
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.95
         assert str(bs.best_params['gf']['metric']
-                   ) == '<bound method FScore.fit of FScore with beta=1>'
-        assert bs.best_params['rbs']['n_iter'] == 12.0
-        assert bs.best_params['rg_dt']['n_total_conditions'] == 4.0
+                   ) == '<bound method Precision.fit of Precision>'
+        assert bs.best_params['rbs']['n_iter'] == 15.0
+        assert bs.best_params['rg_dt']['n_total_conditions'] == 5.0
         assert bs.best_params['rg_dt']['target_feat_corr_types'] is None
-        assert bs.best_params['sf']['threshold'] == 0.1474198119511717
+        assert bs.best_params['sf']['threshold'] == 0.2583716619727481
         assert bs.cv_results.shape == (5, 11)
         y_pred = bs.predict(X)
-        assert y_pred.mean() == 0.1
-        assert f1.fit(y_pred, y, sample_weight) == 0.8421052631578948
+        assert y_pred.mean() == 0.02
+        assert f1.fit(y_pred, y) == 0.33333333333333337
         y_pred = bs.fit_predict(X, y, sample_weight)
-        assert y_pred.mean() == 0.1
-        assert f1.fit(y_pred, y, sample_weight) == 0.8421052631578948
+        assert y_pred.mean() == 0.02
+        assert f1.fit(y_pred, y) == 0.33333333333333337
+        # Test fit/predict/fit_predict, sample_weight given and
+        # sample_weight_in_val = True
+        bs.sample_weight_in_val = True
+        bs.fit(X, y, sample_weight)
+        assert bs.best_score == 0.2545454545454546
+        assert bs.best_index == 2
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.95
+        assert str(bs.best_params['gf']['metric']
+                   ) == '<bound method Precision.fit of Precision>'
+        assert bs.best_params['rbs']['n_iter'] == 15.0
+        assert bs.best_params['rg_dt']['n_total_conditions'] == 5.0
+        assert bs.best_params['rg_dt']['target_feat_corr_types'] is None
+        assert bs.best_params['sf']['threshold'] == 0.2583716619727481
+        assert bs.cv_results.shape == (5, 11)
+        y_pred = bs.predict(X)
+        assert y_pred.mean() == 0.02
+        assert f1.fit(y_pred, y, sample_weight) == 0.33333333333333337
+        y_pred = bs.fit_predict(X, y, sample_weight)
+        assert y_pred.mean() == 0.02
+        assert f1.fit(y_pred, y, sample_weight) == 0.33333333333333337
 
 
 def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
@@ -242,7 +280,22 @@ def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
             'threshold': UniformFloat(0, 1),
         },
         'cf': {
-            'threshold': UniformFloat(0, 1)
+            'correlation_reduction_class': Choice(
+                [
+                    AgglomerativeClusteringReducer(
+                        threshold=0.9,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    ),
+                    AgglomerativeClusteringReducer(
+                        threshold=0.95,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    )
+                ]
+            )
         },
         'gf': {
             'metric': Choice([p.fit, f1.fit])
@@ -273,12 +326,16 @@ def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
         bs.fit(X, y)
         assert bs.best_score == 0.08333333333333333
         assert bs.best_index == 4
-        assert bs.best_params['cf']['threshold'] == 0.1342082233571794
+        assert bs.best_params['rg_opt']['n_total_conditions'] == 4.0
+        assert bs.best_params['sf']['threshold'] == 0.1474198119511717
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.95
         assert str(bs.best_params['gf']['metric']
                    ) == '<bound method FScore.fit of FScore with beta=1>'
         assert bs.best_params['rbs']['n_iter'] == 12.0
-        assert bs.best_params['rg_opt']['n_total_conditions'] == 4.0
-        assert bs.best_params['sf']['threshold'] == 0.1474198119511717
+        bs.pipeline_.get_params()['rbs']['rules_to_keep'] == [
+            'RGO_Rule_20220204_25', 'RGO_Rule_20220204_27',
+            'RGO_Rule_20220204_41'
+        ]
         assert bs.cv_results.shape == (5, 10)
         y_pred = bs.predict(X)
         assert y_pred.mean() == 0.11
@@ -286,16 +343,45 @@ def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
         y_pred = bs.fit_predict(X, y)
         assert y_pred.mean() == 0.11
         assert f1.fit(y_pred, y) == 0.5714285714285713
-        # Test fit/predict/fit_predict, sample_weight given
+        # Test fit/predict/fit_predict, sample_weight given and
+        # sample_weight_in_val = False
+        bs.sample_weight_in_val = False
         bs.fit(X, y, sample_weight)
-        assert bs.best_score == 0.3619909502262444
+        assert bs.best_score == 0.27777777777777773
         assert bs.best_index == 4
-        assert bs.best_params['cf']['threshold'] == 0.1342082233571794
+        assert bs.best_params['rg_opt']['n_total_conditions'] == 4.0
+        assert bs.best_params['sf']['threshold'] == 0.1474198119511717
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.95
         assert str(bs.best_params['gf']['metric']
                    ) == '<bound method FScore.fit of FScore with beta=1>'
         assert bs.best_params['rbs']['n_iter'] == 12.0
+        bs.pipeline_.get_params()['rbs']['rules_to_keep'] == [
+            'RGO_Rule_20220204_31', 'RGO_Rule_20220204_24',
+            'RGO_Rule_20220204_34'
+        ]
+        assert bs.cv_results.shape == (5, 10)
+        y_pred = bs.predict(X)
+        assert y_pred.mean() == 0.13
+        assert f1.fit(y_pred, y) == 0.5217391304347826
+        y_pred = bs.fit_predict(X, y, sample_weight)
+        assert y_pred.mean() == 0.13
+        assert f1.fit(y_pred, y) == 0.5217391304347826
+        # Test fit/predict/fit_predict, sample_weight given and
+        # sample_weight_in_val = True
+        bs.sample_weight_in_val = True
+        bs.fit(X, y, sample_weight)
+        assert bs.best_score == 0.3705379587732529
+        assert bs.best_index == 4
         assert bs.best_params['rg_opt']['n_total_conditions'] == 4.0
         assert bs.best_params['sf']['threshold'] == 0.1474198119511717
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.95
+        assert str(bs.best_params['gf']['metric']
+                   ) == '<bound method FScore.fit of FScore with beta=1>'
+        assert bs.best_params['rbs']['n_iter'] == 12.0
+        bs.pipeline_.get_params()['rbs']['rules_to_keep'] == [
+            'RGO_Rule_20220204_31', 'RGO_Rule_20220204_24',
+            'RGO_Rule_20220204_34'
+        ]
         assert bs.cv_results.shape == (5, 10)
         y_pred = bs.predict(X)
         assert y_pred.mean() == 0.13
@@ -316,7 +402,22 @@ def test_fit_predict_rule_opt(_create_data, _instantiate_classes):
             'threshold': UniformFloat(0, 1),
         },
         'cf': {
-            'threshold': UniformFloat(0, 1)
+            'correlation_reduction_class': Choice(
+                [
+                    AgglomerativeClusteringReducer(
+                        threshold=0.9,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    ),
+                    AgglomerativeClusteringReducer(
+                        threshold=0.95,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    )
+                ]
+            )
         },
         'gf': {
             'metric': Choice([p.fit, f1.fit])
@@ -347,7 +448,7 @@ def test_fit_predict_rule_opt(_create_data, _instantiate_classes):
         bs.fit(X, y)
         assert bs.best_score == 0.09042145593869733
         assert bs.best_index == 9
-        assert bs.best_params['cf']['threshold'] == 0.933434993006217
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.9
         assert str(bs.best_params['gf']['metric']
                    ) == '<bound method FScore.fit of FScore with beta=1>'
         assert bs.best_params['rbs']['n_iter'] == 13.0
@@ -361,11 +462,33 @@ def test_fit_predict_rule_opt(_create_data, _instantiate_classes):
         y_pred = bs.fit_predict(X, y)
         assert y_pred.mean() == 0.82
         assert f1.fit(y_pred, y) == 0.1956521739130435
-        # Test fit/predict/fit_predict, sample_weight given
+        # Test fit/predict/fit_predict, sample_weight given and
+        # sample_weight_in_val = False
+        bs.sample_weight_in_val = False
+        bs.fit(X, y, sample_weight)
+        assert bs.best_score == 0.1660486960820665
+        assert bs.best_index == 9
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.9
+        assert str(bs.best_params['gf']['metric']
+                   ) == '<bound method FScore.fit of FScore with beta=1>'
+        assert bs.best_params['rbs']['n_iter'] == 13.0
+        assert str(bs.best_params['ro']['metric']
+                   ) == '<bound method Precision.fit of Precision>'
+        assert bs.best_params['sf']['threshold'] == 0.09205449690521583
+        assert bs.cv_results.shape == (10, 10)
+        y_pred = bs.predict(X)
+        assert y_pred.mean() == 0.82
+        assert f1.fit(y_pred, y) == 0.1956521739130435
+        y_pred = bs.fit_predict(X, y, sample_weight)
+        assert y_pred.mean() == 0.82
+        assert f1.fit(y_pred, y) == 0.1956521739130435
+        # Test fit/predict/fit_predict, sample_weight given and
+        # sample_weight_in_val = True
+        bs.sample_weight_in_val = True
         bs.fit(X, y, sample_weight)
         assert bs.best_score == 0.2756485534322622
         assert bs.best_index == 9
-        assert bs.best_params['cf']['threshold'] == 0.933434993006217
+        assert bs.best_params['cf']['correlation_reduction_class'].threshold == 0.9
         assert str(bs.best_params['gf']['metric']
                    ) == '<bound method FScore.fit of FScore with beta=1>'
         assert bs.best_params['rbs']['n_iter'] == 13.0
@@ -379,6 +502,317 @@ def test_fit_predict_rule_opt(_create_data, _instantiate_classes):
         y_pred = bs.fit_predict(X, y, sample_weight)
         assert y_pred.mean() == 0.82
         assert f1.fit(y_pred, y, sample_weight) == 0.3243243243243243
+
+
+def test_fit_predict_parallel_pipeline(_create_data, _instantiate_classes):
+    X, y, sample_weight = _create_data
+    rg_dt, _, ro, sf, cf, _, rbs = _instantiate_classes
+    # Create set of non-fraud rules for optimisation
+    rule_strings_nonfraud = {
+        'NonFraudRule1': "(X['A']<0)&(X['C']<0)",
+        'NonFraudRule2': "(X['B']<0)&(X['D']<0)",
+        'NonFraudRule3': "(X['D']<0)",
+        'NonFraudRule4': "(X['C']<0)"
+    }
+    rules_nonfraud = Rules(rule_strings=rule_strings_nonfraud)
+    rule_lambdas_nonfraud = rules_nonfraud.as_rule_lambdas(
+        as_numpy=False, with_kwargs=True)
+    ro_nonfraud = BayesianOptimiser(
+        rule_lambdas=rule_lambdas_nonfraud,
+        lambda_kwargs=rules_nonfraud.lambda_kwargs,
+        metric=f1.fit,
+        n_iter=5
+    )
+    # Define search spaces
+    search_spaces = {
+        'rg_fraud': {
+            'n_total_conditions': UniformInteger(1, 5),
+            'target_feat_corr_types': Choice([None, 'Infer'])
+        },
+        'rg_nonfraud': {
+            'n_total_conditions': UniformInteger(1, 5),
+            'target_feat_corr_types': Choice([None, 'Infer'])
+        },
+        'sf_fraud': {
+            'threshold': UniformFloat(0, 1)
+        },
+        'sf_nonfraud': {
+            'threshold': UniformFloat(0, 1)
+        },
+        'cf_fraud': {
+            'correlation_reduction_class': Choice(
+                [
+                    AgglomerativeClusteringReducer(
+                        threshold=0.9,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    ),
+                    AgglomerativeClusteringReducer(
+                        threshold=0.95,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    )
+                ]
+            )
+        },
+        'cf_nonfraud': {
+            'correlation_reduction_class': Choice(
+                [
+                    AgglomerativeClusteringReducer(
+                        threshold=0.9,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    ),
+                    AgglomerativeClusteringReducer(
+                        threshold=0.95,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    )
+                ]
+            )
+        },
+    }
+    # RBSOptimiser
+    rbso = RBSOptimiser(
+        pipeline=RBSPipeline(
+            config=[],
+            final_decision=0,
+        ),
+        metric=f1.fit,
+        n_iter=10,
+        pos_pred_rules=ClassAccessor(
+            class_tag='cf_fraud',
+            class_attribute='rules_to_keep'
+        ),
+        neg_pred_rules=ClassAccessor(
+            class_tag='cf_nonfraud',
+            class_attribute='rules_to_keep'
+        )
+    )
+    # Set up pipeline
+    # Fraud ----------
+    rg_fraud = deepcopy(rg_dt)
+    rg_fraud.rule_name_prefix = 'Fraud'
+    sf_fraud = deepcopy(sf)
+    cf_fraud = deepcopy(cf)
+    pp_fraud = ParallelPipeline(
+        steps=[
+            ('rg_fraud', rg_fraud),
+            ('ro_fraud', ro)
+        ],
+    )
+    lp_fraud = LinearPipeline(
+        steps=[
+            ('pp_fraud', pp_fraud),
+            ('sf_fraud', sf_fraud),
+            ('cf_fraud', cf_fraud)
+        ]
+    )
+    # Nonfraud ----------
+    rg_nonfraud = deepcopy(rg_dt)
+    rg_nonfraud.rule_name_prefix = 'NonFraud'
+    sf_nonfraud = deepcopy(sf)
+    cf_nonfraud = deepcopy(cf)
+    pp_nonfraud = ParallelPipeline(
+        steps=[
+            ('rg_nonfraud', rg_nonfraud),
+            ('ro_nonfraud', ro_nonfraud)
+        ],
+    )
+    lp_nonfraud = LinearPipeline(
+        steps=[
+            ('pp_nonfraud', pp_nonfraud),
+            ('sf_nonfraud', sf_nonfraud),
+            ('cf_nonfraud', cf_nonfraud)
+        ]
+    )
+    # Overall
+    pp_overall = ParallelPipeline(
+        steps=[
+            ('lp_fraud', lp_fraud),
+            ('lp_nonfraud', lp_nonfraud)
+        ]
+    )
+    lp_overall = LinearPipeline(
+        steps=[
+            ('pp_overall', pp_overall),
+            ('rbso', deepcopy(rbso))
+        ]
+    )
+    # Bayes Search CV
+    bs = BayesSearchCV(
+        pipeline=lp_overall,
+        search_spaces=search_spaces,
+        metric=f1.fit,
+        error_score=0,
+        cv=3,
+        n_iter=10,
+        verbose=1,
+        num_cores=3
+    )
+    # Tests (using num_cores=3 so warnings are supressed)
+    # Test fit/predict/fit_predict, no sample_weight
+    bs.fit(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        },
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        }
+    )
+    assert bs.best_score == 0.21543016370602575
+    assert bs.best_index == 3
+    assert bs.best_params['cf_fraud']['correlation_reduction_class'].threshold == 0.95
+    assert bs.best_params['cf_nonfraud']['correlation_reduction_class'].threshold == 0.9
+    assert bs.best_params['rg_fraud'] == {
+        'n_total_conditions': 2.0, 'target_feat_corr_types': None
+    }
+    assert bs.best_params['rg_nonfraud'] == {
+        'n_total_conditions': 5.0, 'target_feat_corr_types': None
+    }
+    assert bs.best_params['sf_fraud'] == {'threshold': 0.05789784369353024}
+    assert bs.best_params['sf_nonfraud'] == {'threshold': 0.5286917420754508}
+    assert bs.cv_results.shape == (10, 13)
+    y_pred = bs.predict(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        }
+    )
+    assert y_pred.mean() == 0.63
+    assert f1.fit(y_pred, y) == 0.24657534246575338
+    y_pred = bs.fit_predict(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        },
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        }
+    )
+    assert y_pred.mean() == 0.63
+    assert f1.fit(y_pred, y) == 0.24657534246575338
+    # Test fit/predict/fit_predict, sample_weight given and
+    # sample_weight_in_val = False
+    bs.sample_weight_in_val = False
+    bs.fit(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        },
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        },
+        sample_weight={
+            'lp_fraud': sample_weight,
+            'lp_nonfraud': None,
+            'rbso': sample_weight
+        }
+    )
+    assert bs.best_score == 0.21843434343434343
+    assert bs.best_index == 5
+    assert bs.best_params['cf_fraud']['correlation_reduction_class'].threshold == 0.9
+    assert bs.best_params['cf_nonfraud']['correlation_reduction_class'].threshold == 0.95
+    assert bs.best_params['rg_fraud'] == {
+        'n_total_conditions': 2.0, 'target_feat_corr_types': 'Infer'}
+    assert bs.best_params['rg_nonfraud'] == {
+        'n_total_conditions': 4.0, 'target_feat_corr_types': None}
+    assert bs.best_params['sf_fraud'] == {'threshold': 0.24333593546839893}
+    assert bs.best_params['sf_nonfraud'] == {'threshold': 0.2325140282302649}
+    assert bs.cv_results.shape == (10, 13)
+    y_pred = bs.predict(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        }
+    )
+    assert y_pred.mean() == 0.27
+    assert f1.fit(y_pred, y) == 0.32432432432432434
+    y_pred = bs.fit_predict(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        },
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        },
+        sample_weight={
+            'lp_fraud': sample_weight,
+            'lp_nonfraud': None,
+            'rbso': sample_weight
+        }
+    )
+    assert y_pred.mean() == 0.27
+    assert f1.fit(y_pred, y) == 0.32432432432432434
+    # Test fit/predict/fit_predict, sample_weight given and
+    # sample_weight_in_val = True
+    bs.sample_weight_in_val = True
+    bs.fit(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        },
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        },
+        sample_weight={
+            'lp_fraud': sample_weight,
+            'lp_nonfraud': None,
+            'rbso': sample_weight
+        }
+    )
+    assert bs.best_score == 0.32174934489925
+    assert bs.best_index == 3
+    assert bs.best_params['cf_fraud']['correlation_reduction_class'].threshold == 0.95
+    assert bs.best_params['cf_nonfraud']['correlation_reduction_class'].threshold == 0.9
+    assert bs.best_params['rg_fraud'] == {
+        'n_total_conditions': 2.0, 'target_feat_corr_types': None}
+    assert bs.best_params['rg_nonfraud'] == {
+        'n_total_conditions': 5.0, 'target_feat_corr_types': None}
+    assert bs.best_params['sf_fraud'] == {'threshold': 0.05789784369353024}
+    assert bs.best_params['sf_nonfraud'] == {'threshold': 0.5286917420754508}
+    assert bs.cv_results.shape == (10, 13)
+    y_pred = bs.predict(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        }
+    )
+    assert y_pred.mean() == 0.35
+    assert f1.fit(y_pred, y) == 0.3111111111111111
+    y_pred = bs.fit_predict(
+        X={
+            'lp_fraud': X,
+            'lp_nonfraud': X,
+        },
+        y={
+            'lp_fraud': y,
+            'lp_nonfraud': 1-y,
+            'rbso': y
+        },
+        sample_weight={
+            'lp_fraud': sample_weight,
+            'lp_nonfraud': None,
+            'rbso': sample_weight
+        }
+    )
+    assert y_pred.mean() == 0.35
+    assert f1.fit(y_pred, y) == 0.3111111111111111
 
 
 def test_optimise_params(_cv_datasets, _instantiate_lp_and_bs):
@@ -402,6 +836,8 @@ def test_optimise_params(_cv_datasets, _instantiate_lp_and_bs):
     ]
     cv_datasets = _cv_datasets
     lp, bs, search_spaces_ = _instantiate_lp_and_bs
+    # With sample_weight_in_val = True
+    bs.sample_weight_in_val = True
     best_params, cv_results = bs._optimise_params(
         cv_datasets, lp, search_spaces_)
     assert best_params == exp_best_params
@@ -421,6 +857,8 @@ def test_objective(_cv_datasets, _instantiate_lp_and_bs):
             'n_iter': 10
         }
     }
+    # With sample_weight_in_val = True
+    bs.sample_weight_in_val = True
     bs.cv_results = []
     mean_score = bs._objective((params_iter, lp, cv_datasets))
     assert mean_score == -0.2507836990595611
@@ -499,6 +937,47 @@ def test_generate_cv_datasets(_create_data, _instantiate_lp_and_bs):
     assert results == exp_results
 
 
+def test_split_df_into_train_and_val(_instantiate_lp_and_bs, _create_data):
+    _, bs, _ = _instantiate_lp_and_bs
+    X, y, _ = _create_data
+    # Test when dataframe given
+    X_train, X_val = bs._split_df_into_train_and_val(
+        X, list(range(50)), list(range(50, 100))
+    )
+    assert X_train.sum().sum() == 269.58142001682694
+    assert X_val.sum().sum() == 313.9823981250532
+    # Test when series given
+    y_train, y_val = bs._split_df_into_train_and_val(
+        y, list(range(50)), list(range(50, 100))
+    )
+    assert y_train.sum() == 5
+    assert y_val.sum() == 5
+    # Test when dict given
+    df_dict = {
+        'step_A': X[['A', 'B']],
+        'step_B': X[['C', 'D']],
+        'step_C': None
+    }
+    df_train, df_val = bs._split_df_into_train_and_val(
+        df_dict, list(range(50)), list(range(50, 100))
+    )
+    assert df_train['step_A'].sum().sum() == 216
+    assert df_train['step_A'].columns.tolist() == ['A', 'B']
+    assert df_train['step_B'].sum().sum() == 53.581420016826925
+    assert df_train['step_B'].columns.tolist() == ['C', 'D']
+    assert df_train['step_C'] is None
+    assert df_val['step_A'].sum().sum() == 261
+    assert df_val['step_A'].columns.tolist() == ['A', 'B']
+    assert df_val['step_B'].sum().sum() == 52.98239812505319
+    assert df_val['step_B'].columns.tolist() == ['C', 'D']
+    assert df_val['step_C'] is None
+    # Test error
+    with pytest.raises(TypeError, match='`df` must be a Pandas Series/DataFrame or a dict'):
+        bs._split_df_into_train_and_val(
+            [], list(range(50)), list(range(50, 100))
+        )
+
+
 def test_convert_search_spaces_to_hyperopt(_instantiate_lp_and_bs):
     _, bs, exp_search_spaces = _instantiate_lp_and_bs
     search_spaces_ = bs._convert_search_spaces_to_hyperopt(bs.search_spaces)
@@ -507,17 +986,6 @@ def test_convert_search_spaces_to_hyperopt(_instantiate_lp_and_bs):
         for param, param_value in step_params.items():
             assert type(param_value) == type(
                 exp_search_spaces[step_tag][param])
-
-
-def test_inject_params_into_pipeline(_instantiate_lp_and_bs):
-    lp, bs, _ = _instantiate_lp_and_bs
-    params = {
-        'rg_dt': {
-            'n_total_conditions': 10
-        }
-    }
-    pipeline = bs._inject_params_into_pipeline(lp, params)
-    assert pipeline.get_params()['rg_dt__n_total_conditions'] == 10
 
 
 def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,
@@ -540,15 +1008,29 @@ def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,
             'n_iter': 10
         }
     }
+    # With sample_weight_in_val=False
     fold_score = bs._fit_predict_on_fold(
         metric=f1.fit,
         error_score='raise',
         datasets=cv_datasets[0],
         pipeline=lp,
         params_iter=params_iter,
-        fold_idx=0
+        fold_idx=0,
+        sample_weight_in_val=False
+    )
+    assert fold_score == 0.16666666666666666
+    # With sample_weight_in_val=True
+    fold_score = bs._fit_predict_on_fold(
+        metric=f1.fit,
+        error_score='raise',
+        datasets=cv_datasets[0],
+        pipeline=lp,
+        params_iter=params_iter,
+        fold_idx=0,
+        sample_weight_in_val=True
     )
     assert fold_score == 0.25806451612903225
+    # Force errors by setting sf filter threshold to 1
     sf.threshold = 1
     with pytest.raises(Exception, match="No rules remaining for: Pipeline parameter set = {'rg_dt': {'n_total_conditions': 2, 'target_feat_corr_types': None}, 'rbs': {'n_iter': 10}}; Fold index = 0."):
         bs._fit_predict_on_fold(
@@ -557,7 +1039,8 @@ def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,
             datasets=cv_datasets[0],
             pipeline=lp,
             params_iter=params_iter,
-            fold_idx=0
+            fold_idx=0,
+            sample_weight_in_val=True
         )
     with pytest.warns(UserWarning, match="No rules remaining for: Pipeline parameter set = {'rg_dt': {'n_total_conditions': 2, 'target_feat_corr_types': None}, 'rbs': {'n_iter': 10}}; Fold index = 0. The metric score for this parameter set & fold will be set to 0"):
         fold_score = bs._fit_predict_on_fold(
@@ -566,7 +1049,8 @@ def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,
             datasets=cv_datasets[0],
             pipeline=lp,
             params_iter=params_iter,
-            fold_idx=0
+            fold_idx=0,
+            sample_weight_in_val=True
         )
         assert fold_score == 0
 
@@ -694,7 +1178,22 @@ def test_error(_create_data, _instantiate_classes):
             'threshold': UniformFloat(0, 1),
         },
         'cf': {
-            'threshold': UniformFloat(0, 1)
+            'correlation_reduction_class': Choice(
+                [
+                    AgglomerativeClusteringReducer(
+                        threshold=0.9,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    ),
+                    AgglomerativeClusteringReducer(
+                        threshold=0.95,
+                        strategy='top_down',
+                        similarity_function=js.fit,
+                        metric=f1.fit
+                    )
+                ]
+            )
         },
         'gf': {
             'metric': Choice([p.fit, f1.fit])
@@ -720,5 +1219,5 @@ def test_error(_create_data, _instantiate_classes):
         error_score='raise',
         verbose=0
     )
-    with pytest.raises(Exception, match="No rules remaining for: Pipeline parameter set = {'cf': {'threshold': 0.1955964101622225}, 'gf': {'metric': <bound method Precision.fit of Precision>}, 'rbs': {'n_iter': 12.0}, 'ro': {'metric': <bound method Precision.fit of Precision>}, 'sf': {'threshold': 0.4860473230215504}}; Fold index = 0."):
+    with pytest.raises(Exception, match=re.escape("No rules remaining for: Pipeline parameter set = {'cf': {'correlation_reduction_class': AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=<bound method JaccardSimilarity.fit of JaccardSimilarity>, metric=<bound method FScore.fit of FScore with beta=1>, print_clustermap=False)}, 'gf': {'metric': <bound method Precision.fit of Precision>}, 'rbs': {'n_iter': 12.0}, 'ro': {'metric': <bound method Precision.fit of Precision>}, 'sf': {'threshold': 0.4860473230215504}}; Fold index = 0.")):
         bs.fit(X, y)

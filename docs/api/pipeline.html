@@ -275,6 +275,16 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="api/iguanas.pipeline.ParallelPipeline.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.pipeline
+      </span>
+     </code>
+     .ParallelPipeline
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="api/iguanas.pipeline.ClassAccessor.html">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
@@ -568,6 +578,16 @@
      .ConvertProcessedConditionsToGeneral
     </a>
    </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="api/iguanas.rules.ReturnMappings.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.rules
+      </span>
+     </code>
+     .ReturnMappings
+    </a>
+   </li>
   </ul>
  </li>
  <li class="toctree-l1 has-children">
@@ -663,9 +683,12 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline" title="iguanas.pipeline.LinearPipeline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearPipeline</span></code></a></p></td>
-<td><p>Generates a pipeline, which is a sequence of steps which are applied  sequentially to a dataset.</p></td>
+<td><p>Generates a linear pipeline, which is a sequence of steps which are applied  sequentially to a dataset.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/iguanas.pipeline.ClassAccessor.html#iguanas.pipeline.ClassAccessor" title="iguanas.pipeline.ClassAccessor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ClassAccessor</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api/iguanas.pipeline.ParallelPipeline.html#iguanas.pipeline.ParallelPipeline" title="iguanas.pipeline.ParallelPipeline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ParallelPipeline</span></code></a></p></td>
+<td><p>Generates a parallel pipeline, which is a set of steps which run independently - their outputs are then concatenated and returned.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/iguanas.pipeline.ClassAccessor.html#iguanas.pipeline.ClassAccessor" title="iguanas.pipeline.ClassAccessor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ClassAccessor</span></code></a></p></td>
 <td><p>Extracts a class attribute from a class (which is specified by a class  tag).</p></td>
 </tr>
 </tbody>

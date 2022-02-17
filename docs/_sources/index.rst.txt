@@ -56,7 +56,7 @@ Iguanas addresses the disadvantages of an RBS for binary classification problems
 * Iguanas only requires a historic data set to generate rules - similar to the requirements of an ML model.
 * Iguanas utilises an API that is familiar to most data scientists - Sklearn's fit/transform/predict methodology.
 * Iguanas' Rule Optimisation module allows users to update the thresholds of current rules based on new trends.
-* Iguanas' **LinearPipeline** and **BayesSearchCV** classes allow users to identify the combination of rules that gives the best RBS performance.
+* Iguanas' **LinearPipeline**, **ParallelPipeline** and **BayesSearchCV** classes allow users to identify the combination of rules that gives the best RBS performance.
 * Iguanas has many other modules that streamline the process of generating an RBS.
 
 Getting started

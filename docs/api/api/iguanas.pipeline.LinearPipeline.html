@@ -36,7 +36,7 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="shortcut icon" href="../../_static/iguanas_icon.png"/>
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="iguanas.pipeline.ClassAccessor" href="iguanas.pipeline.ClassAccessor.html" />
+    <link rel="next" title="iguanas.pipeline.ParallelPipeline" href="iguanas.pipeline.ParallelPipeline.html" />
     <link rel="prev" title="Pipeline" href="../pipeline.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="en">
@@ -272,6 +272,16 @@
       </span>
      </code>
      .LinearPipeline
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.pipeline.ParallelPipeline.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.pipeline
+      </span>
+     </code>
+     .ParallelPipeline
     </a>
    </li>
    <li class="toctree-l2">
@@ -568,6 +578,16 @@
      .ConvertProcessedConditionsToGeneral
     </a>
    </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.rules.ReturnMappings.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.rules
+      </span>
+     </code>
+     .ReturnMappings
+    </a>
+   </li>
   </ul>
  </li>
  <li class="toctree-l1 has-children">
@@ -657,11 +677,12 @@
 <h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">iguanas.pipeline</span></code>.LinearPipeline<a class="headerlink" href="#iguanas-pipeline-linearpipeline" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="iguanas.pipeline.LinearPipeline">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.pipeline.</span></span><span class="sig-name descname"><span class="pre">LinearPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/pipeline/linear_pipeline.html#LinearPipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.LinearPipeline" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a pipeline, which is a sequence of steps which are applied 
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.pipeline.</span></span><span class="sig-name descname"><span class="pre">LinearPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_init_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/pipeline/linear_pipeline.html#LinearPipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.LinearPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a linear pipeline, which is a sequence of steps which are applied 
 sequentially to a dataset. Each step should be an instantiated class with 
 both <cite>fit</cite> and <cite>transform</cite> methods. The final step should be an 
-instantiated class with both <cite>fit</cite> and <cite>predict</cite> methods.</p>
+instantiated class with either <cite>fit</cite> and <cite>tranform</cite> methods or <cite>fit</cite> and
+<cite>predict</cite> methods.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
@@ -671,45 +692,40 @@ elements - the first element should be a string which refers to the
 step; the second element should be the instantiated class which is run
 as part of the step.</p>
 </dd>
+<dt><strong>use_init_data</strong><span class="classifier">List[str], optional</span></dt><dd><p>Use to denote steps that come after the first step which require the 
+initial dataset <cite>X</cite> to be used as the input to the <cite>fit</cite> method. For 
+example, if a rule optimiser class is placed after a rule generator 
+class in the pipeline, the tag for the rule optimiser should be added 
+to the <cite>use_init_data</cite> list, as the rule optimiser requires the initial
+dataset to optimise the rules. Defaults to None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>steps_</strong><span class="classifier">List[Tuple[str, object]]</span></dt><dd><p>The steps corresponding to the fitted pipeline.</p>
+</dd>
+<dt><strong>rules</strong><span class="classifier">Rules</span></dt><dd><p>The Rules object containing the rules produced from fitting the 
+pipeline.</p>
+</dd>
 </dl>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.pipeline.LinearPipeline.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/iguanas/pipeline/linear_pipeline.html#LinearPipeline.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.LinearPipeline.fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sequentially runs the <cite>fit_transform</cite> methods of each step in the 
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/iguanas/pipeline/linear_pipeline.html#LinearPipeline.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.LinearPipeline.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sequentially runs the <cite>fit_transform</cite> method of each step in the 
 pipeline, except for the last step, where the <cite>fit</cite> method is run.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">PandasDataFrameType</span></dt><dd><p>The dataset.</p>
+<dt><strong>X</strong><span class="classifier">Union[PandasDataFrameType, dict]</span></dt><dd><p>The dataset or dictionary of datasets for each pipeline step.</p>
 </dd>
-<dt><strong>y</strong><span class="classifier">PandasSeriesType</span></dt><dd><p>The binary target column.</p>
+<dt><strong>y</strong><span class="classifier">Union[PandasSeriesType, dict]</span></dt><dd><p>The binary target column or dictionary of binary target columns
+for each pipeline step.</p>
 </dd>
-<dt><strong>sample_weight</strong><span class="classifier">PandasSeriesType, optional</span></dt><dd><p>Row-wise weights to apply. Defaults to None.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="iguanas.pipeline.LinearPipeline.fit_transform">
-<span class="sig-name descname"><span class="pre">fit_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/iguanas/pipeline/linear_pipeline.html#LinearPipeline.fit_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.LinearPipeline.fit_transform" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sequentially runs the <cite>fit_transform</cite> methods of each step in the 
-pipeline.</p>
-<dl class="simple">
-<dt>X<span class="classifier">PandasDataFrameType</span></dt><dd><p>The dataset.</p>
-</dd>
-<dt>y<span class="classifier">PandasSeriesType</span></dt><dd><p>The binary target column.</p>
-</dd>
-<dt>sample_weight<span class="classifier">PandasSeriesType, optional</span></dt><dd><p>Row-wise weights to apply. Defaults to None.</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>PandasDataFrameType</dt><dd><p>The transformed dataset.</p>
+<dt><strong>sample_weight</strong><span class="classifier">Union[PandasSeriesType, dict], optional</span></dt><dd><p>Row-wise weights or dictionary of row-wise weights for each
+pipeline step. Defaults to None.</p>
 </dd>
 </dl>
 </dd>
@@ -717,19 +733,16 @@ pipeline.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="iguanas.pipeline.LinearPipeline.fit_predict">
-<span class="sig-name descname"><span class="pre">fit_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.series.Series</span></span></span><a class="reference internal" href="../../_modules/iguanas/pipeline/linear_pipeline.html#LinearPipeline.fit_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.LinearPipeline.fit_predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sequentially runs the <cite>fit_transform</cite> methods of each step in the 
-pipeline, except for the last step, where the <cite>fit_predict</cite> method is 
-run.</p>
+<dt class="sig sig-object py" id="iguanas.pipeline.LinearPipeline.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.series.Series</span></span></span><a class="reference internal" href="../../_modules/iguanas/pipeline/linear_pipeline.html#LinearPipeline.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.LinearPipeline.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sequentially runs the <cite>transform</cite> method of each step in the pipeline,
+except for the last step, where the <cite>predict</cite> method is run. Note that
+before using this method, you should first run either the <cite>fit</cite> or 
+<cite>fit_predict</cite> methods.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">PandasDataFrameType</span></dt><dd><p>The dataset.</p>
-</dd>
-<dt><strong>y</strong><span class="classifier">PandasSeriesType</span></dt><dd><p>The binary target column.</p>
-</dd>
-<dt><strong>sample_weight</strong><span class="classifier">PandasSeriesType, optional</span></dt><dd><p>Row-wise weights to apply. Defaults to None.</p>
+<dt><strong>X</strong><span class="classifier">Union[PandasDataFrameType, dict]</span></dt><dd><p>The dataset or dictionary of datasets for each pipeline step.</p>
 </dd>
 </dl>
 </dd>
@@ -743,16 +756,70 @@ run.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="iguanas.pipeline.LinearPipeline.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.series.Series</span></span></span><a class="reference internal" href="../../_modules/iguanas/pipeline/linear_pipeline.html#LinearPipeline.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.LinearPipeline.predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sequentially runs the <cite>transform</cite> methods of each step in the pipeline,
-except for the last step, where the <cite>predict</cite> method is run. Note that
-before using this method, you should first run either the <cite>fit</cite> or 
-<cite>fit_predict</cite> methods.</p>
+<dt class="sig sig-object py" id="iguanas.pipeline.LinearPipeline.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">&lt;class</span> <span class="pre">'pandas.core.frame.DataFrame'&gt;</span></span></span><a class="reference internal" href="../../_modules/iguanas/pipeline/linear_pipeline.html#LinearPipeline.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.LinearPipeline.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sequentially runs the <cite>transform</cite> method of each step in the pipeline.
+Note that before using this method, you should first run either the 
+<cite>fit</cite> or <cite>fit_transform</cite> methods.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">PandasDataFrameType</span></dt><dd><p>The dataset.</p>
+<dt><strong>X</strong><span class="classifier">Union[PandasDataFrameType, dict]</span></dt><dd><p>The dataset or dictionary of datasets for each pipeline step.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>PandasDataFrame</dt><dd><p>The transformed dataset.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iguanas.pipeline.LinearPipeline.fit_transform">
+<span class="sig-name descname"><span class="pre">fit_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/iguanas/pipeline/linear_pipeline.html#LinearPipeline.fit_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.LinearPipeline.fit_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sequentially runs the <cite>fit_transform</cite> method of each step in the 
+pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X</strong><span class="classifier">Union[PandasDataFrameType, dict]</span></dt><dd><p>The dataset or dictionary of datasets for each pipeline step.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">Union[PandasSeriesType, dict]</span></dt><dd><p>The binary target column or dictionary of binary target columns
+for each pipeline step.</p>
+</dd>
+<dt><strong>sample_weight</strong><span class="classifier">Union[PandasSeriesType, dict], optional</span></dt><dd><p>Row-wise weights or dictionary of row-wise weights for each
+pipeline step. Defaults to None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>PandasDataFrameType</dt><dd><p>The transformed dataset.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iguanas.pipeline.LinearPipeline.fit_predict">
+<span class="sig-name descname"><span class="pre">fit_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.series.Series</span></span></span><a class="reference internal" href="../../_modules/iguanas/pipeline/linear_pipeline.html#LinearPipeline.fit_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.LinearPipeline.fit_predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sequentially runs the <cite>fit_transform</cite> method of each step in the 
+pipeline, except for the last step, where the <cite>fit_predict</cite> method is 
+run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X</strong><span class="classifier">Union[PandasDataFrameType, dict]</span></dt><dd><p>The dataset or dictionary of datasets for each pipeline step.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">Union[PandasSeriesType, dict]</span></dt><dd><p>The binary target column or dictionary of binary target columns
+for each pipeline step.</p>
+</dd>
+<dt><strong>sample_weight</strong><span class="classifier">Union[PandasSeriesType, dict], optional</span></dt><dd><p>Row-wise weights or dictionary of row-wise weights for each
+pipeline step. Defaults to None.</p>
 </dd>
 </dl>
 </dd>
@@ -767,7 +834,7 @@ before using this method, you should first run either the <cite>fit</cite> or
 
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.pipeline.LinearPipeline.get_params">
-<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../_modules/iguanas/pipeline/linear_pipeline.html#LinearPipeline.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.LinearPipeline.get_params" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#iguanas.pipeline.LinearPipeline.get_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the parameters of each step in the pipeline.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>

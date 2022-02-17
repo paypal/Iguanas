@@ -246,6 +246,46 @@
             <span class="bp">self</span><span class="p">,</span> <span class="n">rule_strings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">,</span>
         <span class="p">)</span>
 
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_exception_if_similar_keys</span><span class="p">(</span><span class="n">dict1</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">dict2</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                                       <span class="n">rule_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Raises exception if there are similar keys in `dict1` and `dict2`.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">dict1_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">dict1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">dict2_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">dict2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">sim_keys</span> <span class="o">=</span> <span class="n">dict1_keys</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">dict2_keys</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sim_keys</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Attempting to add rule sets with similar keys in `</span><span class="si">{</span><span class="n">rule_format</span><span class="si">}</span><span class="s2">`. Similar keys are &#39;</span><span class="si">{</span><span class="s2">&quot;&#39;, &#39;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sim_keys</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;.&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Raise exception if there are similar keys in any of the rule formats</span>
+        <span class="n">check_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_dicts</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">rule_dicts</span><span class="p">,</span> <span class="s1">&#39;rule_dicts&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">,</span> <span class="s1">&#39;rule_strings&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_lambdas</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">rule_lambdas</span><span class="p">,</span> <span class="s1">&#39;rule_lambdas&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lambda_kwargs</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">lambda_kwargs</span><span class="p">,</span> <span class="s1">&#39;lambda_kwargs&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lambda_args</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">lambda_args</span><span class="p">,</span> <span class="s1">&#39;lambda_args&#39;</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">dict1</span><span class="p">,</span> <span class="n">dict2</span><span class="p">,</span> <span class="n">rule_format</span> <span class="ow">in</span> <span class="n">check_list</span><span class="p">:</span>
+            <span class="n">_exception_if_similar_keys</span><span class="p">(</span><span class="n">dict1</span><span class="p">,</span> <span class="n">dict2</span><span class="p">,</span> <span class="n">rule_format</span><span class="p">)</span>
+        <span class="c1"># Combine rule formats</span>
+        <span class="n">rule_dicts</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_dicts</span><span class="p">,</span> <span class="o">**</span><span class="n">other</span><span class="o">.</span><span class="n">rule_dicts</span><span class="p">}</span>
+        <span class="n">rule_strings</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">,</span> <span class="o">**</span><span class="n">other</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">}</span>
+        <span class="n">rule_lambdas</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_lambdas</span><span class="p">,</span> <span class="o">**</span><span class="n">other</span><span class="o">.</span><span class="n">rule_lambdas</span><span class="p">}</span>
+        <span class="n">lambda_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">lambda_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">other</span><span class="o">.</span><span class="n">lambda_kwargs</span><span class="p">}</span>
+        <span class="n">lambda_args</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">lambda_args</span><span class="p">,</span> <span class="o">**</span><span class="n">other</span><span class="o">.</span><span class="n">lambda_args</span><span class="p">}</span>
+        <span class="c1"># Return combined rule set</span>
+        <span class="k">return</span> <span class="n">Rules</span><span class="p">(</span>
+            <span class="n">rule_dicts</span><span class="o">=</span><span class="n">rule_dicts</span><span class="p">,</span> <span class="n">rule_strings</span><span class="o">=</span><span class="n">rule_strings</span><span class="p">,</span>
+            <span class="n">rule_lambdas</span><span class="o">=</span><span class="n">rule_lambdas</span><span class="p">,</span> <span class="n">lambda_kwargs</span><span class="o">=</span><span class="n">lambda_kwargs</span><span class="p">,</span>
+            <span class="n">lambda_args</span><span class="o">=</span><span class="n">lambda_args</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">rules_lens</span> <span class="o">=</span> <span class="p">[</span>
             <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_dicts</span><span class="p">),</span>

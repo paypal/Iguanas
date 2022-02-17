@@ -275,6 +275,16 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.pipeline.ParallelPipeline.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.pipeline
+      </span>
+     </code>
+     .ParallelPipeline
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="iguanas.pipeline.ClassAccessor.html">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
@@ -568,6 +578,16 @@
      .ConvertProcessedConditionsToGeneral
     </a>
    </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.rules.ReturnMappings.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.rules
+      </span>
+     </code>
+     .ReturnMappings
+    </a>
+   </li>
   </ul>
  </li>
  <li class="toctree-l1 has-children">
@@ -657,7 +677,7 @@
 <h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">iguanas.rule_selection</span></code>.GreedyFilter<a class="headerlink" href="#iguanas-rule-selection-greedyfilter" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="iguanas.rule_selection.GreedyFilter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">GreedyFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sorting_metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/rule_selection/greedy_filter.html#GreedyFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.GreedyFilter" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">GreedyFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sorting_metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/rule_selection/greedy_filter.html#GreedyFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.GreedyFilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sorts rules by a given metric, calculates the combined performance of the
 top n rules, then filters to the rules which give the best combined
 performance.</p>
@@ -670,6 +690,10 @@ rules (e.g. Fbeta score).</p>
 <dt><strong>sorting_metric</strong><span class="classifier">Callable</span></dt><dd><p>The method/function used calculate the performance metric by which the
 rules are sorted.</p>
 </dd>
+<dt><strong>rules</strong><span class="classifier">Rules, optional</span></dt><dd><p>An Iguanas <cite>Rules</cite> object containing the rules that need to be 
+filtered. If provided, the rules within the object will be filtered. 
+Defaults to None.</p>
+</dd>
 <dt><strong>verbose</strong><span class="classifier">int, optional</span></dt><dd><p>Controls the verbosity - the higher, the more messages. &gt;0 : shows the
 progress of the filtering process. Defaults to 0.</p>
 </dd>
@@ -677,7 +701,10 @@ progress of the filtering process. Defaults to 0.</p>
 </dd>
 <dt class="field-even">Attributes</dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>rules_to_keep</strong><span class="classifier">List[str]</span></dt><dd><p>List of rules which give the best combined performance.</p>
+<dt><strong>rules_to_keep</strong><span class="classifier">List[str]</span></dt><dd><p>List of rules which remain after the filter has been applied.</p>
+</dd>
+<dt><strong>rules</strong><span class="classifier">Rules</span></dt><dd><p>The Iguanas <cite>Rules</cite> object containing the rules which remain after the
+filter has been applied.</p>
 </dd>
 <dt><strong>score</strong><span class="classifier">float</span></dt><dd><p>The combined performance (i.e. the value of <cite>metric</cite>) of the rules
 which give the best combined performance.</p>

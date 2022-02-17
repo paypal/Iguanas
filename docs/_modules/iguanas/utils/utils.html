@@ -222,7 +222,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">num_cols</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">int64_cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">==</span> <span class="s1">&#39;Int64&#39;</span><span class="p">])</span>
+    <span class="n">int64_cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="n">X</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">index</span><span class="p">[(</span><span class="n">X</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">==</span> <span class="s1">&#39;Int64&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">==</span> <span class="s1">&#39;int64&#39;</span><span class="p">)]</span>
+    <span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">int64_cols</span><span class="p">)</span> <span class="o">==</span> <span class="n">num_cols</span><span class="p">:</span>
         <span class="n">int_cols</span> <span class="o">=</span> <span class="n">int64_cols</span>
         <span class="n">float_cols</span> <span class="o">=</span> <span class="p">[]</span>
@@ -749,6 +751,30 @@
 
     <span class="n">x_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">x_type</span> <span class="ow">in</span> <span class="n">types</span></div>
+
+
+<div class="viewcode-block" id="return_dataset_if_dict"><a class="viewcode-back" href="../../../api/utils.html#iguanas.utils.utils.return_dataset_if_dict">[docs]</a><span class="k">def</span> <span class="nf">return_dataset_if_dict</span><span class="p">(</span><span class="n">step_tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                           <span class="n">df</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">PandasDataFrameType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If `df` is a dict, then the dataframe for the given step in a pipeline is</span>
+<span class="sd">    extracted from the dict; else, just return `df`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    step_tag : str</span>
+<span class="sd">        The tag corresponding to the pipeline step.</span>
+<span class="sd">    df : Union[dict, PandasDataFrameType]</span>
+<span class="sd">        The dataset or dictionary of datasets.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    PandasDataFrameType</span>
+<span class="sd">        The dataset for the pipeline step.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">step_tag</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">step_tag</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">df</span></div>
 </pre></div>
 
               </div>

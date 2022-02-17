@@ -159,12 +159,11 @@
                 
   <h1>Source code for iguanas.rules.convert_processed_conditions_to_general</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Class for converting generated rule conditions to system-ready conditions.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">iguanas.rules._convert_rule_strings_to_rule_dicts</span> <span class="kn">import</span> <span class="n">_ConvertRuleStringsToRuleDicts</span>
 <span class="kn">from</span> <span class="nn">iguanas.rules</span> <span class="kn">import</span> <span class="n">Rules</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
-
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 
 <div class="viewcode-block" id="ConvertProcessedConditionsToGeneral"><a class="viewcode-back" href="../../../api/api/iguanas.rules.ConvertProcessedConditionsToGeneral.html#iguanas.rules.ConvertProcessedConditionsToGeneral">[docs]</a><span class="k">class</span> <span class="nc">ConvertProcessedConditionsToGeneral</span><span class="p">:</span>
@@ -429,13 +428,13 @@
         <span class="k">return</span> <span class="n">cleaned_condition</span></div>
 
 
-<span class="k">class</span> <span class="nc">ReturnMappings</span><span class="p">:</span>
+<div class="viewcode-block" id="ReturnMappings"><a class="viewcode-back" href="../../../api/api/iguanas.rules.ReturnMappings.html#iguanas.rules.ReturnMappings">[docs]</a><span class="k">class</span> <span class="nc">ReturnMappings</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates mapping dictionaries (for imputed values and OHE values) which </span>
 <span class="sd">    are required in the `ConvertProcessedConditionsToGeneral` class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ReturnMappings.return_imputed_values_mapping"><a class="viewcode-back" href="../../../api/api/iguanas.rules.ReturnMappings.html#iguanas.rules.ReturnMappings.return_imputed_values_mapping">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">return_imputed_values_mapping</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a dictionary of the value used to impute nulls for each feature</span>
@@ -458,9 +457,9 @@
         <span class="k">for</span> <span class="n">features_list</span><span class="p">,</span> <span class="n">imputed_value</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">features_list</span><span class="p">:</span>
                 <span class="n">imputed_values_dict</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="n">imputed_value</span>
-        <span class="k">return</span> <span class="n">imputed_values_dict</span>
+        <span class="k">return</span> <span class="n">imputed_values_dict</span></div>
 
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ReturnMappings.return_ohe_categories_mapping"><a class="viewcode-back" href="../../../api/api/iguanas.rules.ReturnMappings.html#iguanas.rules.ReturnMappings.return_ohe_categories_mapping">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">return_ohe_categories_mapping</span><span class="p">(</span><span class="n">pre_ohe_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">post_ohe_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                                       <span class="n">pre_ohe_dtypes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -500,7 +499,7 @@
                     <span class="k">elif</span> <span class="n">category</span> <span class="o">==</span> <span class="s1">&#39;False&#39;</span><span class="p">:</span>
                         <span class="n">category</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">ohe_categories</span><span class="p">[</span><span class="n">ohe_col_for_cat_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">category</span>
-        <span class="k">return</span> <span class="n">ohe_categories</span>
+        <span class="k">return</span> <span class="n">ohe_categories</span></div></div>
 </pre></div>
 
               </div>

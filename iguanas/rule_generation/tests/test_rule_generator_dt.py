@@ -1,11 +1,9 @@
-from hyperopt.pyll.base import exp
 import pytest
 import numpy as np
 import pandas as pd
 from iguanas.rule_generation import RuleGeneratorDT
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import precision_score, recall_score
 from iguanas.metrics.classification import FScore
 import random
 
@@ -108,19 +106,21 @@ def test_fit(create_data, rg_instantiated):
                 161, 219, 166, 125, 107, 205, 133, 225, 228, 110, 163, 43, 21, 170
             ], dtype='int64'),
             index=[
-                'RGDT_Rule_20200204_40', 'RGDT_Rule_20200204_41', 'RGDT_Rule_20200204_42', 'RGDT_Rule_20200204_43', 'RGDT_Rule_20200204_44', 'RGDT_Rule_20200204_45', 'RGDT_Rule_20200204_46', 'RGDT_Rule_20200204_47',
-                'RGDT_Rule_20200204_48', 'RGDT_Rule_20200204_49', 'RGDT_Rule_20200204_50', 'RGDT_Rule_20200204_51', 'RGDT_Rule_20200204_52', 'RGDT_Rule_20200204_53'
+                'RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1', 'RGDT_Rule_20200204_2',
+                'RGDT_Rule_20200204_3', 'RGDT_Rule_20200204_4', 'RGDT_Rule_20200204_5',
+                'RGDT_Rule_20200204_6', 'RGDT_Rule_20200204_7', 'RGDT_Rule_20200204_8',
+                'RGDT_Rule_20200204_9', 'RGDT_Rule_20200204_10', 'RGDT_Rule_20200204_11',
+                'RGDT_Rule_20200204_12', 'RGDT_Rule_20200204_13'
             ])
     ]
     X, y, _, _, _, weights = create_data
     rg, _ = rg_instantiated
     for i, w in enumerate([None, weights]):
-        print(i)
         X_rules = rg.fit(X, y, sample_weight=w)
         pd.testing.assert_series_equal(X_rules.sum(), exp_results[i])
         assert rg.rule_names == exp_results[i].index.tolist() == list(
             rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == list(
-            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys())
+                rg.rules.rule_strings.keys())
 
 
 def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
@@ -142,8 +142,11 @@ def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
                 234, 232, 232, 125, 232, 216, 142, 225, 272, 120, 371, 43, 96, 213
             ], dtype='int64'),
             index=[
-                'RGDT_Rule_20200204_40', 'RGDT_Rule_20200204_41', 'RGDT_Rule_20200204_42', 'RGDT_Rule_20200204_43', 'RGDT_Rule_20200204_44', 'RGDT_Rule_20200204_45', 'RGDT_Rule_20200204_46', 'RGDT_Rule_20200204_47', 'RGDT_Rule_20200204_48',
-                'RGDT_Rule_20200204_49', 'RGDT_Rule_20200204_50', 'RGDT_Rule_20200204_51', 'RGDT_Rule_20200204_52', 'RGDT_Rule_20200204_53',
+                'RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1', 'RGDT_Rule_20200204_2',
+                'RGDT_Rule_20200204_3', 'RGDT_Rule_20200204_4', 'RGDT_Rule_20200204_5',
+                'RGDT_Rule_20200204_6', 'RGDT_Rule_20200204_7', 'RGDT_Rule_20200204_8',
+                'RGDT_Rule_20200204_9', 'RGDT_Rule_20200204_10', 'RGDT_Rule_20200204_11',
+                'RGDT_Rule_20200204_12', 'RGDT_Rule_20200204_13'
             ])
     ]
     X, y, _, _, _, weights = create_data
@@ -153,7 +156,8 @@ def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
         X_rules = rg.fit(X, y, sample_weight=w)
         pd.testing.assert_series_equal(X_rules.sum(), exp_results[i])
         assert rg.rule_names == exp_results[i].index.tolist() == list(
-            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys())
+            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == list(
+                rg.rules.rule_strings.keys())
         assert len(
             [l for l in list(rg.rule_strings.keys()) if "X['email_alpharatio']>" in l]) == 0
         assert len(
@@ -185,8 +189,11 @@ def test_fit_target_feat_corr_types_provided(create_data, rg_instantiated):
                 234, 232, 232, 125, 232, 216, 142, 225, 272, 120, 371, 43, 96, 213
             ], dtype='int64'),
             index=[
-                'RGDT_Rule_20200204_40', 'RGDT_Rule_20200204_41', 'RGDT_Rule_20200204_42', 'RGDT_Rule_20200204_43', 'RGDT_Rule_20200204_44', 'RGDT_Rule_20200204_45', 'RGDT_Rule_20200204_46', 'RGDT_Rule_20200204_47', 'RGDT_Rule_20200204_48',
-                'RGDT_Rule_20200204_49', 'RGDT_Rule_20200204_50', 'RGDT_Rule_20200204_51', 'RGDT_Rule_20200204_52', 'RGDT_Rule_20200204_53',
+                'RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1', 'RGDT_Rule_20200204_2',
+                'RGDT_Rule_20200204_3', 'RGDT_Rule_20200204_4', 'RGDT_Rule_20200204_5',
+                'RGDT_Rule_20200204_6', 'RGDT_Rule_20200204_7', 'RGDT_Rule_20200204_8',
+                'RGDT_Rule_20200204_9', 'RGDT_Rule_20200204_10', 'RGDT_Rule_20200204_11',
+                'RGDT_Rule_20200204_12', 'RGDT_Rule_20200204_13'
             ])
     ]
     X, y, _, _, _, weights = create_data
@@ -203,7 +210,8 @@ def test_fit_target_feat_corr_types_provided(create_data, rg_instantiated):
         X_rules = rg.fit(X, y, sample_weight=w)
         pd.testing.assert_series_equal(X_rules.sum(), exp_results[i])
         assert rg.rule_names == exp_results[i].index.tolist() == list(
-            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys())
+            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == list(
+                rg.rules.rule_strings.keys())
         assert len(
             [l for l in list(rg.rule_strings.values()) if "X['email_alpharatio']>" in l]) == 0
         assert len(
@@ -236,8 +244,11 @@ def test_transform(create_data, rg_instantiated):
                 161, 219, 166, 125, 107, 205, 133, 225, 228, 110, 163, 43, 21, 170
             ], dtype='int64'),
             index=[
-                'RGDT_Rule_20200204_40', 'RGDT_Rule_20200204_41', 'RGDT_Rule_20200204_42', 'RGDT_Rule_20200204_43', 'RGDT_Rule_20200204_44', 'RGDT_Rule_20200204_45', 'RGDT_Rule_20200204_46', 'RGDT_Rule_20200204_47',
-                'RGDT_Rule_20200204_48', 'RGDT_Rule_20200204_49', 'RGDT_Rule_20200204_50', 'RGDT_Rule_20200204_51', 'RGDT_Rule_20200204_52', 'RGDT_Rule_20200204_53'
+                'RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1', 'RGDT_Rule_20200204_2',
+                'RGDT_Rule_20200204_3', 'RGDT_Rule_20200204_4', 'RGDT_Rule_20200204_5',
+                'RGDT_Rule_20200204_6', 'RGDT_Rule_20200204_7', 'RGDT_Rule_20200204_8',
+                'RGDT_Rule_20200204_9', 'RGDT_Rule_20200204_10', 'RGDT_Rule_20200204_11',
+                'RGDT_Rule_20200204_12', 'RGDT_Rule_20200204_13'
             ])
     ]
     X, y, _, _, _, weights = create_data

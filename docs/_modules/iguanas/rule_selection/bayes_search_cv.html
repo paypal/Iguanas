@@ -158,8 +158,7 @@
               <div>
                 
   <h1>Source code for iguanas.rule_selection.bayes_search_cv</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">stat</span>
-<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">sample</span>
+<span></span><span class="sd">&quot;&quot;&quot;Optimises the parameters of a pipeline using Bayesian Optimisation.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">StratifiedKFold</span>
 <span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
@@ -169,25 +168,25 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">iguanas.pipeline</span> <span class="kn">import</span> <span class="n">LinearPipeline</span>
-<span class="kn">from</span> <span class="nn">iguanas.pipeline.linear_pipeline</span> <span class="kn">import</span> <span class="n">DataFrameSizeError</span>
+<span class="kn">from</span> <span class="nn">iguanas.exceptions</span> <span class="kn">import</span> <span class="n">DataFrameSizeError</span><span class="p">,</span> <span class="n">NoRulesError</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasSeriesType</span>
-<span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">PandasSeries</span>
+<span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span>
 <span class="kn">import</span> <span class="nn">iguanas.utils</span> <span class="k">as</span> <span class="nn">utils</span>
 <span class="kn">from</span> <span class="nn">iguanas.space</span> <span class="kn">import</span> <span class="n">Choice</span>
 
 
 <div class="viewcode-block" id="BayesSearchCV"><a class="viewcode-back" href="../../../api/api/iguanas.rule_selection.BayesSearchCV.html#iguanas.rule_selection.BayesSearchCV">[docs]</a><span class="k">class</span> <span class="nc">BayesSearchCV</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Optimises the parameters of a pipeline using a user-defined set of </span>
+<span class="sd">    Optimises the parameters of a pipeline using a user-defined set of</span>
 <span class="sd">    search spaces in conjuncion with Bayesian Optimisation.</span>
 
 <span class="sd">    The data is first split into cross validation datasets. For each fold, the</span>
 <span class="sd">    Bayesian optimiser chooses a set of parameters (from the ranges provided),</span>
-<span class="sd">    applies the pipeline&#39;s `fit` method to the training set, then applies the </span>
+<span class="sd">    applies the pipeline&#39;s `fit` method to the training set, then applies the</span>
 <span class="sd">    `predict` method to the validation set. The pipeline&#39;s prediction is scored</span>
-<span class="sd">    using the `metric` function, and these scores are averaged across the </span>
+<span class="sd">    using the `metric` function, and these scores are averaged across the</span>
 <span class="sd">    folds. New parameter sets are chosen and applied until `n_iter` is reached.</span>
-<span class="sd">    The parameter setwith the highest mean score is deemed to be the best </span>
+<span class="sd">    The parameter setwith the highest mean score is deemed to be the best</span>
 <span class="sd">    performing.</span>
 
 <span class="sd">    Parameters</span>
@@ -197,10 +196,10 @@
 <span class="sd">        must include a `predict` method, which utilises a set of rules to make</span>
 <span class="sd">        a prediction on a binary target.</span>
 <span class="sd">    search_spaces : Dict[str, dict]</span>
-<span class="sd">        The search spaces for each relevant parameter of each step in the </span>
+<span class="sd">        The search spaces for each relevant parameter of each step in the</span>
 <span class="sd">        pipeline. Each key should correspond to the tag used for the relevant</span>
-<span class="sd">        pipeline step; each value should be a dictionary of the parameters </span>
-<span class="sd">        (keys) and their search spaces (values). Search spaces should be </span>
+<span class="sd">        pipeline step; each value should be a dictionary of the parameters</span>
+<span class="sd">        (keys) and their search spaces (values). Search spaces should be</span>
 <span class="sd">        defined using the classes in `iguanas.space`.</span>
 <span class="sd">    metric : Callable</span>
 <span class="sd">        The metric used to optimise the pipeline.</span>
@@ -209,30 +208,34 @@
 <span class="sd">    n_iter : int</span>
 <span class="sd">        The number of iterations that the optimiser should perform.</span>
 <span class="sd">    refit : bool, optional</span>
-<span class="sd">        Refit the best pipeline using the entire dataset. Must be set to True </span>
-<span class="sd">        if predictions need to be made using the best pipeline. Defaults to </span>
+<span class="sd">        Refit the best pipeline using the entire dataset. Must be set to True</span>
+<span class="sd">        if predictions need to be made using the best pipeline. Defaults to</span>
 <span class="sd">        True.</span>
 <span class="sd">    algorithm : Callable, optional</span>
 <span class="sd">        The algorithm leveraged by hyperopt&#39;s `fmin` function, which optimises</span>
-<span class="sd">        the rules. Defaults to tpe.suggest, which corresponds to </span>
+<span class="sd">        the rules. Defaults to tpe.suggest, which corresponds to</span>
 <span class="sd">        Tree-of-Parzen-Estimator.</span>
 <span class="sd">    error_score : Union[str, float], optional</span>
-<span class="sd">        Value to assign to the score of a validation fold if an error occurs </span>
-<span class="sd">        in the pipeline fitting. If set to ‘raise’, the error is raised. If a </span>
+<span class="sd">        Value to assign to the score of a validation fold if an error occurs</span>
+<span class="sd">        in the pipeline fitting. If set to ‘raise’, the error is raised. If a</span>
 <span class="sd">        numeric value is given, a warning is raised. This parameter does not</span>
 <span class="sd">        affect the refit step, which will always raise the error. Defaults to</span>
 <span class="sd">        &#39;raise&#39;.</span>
+<span class="sd">    sample_weight_in_val : bool, optional</span>
+<span class="sd">        Whether the `sample_weight` should be used when calculating the </span>
+<span class="sd">        `metric` on the validation fold. If True, the `sample_weight` is used.</span>
+<span class="sd">        Defaults to False.</span>
 <span class="sd">    num_cores : int, optional</span>
-<span class="sd">        Number of cores to use when fitting a given parameter set. Should be </span>
-<span class="sd">        set to &lt;= `cv`. Defaults to 1.</span>
+<span class="sd">        Number of cores to use when fitting a given parameter set. Should be</span>
+<span class="sd">        set to &lt;= `cv`. Defaults to 1.    </span>
 <span class="sd">    verbose : int, optional</span>
-<span class="sd">        Controls the verbosity - the higher, the more messages. &gt;0 : shows the </span>
+<span class="sd">        Controls the verbosity - the higher, the more messages. &gt;0 : shows the</span>
 <span class="sd">        overall progress of the optimisation process. Defaults to 0.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    cv_results : PandasDataFrameType</span>
-<span class="sd">        Shows the scores per fold, mean score and standard deviation of the </span>
+<span class="sd">        Shows the scores per fold, mean score and standard deviation of the</span>
 <span class="sd">        score for each trialled parameter set.</span>
 <span class="sd">    best_score : float</span>
 <span class="sd">        The best mean score achieved.</span>
@@ -253,6 +256,7 @@
                  <span class="n">refit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">algorithm</span><span class="o">=</span><span class="n">tpe</span><span class="o">.</span><span class="n">suggest</span><span class="p">,</span>
                  <span class="n">error_score</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">,</span>
+                 <span class="n">sample_weight_in_val</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">num_cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -269,32 +273,35 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">refit</span> <span class="o">=</span> <span class="n">refit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">=</span> <span class="n">algorithm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">error_score</span> <span class="o">=</span> <span class="n">error_score</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_weight_in_val</span> <span class="o">=</span> <span class="n">sample_weight_in_val</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span> <span class="o">=</span> <span class="n">num_cores</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
 <div class="viewcode-block" id="BayesSearchCV.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_selection.BayesSearchCV.html#iguanas.rule_selection.BayesSearchCV.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-            <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
-            <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+            <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+            <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasSeriesType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
             <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Optimises the parameters of the given pipeline.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        X : PandasDataFrameType</span>
-<span class="sd">            The dataset.</span>
-<span class="sd">        y : PandasSeriesType</span>
-<span class="sd">            The binary target column.</span>
-<span class="sd">        sample_weight : PandasSeriesType, optional</span>
-<span class="sd">            Row-wise weights to apply. Defaults to None.</span>
+<span class="sd">        X : Union[PandasDataFrameType, dict]</span>
+<span class="sd">            The dataset or dictionary of datasets for each pipeline step.</span>
+<span class="sd">        y : Union[PandasSeriesType, dict]</span>
+<span class="sd">            The binary target column or dictionary of binary target columns</span>
+<span class="sd">            for each pipeline step.</span>
+<span class="sd">        sample_weight : Union[PandasSeriesType, dict], optional</span>
+<span class="sd">            Row-wise weights or dictionary of row-wise weights for each</span>
+<span class="sd">            pipeline step.. Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">])</span>
-        <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">])</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span>
-                <span class="n">sample_weight</span><span class="p">,</span> <span class="s1">&#39;sample_weight&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">])</span>
+                <span class="n">sample_weight</span><span class="p">,</span> <span class="s1">&#39;sample_weight&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
         <span class="c1"># Copy original pipeline</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pipeline_</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">)</span>
         <span class="c1"># Generate CV datasets</span>
@@ -324,19 +331,17 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">refit</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;--- Refitting on entire dataset with best pipeline ---&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_inject_params_into_pipeline</span><span class="p">(</span>
-                <span class="n">pipeline</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline_</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">best_params</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pipeline_</span><span class="o">.</span><span class="n">_update_kwargs</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">best_params</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pipeline_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BayesSearchCV.predict"><a class="viewcode-back" href="../../../api/api/iguanas.rule_selection.BayesSearchCV.html#iguanas.rule_selection.BayesSearchCV.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
+<div class="viewcode-block" id="BayesSearchCV.predict"><a class="viewcode-back" href="../../../api/api/iguanas.rule_selection.BayesSearchCV.html#iguanas.rule_selection.BayesSearchCV.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Predict using the optimised pipeline.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        X : PandasDataFrameType</span>
-<span class="sd">            The dataset.</span>
+<span class="sd">        X : Union[PandasDataFrameType, dict]</span>
+<span class="sd">            The dataset or dictionary of datasets for each pipeline step.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -344,24 +349,27 @@
 <span class="sd">            The prediction of the pipeline.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline_</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BayesSearchCV.fit_predict"><a class="viewcode-back" href="../../../api/api/iguanas.rule_selection.BayesSearchCV.html#iguanas.rule_selection.BayesSearchCV.fit_predict">[docs]</a>    <span class="k">def</span> <span class="nf">fit_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                    <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
-                    <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+                    <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+                    <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasSeriesType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
                     <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Optimises the parameters of the given pipeline, then generates the </span>
+<span class="sd">        Optimises the parameters of the given pipeline, then generates the</span>
 <span class="sd">        optimised pipeline&#39;s prediction on the dataset.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        X : PandasDataFrameType</span>
-<span class="sd">            The dataset.</span>
-<span class="sd">        y : PandasSeriesType</span>
-<span class="sd">            The binary target column.</span>
-<span class="sd">        sample_weight : PandasSeriesType, optional</span>
-<span class="sd">            Row-wise weights to apply. Defaults to None.</span>
+<span class="sd">        X : Union[PandasDataFrameType, dict]</span>
+<span class="sd">            The dataset or dictionary of datasets for each pipeline step.</span>
+<span class="sd">        y : Union[PandasSeriesType, dict]</span>
+<span class="sd">            The binary target column or dictionary of binary target columns</span>
+<span class="sd">            for each pipeline step.</span>
+<span class="sd">        sample_weight : Union[PandasSeriesType, dict], optional</span>
+<span class="sd">            Row-wise weights or dictionary of row-wise weights for each</span>
+<span class="sd">            pipeline step.. Defaults to None.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -399,12 +407,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">params_iter</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">cv_datasets</span> <span class="o">=</span> <span class="n">objective_inputs</span>
-        <span class="n">pipeline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inject_params_into_pipeline</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">params_iter</span><span class="p">)</span>
+        <span class="n">pipeline</span><span class="o">.</span><span class="n">_update_kwargs</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">params_iter</span><span class="p">)</span>
         <span class="c1"># Fit/predict/score on each fold</span>
         <span class="k">with</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span><span class="p">)</span> <span class="k">as</span> <span class="n">parallel</span><span class="p">:</span>
             <span class="n">scores_over_folds</span> <span class="o">=</span> <span class="n">parallel</span><span class="p">(</span><span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fit_predict_on_fold</span><span class="p">)(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_score</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">params_iter</span><span class="p">,</span>
-                <span class="n">fold_idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">fold_idx</span><span class="p">,</span> <span class="n">datasets</span> <span class="ow">in</span> <span class="n">cv_datasets</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="n">fold_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_weight_in_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">fold_idx</span><span class="p">,</span> <span class="n">datasets</span> <span class="ow">in</span> <span class="n">cv_datasets</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="p">)</span>
         <span class="n">scores_over_folds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">scores_over_folds</span><span class="p">)</span>
         <span class="n">mean_score</span> <span class="o">=</span> <span class="n">scores_over_folds</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
@@ -420,7 +428,7 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_check_search_spaces_type</span><span class="p">(</span><span class="n">search_spaces</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Checks that values of search_spaces are the correct type - </span>
+<span class="sd">        Checks that values of search_spaces are the correct type -</span>
 <span class="sd">        UniformInteger, UniformFloat or Choice</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -432,41 +440,81 @@
                     <span class="s2">&quot;&lt;class &#39;iguanas.space.spaces.Choice&#39;&gt;&quot;</span>
                 <span class="p">])</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_generate_cv_datasets</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
-                              <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
-                              <span class="n">sample_weight</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_generate_cv_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+                              <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasSeriesType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+                              <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasSeriesType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
                               <span class="n">cv</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Generates the cross validation datasets for each fold.&quot;&quot;&quot;</span>
 
+        <span class="c1"># If X or y are dicts, use first dataset in dict to calc folds</span>
+        <span class="n">X_</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">X</span>
+        <span class="n">y_</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">y</span>
         <span class="n">cv_datasets</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">skf</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span>
             <span class="n">n_splits</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
-        <span class="n">skf</span><span class="o">.</span><span class="n">get_n_splits</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">skf</span><span class="o">.</span><span class="n">get_n_splits</span><span class="p">(</span><span class="n">X_</span><span class="p">,</span> <span class="n">y_</span><span class="p">)</span>
         <span class="n">folds</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">fold_idx</span><span class="p">:</span> <span class="p">(</span><span class="n">train_idxs</span><span class="p">,</span> <span class="n">val_idxs</span><span class="p">)</span> <span class="k">for</span> <span class="n">fold_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">train_idxs</span><span class="p">,</span> <span class="n">val_idxs</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">skf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+            <span class="n">fold_idx</span><span class="p">:</span> <span class="p">(</span><span class="n">train_idxs</span><span class="p">,</span> <span class="n">val_idxs</span><span class="p">)</span> <span class="k">for</span> <span class="n">fold_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">train_idxs</span><span class="p">,</span> <span class="n">val_idxs</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">skf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X_</span><span class="p">,</span> <span class="n">y_</span><span class="p">))</span>
         <span class="p">}</span>
         <span class="k">for</span> <span class="n">fold_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">train_idxs</span><span class="p">,</span> <span class="n">val_idxs</span><span class="p">)</span> <span class="ow">in</span> <span class="n">folds</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">X_train</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idxs</span><span class="p">]</span>
-            <span class="n">X_val</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">val_idxs</span><span class="p">]</span>
-            <span class="n">y_train</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idxs</span><span class="p">]</span>
-            <span class="n">y_val</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">val_idxs</span><span class="p">]</span>
+            <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_df_into_train_and_val</span><span class="p">(</span>
+                <span class="n">df</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">train_idxs</span><span class="o">=</span><span class="n">train_idxs</span><span class="p">,</span> <span class="n">val_idxs</span><span class="o">=</span><span class="n">val_idxs</span>
+            <span class="p">)</span>
+            <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_df_into_train_and_val</span><span class="p">(</span>
+                <span class="n">df</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">train_idxs</span><span class="o">=</span><span class="n">train_idxs</span><span class="p">,</span> <span class="n">val_idxs</span><span class="o">=</span><span class="n">val_idxs</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">sample_weight_train</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">sample_weight_val</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">sample_weight_train</span> <span class="o">=</span> <span class="n">sample_weight</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idxs</span><span class="p">]</span>
-                <span class="n">sample_weight_val</span> <span class="o">=</span> <span class="n">sample_weight</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">val_idxs</span><span class="p">]</span>
+                <span class="n">sample_weight_train</span><span class="p">,</span> <span class="n">sample_weight_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_df_into_train_and_val</span><span class="p">(</span>
+                    <span class="n">df</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span> <span class="n">train_idxs</span><span class="o">=</span><span class="n">train_idxs</span><span class="p">,</span> <span class="n">val_idxs</span><span class="o">=</span><span class="n">val_idxs</span>
+                <span class="p">)</span>
             <span class="n">cv_datasets</span><span class="p">[</span><span class="n">fold_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">sample_weight_train</span><span class="p">,</span> <span class="n">sample_weight_val</span>
         <span class="k">return</span> <span class="n">cv_datasets</span>
 
     <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_split_df_into_train_and_val</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasSeriesType</span><span class="p">,</span>
+                                               <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+                                     <span class="n">train_idxs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                     <span class="n">val_idxs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span>
+                                         <span class="n">PandasSeriesType</span><span class="p">,</span>
+                                         <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Splits a dataset or dictionary of datasets into training and validation</span>
+<span class="sd">        sets.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">_splitter</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">idxs</span><span class="p">):</span>
+            <span class="c1"># If the data is a Pandas data object, return the filtered object</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)):</span>
+                <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idxs</span><span class="p">]</span>
+            <span class="c1"># If the data is a dict, loop through the dict and filter the</span>
+            <span class="c1"># Pandas data objects</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">df_dict</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">step_tag</span><span class="p">,</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">df_dict</span><span class="p">[</span><span class="n">step_tag</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">df_dict</span><span class="p">[</span><span class="n">step_tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idxs</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">df_dict</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s1">&#39;`df` must be a Pandas Series/DataFrame or a dict&#39;</span><span class="p">)</span>
+        <span class="n">df_train</span><span class="p">,</span> <span class="n">df_val</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">_splitter</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">idxs</span><span class="p">)</span> <span class="k">for</span> <span class="n">idxs</span> <span class="ow">in</span> <span class="p">[</span><span class="n">train_idxs</span><span class="p">,</span> <span class="n">val_idxs</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">df_train</span><span class="p">,</span> <span class="n">df_val</span>
+
+    <span class="o">@</span> <span class="nb">staticmethod</span>
     <span class="k">def</span> <span class="nf">_convert_search_spaces_to_hyperopt</span><span class="p">(</span><span class="n">search_spaces</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Converts ranges in the search_spaces that are stored using </span>
+<span class="sd">        Converts ranges in the search_spaces that are stored using</span>
 <span class="sd">        `iguanas.space.spaces` types into hyperopt&#39;s stochastic expressions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -478,39 +526,42 @@
                 <span class="p">)</span>
         <span class="k">return</span> <span class="n">search_spaces_</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_inject_params_into_pipeline</span><span class="p">(</span><span class="n">pipeline</span><span class="p">:</span> <span class="n">LinearPipeline</span><span class="p">,</span>
-                                     <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LinearPipeline</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Injects the given parameters into the pipeline.&quot;&quot;&quot;</span>
-
-        <span class="k">for</span> <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">steps</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">step_tag</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">step</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">step_tag</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">pipeline</span>
-
-    <span class="nd">@staticmethod</span>
+    <span class="o">@</span> <span class="nb">staticmethod</span>
     <span class="k">def</span> <span class="nf">_fit_predict_on_fold</span><span class="p">(</span><span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
                              <span class="n">error_score</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
                              <span class="n">datasets</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
                              <span class="n">pipeline</span><span class="p">:</span> <span class="n">LinearPipeline</span><span class="p">,</span>
                              <span class="n">params_iter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-                             <span class="n">fold_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+                             <span class="n">fold_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                             <span class="n">sample_weight_in_val</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Tries to to fit the pipeline (using a given parameter set) on the </span>
-<span class="sd">        training set, then apply it to the validation set. If no rules remain </span>
-<span class="sd">        after any of the stages of the pipeline, an error is thrown (if </span>
-<span class="sd">        `self.error_score` == &#39;raise&#39;) or the score for the pipeline for that </span>
+<span class="sd">        Tries to to fit the pipeline (using a given parameter set) on the</span>
+<span class="sd">        training set, then apply it to the validation set. If no rules remain</span>
+<span class="sd">        after any of the stages of the pipeline, an error is thrown (if</span>
+<span class="sd">        `self.error_score` == &#39;raise&#39;) or the score for the pipeline for that</span>
 <span class="sd">        validation set is set to `self.error_score`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">sample_weight_train</span><span class="p">,</span> <span class="n">sample_weight_val</span> <span class="o">=</span> <span class="n">datasets</span>
-            <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-                <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">sample_weight_train</span>
-            <span class="p">)</span>
+            <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">sample_weight_train</span><span class="p">)</span>
             <span class="n">y_pred_val</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_val</span><span class="p">)</span>
-            <span class="n">fold_score</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">y_pred_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">sample_weight_val</span><span class="p">)</span>
-        <span class="k">except</span> <span class="n">DataFrameSizeError</span><span class="p">:</span>
+            <span class="c1"># If y_val or sample_weight_val are dicts, extract the dataset</span>
+            <span class="c1"># corresponding to the final pipeline step, so the score of the</span>
+            <span class="c1"># pipeline predictor can be calculated</span>
+            <span class="n">y_val</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">return_dataset_if_dict</span><span class="p">(</span>
+                <span class="n">step_tag</span><span class="o">=</span><span class="n">pipeline</span><span class="o">.</span><span class="n">steps_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">df</span><span class="o">=</span><span class="n">y_val</span>
+            <span class="p">)</span>
+            <span class="n">sample_weight_val</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">return_dataset_if_dict</span><span class="p">(</span>
+                <span class="n">step_tag</span><span class="o">=</span><span class="n">pipeline</span><span class="o">.</span><span class="n">steps_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">df</span><span class="o">=</span><span class="n">sample_weight_val</span>
+            <span class="p">)</span>
+            <span class="c1"># If sample_weight_in_val is True, use the sample_weight_val in the</span>
+            <span class="c1"># metric calculation</span>
+            <span class="k">if</span> <span class="n">sample_weight_in_val</span><span class="p">:</span>
+                <span class="n">fold_score</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">y_pred_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">sample_weight_val</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fold_score</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">y_pred_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">DataFrameSizeError</span><span class="p">,</span> <span class="n">NoRulesError</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">error_score</span> <span class="o">==</span> <span class="s1">&#39;raise&#39;</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;&quot;&quot;No rules remaining for: Pipeline parameter set = </span><span class="si">{</span><span class="n">params_iter</span><span class="si">}</span><span class="s2">; Fold index = </span><span class="si">{</span><span class="n">fold_idx</span><span class="si">}</span><span class="s2">.&quot;&quot;&quot;</span>
@@ -522,12 +573,12 @@
                 <span class="n">fold_score</span> <span class="o">=</span> <span class="n">error_score</span>
         <span class="k">return</span> <span class="n">fold_score</span>
 
-    <span class="nd">@staticmethod</span>
+    <span class="o">@</span> <span class="nb">staticmethod</span>
     <span class="k">def</span> <span class="nf">_update_cv_results</span><span class="p">(</span><span class="n">cv_results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">params_iter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
                            <span class="n">fold_idxs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">scores_over_folds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                            <span class="n">mean_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">std_dev_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Updates the cv_results dictionary with the results for the given </span>
+<span class="sd">        Updates the cv_results dictionary with the results for the given</span>
 <span class="sd">        parameter set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -545,11 +596,11 @@
         <span class="p">})</span>
         <span class="k">return</span> <span class="n">cv_results</span>
 
-    <span class="nd">@staticmethod</span>
+    <span class="o">@</span> <span class="nb">staticmethod</span>
     <span class="k">def</span> <span class="nf">_reformat_best_params</span><span class="p">(</span><span class="n">best_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">search_spaces</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Reformats the output of hyperopt&#39;s fmin function into the same </span>
-<span class="sd">        dictionary format that is used to define the search_spaces. This allows </span>
+<span class="sd">        Reformats the output of hyperopt&#39;s fmin function into the same</span>
+<span class="sd">        dictionary format that is used to define the search_spaces. This allows</span>
 <span class="sd">        the best parameters to be injected back into the pipeline.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -574,11 +625,11 @@
                         <span class="n">step_tag</span><span class="p">][</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">best_choice_idx</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">best_params_</span>
 
-    <span class="nd">@staticmethod</span>
+    <span class="o">@</span> <span class="nb">staticmethod</span>
     <span class="k">def</span> <span class="nf">_format_cv_results</span><span class="p">(</span><span class="n">cv_results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Formats the cv_results dictionary into a Pandas Dataframe, and sorts by</span>
-<span class="sd">        MeanScore descending, StdDevScore ascending.        </span>
+<span class="sd">        MeanScore descending, StdDevScore ascending.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">cv_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">cv_results</span><span class="p">)</span>

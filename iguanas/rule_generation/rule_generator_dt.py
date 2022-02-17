@@ -5,6 +5,7 @@ import iguanas.utils as utils
 from iguanas.rule_generation._base_generator import _BaseGenerator
 from iguanas.utils.types import PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasSeriesType, PandasDataFrameType
+from iguanas.exceptions import NoRulesError
 from typing import Union, Callable, List, Set, Tuple
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -56,8 +57,16 @@ class RuleGeneratorDT(_BaseGenerator):
     Attributes
     ----------
     rule_strings : Dict[str, str]
-        The generated rules, defined using the standard Iguanas string format
-        (values) and their names (keys).
+        The generated rules, defined using the standard Iguanas string 
+        format (values) and their names (keys).   
+    rule_lambdas : Dict[str, object]
+        The generated rules, defined using the standard Iguanas lambda 
+        expression format (values) and their names (keys).   
+    lambda_kwargs : Dict[str, object]
+        The keyword arguments for the generated rules defined using the 
+        standard Iguanas lambda expression format.
+    rules : Rules
+        The Rules object containing the generated rules.
     rule_names : List[str]
         The names of the generated rules.
     """
@@ -117,6 +126,10 @@ class RuleGeneratorDT(_BaseGenerator):
         if sample_weight is not None:
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [PandasSeries])
+        # Ensures rule names are the same when fit run without reinstantiating
+        self._rule_name_counter = 0
+        # Ensures max_depth updates if n_total_conditions changed in
+        # already instantiated class
         self.tree_ensemble.max_depth = self.n_total_conditions
         self.tree_ensemble.random_state = 0
         if self.target_feat_corr_types == 'Infer':
@@ -145,13 +158,7 @@ class RuleGeneratorDT(_BaseGenerator):
             columns_cat=columns_cat,
             sample_weight=sample_weight
         )
-        self.rule_names = list(self.rule_strings.keys())
-        # Convert generated rules into lambda format. Set rule_lambdas to an
-        # empty dict first, prevents errors when running fit more than once.
-        self.rule_lambdas = {}
-        self.rule_lambdas = self.as_rule_lambdas(
-            as_numpy=False, with_kwargs=True
-        )
+        self._generate_other_rule_formats()
         return X_rules
 
     def _extract_rules_from_ensemble(self, X: PandasDataFrameType, y: PandasSeriesType,
@@ -173,10 +180,12 @@ class RuleGeneratorDT(_BaseGenerator):
             ) for decision_tree in decision_trees
             )
         rule_strings_set = sorted(set().union(*list_of_rule_string_sets))
-        self.rule_strings = dict((self._generate_rule_name(), rule_string)
-                                 for rule_string in rule_strings_set)
+        self.rule_strings = dict(
+            (self._generate_rule_name(), rule_string)
+            for rule_string in rule_strings_set
+        )
         if not self.rule_strings:
-            raise Exception(
+            raise NoRulesError(
                 'No rules could be generated. Try changing the class parameters.')
         X_rules = self.transform(X=X)
         return X_rules

@@ -6,8 +6,7 @@ import numpy as np
 import iguanas.utils as utils
 from iguanas.rule_generation._base_generator import _BaseGenerator
 from iguanas.utils.types import KoalasDataFrame, KoalasSeries
-from iguanas.utils.typing import KoalasDataFrameType, KoalasSeriesType,\
-    PandasDataFrameType
+from iguanas.utils.typing import KoalasDataFrameType, KoalasSeriesType
 from typing import Callable, List, Set, Tuple
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.classification import RandomForestClassifier, DecisionTreeClassificationModel
@@ -58,8 +57,16 @@ class RuleGeneratorDTSpark(_BaseGenerator):
     rule_strings : Dict[str, str]
         The generated rules, defined using the standard Iguanas string 
         format (values) and their names (keys).   
+    rule_lambdas : Dict[str, object]
+        The generated rules, defined using the standard Iguanas lambda 
+        expression format (values) and their names (keys).   
+    lambda_kwargs : Dict[str, object]
+        The keyword arguments for the generated rules defined using the 
+        standard Iguanas lambda expression format.
+    rules : Rules
+        The Rules object containing the generated rules.
     rule_names : List[str]
-        The names of the generated rules. 
+        The names of the generated rules.
     """
 
     def __init__(self, metric: Callable,
@@ -145,13 +152,7 @@ class RuleGeneratorDTSpark(_BaseGenerator):
             tree_ensemble=trained_tree_ensemble, columns_int=columns_int,
             columns_cat=columns_cat,
         )
-        self.rule_names = list(self.rule_strings.keys())
-        # Convert generated rules into lambda format. Set rule_lambdas to an
-        # empty dict first, prevents errors when running fit more than once.
-        self.rule_lambdas = {}
-        self.rule_lambdas = self.as_rule_lambdas(
-            as_numpy=False, with_kwargs=True
-        )
+        self._generate_other_rule_formats()
         return X_rules
 
     def _extract_rules_from_ensemble(self, X: KoalasDataFrameType, y: KoalasSeriesType,
@@ -176,9 +177,10 @@ class RuleGeneratorDTSpark(_BaseGenerator):
             )
             list_of_rule_string_sets.append(dt_rule_strings_set)
         rule_strings_set = sorted(set().union(*list_of_rule_string_sets))
-        # self.rule_strings = dict((self._generate_rule_name_dt(), rule_string)
-        self.rule_strings = dict((self._generate_rule_name(), rule_string)
-                                 for rule_string in rule_strings_set)
+        self.rule_strings = dict(
+            (self._generate_rule_name(), rule_string)
+            for rule_string in rule_strings_set
+        )
         if not self.rule_strings:
             raise Exception(
                 'No rules could be generated. Try changing the class parameters.')

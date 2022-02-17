@@ -1,7 +1,6 @@
 import pytest
 from iguanas.rule_selection import GreedyFilter
 from iguanas.metrics import FScore, Precision
-import iguanas.utils as utils
 import numpy as np
 import pandas as pd
 import random

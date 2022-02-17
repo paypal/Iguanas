@@ -1,5 +1,5 @@
 """Class for accessing a class attribute within a pipeline."""
-from typing import Union, List, Tuple
+from typing import Union, Dict
 
 
 class ClassAccessor:
@@ -15,7 +15,7 @@ class ClassAccessor:
     class_tag : str
         The tag corresponding to the class where the attribute is located.
     class_attribute : str
-        The name of the attribute to be extracted.
+        The name of the attribute to be extracted.    
     """
 
     def __init__(self,
@@ -25,14 +25,16 @@ class ClassAccessor:
         self.class_tag = class_tag
         self.class_attribute = class_attribute
 
-    def get(self, steps: List[Tuple[str, object]]) -> Union[str, float, int, dict, list, tuple]:
+    def get(self,
+            pipeline_params: Dict[str, dict]
+            ) -> Union[str, float, int, dict, list, tuple]:
         """
         Extracts the given class attribute.
 
         Parameters
         ----------
-        steps : List[Tuple[str, object]]
-            The list of pipeline steps where the class is located.
+        pipeline_params : Dict[str, dict]
+            The parameters of the pipeline containing the class attribute.
 
         Returns
         -------
@@ -44,9 +46,9 @@ class ClassAccessor:
         ValueError
             If the `class_tag` cannot be found in `steps`.
         """
-        for tag, class_ in steps:
-            if tag == self.class_tag:
-                return class_.__dict__[self.class_attribute]
+
+        if self.class_tag in pipeline_params.keys():
+            return pipeline_params[self.class_tag][self.class_attribute]
         raise ValueError(
-            f'There are no steps in `pipeline` corresponding to `class_tag`={self.class_tag}'
+            f"There are no steps in `pipeline` corresponding to `class_tag`='{self.class_tag}'"
         )

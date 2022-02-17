@@ -275,6 +275,16 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="api/iguanas.pipeline.ParallelPipeline.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.pipeline
+      </span>
+     </code>
+     .ParallelPipeline
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="api/iguanas.pipeline.ClassAccessor.html">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
@@ -566,6 +576,16 @@
       </span>
      </code>
      .ConvertProcessedConditionsToGeneral
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="api/iguanas.rules.ReturnMappings.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.rules
+      </span>
+     </code>
+     .ReturnMappings
     </a>
    </li>
   </ul>
@@ -964,6 +984,29 @@ stringified types.</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
 <dt>bool</dt><dd><p>If str(type(<cite>x</cite>)) is in <cite>types</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.utils.utils.return_dataset_if_dict">
+<span class="sig-prename descclassname"><span class="pre">iguanas.utils.utils.</span></span><span class="sig-name descname"><span class="pre">return_dataset_if_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step_tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/utils/utils.html#return_dataset_if_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.utils.utils.return_dataset_if_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>If <cite>df</cite> is a dict, then the dataframe for the given step in a pipeline is
+extracted from the dict; else, just return <cite>df</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>step_tag</strong><span class="classifier">str</span></dt><dd><p>The tag corresponding to the pipeline step.</p>
+</dd>
+<dt><strong>df</strong><span class="classifier">Union[dict, PandasDataFrameType]</span></dt><dd><p>The dataset or dictionary of datasets.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>PandasDataFrameType</dt><dd><p>The dataset for the pipeline step.</p>
 </dd>
 </dl>
 </dd>

@@ -2,7 +2,6 @@
 Generates rules by optimising the thresholds of each feature individually, then
 combining them.
 """
-from random import sample
 import pandas as pd
 import numpy as np
 import math
@@ -79,8 +78,16 @@ class RuleGeneratorOpt(_BaseGenerator):
     Attributes
     ----------
     rule_strings : Dict[str, str]
-        The generated rules, defined using the standard Iguanas string format
-        (values) and their names (keys).        
+        The generated rules, defined using the standard Iguanas string 
+        format (values) and their names (keys).   
+    rule_lambdas : Dict[str, object]
+        The generated rules, defined using the standard Iguanas lambda 
+        expression format (values) and their names (keys).   
+    lambda_kwargs : Dict[str, object]
+        The keyword arguments for the generated rules defined using the 
+        standard Iguanas lambda expression format.
+    rules : Rules
+        The Rules object containing the generated rules.
     rule_names : List[str]
         The names of the generated rules.
     """
@@ -140,6 +147,8 @@ class RuleGeneratorOpt(_BaseGenerator):
         if sample_weight is not None:
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [PandasSeries])
+        # Ensures rule names are the same when fit run without reinstantiating
+        self._rule_name_counter = 0
         if self.target_feat_corr_types == 'Infer':
             self.target_feat_corr_types = self._calc_target_ratio_wrt_features(
                 X=X, y=y
@@ -173,13 +182,7 @@ class RuleGeneratorOpt(_BaseGenerator):
         self.rule_strings, X_rules = self._generate_n_order_pairwise_rules(
             X_rules, y, rule_strings, self.remove_corr_rules, sample_weight
         )
-        self.rule_names = list(self.rule_strings.keys())
-        # Convert generated rules into lambda format. Set rule_lambdas to an
-        # empty dict first, prevents errors when running fit more than once.
-        self.rule_lambdas = {}
-        self.rule_lambdas = self.as_rule_lambdas(
-            as_numpy=False, with_kwargs=True
-        )
+        self._generate_other_rule_formats()
         return X_rules
 
     def _generate_numeric_one_condition_rules(self, X: PandasDataFrameType,
@@ -254,8 +257,10 @@ class RuleGeneratorOpt(_BaseGenerator):
                 col for col in columns_cat if col in self.target_feat_corr_types['NegativeCorr']]
             cols_and_operators = list(zip(pos_corr_cat_feats, ['True'] * len(pos_corr_cat_feats))) + list(
                 zip(neg_corr_cat_feats, ['False'] * len(neg_corr_cat_feats)))
-            rule_strings = {self._generate_rule_name(): f"(X['{col}']=={operator})" for col,
-                            operator in cols_and_operators}
+            rule_strings = {
+                self._generate_rule_name(): f"(X['{col}']=={operator})"
+                for col, operator in cols_and_operators
+            }
             ara = RuleApplier(
                 rule_strings=rule_strings
             )

@@ -1,13 +1,9 @@
 import pytest
 from iguanas.rule_optimisation.bayesian_optimiser import BayesianOptimiser
-from iguanas.rule_optimisation._base_optimiser import _BaseOptimiser
 from iguanas.metrics.classification import FScore
 from iguanas.rules import Rules
 import numpy as np
 import pandas as pd
-from hyperopt import hp
-from hyperopt.pyll import scope
-from unittest.mock import patch
 import matplotlib.pyplot as plt
 
 
@@ -259,3 +255,15 @@ def test_return_orig_rule_if_better_perf(_instantiate):
     assert opt_rule_strings == expected_opt_rule_strings
     assert opt_rule_performances == expected_opt_rule_performances
     assert all(opt_X_rules == expected_X_rules)
+
+
+def test_generate_other_rule_formats(_instantiate):
+    ro = _instantiate
+    ro.rule_strings = {'Rule1': "(X['A']>1)"}
+    ro._generate_other_rule_formats()
+    assert ro.rule_names == ['Rule1']
+    assert ro.rule_lambdas['Rule1'](
+        **ro.lambda_kwargs['Rule1']) == "(X['A']>1)"
+    assert ro.rules.rule_strings == {'Rule1': "(X['A']>1)"}
+    assert ro.rules.rule_lambdas['Rule1'](
+        **ro.rules.lambda_kwargs['Rule1']) == "(X['A']>1)"

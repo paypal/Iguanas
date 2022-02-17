@@ -1,10 +1,9 @@
 """Class for converting generated rule conditions to system-ready conditions."""
-import pandas as pd
 from iguanas.rules._convert_rule_strings_to_rule_dicts import _ConvertRuleStringsToRuleDicts
 from iguanas.rules import Rules
-from typing import Dict, List, Tuple, Union
-
 from iguanas.utils.typing import PandasDataFrameType
+import pandas as pd
+from typing import Dict, List, Tuple, Union
 
 
 class ConvertProcessedConditionsToGeneral:

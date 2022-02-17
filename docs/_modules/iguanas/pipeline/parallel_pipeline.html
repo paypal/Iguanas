@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iguanas.pipeline.parallel_pipeline &#8212; Iguanas  documentation</title>
+    
+  <link href="../../../_static/css/theme.css" rel="stylesheet">
+  <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/blank.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/iguanas.css" />
+    
+  <link rel="preload" as="script" href="../../../_static/js/index.be7d3bbb2ef33a8344ce.js">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../../_static/iguanas_icon.png"/>
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+
+<a class="navbar-brand" href="../../../index.html">
+  <img src="../../../_static/iguanas_text_logo.png" class="logo" alt="logo">
+</a>      
+
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../install/index.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../api/index.html">
+  API
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../examples/index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../about_the_project/index.html">
+  About the project
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/paypal/Iguanas" rel="noopener" target="_blank" title="GitHub">
+            <span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label>
+          </a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for iguanas.pipeline.parallel_pipeline</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Class for creating a Parallel Pipeline.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">iguanas.pipeline._base_pipeline</span> <span class="kn">import</span> <span class="n">_BasePipeline</span>
+<span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasSeriesType</span>
+<span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span>
+<span class="kn">import</span> <span class="nn">iguanas.utils.utils</span> <span class="k">as</span> <span class="nn">utils</span>
+<span class="kn">from</span> <span class="nn">iguanas.rules</span> <span class="kn">import</span> <span class="n">Rules</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="ParallelPipeline"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.ParallelPipeline.html#iguanas.pipeline.ParallelPipeline">[docs]</a><span class="k">class</span> <span class="nc">ParallelPipeline</span><span class="p">(</span><span class="n">_BasePipeline</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a parallel pipeline, which is a set of steps which run</span>
+<span class="sd">    independently - their outputs are then concatenated and returned. Each step </span>
+<span class="sd">    should be an instantiated class with both `fit` and `transform` methods.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    steps : List[Tuple[str, object]]</span>
+<span class="sd">        The steps to be applied as part of the pipeline. Each element of the</span>
+<span class="sd">        list corresponds to a single step. Each step should be a tuple of two</span>
+<span class="sd">        elements - the first element should be a string which refers to the </span>
+<span class="sd">        step; the second element should be the instantiated class which is run</span>
+<span class="sd">        as part of the step. </span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    steps_ : List[Tuple[str, object]]</span>
+<span class="sd">        The steps corresponding to the fitted pipeline.</span>
+<span class="sd">    rule_names : List[str]</span>
+<span class="sd">        The names of the rules in the concatenated output.</span>
+<span class="sd">    rules : Rules</span>
+<span class="sd">        The Rules object containing the rules produced from fitting the </span>
+<span class="sd">        pipeline.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">steps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_BasePipeline</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ParallelPipeline.fit_transform"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.ParallelPipeline.html#iguanas.pipeline.ParallelPipeline.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                      <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+                      <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasSeriesType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+                      <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Independently runs the `fit_transform` method of each step in the </span>
+<span class="sd">        pipeline, then concatenates the output of each step column-wise.        </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : Union[PandasDataFrameType, dict]</span>
+<span class="sd">            The dataset or dictionary of datasets for each pipeline step.</span>
+<span class="sd">        y : Union[PandasSeriesType, dict]</span>
+<span class="sd">            The binary target column or dictionary of binary target columns</span>
+<span class="sd">            for each pipeline step.</span>
+<span class="sd">        sample_weight : Union[PandasSeriesType, dict], optional</span>
+<span class="sd">            Row-wise weights or dictionary of row-wise weights for each</span>
+<span class="sd">            pipeline step. Defaults to None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        PandasDataFrameType</span>
+<span class="sd">            The transformed dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span>
+                <span class="n">sample_weight</span><span class="p">,</span> <span class="s1">&#39;sample_weight&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span>
+        <span class="n">X_rules_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">rules_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">:</span>
+            <span class="n">X_rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_fit_transform</span><span class="p">(</span>
+                    <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">rules</span><span class="p">)</span>
+        <span class="n">X_rules</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">X_rules_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_concat_rules</span><span class="p">(</span><span class="n">rules_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rule_names</span> <span class="o">=</span> <span class="n">X_rules</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">X_rules</span></div>
+
+<div class="viewcode-block" id="ParallelPipeline.transform"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.ParallelPipeline.html#iguanas.pipeline.ParallelPipeline.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Independently runs the `transform` method of each step in the pipeline,</span>
+<span class="sd">        then concatenates the output of each step column-wise. Note that before</span>
+<span class="sd">        using this method, you should first run the `fit_transform` method.     </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : Union[PandasDataFrameType, dict]</span>
+<span class="sd">            The dataset or dictionary of datasets for each pipeline step.</span>
+<span class="sd">        y : Union[PandasSeriesType, dict]</span>
+<span class="sd">            The binary target column or dictionary of binary target columns</span>
+<span class="sd">            for each pipeline step.</span>
+<span class="sd">        sample_weight : Union[PandasSeriesType, dict], optional</span>
+<span class="sd">            Row-wise weights or dictionary of row-wise weights for each</span>
+<span class="sd">            pipeline step. Defaults to None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        PandasDataFrameType</span>
+<span class="sd">            The transformed dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
+        <span class="n">X_rules_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">:</span>
+            <span class="n">X_rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_transform</span><span class="p">(</span>
+                    <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">X</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">X_rules</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">X_rules_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rule_names</span> <span class="o">=</span> <span class="n">X_rules</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">X_rules</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_concat_rules</span><span class="p">(</span><span class="n">rules_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Rules</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Rules</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the combined rule set given a list of individual rule sets. If</span>
+<span class="sd">        `rules_list` is all None, returns None. If elements in `rules_list` are</span>
+<span class="sd">        None, raises an exception.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">rule</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules_list</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">rules_list</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                One or more of the classes in the pipeline has `None` assigned to </span>
+<span class="sd">                the `rules` parameter, whereas other classes in the pipeline have </span>
+<span class="sd">                the `rules` parameter populated. Either set all to `None` or </span>
+<span class="sd">                provide the `rules` parameter for all classes.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">rules_list</span><span class="p">)</span></div>
+</pre></div>
+
+              </div>
+              
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <script src="../../../_static/js/index.be7d3bbb2ef33a8344ce.js"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2021, James Laidler.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

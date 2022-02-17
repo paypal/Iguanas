@@ -1,15 +1,15 @@
 """Optimises a set of rules using Bayesian Optimisation."""
-from typing import Callable, Dict, List
-from hyperopt import hp, tpe, fmin
-from hyperopt.pyll import scope
-import numpy as np
-import pandas as pd
 from iguanas.rules import Rules
 import iguanas.utils as utils
 from iguanas.utils.types import NumpyArray, PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
-from joblib import Parallel, delayed
 from iguanas.rule_optimisation._base_optimiser import _BaseOptimiser
+import pandas as pd
+from typing import Callable, Dict, List
+from hyperopt import hp, tpe, fmin
+from hyperopt.pyll import scope
+import numpy as np
+from joblib import Parallel, delayed
 
 
 class BayesianOptimiser(_BaseOptimiser):
@@ -50,8 +50,16 @@ class BayesianOptimiser(_BaseOptimiser):
     Attributes
     ----------
     rule_strings : Dict[str, str]
-        The optimised rules stored in the standard Iguanas string format 
-        (values) and their names (keys).    
+        The optimised rules, defined using the standard Iguanas string 
+        format (values) and their names (keys).   
+    rule_lambdas : Dict[str, object]
+        The optimised rules, defined using the standard Iguanas lambda 
+        expression format (values) and their names (keys).   
+    lambda_kwargs : Dict[str, object]
+        The keyword arguments for the optimised rules defined using the 
+        standard Iguanas lambda expression format.
+    rules : Rules
+        The Rules object containing the optimised rules.
     rule_names_missing_features : List[str]
         Names of rules which use features that are not present in the dataset 
         (and therefore can't be optimised or applied).
@@ -68,9 +76,7 @@ class BayesianOptimiser(_BaseOptimiser):
         The optimisation metric (values) calculated for each original rule 
         (keys).
     non_optimisable_rules : Rules
-        A `Rules` object containing the rules which could not be optimised.
-    rule_names : List
-        The names of the optimised rules.
+        A `Rules` object containing the rules which could not be optimised.    
     """
 
     def __init__(self, rule_lambdas: Dict[str, Callable],
@@ -88,7 +94,7 @@ class BayesianOptimiser(_BaseOptimiser):
         self.num_cores = num_cores
         self.kwargs = kwargs
         self.rule_strings = {}
-        self.rule_names = {}
+        self.rule_names = []
 
     def __repr__(self):
         if self.rule_strings == {}:
@@ -124,8 +130,8 @@ class BayesianOptimiser(_BaseOptimiser):
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [PandasSeries])
         self.orig_rules = Rules(
-            rule_lambdas=self.orig_rule_lambdas,
-            lambda_kwargs=self.orig_lambda_kwargs,
+            rule_lambdas=self.orig_rule_lambdas.copy(),
+            lambda_kwargs=self.orig_lambda_kwargs.copy(),
         )
         _ = self.orig_rules.as_rule_strings(as_numpy=False)
         if self.verbose > 0:
@@ -201,10 +207,7 @@ class BayesianOptimiser(_BaseOptimiser):
             orig_X_rules=orig_X_rules,
             opt_X_rules=opt_X_rules
         )
-        self.rule_lambdas = self.as_rule_lambdas(
-            as_numpy=False, with_kwargs=True
-        )
-        self.rule_names = list(self.rule_strings.keys())
+        self._generate_other_rule_formats()
         return X_rules
 
     def _optimise_rules(self, rule_lambdas: Dict[str, Callable[[Dict], str]],
@@ -267,7 +270,6 @@ class BayesianOptimiser(_BaseOptimiser):
         Returns a dictionary of the space function (used in the optimiser) for 
         each feature in the dataset
         """
-
         space_funcs = {}
         for feature in all_rule_features:
             # If features contains %, means that there's more than one
@@ -338,9 +340,13 @@ class BayesianOptimiser(_BaseOptimiser):
             return -result
 
         opt_thresholds = fmin(
-            fn=_objective, space=rule_space_funcs, algo=algorithm,
-            max_evals=n_iter, verbose=verbose > 1,
-            rstate=np.random.RandomState(0), **kwargs
+            fn=_objective,
+            space=rule_space_funcs,
+            algo=algorithm,
+            max_evals=n_iter,
+            verbose=verbose > 1,
+            rstate=np.random.RandomState(0),
+            **kwargs
         )
 
         # If rule_space_funcs contained constant values (due to min/max of
@@ -359,7 +365,6 @@ class BayesianOptimiser(_BaseOptimiser):
         Converts threshold values based on integer columns into integer 
         format.
         """
-
         for feature, value in opt_thresholds.items():
             col = feature.split('%')[0]
             if col in int_cols:

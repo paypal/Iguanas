@@ -39,7 +39,7 @@ def _rule_dicts():
                                                   'value': 120.0},
                                                  {'field': 'payer_id_sum_approved_txn_amt_per_paypalid_30day',
                                                   'operator': 'less_or_equal',
-                                                  'value': 500.0}]},
+                                                  'value': 500}]},
                                       {'field': 'num_items', 'operator': 'equal', 'value': 1.0}]},
                   'Rule2': {'condition': 'AND',
                             'rules': [{'field': 'ml_cc_v0', 'operator': 'less', 'value': 0.315},
@@ -89,7 +89,7 @@ def _rule_dicts():
 
 @pytest.fixture
 def _rule_strings_pandas():
-    rule_strings = {'Rule1': "((X['payer_id_sum_approved_txn_amt_per_paypalid_1day']>=60.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_7day']>120.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_30day']<=500.0))&(X['num_items']==1.0)",
+    rule_strings = {'Rule1': "((X['payer_id_sum_approved_txn_amt_per_paypalid_1day']>=60.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_7day']>120.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_30day']<=500))&(X['num_items']==1.0)",
                     'Rule2': "(X['ml_cc_v0']<0.315)&((X['method_clean']=='checkout')|(X['method_clean'].str.startswith('checkout', na=False))|(X['method_clean'].str.endswith('checkout', na=False))|(X['method_clean'].str.contains('checkout', na=False, regex=False))|(~X['ip_address'].isna())|(X['ip_isp'].fillna('')!=''))",
                     'Rule3': "(~X['method_clean'].str.startswith('checkout', na=False))&(~X['method_clean'].str.endswith('checkout', na=False))&(~X['method_clean'].str.contains('checkout', na=False, regex=False))&((X['ip_address'].isna())|(X['ip_isp'].fillna('')==''))",
                     'Rule4': "(X['forwarder_address']==True)&(X['is_shipping_billing_address_same']==False)",
@@ -100,7 +100,7 @@ def _rule_strings_pandas():
 
 @pytest.fixture
 def _rule_strings_numpy():
-    rule_strings = {'Rule1': "((X['payer_id_sum_approved_txn_amt_per_paypalid_1day'].to_numpy(na_value=np.nan)>=60.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_7day'].to_numpy(na_value=np.nan)>120.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_30day'].to_numpy(na_value=np.nan)<=500.0))&(X['num_items'].to_numpy(na_value=np.nan)==1.0)",
+    rule_strings = {'Rule1': "((X['payer_id_sum_approved_txn_amt_per_paypalid_1day'].to_numpy(na_value=np.nan)>=60.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_7day'].to_numpy(na_value=np.nan)>120.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_30day'].to_numpy(na_value=np.nan)<=500))&(X['num_items'].to_numpy(na_value=np.nan)==1.0)",
                     'Rule2': "(X['ml_cc_v0'].to_numpy(na_value=np.nan)<0.315)&((X['method_clean'].to_numpy(na_value=np.nan)=='checkout')|(X['method_clean'].str.startswith('checkout', na=False))|(X['method_clean'].str.endswith('checkout', na=False))|(X['method_clean'].str.contains('checkout', na=False, regex=False))|(~pd.isna(X['ip_address'].to_numpy(na_value=np.nan)))|(X['ip_isp'].fillna('')!=''))",
                     'Rule3': "(~X['method_clean'].str.startswith('checkout', na=False))&(~X['method_clean'].str.endswith('checkout', na=False))&(~X['method_clean'].str.contains('checkout', na=False, regex=False))&((pd.isna(X['ip_address'].to_numpy(na_value=np.nan)))|(X['ip_isp'].fillna('')==''))",
                     'Rule4': "(X['forwarder_address'].to_numpy(na_value=np.nan)==True)&(X['is_shipping_billing_address_same'].to_numpy(na_value=np.nan)==False)",
@@ -149,6 +149,72 @@ def _rule_lambdas_with_args():
         'Rule6': [],
     }
     return rule_lambdas, lambda_args
+
+
+def test_add_and_radd():
+    exp_rule_strings = {'Rule1': "X['A']>0", 'Rule2': "X['B']>0"}
+    exp_rule_dicts = {
+        'Rule1': {
+            'condition': 'AND', 'rules': [{
+                'field': 'A', 'operator': 'greater', 'value': 0
+            }]},
+        'Rule2': {
+            'condition': 'AND', 'rules': [{
+                'field': 'B', 'operator': 'greater', 'value': 0
+            }]}
+    }
+    rules1 = Rules(
+        rule_strings={'Rule1': "X['A']>0"},
+        rule_dicts={
+            'Rule1': {
+                'condition': 'AND', 'rules': [{
+                    'field': 'A', 'operator': 'greater', 'value': 0
+                }]}
+        },
+        rule_lambdas={'Rule1': lambda **kwargs: "X['A']>{A}".format(**kwargs)},
+        lambda_kwargs={'Rule1': {'A': 0}},
+    )
+    rules2 = Rules(
+        rule_strings={'Rule2': "X['B']>0"},
+        rule_dicts={
+            'Rule2': {
+                'condition': 'AND', 'rules': [{
+                    'field': 'B', 'operator': 'greater', 'value': 0
+                }]}
+        },
+        rule_lambdas={'Rule2': lambda **kwargs: "X['B']>{B}".format(**kwargs)},
+        lambda_kwargs={'Rule2': {'B': 0}},
+    )
+    # Test __add__
+    rules = rules1 + rules2
+    assert rules.rule_strings == exp_rule_strings
+    assert rules.rule_dicts == exp_rule_dicts
+    for r in ['Rule1', 'Rule2']:
+        assert rules.rule_lambdas[r](
+            **rules.lambda_kwargs[r]) == exp_rule_strings[r]
+    # Test __radd__
+    rules = sum([rules1, rules2])
+    assert rules.rule_strings == exp_rule_strings
+    assert rules.rule_dicts == exp_rule_dicts
+    for r in ['Rule1', 'Rule2']:
+        assert rules.rule_lambdas[r](
+            **rules.lambda_kwargs[r]) == exp_rule_strings[r]
+    # Test exception
+    with pytest.raises(ValueError, match=f"""Attempting to add rule sets with similar keys in `rule_dicts`. Similar keys are 'Rule1'."""):
+        rules = rules1 + rules1
+        rules = sum([rules1, rules1])
+    rules1.rule_dicts = {}
+    with pytest.raises(ValueError, match=f"""Attempting to add rule sets with similar keys in `rule_strings`. Similar keys are 'Rule1'."""):
+        rules = rules1 + rules1
+        rules = sum([rules1, rules1])
+    rules1.rule_strings = {}
+    with pytest.raises(ValueError, match=f"""Attempting to add rule sets with similar keys in `rule_lambdas`. Similar keys are 'Rule1'."""):
+        rules = rules1 + rules1
+        rules = sum([rules1, rules1])
+    rules1.rule_lambdas = {}
+    with pytest.raises(ValueError, match=f"""Attempting to add rule sets with similar keys in `lambda_kwargs`. Similar keys are 'Rule1'."""):
+        rules = rules1 + rules1
+        rules = sum([rules1, rules1])
 
 
 def test_repr(_rule_strings_pandas):
@@ -214,7 +280,6 @@ def test_as_rule_strings_starting_with_rule_lambdas_kwargs(_rule_lambdas_with_kw
     rule_strings_numpy = _rule_strings_numpy
     r = Rules(rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs)
     rule_strings = r.as_rule_strings(as_numpy=False)
-    print(type(rule_strings))
     assert rule_strings == rule_strings_pandas
     r = Rules(rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs)
     rule_strings = r.as_rule_strings(as_numpy=True)

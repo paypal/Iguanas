@@ -1,10 +1,4 @@
 """Custom typing objects. Used so packages don't need to be imported."""
-# from typing import TYPE_CHECKING
-# if TYPE_CHECKING:
-#     import numpy
-#     import pandas
-#     import databricks
-#     import pyspark
 
 NumpyArrayType = 'numpy.ndarray'
 PandasDataFrameType = 'pandas.core.frame.DataFrame'

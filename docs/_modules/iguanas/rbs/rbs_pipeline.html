@@ -162,10 +162,9 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">iguanas.utils</span> <span class="k">as</span> <span class="nn">utils</span>
-<span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">PandasSeries</span>
+<span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">PandasDataFrame</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasSeriesType</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
-<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 
 <div class="viewcode-block" id="RBSPipeline"><a class="viewcode-back" href="../../../api/api/iguanas.rbs.RBSPipeline.html#iguanas.rbs.RBSPipeline">[docs]</a><span class="k">class</span> <span class="nc">RBSPipeline</span><span class="p">:</span>
@@ -176,7 +175,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    config : List[Tuple(int, list)] </span>
+<span class="sd">    config : Union[List[Tuple[int, list]], List[list]]</span>
 <span class="sd">        The optimised pipeline configuration, where each element aligns to a</span>
 <span class="sd">        stage in the pipeline. Each element is a tuple with 2 elements: the </span>
 <span class="sd">        first element corresponds to the decision made at that stage (either 0</span>
@@ -191,25 +190,18 @@
 <span class="sd">    ValueError</span>
 <span class="sd">        `config` must be a list.</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        `final_decision` must be either 0 or 1.</span>
-
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">    score : float </span>
-<span class="sd">        The result of the `metric` function when the pipeline is applied.    </span>
+<span class="sd">        `final_decision` must be either 0 or 1.    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">config</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">]],</span>
-                 <span class="n">final_decision</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">num_cores</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+                 <span class="n">config</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="nb">list</span><span class="p">]],</span>
+                 <span class="n">final_decision</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`config` must be a list&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">final_decision</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`final_decision` must be either 0 or 1&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">final_decision</span> <span class="o">=</span> <span class="n">final_decision</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span> <span class="o">=</span> <span class="n">num_cores</span>
 
 <div class="viewcode-block" id="RBSPipeline.predict"><a class="viewcode-back" href="../../../api/api/iguanas.rbs.RBSPipeline.html#iguanas.rbs.RBSPipeline.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
@@ -228,9 +220,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">X_rules</span><span class="p">,</span> <span class="s1">&#39;X_rules&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">])</span>
-        <span class="n">num_rows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_rules</span><span class="p">)</span>
         <span class="n">stage_level_preds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stage_level_preds</span><span class="p">(</span><span class="n">X_rules</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pipeline_pred</span><span class="p">(</span><span class="n">stage_level_preds</span><span class="p">,</span> <span class="n">num_rows</span><span class="p">)</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pipeline_pred</span><span class="p">(</span><span class="n">stage_level_preds</span><span class="p">,</span> <span class="n">X_rules</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">y_pred</span></div>
 
     <span class="nd">@staticmethod</span>
@@ -261,12 +252,13 @@
         <span class="k">return</span> <span class="n">stage_level_preds</span>
 
     <span class="k">def</span> <span class="nf">_get_pipeline_pred</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stage_level_preds</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
-                           <span class="n">num_rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
+                           <span class="n">idx</span><span class="p">:</span> <span class="nb">list</span>
+                           <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns the predictions of the pipeline&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">stage_level_preds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">num_rows</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_decision</span>
-        <span class="k">for</span> <span class="n">stage_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">stage_level_preds</span><span class="o">.</span><span class="n">columns</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_decision</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">stage_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">stage_level_preds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
             <span class="k">if</span> <span class="n">stage_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">y_pred</span> <span class="o">=</span> <span class="n">stage_level_preds</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">stage_idx</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
@@ -274,6 +266,8 @@
                     <span class="p">(</span><span class="n">y_pred</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">stage_level_preds</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">stage_idx</span><span class="p">])</span> <span class="o">+</span> <span class="n">y_pred</span>
         <span class="n">y_pred</span> <span class="o">=</span> <span class="p">((</span><span class="n">y_pred</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_decision</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_pred</span>
         <span class="n">y_pred</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_pred</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">y_pred</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">idx</span>
+        <span class="n">y_pred</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">y_pred</span></div>
 </pre></div>
 

@@ -1,5 +1,6 @@
 import pytest
 import pandas as pd
+from iguanas.rules import Rules
 from hyperopt import hp
 from hyperopt.pyll.base import Apply
 from iguanas.rbs import RBSPipeline
@@ -49,11 +50,22 @@ def _instantiate_config():
         config=config,
         final_decision=0,
     )
+    rules = Rules(
+        rule_strings={
+            'Approve1': "X['1']<0",
+            'Approve2': "X['2']<0",
+            'Approve3': "X['3']<0",
+            'Decline1': "X['1']>0",
+            'Decline2': "X['2']>0",
+            'Decline3': "X['3']>0"
+        }
+    )
     rbso = RBSOptimiser(
         pipeline=rbsp,
         metric=f1.fit,
         n_iter=30,
-        verbose=0
+        verbose=0,
+        rules=rules
     )
     return rbso
 
@@ -65,12 +77,23 @@ def _instantiate_no_config():
         config=[],
         final_decision=0,
     )
+    rules = Rules(
+        rule_strings={
+            'Approve1': "X['1']<0",
+            'Approve2': "X['2']<0",
+            'Approve3': "X['3']<0",
+            'Decline1': "X['1']>0",
+            'Decline2': "X['2']>0",
+            'Decline3': "X['3']>0"
+        }
+    )
     rbso = RBSOptimiser(
         pipeline=rbsp,
         metric=f1.fit,
         n_iter=30,
         neg_pred_rules=['Approve1', 'Approve2', 'Approve3'],
         pos_pred_rules=['Decline1', 'Decline2', 'Decline3'],
+        rules=rules,
         verbose=0
     )
     return rbso
@@ -112,7 +135,8 @@ def test_fit_config_given(_create_data, _instantiate_config):
     rbso = _instantiate_config
     rbso.fit(X, y)
     assert rbso.config == exp_config
-    assert rbso.rules_to_keep == ['Approve1', 'Decline1']
+    assert rbso.rules_to_keep == ['Approve1', 'Decline1'] == list(
+        rbso.rules.rule_strings.keys())
 
 
 def test_fit_predict_config_given(_create_data, _instantiate_config):
@@ -124,7 +148,8 @@ def test_fit_predict_config_given(_create_data, _instantiate_config):
     rbso = _instantiate_config
     y_pred = rbso.fit_predict(X, y)
     assert rbso.config == exp_config
-    assert rbso.rules_to_keep == ['Approve1', 'Decline1']
+    assert rbso.rules_to_keep == ['Approve1', 'Decline1'] == list(
+        rbso.rules.rule_strings.keys())
     assert all(y_pred == y)
 
 
@@ -138,8 +163,9 @@ def test_fit_config_omitted(_create_data, _instantiate_no_config):
     rbso = _instantiate_no_config
     rbso.fit(X, y)
     assert rbso.config == exp_config
-    assert rbso.rules_to_keep == [
-        'Approve1', 'Decline1', 'Decline3', 'Approve2']
+    assert sorted(rbso.rules_to_keep) == [
+        'Approve1', 'Approve2', 'Decline1', 'Decline3'
+    ] == sorted(list(rbso.rules.rule_strings.keys()))
 
 
 def test_fit_predict_config_omitted(_create_data, _instantiate_no_config):
@@ -152,8 +178,9 @@ def test_fit_predict_config_omitted(_create_data, _instantiate_no_config):
     rbso = _instantiate_no_config
     y_pred = rbso.fit_predict(X, y)
     assert rbso.config == exp_config
-    assert rbso.rules_to_keep == [
-        'Approve1', 'Decline1', 'Decline3', 'Approve2']
+    assert sorted(rbso.rules_to_keep) == [
+        'Approve1', 'Approve2', 'Decline1', 'Decline3'
+    ] == sorted(list(rbso.rules.rule_strings.keys()))
     assert all(y_pred == y)
 
 
@@ -166,7 +193,8 @@ def test_fit_weighted_config_given(_create_data_random, _instantiate_config):
     rbso = _instantiate_config
     rbso.fit(X, y, sample_weight)
     assert rbso.config == exp_config
-    assert rbso.rules_to_keep == ['Decline1', 'Decline2', 'Decline3']
+    assert rbso.rules_to_keep == ['Decline1', 'Decline2', 'Decline3'] == list(
+        rbso.rules.rule_strings.keys())
 
 
 def test_fit_predict_weighted_config_given(_create_data_random, _instantiate_config):
@@ -176,9 +204,11 @@ def test_fit_predict_weighted_config_given(_create_data_random, _instantiate_con
     ]
     X, y, sample_weight = _create_data_random
     rbso = _instantiate_config
-    rbso.fit_predict(X, y, sample_weight)
+    y_pred = rbso.fit_predict(X, y, sample_weight)
     assert rbso.config == exp_config
-    assert rbso.rules_to_keep == ['Decline1', 'Decline2', 'Decline3']
+    assert rbso.rules_to_keep == ['Decline1', 'Decline2', 'Decline3'] == list(
+        rbso.rules.rule_strings.keys())
+    assert y_pred.sum() == 90
 
 
 def test_fit_weighted_config_omitted(_create_data_random, _instantiate_no_config):
@@ -190,9 +220,9 @@ def test_fit_weighted_config_omitted(_create_data_random, _instantiate_no_config
     rbso = _instantiate_no_config
     rbso.fit(X, y, sample_weight)
     assert rbso.config == exp_config
-    assert rbso.rules_to_keep == [
-        'Decline2', 'Decline3', 'Decline1', 'Approve1', 'Approve3'
-    ]
+    assert sorted(rbso.rules_to_keep) == [
+        'Approve1', 'Approve3', 'Decline1', 'Decline2', 'Decline3'
+    ] == sorted(list(rbso.rules.rule_strings.keys()))
 
 
 def test_fit_predict_weighted_config_omitted(_create_data_random, _instantiate_no_config):
@@ -202,11 +232,12 @@ def test_fit_predict_weighted_config_omitted(_create_data_random, _instantiate_n
     ]
     X, y, sample_weight = _create_data_random
     rbso = _instantiate_no_config
-    rbso.fit_predict(X, y, sample_weight)
+    y_pred = rbso.fit_predict(X, y, sample_weight)
     assert rbso.config == exp_config
-    assert rbso.rules_to_keep == [
-        'Decline2', 'Decline3', 'Decline1', 'Approve1', 'Approve3'
-    ]
+    assert sorted(rbso.rules_to_keep) == [
+        'Approve1', 'Approve3', 'Decline1', 'Decline2', 'Decline3'
+    ] == sorted(list(rbso.rules.rule_strings.keys()))
+    assert y_pred.sum() == 90
 
 
 def test_get_space_funcs(_create_data, _instantiate_config):

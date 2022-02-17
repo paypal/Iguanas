@@ -1,13 +1,13 @@
 """Optimises a set of rules using Direct Search algorithms."""
-from typing import Callable, Dict, List, Union
-import numpy as np
-import pandas as pd
-from scipy.optimize import minimize
 from iguanas.rules import Rules
 from iguanas.rule_optimisation._base_optimiser import _BaseOptimiser
 import iguanas.utils as utils
 from iguanas.utils.types import NumpyArray, PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
+import pandas as pd
+from typing import Callable, Dict, List, Union
+import numpy as np
+from scipy.optimize import minimize
 import warnings
 
 
@@ -74,9 +74,19 @@ class DirectSearchOptimiser(_BaseOptimiser):
 
     Attributes
     ----------
-    rule_strings : Dict[str, str] 
-        The optimised rules stored in the standard Iguanas string format 
-        (values) and their names (keys).    
+    rule_strings : Dict[str, str]
+        The optimised rules, defined using the standard Iguanas string 
+        format (values) and their names (keys).   
+    rule_lambdas : Dict[str, object]
+        The optimised rules, defined using the standard Iguanas lambda 
+        expression format (values) and their names (keys).   
+    lambda_kwargs : Dict[str, object]
+        The keyword arguments for the optimised rules defined using the 
+        standard Iguanas lambda expression format.
+    rules : Rules
+        The Rules object containing the optimised rules.
+    rule_names : List[str]
+        The names of the optimised rules.
     rule_names_missing_features : List[str] 
         Names of rules which use features that are not present in the dataset 
         (and therefore can't be optimised or applied).
@@ -93,9 +103,7 @@ class DirectSearchOptimiser(_BaseOptimiser):
         The optimisation metric (values) calculated for each original rule 
         (keys).
     non_optimisable_rules : Rules 
-        A `Rules` object containing the rules which could not be optimised.
-    rule_names : List
-        The names of the optimised rules.
+        A `Rules` object containing the rules which could not be optimised.    
     """
 
     def __init__(self,
@@ -166,8 +174,8 @@ class DirectSearchOptimiser(_BaseOptimiser):
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [PandasSeries])
         self.orig_rules = Rules(
-            rule_lambdas=self.orig_rule_lambdas,
-            lambda_kwargs=self.orig_lambda_kwargs,
+            rule_lambdas=self.orig_rule_lambdas.copy(),
+            lambda_kwargs=self.orig_lambda_kwargs.copy(),
         )
         _ = self.orig_rules.as_rule_strings(as_numpy=False)
         if self.verbose > 0:
@@ -232,10 +240,7 @@ class DirectSearchOptimiser(_BaseOptimiser):
             orig_X_rules=orig_X_rules,
             opt_X_rules=opt_X_rules
         )
-        self.rule_lambdas = self.as_rule_lambdas(
-            as_numpy=False, with_kwargs=True
-        )
-        self.rule_names = list(self.rule_strings.keys())
+        self._generate_other_rule_formats()
         return X_rules
 
     @classmethod

@@ -346,3 +346,20 @@ class _BaseGenerator(Rules):
             return _calc_target_ratios_koalas(X, y)
         else:
             return _calc_target_ratios_numpy(X, y)
+
+    def _generate_other_rule_formats(self) -> None:
+        """Generates other rule formats from `self.rule_strings`"""
+
+        # Generate rule names
+        self.rule_names = list(self.rule_strings.keys())
+        # Convert generated rules into lambda format. Set rule_lambdas to an
+        # empty dict first, prevents errors when running fit more than once.
+        self.rule_lambdas = {}
+        self.rule_lambdas = self.as_rule_lambdas(
+            as_numpy=False, with_kwargs=True
+        )
+        # Generate rules object
+        self.rules = Rules(
+            rule_strings=self.rule_strings, rule_lambdas=self.rule_lambdas,
+            lambda_kwargs=self.lambda_kwargs
+        )

@@ -25,23 +25,32 @@ class SimpleFilter(_BaseFilter):
     metric : Callable
         The method/function which calculates the metric by which the rules are
         filtered.    
+    rules : Rules, optional
+        An Iguanas `Rules` object containing the rules that need to be 
+        filtered. If provided, the rules within the object will be filtered. 
+        Defaults to None.
 
     Attributes
     ----------
     rules_to_keep : List[str]
         List of rules which remain after the filter has been applied.
+    rules : Rules
+        The Iguanas `Rules` object containing the rules which remain after the
+        filter has been applied.
     """
 
     def __init__(self,
                  threshold: float,
                  operator: str,
-                 metric: Callable):
+                 metric: Callable,
+                 rules=None):
+
         if operator not in ['>', '>=', '<', '<=']:
             raise ValueError("`operator` must be '>', '>=', '<' or '<='")
         self.threshold = threshold
         self.operator = operator
         self.metric = metric
-        _BaseFilter.__init__(self, rules_to_keep=[])
+        _BaseFilter.__init__(self, rules_to_keep=[], rules=rules)
 
     def fit(self,
             X_rules: PandasDataFrameType,

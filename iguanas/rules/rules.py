@@ -86,6 +86,46 @@ class Rules(RuleApplier):
             self, rule_strings=self.rule_strings,
         )
 
+    def __add__(self, other):
+
+        def _exception_if_similar_keys(dict1: dict, dict2: dict,
+                                       rule_format: str) -> None:
+            """
+            Raises exception if there are similar keys in `dict1` and `dict2`.
+            """
+            dict1_keys = set(dict1.keys())
+            dict2_keys = set(dict2.keys())
+            sim_keys = dict1_keys.intersection(dict2_keys)
+            if sim_keys:
+                raise ValueError(
+                    f"""Attempting to add rule sets with similar keys in `{rule_format}`. Similar keys are '{"', '".join(sim_keys)}'.""")
+
+        # Raise exception if there are similar keys in any of the rule formats
+        check_list = [
+            (self.rule_dicts, other.rule_dicts, 'rule_dicts'),
+            (self.rule_strings, other.rule_strings, 'rule_strings'),
+            (self.rule_lambdas, other.rule_lambdas, 'rule_lambdas'),
+            (self.lambda_kwargs, other.lambda_kwargs, 'lambda_kwargs'),
+            (self.lambda_args, other.lambda_args, 'lambda_args')
+        ]
+        for dict1, dict2, rule_format in check_list:
+            _exception_if_similar_keys(dict1, dict2, rule_format)
+        # Combine rule formats
+        rule_dicts = {**self.rule_dicts, **other.rule_dicts}
+        rule_strings = {**self.rule_strings, **other.rule_strings}
+        rule_lambdas = {**self.rule_lambdas, **other.rule_lambdas}
+        lambda_kwargs = {**self.lambda_kwargs, **other.lambda_kwargs}
+        lambda_args = {**self.lambda_args, **other.lambda_args}
+        # Return combined rule set
+        return Rules(
+            rule_dicts=rule_dicts, rule_strings=rule_strings,
+            rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs,
+            lambda_args=lambda_args
+        )
+
+    def __radd__(self, other):
+        return self
+
     def __repr__(self):
         rules_lens = [
             len(self.rule_dicts),

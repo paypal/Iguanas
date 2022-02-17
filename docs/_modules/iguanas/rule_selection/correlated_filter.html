@@ -159,7 +159,6 @@
                 
   <h1>Source code for iguanas.rule_selection.correlated_filter</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Filters correlated rules.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">sample</span>
 <span class="kn">from</span> <span class="nn">iguanas.rule_selection._base_filter</span> <span class="kn">import</span> <span class="n">_BaseFilter</span>
 <span class="kn">from</span> <span class="nn">iguanas.correlation_reduction</span> <span class="kn">import</span> <span class="n">AgglomerativeClusteringReducer</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span>
@@ -174,18 +173,26 @@
 <span class="sd">    ----------</span>
 <span class="sd">    correlation_reduction_class : AgglomerativeClusteringReducer</span>
 <span class="sd">        Instatiated class from the `correlation_reduction` sub-package.    </span>
+<span class="sd">    rules : Rules, optional</span>
+<span class="sd">        An Iguanas `Rules` object containing the rules that need to be </span>
+<span class="sd">        filtered. If provided, the rules within the object will be filtered. </span>
+<span class="sd">        Defaults to None.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    rules_to_keep : List[str]</span>
-<span class="sd">        List of rules which remain after correlated rules have been removed.</span>
+<span class="sd">        List of rules which remain after the filter has been applied.</span>
+<span class="sd">    rules : Rules</span>
+<span class="sd">        The Iguanas `Rules` object containing the rules which remain after the</span>
+<span class="sd">        filter has been applied.    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">correlation_reduction_class</span><span class="p">:</span> <span class="n">AgglomerativeClusteringReducer</span><span class="p">):</span>
+                 <span class="n">correlation_reduction_class</span><span class="p">:</span> <span class="n">AgglomerativeClusteringReducer</span><span class="p">,</span>
+                 <span class="n">rules</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">correlation_reduction_class</span> <span class="o">=</span> <span class="n">correlation_reduction_class</span>
-        <span class="n">_BaseFilter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rules_to_keep</span><span class="o">=</span><span class="p">[])</span>
+        <span class="n">_BaseFilter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rules_to_keep</span><span class="o">=</span><span class="p">[],</span> <span class="n">rules</span><span class="o">=</span><span class="n">rules</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CorrelatedFilter.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_selection.CorrelatedFilter.html#iguanas.rule_selection.CorrelatedFilter.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
             <span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>

@@ -21,6 +21,12 @@ cp ../iguanas/rule_optimisation/examples/*example.ipynb ./examples/rule_optimisa
 cp ../iguanas/rule_scoring/examples/*example.ipynb ./examples/rule_scoring
 cp ../iguanas/rule_selection/examples/*example.ipynb ./examples/rule_selection
 cp ../iguanas/rules/examples/*example.ipynb ./examples/rules
+# Copy over images
+mkdir ./examples/pipeline/images
+mkdir ./examples/rule_selection/images
+cp ../iguanas/pipeline/examples/images/* ./examples/pipeline/images
+cp ../iguanas/rule_selection/examples/images/* ./examples/rule_selection/images
+
 make clean
 make html
 cd ..
