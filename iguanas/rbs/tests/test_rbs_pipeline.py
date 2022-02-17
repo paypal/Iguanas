@@ -1,6 +1,5 @@
 import pytest
 import pandas as pd
-import numpy as np
 from iguanas.rbs import RBSPipeline
 from iguanas.metrics.classification import FScore
 

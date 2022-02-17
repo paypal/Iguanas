@@ -6,8 +6,7 @@ import numpy as np
 import iguanas.utils as utils
 from iguanas.rule_generation._base_generator import _BaseGenerator
 from iguanas.utils.types import KoalasDataFrame, KoalasSeries
-from iguanas.utils.typing import KoalasDataFrameType, KoalasSeriesType,\
-    PandasDataFrameType
+from iguanas.utils.typing import KoalasDataFrameType, KoalasSeriesType
 from typing import Callable, List, Set, Tuple
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.classification import RandomForestClassifier, DecisionTreeClassificationModel

@@ -7,7 +7,6 @@ from iguanas.metrics.classification import FScore
 from pyspark.ml.classification import RandomForestClassifier as RandomForestClassifierSpark
 from pyspark.ml.feature import VectorAssembler
 import random
-from sklearn.metrics import precision_score, recall_score, fbeta_score
 
 
 @pytest.fixture

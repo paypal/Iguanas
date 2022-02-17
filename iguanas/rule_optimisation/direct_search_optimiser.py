@@ -1,13 +1,13 @@
 """Optimises a set of rules using Direct Search algorithms."""
-from typing import Callable, Dict, List, Union
-import numpy as np
-import pandas as pd
-from scipy.optimize import minimize
 from iguanas.rules import Rules
 from iguanas.rule_optimisation._base_optimiser import _BaseOptimiser
 import iguanas.utils as utils
 from iguanas.utils.types import NumpyArray, PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
+import pandas as pd
+from typing import Callable, Dict, List, Union
+import numpy as np
+from scipy.optimize import minimize
 import warnings
 
 

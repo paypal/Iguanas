@@ -5,9 +5,8 @@ or Koalas
 import pytest
 from iguanas.metrics.classification import FScore
 from iguanas.rule_generation import RuleGeneratorDT
-from sklearn.ensemble import RandomForestClassifier
-
 from iguanas.rule_generation.rule_generator_opt import RuleGeneratorOpt
+from sklearn.ensemble import RandomForestClassifier
 
 
 @pytest.fixture

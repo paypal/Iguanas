@@ -1,11 +1,9 @@
-from hyperopt.pyll.base import exp
 import pytest
 import numpy as np
 import pandas as pd
 from iguanas.rule_generation import RuleGeneratorDT
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import precision_score, recall_score
 from iguanas.metrics.classification import FScore
 import random
 

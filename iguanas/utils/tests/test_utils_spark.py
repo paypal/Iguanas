@@ -1,11 +1,11 @@
+from iguanas.metrics import FScore, AlertsPerDay
+import iguanas.utils as utils
 import pytest
 import numpy as np
 import pandas as pd
 import databricks.koalas as ks
-import iguanas.utils as utils
 from sklearn.metrics import fbeta_score, precision_score, recall_score
 import string
-from iguanas.metrics import FScore, AlertsPerDay
 
 
 @pytest.fixture

@@ -15,3 +15,4 @@ Used for:
 
    Rules
    ConvertProcessedConditionsToGeneral
+   ReturnMappings

@@ -158,7 +158,8 @@
               <div>
                 
   <h1>Source code for iguanas.pipeline.parallel_pipeline</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span></span><span class="sd">&quot;&quot;&quot;Class for creating a Parallel Pipeline.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">iguanas.pipeline._base_pipeline</span> <span class="kn">import</span> <span class="n">_BasePipeline</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasSeriesType</span>
@@ -171,7 +172,7 @@
 <div class="viewcode-block" id="ParallelPipeline"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.ParallelPipeline.html#iguanas.pipeline.ParallelPipeline">[docs]</a><span class="k">class</span> <span class="nc">ParallelPipeline</span><span class="p">(</span><span class="n">_BasePipeline</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a parallel pipeline, which is a set of steps which run</span>
-<span class="sd">    independently - their outputs are then combined and returned. Each step </span>
+<span class="sd">    independently - their outputs are then concatenated and returned. Each step </span>
 <span class="sd">    should be an instantiated class with both `fit` and `transform` methods.</span>
 
 <span class="sd">    Parameters</span>
@@ -280,7 +281,13 @@
         <span class="k">return</span> <span class="n">X_rules</span></div>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_concat_rules</span><span class="p">(</span><span class="n">rules_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Rules</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="nf">_concat_rules</span><span class="p">(</span><span class="n">rules_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Rules</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Rules</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the combined rule set given a list of individual rule sets. If</span>
+<span class="sd">        `rules_list` is all None, returns None. If elements in `rules_list` are</span>
+<span class="sd">        None, raises an exception.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">rule</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules_list</span><span class="p">]):</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">elif</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">rules_list</span><span class="p">:</span>

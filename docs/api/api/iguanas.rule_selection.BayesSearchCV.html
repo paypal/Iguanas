@@ -578,6 +578,16 @@
      .ConvertProcessedConditionsToGeneral
     </a>
    </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.rules.ReturnMappings.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.rules
+      </span>
+     </code>
+     .ReturnMappings
+    </a>
+   </li>
   </ul>
  </li>
  <li class="toctree-l1 has-children">
@@ -711,12 +721,12 @@ numeric value is given, a warning is raised. This parameter does not
 affect the refit step, which will always raise the error. Defaults to
 ‘raise’.</p>
 </dd>
-<dt><strong>num_cores</strong><span class="classifier">int, optional</span></dt><dd><p>Number of cores to use when fitting a given parameter set. Should be
-set to &lt;= <cite>cv</cite>. Defaults to 1.</p>
-</dd>
 <dt><strong>sample_weight_in_val</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether the <cite>sample_weight</cite> should be used when calculating the 
 <cite>metric</cite> on the validation fold. If True, the <cite>sample_weight</cite> is used.
 Defaults to False.</p>
+</dd>
+<dt><strong>num_cores</strong><span class="classifier">int, optional</span></dt><dd><p>Number of cores to use when fitting a given parameter set. Should be
+set to &lt;= <cite>cv</cite>. Defaults to 1.</p>
 </dd>
 <dt><strong>verbose</strong><span class="classifier">int, optional</span></dt><dd><p>Controls the verbosity - the higher, the more messages. &gt;0 : shows the
 overall progress of the optimisation process. Defaults to 0.</p>

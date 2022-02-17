@@ -1,5 +1,4 @@
 """Class for accessing a class attribute within a pipeline."""
-from copy import deepcopy
 from typing import Union, Dict
 
 

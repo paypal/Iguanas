@@ -578,6 +578,16 @@
      .ConvertProcessedConditionsToGeneral
     </a>
    </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.rules.ReturnMappings.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.rules
+      </span>
+     </code>
+     .ReturnMappings
+    </a>
+   </li>
   </ul>
  </li>
  <li class="toctree-l1 has-children">
@@ -669,7 +679,7 @@
 <dt class="sig sig-object py" id="iguanas.pipeline.ParallelPipeline">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.pipeline.</span></span><span class="sig-name descname"><span class="pre">ParallelPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/pipeline/parallel_pipeline.html#ParallelPipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.pipeline.ParallelPipeline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a parallel pipeline, which is a set of steps which run
-independently - their outputs are then combined and returned. Each step 
+independently - their outputs are then concatenated and returned. Each step 
 should be an instantiated class with both <cite>fit</cite> and <cite>transform</cite> methods.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

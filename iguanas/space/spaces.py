@@ -1,6 +1,5 @@
 """Classes for defining search spaces."""
 from hyperopt import hp
-from hyperopt.pyll import scope
 
 
 class UniformInteger:

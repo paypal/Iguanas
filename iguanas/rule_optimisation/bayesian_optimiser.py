@@ -1,16 +1,15 @@
 """Optimises a set of rules using Bayesian Optimisation."""
-from copy import deepcopy
-from typing import Callable, Dict, List
-from hyperopt import hp, tpe, fmin
-from hyperopt.pyll import scope
-import numpy as np
-import pandas as pd
 from iguanas.rules import Rules
 import iguanas.utils as utils
 from iguanas.utils.types import NumpyArray, PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
-from joblib import Parallel, delayed
 from iguanas.rule_optimisation._base_optimiser import _BaseOptimiser
+import pandas as pd
+from typing import Callable, Dict, List
+from hyperopt import hp, tpe, fmin
+from hyperopt.pyll import scope
+import numpy as np
+from joblib import Parallel, delayed
 
 
 class BayesianOptimiser(_BaseOptimiser):

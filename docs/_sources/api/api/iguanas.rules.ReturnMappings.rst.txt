@@ -1,0 +1,10 @@
+﻿:mod:`iguanas.rules`.ReturnMappings
+==========================================
+
+.. currentmodule:: iguanas.rules
+
+.. autoclass:: ReturnMappings
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -799,7 +799,7 @@ div.rendered_html tbody tr:hover {
 <li><p>Return the parameter set which generated the highest mean overall score across the validation datasets.</p></li>
 </ul>
 <p>In this example, we’ll consider the following more advanced workflow (compared to the standard <code class="docutils literal notranslate"><span class="pre">bayes_search_cv_example</span></code> notebook), which considers the generation of a Rules-Based System for a credit card fraud transaction use case:</p>
-<center><p><img alt="e58de43fcbe344fe95df422f2e41ba5b" src="../../_images/complex_example.png" /></p>
+<center><p><img alt="16c0d6b6bfa743d38e4193e1d0a3e9c1" src="../../_images/complex_example.png" /></p>
 </center><p>Here, we have a fraud detection use case, and we’re aiming to create two distinct rule sets - one for flagging fraudulent behaviour; one for flagging good behaviour. Each of these rule sets will be comprised of a generated rule set and an existing rule set. We’ll optimise and filter these two rule sets separately, then combine and feed them into the decision engine optimiser. <strong>Note:</strong> we optimise the generated rules as they’ll be created using the <code class="docutils literal notranslate"><span class="pre">RuleGeneratorDT</span></code> class, which generates
 rules from the branches of decision trees - these split based on gini or entropy - so we can further optimise them for a specific metric.</p>
 <p><strong>The decision engine will have the following constraint:</strong> for a given transaction, if any approve rules fire it will be approved; else, if any reject rules fire it will be rejected; else, it will be approved.</p>

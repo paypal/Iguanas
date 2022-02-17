@@ -175,7 +175,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    config : List[Tuple(int, list)] </span>
+<span class="sd">    config : Union[List[Tuple[int, list]], List[list]]</span>
 <span class="sd">        The optimised pipeline configuration, where each element aligns to a</span>
 <span class="sd">        stage in the pipeline. Each element is a tuple with 2 elements: the </span>
 <span class="sd">        first element corresponds to the decision made at that stage (either 0</span>
@@ -190,12 +190,7 @@
 <span class="sd">    ValueError</span>
 <span class="sd">        `config` must be a list.</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        `final_decision` must be either 0 or 1.</span>
-
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">    score : float </span>
-<span class="sd">        The result of the `metric` function when the pipeline is applied.    </span>
+<span class="sd">        `final_decision` must be either 0 or 1.    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>

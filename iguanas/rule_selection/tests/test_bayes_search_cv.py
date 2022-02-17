@@ -5,7 +5,6 @@ import numpy as np
 from hyperopt import hp
 from sklearn.ensemble import RandomForestClassifier
 from copy import deepcopy
-
 from iguanas.rule_generation import RuleGeneratorDT, RuleGeneratorOpt
 from iguanas.rule_optimisation import BayesianOptimiser
 from iguanas.rules import Rules

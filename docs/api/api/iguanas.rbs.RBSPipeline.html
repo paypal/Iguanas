@@ -578,6 +578,16 @@
      .ConvertProcessedConditionsToGeneral
     </a>
    </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.rules.ReturnMappings.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.rules
+      </span>
+     </code>
+     .ReturnMappings
+    </a>
+   </li>
   </ul>
  </li>
  <li class="toctree-l1 has-children">
@@ -674,7 +684,7 @@ if any of them trigger, mark the relevant records with that decision.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>config</strong><span class="classifier">List[Tuple(int, list)]</span></dt><dd><p>The optimised pipeline configuration, where each element aligns to a
+<dt><strong>config</strong><span class="classifier">Union[List[Tuple[int, list]], List[list]]</span></dt><dd><p>The optimised pipeline configuration, where each element aligns to a
 stage in the pipeline. Each element is a tuple with 2 elements: the 
 first element corresponds to the decision made at that stage (either 0
 or 1); the second element is a list of the rules that must trigger to 
@@ -690,12 +700,6 @@ either 0 or 1.</p>
 <dt>ValueError</dt><dd><p><cite>config</cite> must be a list.</p>
 </dd>
 <dt>ValueError</dt><dd><p><cite>final_decision</cite> must be either 0 or 1.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-odd">Attributes</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>score</strong><span class="classifier">float</span></dt><dd><p>The result of the <cite>metric</cite> function when the pipeline is applied.</p>
 </dd>
 </dl>
 </dd>

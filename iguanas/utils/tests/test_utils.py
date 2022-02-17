@@ -1,14 +1,13 @@
+from iguanas.metrics import FScore, AlertsPerDay
+from iguanas.utils.types import PandasDataFrame
+import iguanas.utils as utils
 import pytest
 import numpy as np
 import pandas as pd
 import json
-import iguanas.utils as utils
 from sklearn.metrics import fbeta_score, precision_score, recall_score
 import string
-from iguanas.metrics import FScore, AlertsPerDay
 from tqdm import tqdm
-
-from iguanas.utils.types import PandasDataFrame
 
 
 @pytest.fixture

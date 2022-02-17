@@ -5,8 +5,7 @@ import iguanas.utils as utils
 from typing import Dict, Union
 from iguanas.utils.types import KoalasDataFrame, KoalasSeries, PandasDataFrame,\
     PandasSeries
-from iguanas.utils.typing import KoalasDataFrameType, KoalasSeriesType,\
-    PandasDataFrameType, PandasSeriesType
+from iguanas.utils.typing import KoalasDataFrameType, PandasDataFrameType
 
 
 class RuleApplier:

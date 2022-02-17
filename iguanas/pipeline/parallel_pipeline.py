@@ -1,3 +1,4 @@
+"""Class for creating a Parallel Pipeline."""
 from copy import deepcopy
 from typing import List, Tuple, Union
 from iguanas.pipeline._base_pipeline import _BasePipeline
@@ -11,7 +12,7 @@ import pandas as pd
 class ParallelPipeline(_BasePipeline):
     """
     Generates a parallel pipeline, which is a set of steps which run
-    independently - their outputs are then combined and returned. Each step 
+    independently - their outputs are then concatenated and returned. Each step 
     should be an instantiated class with both `fit` and `transform` methods.
 
     Parameters
@@ -120,7 +121,13 @@ class ParallelPipeline(_BasePipeline):
         return X_rules
 
     @staticmethod
-    def _concat_rules(rules_list: List[Rules]):
+    def _concat_rules(rules_list: List[Rules]) -> Rules:
+        """
+        Returns the combined rule set given a list of individual rule sets. If
+        `rules_list` is all None, returns None. If elements in `rules_list` are
+        None, raises an exception.
+        """
+
         if all([rule is None for rule in rules_list]):
             return None
         elif None in rules_list:

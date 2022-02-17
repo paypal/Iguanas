@@ -1,13 +1,9 @@
 import pytest
 from iguanas.rule_optimisation.bayesian_optimiser import BayesianOptimiser
-from iguanas.rule_optimisation._base_optimiser import _BaseOptimiser
 from iguanas.metrics.classification import FScore
 from iguanas.rules import Rules
 import numpy as np
 import pandas as pd
-from hyperopt import hp
-from hyperopt.pyll import scope
-from unittest.mock import patch
 import matplotlib.pyplot as plt
 
 

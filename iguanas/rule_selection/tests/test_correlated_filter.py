@@ -2,12 +2,9 @@ import pytest
 from iguanas.rule_selection import CorrelatedFilter
 from iguanas.metrics import FScore, CosineSimilarity, JaccardSimilarity
 from iguanas.correlation_reduction import AgglomerativeClusteringReducer
-import iguanas.utils as utils
 import numpy as np
 import pandas as pd
-import random
 from itertools import product
-from iguanas.rule_application import RuleApplier
 
 
 @pytest.fixture

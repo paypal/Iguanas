@@ -1,7 +1,6 @@
 """Filters rules based on performance metrics."""
 from iguanas.rule_selection._base_filter import _BaseFilter
 from typing import Callable
-from iguanas.rules.rules import Rules
 from iguanas.utils.typing import PandasDataFrameType
 
 FILTERING_FUNCTIONS = {

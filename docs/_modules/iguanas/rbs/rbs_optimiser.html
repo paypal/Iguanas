@@ -207,7 +207,8 @@
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If `config` not provided in `pipeline`, `rule_types` must be given.</span>
+<span class="sd">        If `config` not provided in `pipeline`, then one or both of </span>
+<span class="sd">        `pos_pred_rules` and `neg_pred_rules` must be given.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -219,6 +220,8 @@
 <span class="sd">        give that decision.</span>
 <span class="sd">    rules_to_keep: List[str]</span>
 <span class="sd">        The rules used in the optimised pipeline.    </span>
+<span class="sd">    rules : Rules</span>
+<span class="sd">        The Rules object containing the rules remaining after optimisation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>

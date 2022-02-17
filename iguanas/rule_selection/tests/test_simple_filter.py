@@ -1,7 +1,6 @@
 import pytest
 from iguanas.rule_selection import SimpleFilter
 from iguanas.metrics import FScore, AlertsPerDay
-import iguanas.utils as utils
 import numpy as np
 import pandas as pd
 import random

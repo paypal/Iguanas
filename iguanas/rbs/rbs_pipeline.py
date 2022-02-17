@@ -15,7 +15,7 @@ class RBSPipeline:
 
     Parameters
     ----------
-    config : List[Tuple(int, list)] 
+    config : Union[List[Tuple[int, list]], List[list]]
         The optimised pipeline configuration, where each element aligns to a
         stage in the pipeline. Each element is a tuple with 2 elements: the 
         first element corresponds to the decision made at that stage (either 0
@@ -30,12 +30,7 @@ class RBSPipeline:
     ValueError
         `config` must be a list.
     ValueError
-        `final_decision` must be either 0 or 1.
-
-    Attributes
-    ----------
-    score : float 
-        The result of the `metric` function when the pipeline is applied.    
+        `final_decision` must be either 0 or 1.    
     """
 
     def __init__(self,

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>iguanas.space.UniformFloat &#8212; Iguanas  documentation</title>
+    <title>iguanas.rules.ReturnMappings &#8212; Iguanas  documentation</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet">
   <link href="../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -36,8 +36,8 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="shortcut icon" href="../../_static/iguanas_icon.png"/>
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="iguanas.space.Choice" href="iguanas.space.Choice.html" />
-    <link rel="prev" title="iguanas.space.UniformInteger" href="iguanas.space.UniformInteger.html" />
+    <link rel="next" title="Space" href="../space.html" />
+    <link rel="prev" title="iguanas.rules.ConvertProcessedConditionsToGeneral" href="iguanas.rules.ConvertProcessedConditionsToGeneral.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="en">
     
@@ -548,16 +548,16 @@
    </li>
   </ul>
  </li>
- <li class="toctree-l1 has-children">
+ <li class="toctree-l1 current active has-children">
   <a class="reference internal" href="../rules.html">
    Rules
   </a>
-  <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
   <label for="toctree-checkbox-10">
    <i class="fas fa-chevron-down">
    </i>
   </label>
-  <ul>
+  <ul class="current">
    <li class="toctree-l2">
     <a class="reference internal" href="iguanas.rules.Rules.html">
      <code class="xref py py-mod docutils literal notranslate">
@@ -578,8 +578,8 @@
      .ConvertProcessedConditionsToGeneral
     </a>
    </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="iguanas.rules.ReturnMappings.html">
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
        iguanas.rules
@@ -590,16 +590,16 @@
    </li>
   </ul>
  </li>
- <li class="toctree-l1 current active has-children">
+ <li class="toctree-l1 has-children">
   <a class="reference internal" href="../space.html">
    Space
   </a>
-  <input checked="" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
+  <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
   <label for="toctree-checkbox-11">
    <i class="fas fa-chevron-down">
    </i>
   </label>
-  <ul class="current">
+  <ul>
    <li class="toctree-l2">
     <a class="reference internal" href="iguanas.space.UniformInteger.html">
      <code class="xref py py-mod docutils literal notranslate">
@@ -610,8 +610,8 @@
      .UniformInteger
     </a>
    </li>
-   <li class="toctree-l2 current active">
-    <a class="current reference internal" href="#">
+   <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.space.UniformFloat.html">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
        iguanas.space
@@ -673,37 +673,58 @@
               
               <div>
                 
-  <section id="iguanas-space-uniformfloat">
-<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">iguanas.space</span></code>.UniformFloat<a class="headerlink" href="#iguanas-space-uniformfloat" title="Permalink to this headline">¶</a></h1>
+  <section id="iguanas-rules-returnmappings">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">iguanas.rules</span></code>.ReturnMappings<a class="headerlink" href="#iguanas-rules-returnmappings" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="iguanas.space.UniformFloat">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.space.</span></span><span class="sig-name descname"><span class="pre">UniformFloat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/space/spaces.html#UniformFloat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.space.UniformFloat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a random float in the range [<cite>self.low</cite>, <cite>self.high</cite>].</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>low</strong><span class="classifier">int</span></dt><dd><p>Low limit.</p>
-</dd>
-<dt><strong>high</strong><span class="classifier">int</span></dt><dd><p>High limit.</p>
-</dd>
-</dl>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="iguanas.rules.ReturnMappings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.rules.</span></span><span class="sig-name descname"><span class="pre">ReturnMappings</span></span><a class="reference internal" href="../../_modules/iguanas/rules/convert_processed_conditions_to_general.html#ReturnMappings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rules.ReturnMappings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates mapping dictionaries (for imputed values and OHE values) which 
+are required in the <cite>ConvertProcessedConditionsToGeneral</cite> class.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="iguanas.space.UniformFloat.transform">
-<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">hyperopt.pyll_utils.hp_uniform</span></span></span><a class="reference internal" href="../../_modules/iguanas/space/spaces.html#UniformFloat.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.space.UniformFloat.transform" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return hp.uniform(<cite>label</cite>, <cite>self.low</cite>, <cite>self.high</cite>) function.</p>
+<dt class="sig sig-object py" id="iguanas.rules.ReturnMappings.return_imputed_values_mapping">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">return_imputed_values_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/iguanas/rules/convert_processed_conditions_to_general.html#ReturnMappings.return_imputed_values_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rules.ReturnMappings.return_imputed_values_mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of the value used to impute nulls for each feature
+in the original, unprocessed dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>label</strong><span class="classifier">str</span></dt><dd><p>Function label.</p>
+<dt><strong>*args: tuple</strong></dt><dd><p>Set of lists, each of which has two elements - the first containing
+the list of fields imputed, the second containing the imputed
+value.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt>hp.uniform</dt><dd><p>Hyperopt space function which returns a float between <cite>self.low</cite>
-and <cite>self.high</cite>.</p>
+<dt>Dict[str, Union[str, float]]</dt><dd><p>The value used to impute nulls for each feature.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iguanas.rules.ReturnMappings.return_ohe_categories_mapping">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">return_ohe_categories_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pre_ohe_cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_ohe_cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_ohe_dtypes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/iguanas/rules/convert_processed_conditions_to_general.html#ReturnMappings.return_ohe_categories_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rules.ReturnMappings.return_ohe_categories_mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary of the category linked to each One Hot Encoded 
+column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>pre_ohe_cols</strong><span class="classifier">List[str]</span></dt><dd><p>List of column names from the dataset before one hot encoding was
+applied.</p>
+</dd>
+<dt><strong>post_ohe_cols</strong><span class="classifier">List[str]</span></dt><dd><p>List of column names from the dataset after one hot encoding was
+applied.</p>
+</dd>
+<dt><strong>pre_ohe_dtypes</strong><span class="classifier">Dict[str. str]</span></dt><dd><p>The datatype (values) of each column (keys) from the dataset before
+one hot encoding was applied.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>Dict[str, str]</dt><dd><p>The category linked to each One Hot Encoded column.</p>
 </dd>
 </dl>
 </dd>

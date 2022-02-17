@@ -1,3 +1,6 @@
+"""
+Base pipeline class. Main rule generator classes inherit from this one.
+"""
 from copy import deepcopy
 from typing import List, Tuple, Union, Dict
 from iguanas.pipeline.class_accessor import ClassAccessor

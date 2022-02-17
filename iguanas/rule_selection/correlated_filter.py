@@ -1,5 +1,4 @@
 """Filters correlated rules."""
-from random import sample
 from iguanas.rule_selection._base_filter import _BaseFilter
 from iguanas.correlation_reduction import AgglomerativeClusteringReducer
 from iguanas.utils.typing import PandasDataFrameType

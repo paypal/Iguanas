@@ -1,4 +1,4 @@
-from multiprocessing.sharedctypes import Value
+"""Optimises the parameters of a pipeline using Bayesian Optimisation."""
 from typing import Callable, Tuple, Dict, List, Union
 from sklearn.model_selection import StratifiedKFold
 from joblib import Parallel, delayed
@@ -61,13 +61,13 @@ class BayesSearchCV:
         numeric value is given, a warning is raised. This parameter does not
         affect the refit step, which will always raise the error. Defaults to
         'raise'.
-    num_cores : int, optional
-        Number of cores to use when fitting a given parameter set. Should be
-        set to <= `cv`. Defaults to 1.
     sample_weight_in_val : bool, optional
         Whether the `sample_weight` should be used when calculating the 
         `metric` on the validation fold. If True, the `sample_weight` is used.
         Defaults to False.
+    num_cores : int, optional
+        Number of cores to use when fitting a given parameter set. Should be
+        set to <= `cv`. Defaults to 1.    
     verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : shows the
         overall progress of the optimisation process. Defaults to 0.

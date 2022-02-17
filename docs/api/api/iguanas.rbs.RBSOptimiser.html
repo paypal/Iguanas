@@ -578,6 +578,16 @@
      .ConvertProcessedConditionsToGeneral
     </a>
    </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.rules.ReturnMappings.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.rules
+      </span>
+     </code>
+     .ReturnMappings
+    </a>
+   </li>
   </ul>
  </li>
  <li class="toctree-l1 has-children">
@@ -704,7 +714,8 @@ overall progress of the optimisation process. Defaults to 0.</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><dl class="simple">
-<dt>ValueError</dt><dd><p>If <cite>config</cite> not provided in <cite>pipeline</cite>, <cite>rule_types</cite> must be given.</p>
+<dt>ValueError</dt><dd><p>If <cite>config</cite> not provided in <cite>pipeline</cite>, then one or both of 
+<cite>pos_pred_rules</cite> and <cite>neg_pred_rules</cite> must be given.</p>
 </dd>
 </dl>
 </dd>
@@ -717,6 +728,8 @@ or 1); the second element is a list of the rules that must trigger to
 give that decision.</p>
 </dd>
 <dt><strong>rules_to_keep: List[str]</strong></dt><dd><p>The rules used in the optimised pipeline.</p>
+</dd>
+<dt><strong>rules</strong><span class="classifier">Rules</span></dt><dd><p>The Rules object containing the rules remaining after optimisation.</p>
 </dd>
 </dl>
 </dd>

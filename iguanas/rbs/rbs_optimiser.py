@@ -47,7 +47,8 @@ class RBSOptimiser(RBSPipeline):
     Raises
     ------
     ValueError
-        If `config` not provided in `pipeline`, `rule_types` must be given.
+        If `config` not provided in `pipeline`, then one or both of 
+        `pos_pred_rules` and `neg_pred_rules` must be given.
 
     Attributes
     ----------
@@ -59,6 +60,8 @@ class RBSOptimiser(RBSPipeline):
         give that decision.
     rules_to_keep: List[str]
         The rules used in the optimised pipeline.    
+    rules : Rules
+        The Rules object containing the rules remaining after optimisation.
     """
 
     def __init__(self,
