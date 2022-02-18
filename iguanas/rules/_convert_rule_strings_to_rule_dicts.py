@@ -377,10 +377,11 @@ class _ConvertRuleStringsToRuleDicts:
             value = True
         elif value == 'False':
             value = False
-        elif '.' not in value:
-            value = int(value)
         else:
             value = float(value)
+            # If value is an integer, convert to int
+            if value % 1 == 0:
+                value = int(value)
         return value
 
     @staticmethod

@@ -21,7 +21,8 @@ def _data():
         'num_items': np.random.randint(0, 100, 1000),
         'payer_id_sum_approved_txn_amt_per_paypalid_1day': np.random.uniform(0, 100, 1000),
         'payer_id_sum_approved_txn_amt_per_paypalid_30day': np.random.uniform(0, 300, 1000),
-        'payer_id_sum_approved_txn_amt_per_paypalid_7day': np.random.uniform(0, 1000, 1000)
+        'payer_id_sum_approved_txn_amt_per_paypalid_7day': np.random.uniform(0, 1000, 1000),
+        'kb_distance': np.random.uniform(0, 2e-05, 1000)
     })
     y = pd.Series(np.random.randint(0, 2, 1000))
     return X, y
@@ -29,83 +30,95 @@ def _data():
 
 @pytest.fixture
 def _rule_dicts():
-    rule_dicts = {'Rule1': {'condition': 'AND',
-                            'rules': [{'condition': 'OR',
-                                       'rules': [{'field': 'payer_id_sum_approved_txn_amt_per_paypalid_1day',
-                                                  'operator': 'greater_or_equal',
-                                                  'value': 60.0},
-                                                 {'field': 'payer_id_sum_approved_txn_amt_per_paypalid_7day',
-                                                  'operator': 'greater',
-                                                  'value': 120.0},
-                                                 {'field': 'payer_id_sum_approved_txn_amt_per_paypalid_30day',
-                                                  'operator': 'less_or_equal',
-                                                  'value': 500}]},
-                                      {'field': 'num_items', 'operator': 'equal', 'value': 1.0}]},
-                  'Rule2': {'condition': 'AND',
-                            'rules': [{'field': 'ml_cc_v0', 'operator': 'less', 'value': 0.315},
-                                      {'condition': 'OR',
-                                       'rules': [{'field': 'method_clean',
-                                                  'operator': 'equal',
-                                                  'value': 'checkout'},
-                                                 {'field': 'method_clean',
-                                                  'operator': 'begins_with', 'value': 'checkout'},
-                                                 {'field': 'method_clean',
-                                                  'operator': 'ends_with', 'value': 'checkout'},
-                                                 {'field': 'method_clean',
-                                                  'operator': 'contains', 'value': 'checkout'},
-                                                 {'field': 'ip_address',
-                                                  'operator': 'is_not_null', 'value': None},
-                                                 {'field': 'ip_isp', 'operator': 'is_not_empty', 'value': None}]}]},
-                  'Rule3': {'condition': 'AND',
-                            'rules': [{'field': 'method_clean',
-                                       'operator': 'not_begins_with',
-                                       'value': 'checkout'},
-                                      {'field': 'method_clean',
-                                       'operator': 'not_ends_with', 'value': 'checkout'},
-                                      {'field': 'method_clean',
-                                       'operator': 'not_contains', 'value': 'checkout'},
-                                      {'condition': 'OR',
-                                       'rules': [{'field': 'ip_address', 'operator': 'is_null', 'value': None},
-                                                 {'field': 'ip_isp', 'operator': 'is_empty', 'value': None}]}]},
-                  'Rule4': {'condition': 'AND',
-                            'rules': [{'field': 'forwarder_address', 'operator': 'equal', 'value': True},
-                                      {'field': 'is_shipping_billing_address_same',
-                                       'operator': 'equal',
-                                       'value': False}]},
-                  'Rule5': {'condition': 'AND',
-                            'rules': [{'field': 'ad_price_type',
-                                       'operator': 'not_in',
-                                       'value': ['FREE', 'NEGOTIATION']},
-                                      {'field': 'ad_price_type', 'operator': 'in', 'value': ['FOO', 'BAR']}]},
-                  'Rule6': {'condition': 'AND',
-                            'rules': [{'field': 'ip_country_iso_code',
-                                       'operator': 'equal_field',
-                                       'value': 'billing_country'},
-                                      {'field': 'country_id',
-                                       'operator': 'not_equal_field',
-                                       'value': 'ip_country_iso_code'}]}}
+    rule_dicts = {
+        'Rule1': {'condition': 'AND',
+                  'rules': [{'condition': 'OR',
+                             'rules': [{'field': 'payer_id_sum_approved_txn_amt_per_paypalid_1day',
+                                        'operator': 'greater_or_equal',
+                                        'value': 60},
+                                       {'field': 'payer_id_sum_approved_txn_amt_per_paypalid_7day',
+                                        'operator': 'greater',
+                                        'value': 120},
+                                       {'field': 'payer_id_sum_approved_txn_amt_per_paypalid_30day',
+                                        'operator': 'less_or_equal',
+                                        'value': 500}]},
+                            {'field': 'num_items', 'operator': 'equal', 'value': 1}]},
+        'Rule2': {'condition': 'AND',
+                  'rules': [{'field': 'ml_cc_v0', 'operator': 'less', 'value': 0.315},
+                            {'condition': 'OR',
+                             'rules': [{'field': 'method_clean',
+                                        'operator': 'equal',
+                                        'value': 'checkout'},
+                                       {'field': 'method_clean',
+                                        'operator': 'begins_with', 'value': 'checkout'},
+                                       {'field': 'method_clean',
+                                        'operator': 'ends_with', 'value': 'checkout'},
+                                       {'field': 'method_clean',
+                                        'operator': 'contains', 'value': 'checkout'},
+                                       {'field': 'ip_address',
+                                        'operator': 'is_not_null', 'value': None},
+                                       {'field': 'ip_isp', 'operator': 'is_not_empty', 'value': None}]}]},
+        'Rule3': {'condition': 'AND',
+                  'rules': [{'field': 'method_clean',
+                             'operator': 'not_begins_with',
+                             'value': 'checkout'},
+                            {'field': 'method_clean',
+                             'operator': 'not_ends_with', 'value': 'checkout'},
+                            {'field': 'method_clean',
+                             'operator': 'not_contains', 'value': 'checkout'},
+                            {'condition': 'OR',
+                             'rules': [{'field': 'ip_address', 'operator': 'is_null', 'value': None},
+                                       {'field': 'ip_isp', 'operator': 'is_empty', 'value': None}]}]},
+        'Rule4': {'condition': 'AND',
+                  'rules': [{'field': 'forwarder_address', 'operator': 'equal', 'value': True},
+                            {'field': 'is_shipping_billing_address_same',
+                             'operator': 'equal',
+                             'value': False}]},
+        'Rule5': {'condition': 'AND',
+                  'rules': [{'field': 'ad_price_type',
+                             'operator': 'not_in',
+                             'value': ['FREE', 'NEGOTIATION']},
+                            {'field': 'ad_price_type', 'operator': 'in', 'value': ['FOO', 'BAR']}]},
+        'Rule6': {'condition': 'AND',
+                  'rules': [{'field': 'ip_country_iso_code',
+                             'operator': 'equal_field',
+                             'value': 'billing_country'},
+                            {'field': 'country_id',
+                             'operator': 'not_equal_field',
+                             'value': 'ip_country_iso_code'}]},
+        'Rule7': {'condition': 'AND',
+                  'rules': [{'field': 'kb_distance',
+                             'operator': 'greater',
+                             'value': 1e-05}]}
+    }
     return rule_dicts
 
 
 @pytest.fixture
 def _rule_strings_pandas():
-    rule_strings = {'Rule1': "((X['payer_id_sum_approved_txn_amt_per_paypalid_1day']>=60.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_7day']>120.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_30day']<=500))&(X['num_items']==1.0)",
-                    'Rule2': "(X['ml_cc_v0']<0.315)&((X['method_clean']=='checkout')|(X['method_clean'].str.startswith('checkout', na=False))|(X['method_clean'].str.endswith('checkout', na=False))|(X['method_clean'].str.contains('checkout', na=False, regex=False))|(~X['ip_address'].isna())|(X['ip_isp'].fillna('')!=''))",
-                    'Rule3': "(~X['method_clean'].str.startswith('checkout', na=False))&(~X['method_clean'].str.endswith('checkout', na=False))&(~X['method_clean'].str.contains('checkout', na=False, regex=False))&((X['ip_address'].isna())|(X['ip_isp'].fillna('')==''))",
-                    'Rule4': "(X['forwarder_address']==True)&(X['is_shipping_billing_address_same']==False)",
-                    'Rule5': "(~X['ad_price_type'].isin(['FREE', 'NEGOTIATION']))&(X['ad_price_type'].isin(['FOO', 'BAR']))",
-                    'Rule6': "(X['ip_country_iso_code']==X['billing_country'])&(X['country_id']!=X['ip_country_iso_code'])"}
+    rule_strings = {
+        'Rule1': "((X['payer_id_sum_approved_txn_amt_per_paypalid_1day']>=60)|(X['payer_id_sum_approved_txn_amt_per_paypalid_7day']>120)|(X['payer_id_sum_approved_txn_amt_per_paypalid_30day']<=500))&(X['num_items']==1)",
+        'Rule2': "(X['ml_cc_v0']<0.315)&((X['method_clean']=='checkout')|(X['method_clean'].str.startswith('checkout', na=False))|(X['method_clean'].str.endswith('checkout', na=False))|(X['method_clean'].str.contains('checkout', na=False, regex=False))|(~X['ip_address'].isna())|(X['ip_isp'].fillna('')!=''))",
+        'Rule3': "(~X['method_clean'].str.startswith('checkout', na=False))&(~X['method_clean'].str.endswith('checkout', na=False))&(~X['method_clean'].str.contains('checkout', na=False, regex=False))&((X['ip_address'].isna())|(X['ip_isp'].fillna('')==''))",
+        'Rule4': "(X['forwarder_address']==True)&(X['is_shipping_billing_address_same']==False)",
+        'Rule5': "(~X['ad_price_type'].isin(['FREE', 'NEGOTIATION']))&(X['ad_price_type'].isin(['FOO', 'BAR']))",
+        'Rule6': "(X['ip_country_iso_code']==X['billing_country'])&(X['country_id']!=X['ip_country_iso_code'])",
+        'Rule7': "(X['kb_distance']>1e-05)"
+    }
     return rule_strings
 
 
 @pytest.fixture
 def _rule_strings_numpy():
-    rule_strings = {'Rule1': "((X['payer_id_sum_approved_txn_amt_per_paypalid_1day'].to_numpy(na_value=np.nan)>=60.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_7day'].to_numpy(na_value=np.nan)>120.0)|(X['payer_id_sum_approved_txn_amt_per_paypalid_30day'].to_numpy(na_value=np.nan)<=500))&(X['num_items'].to_numpy(na_value=np.nan)==1.0)",
-                    'Rule2': "(X['ml_cc_v0'].to_numpy(na_value=np.nan)<0.315)&((X['method_clean'].to_numpy(na_value=np.nan)=='checkout')|(X['method_clean'].str.startswith('checkout', na=False))|(X['method_clean'].str.endswith('checkout', na=False))|(X['method_clean'].str.contains('checkout', na=False, regex=False))|(~pd.isna(X['ip_address'].to_numpy(na_value=np.nan)))|(X['ip_isp'].fillna('')!=''))",
-                    'Rule3': "(~X['method_clean'].str.startswith('checkout', na=False))&(~X['method_clean'].str.endswith('checkout', na=False))&(~X['method_clean'].str.contains('checkout', na=False, regex=False))&((pd.isna(X['ip_address'].to_numpy(na_value=np.nan)))|(X['ip_isp'].fillna('')==''))",
-                    'Rule4': "(X['forwarder_address'].to_numpy(na_value=np.nan)==True)&(X['is_shipping_billing_address_same'].to_numpy(na_value=np.nan)==False)",
-                    'Rule5': "(~X['ad_price_type'].isin(['FREE', 'NEGOTIATION']))&(X['ad_price_type'].isin(['FOO', 'BAR']))",
-                    'Rule6': "(X['ip_country_iso_code'].to_numpy(na_value=np.nan)==X['billing_country'].to_numpy(na_value=np.nan))&(X['country_id'].to_numpy(na_value=np.nan)!=X['ip_country_iso_code'].to_numpy(na_value=np.nan))"}
+    rule_strings = {
+        'Rule1': "((X['payer_id_sum_approved_txn_amt_per_paypalid_1day'].to_numpy(na_value=np.nan)>=60)|(X['payer_id_sum_approved_txn_amt_per_paypalid_7day'].to_numpy(na_value=np.nan)>120)|(X['payer_id_sum_approved_txn_amt_per_paypalid_30day'].to_numpy(na_value=np.nan)<=500))&(X['num_items'].to_numpy(na_value=np.nan)==1)",
+        'Rule2': "(X['ml_cc_v0'].to_numpy(na_value=np.nan)<0.315)&((X['method_clean'].to_numpy(na_value=np.nan)=='checkout')|(X['method_clean'].str.startswith('checkout', na=False))|(X['method_clean'].str.endswith('checkout', na=False))|(X['method_clean'].str.contains('checkout', na=False, regex=False))|(~pd.isna(X['ip_address'].to_numpy(na_value=np.nan)))|(X['ip_isp'].fillna('')!=''))",
+        'Rule3': "(~X['method_clean'].str.startswith('checkout', na=False))&(~X['method_clean'].str.endswith('checkout', na=False))&(~X['method_clean'].str.contains('checkout', na=False, regex=False))&((pd.isna(X['ip_address'].to_numpy(na_value=np.nan)))|(X['ip_isp'].fillna('')==''))",
+        'Rule4': "(X['forwarder_address'].to_numpy(na_value=np.nan)==True)&(X['is_shipping_billing_address_same'].to_numpy(na_value=np.nan)==False)",
+        'Rule5': "(~X['ad_price_type'].isin(['FREE', 'NEGOTIATION']))&(X['ad_price_type'].isin(['FOO', 'BAR']))",
+        'Rule6': "(X['ip_country_iso_code'].to_numpy(na_value=np.nan)==X['billing_country'].to_numpy(na_value=np.nan))&(X['country_id'].to_numpy(na_value=np.nan)!=X['ip_country_iso_code'].to_numpy(na_value=np.nan))",
+        'Rule7': "(X['kb_distance'].to_numpy(na_value=np.nan)>1e-05)"
+    }
     return rule_strings
 
 
@@ -117,7 +130,8 @@ def _rule_lambdas_with_kwargs():
         'Rule3': lambda **kwargs: "(~X['method_clean'].str.startswith('checkout', na=False))&(~X['method_clean'].str.endswith('checkout', na=False))&(~X['method_clean'].str.contains('checkout', na=False, regex=False))&((X['ip_address'].isna())|(X['ip_isp'].fillna('')==''))".format(**kwargs),
         'Rule4': lambda **kwargs: "(X['forwarder_address']==True)&(X['is_shipping_billing_address_same']==False)".format(**kwargs),
         'Rule5': lambda **kwargs: "(~X['ad_price_type'].isin(['FREE', 'NEGOTIATION']))&(X['ad_price_type'].isin(['FOO', 'BAR']))".format(**kwargs),
-        'Rule6': lambda **kwargs: "(X['ip_country_iso_code']==X['billing_country'])&(X['country_id']!=X['ip_country_iso_code'])".format(**kwargs)
+        'Rule6': lambda **kwargs: "(X['ip_country_iso_code']==X['billing_country'])&(X['country_id']!=X['ip_country_iso_code'])".format(**kwargs),
+        'Rule7': lambda **kwargs: "(X['kb_distance']>{kb_distance}".format(**kwargs)
     }
     lambda_kwargs = {
         'Rule1': {'payer_id_sum_approved_txn_amt_per_paypalid_1day': 60.0, 'payer_id_sum_approved_txn_amt_per_paypalid_7day': 120.0, 'payer_id_sum_approved_txn_amt_per_paypalid_30day': 500, 'num_items': 1.0},
@@ -126,6 +140,7 @@ def _rule_lambdas_with_kwargs():
         'Rule4': {},
         'Rule5': {},
         'Rule6': {},
+        'Rule7': {'kb_distance': 1e-05}
     }
     return rule_lambdas, lambda_kwargs
 
@@ -138,7 +153,8 @@ def _rule_lambdas_with_args():
         'Rule3': lambda *args: "(~X['method_clean'].str.startswith('checkout', na=False))&(~X['method_clean'].str.endswith('checkout', na=False))&(~X['method_clean'].str.contains('checkout', na=False, regex=False))&((X['ip_address'].isna())|(X['ip_isp'].fillna('')==''))".format(*args),
         'Rule4': lambda *args: "(X['forwarder_address']==True)&(X['is_shipping_billing_address_same']==False)".format(*args),
         'Rule5': lambda *args: "(~X['ad_price_type'].isin(['FREE', 'NEGOTIATION']))&(X['ad_price_type'].isin(['FOO', 'BAR']))".format(*args),
-        'Rule6': lambda *args: "(X['ip_country_iso_code']==X['billing_country'])&(X['country_id']!=X['ip_country_iso_code'])".format(*args)
+        'Rule6': lambda *args: "(X['ip_country_iso_code']==X['billing_country'])&(X['country_id']!=X['ip_country_iso_code'])".format(*args),
+        'Rule7': lambda *args: "(X['kb_distance']>{}".format(*args)
     }
     lambda_args = {
         'Rule1': [60.0, 120.0, 500, 1.0],
@@ -147,6 +163,7 @@ def _rule_lambdas_with_args():
         'Rule4': [],
         'Rule5': [],
         'Rule6': [],
+        'Rule7': [1e-05]
     }
     return rule_lambdas, lambda_args
 
@@ -220,7 +237,7 @@ def test_add_and_radd():
 def test_repr(_rule_strings_pandas):
     rule_strings_pandas = _rule_strings_pandas
     r = Rules(rule_strings=rule_strings_pandas)
-    assert r.__repr__() == 'Rules object containing 6 rules'
+    assert r.__repr__() == 'Rules object containing 7 rules'
 
 
 def test_as_rule_dicts_starting_with_rule_strings(_rule_strings_pandas, _rule_strings_numpy, _rule_dicts):
@@ -444,7 +461,7 @@ def test_as_rule_lambdas_starting_with_rule_lambdas_with_kwargs_False(_rule_lamb
 def test_transform(_data, _rule_dicts):
     X, y_ = _data
     rule_dicts = _rule_dicts
-    exp_X_rules_sum = np.array([10, 285, 128,  98, 413, 179])
+    exp_X_rules_sum = np.array([10, 285, 128,  98, 413, 179, 488])
     r = Rules(rule_dicts=rule_dicts)
     X_rules = r.transform(X)
     np.testing.assert_array_equal(X_rules.sum().values, exp_X_rules_sum)
@@ -496,15 +513,31 @@ def test_filter_rules_rule_dicts_only(_rule_dicts):
 
 
 def test_get_rule_features(_rule_dicts):
-    exp_result = {'Rule1': {'num_items',
-                            'payer_id_sum_approved_txn_amt_per_paypalid_1day',
-                            'payer_id_sum_approved_txn_amt_per_paypalid_30day',
-                            'payer_id_sum_approved_txn_amt_per_paypalid_7day'},
-                  'Rule2': {'ip_address', 'ip_isp', 'method_clean', 'ml_cc_v0'},
-                  'Rule3': {'ip_address', 'ip_isp', 'method_clean'},
-                  'Rule4': {'forwarder_address', 'is_shipping_billing_address_same'},
-                  'Rule5': {'ad_price_type'},
-                  'Rule6': {'billing_country', 'country_id', 'ip_country_iso_code'}}
+    exp_result = {
+        'Rule1': {
+            'num_items', 'payer_id_sum_approved_txn_amt_per_paypalid_1day',
+            'payer_id_sum_approved_txn_amt_per_paypalid_30day',
+            'payer_id_sum_approved_txn_amt_per_paypalid_7day'
+        },
+        'Rule2': {
+            'ip_address', 'ip_isp', 'method_clean', 'ml_cc_v0'
+        },
+        'Rule3': {
+            'ip_address', 'ip_isp', 'method_clean'
+        },
+        'Rule4': {
+            'forwarder_address', 'is_shipping_billing_address_same'
+        },
+        'Rule5': {
+            'ad_price_type'
+        },
+        'Rule6': {
+            'billing_country', 'country_id', 'ip_country_iso_code'
+        },
+        'Rule7': {
+            'kb_distance'
+        }
+    }
     rule_dicts = _rule_dicts
     r = Rules(rule_dicts=rule_dicts)
     rule_features = r.get_rule_features()
