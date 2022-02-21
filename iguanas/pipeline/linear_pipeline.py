@@ -30,6 +30,10 @@ class LinearPipeline(_BasePipeline):
         class in the pipeline, the tag for the rule optimiser should be added 
         to the `use_init_data` list, as the rule optimiser requires the initial
         dataset to optimise the rules. Defaults to None.
+    verbose : int, optional
+        Controls the verbosity - the higher, the more messages. >0 : gives
+        the overall progress of the training of the pipeline; >1 : shows the 
+        current step being trained.
 
     Attributes
     ----------
@@ -42,8 +46,9 @@ class LinearPipeline(_BasePipeline):
 
     def __init__(self,
                  steps: List[Tuple[str, object]],
-                 use_init_data=None):
-        _BasePipeline.__init__(self, steps=steps)
+                 use_init_data=None,
+                 verbose=0):
+        _BasePipeline.__init__(self, steps=steps, verbose=verbose)
         utils.check_allowed_types(
             use_init_data, 'use_init_data', [ClassList, ClassNoneType]
         )
@@ -76,7 +81,14 @@ class LinearPipeline(_BasePipeline):
                 sample_weight, 'sample_weight', [PandasSeries, Dictionary])
         X_init = self._copy_X_if_use_init_data(X)
         self.steps_ = deepcopy(self.steps)
-        for step_tag, step in self.steps_[:-1]:
+        steps_ = utils.return_progress_ready_range(
+            verbose=self.verbose == 1, range=self.steps_[:-1]
+        )
+        for step_tag, step in steps_:
+            if self.verbose > 1:
+                print(
+                    f'--- Applying `fit_transform` method for step `{step_tag}` ---'
+                )
             X = self._return_X(step_tag=step_tag, X=X, X_init=X_init)
             X = self._pipeline_fit_transform(
                 step_tag=step_tag, step=step, X=X, y=y,
@@ -85,6 +97,10 @@ class LinearPipeline(_BasePipeline):
         final_step_tag = self.steps_[-1][0]
         final_step = self.steps_[-1][1]
         X = self._return_X(step_tag=final_step_tag, X=X, X_init=X_init)
+        if self.verbose > 1:
+            print(
+                f'--- Applying `fit` method or step `{final_step_tag}` ---'
+            )
         self._pipeline_fit(
             step_tag=final_step_tag, step=final_step, X=X, y=y,
             sample_weight=sample_weight

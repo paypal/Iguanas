@@ -23,6 +23,10 @@ class ParallelPipeline(_BasePipeline):
         elements - the first element should be a string which refers to the 
         step; the second element should be the instantiated class which is run
         as part of the step. 
+    verbose : int, optional
+        Controls the verbosity - the higher, the more messages. >0 : gives
+        the overall progress of the training of the pipeline; >1 : shows the 
+        current step being trained.
 
     Attributes
     ----------
@@ -36,8 +40,9 @@ class ParallelPipeline(_BasePipeline):
     """
 
     def __init__(self,
-                 steps: List[Tuple[str, object]]) -> None:
-        _BasePipeline.__init__(self, steps=steps)
+                 steps: List[Tuple[str, object]],
+                 verbose=0) -> None:
+        _BasePipeline.__init__(self, steps=steps, verbose=verbose)
 
     def fit_transform(self,
                       X: Union[PandasDataFrameType, dict],
@@ -72,7 +77,14 @@ class ParallelPipeline(_BasePipeline):
         self.steps_ = deepcopy(self.steps)
         X_rules_list = []
         rules_list = []
-        for step_tag, step in self.steps_:
+        steps_ = utils.return_progress_ready_range(
+            verbose=self.verbose == 1, range=self.steps_
+        )
+        for step_tag, step in steps_:
+            if self.verbose > 1:
+                print(
+                    f'--- Applying `fit_transform` method for step `{step_tag}` ---'
+                )
             X_rules_list.append(
                 self._pipeline_fit_transform(
                     step_tag, step, X, y, sample_weight
