@@ -1,4 +1,5 @@
 """Contains functions that are shared across Iguanas modules."""
+from logging import exception
 from iguanas.utils.types import KoalasDataFrame, KoalasSeries, PandasDataFrame, \
     PandasSeries
 from iguanas.utils.typing import KoalasDataFrameType, KoalasSeriesType, \
@@ -615,3 +616,13 @@ def return_dataset_if_dict(step_tag: str,
         return df[step_tag]
     else:
         return df
+
+
+def check_duplicate_cols(X: Union[PandasDataFrameType, KoalasDataFrameType],
+                         X_name: str) -> None:
+
+    X_cols_dups_mask = X.columns.duplicated()
+    if X_cols_dups_mask.sum() > 0:
+        X_cols_dups = list(set(X.columns[X_cols_dups_mask]))
+        raise Exception(
+            f"""`{X_name}` contains duplicate column names - these are '{"', '".join(X_cols_dups)}'""")

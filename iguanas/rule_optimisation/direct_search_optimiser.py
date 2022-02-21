@@ -173,6 +173,7 @@ class DirectSearchOptimiser(_BaseOptimiser):
         if sample_weight is not None:
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [PandasSeries])
+        utils.check_duplicate_cols(X, 'X')
         self.orig_rules = Rules(
             rule_lambdas=self.orig_rule_lambdas.copy(),
             lambda_kwargs=self.orig_lambda_kwargs.copy(),

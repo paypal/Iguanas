@@ -147,6 +147,7 @@ class RuleGeneratorOpt(_BaseGenerator):
         if sample_weight is not None:
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [PandasSeries])
+        utils.check_duplicate_cols(X, 'X')
         # Ensures rule names are the same when fit run without reinstantiating
         self._rule_name_counter = 0
         if self.target_feat_corr_types == 'Infer':

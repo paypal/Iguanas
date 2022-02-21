@@ -6,6 +6,7 @@ from iguanas.rule_scoring.rule_scoring_methods import PerformanceScorer, LogRegS
     RandomForestScorer
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.rule_scoring.rule_score_scalers import MinMaxScaler, ConstantScaler
+import iguanas.utils.utils as utils
 from typing import Union
 
 
@@ -52,9 +53,10 @@ class RuleScorer:
         sample_weight : PandasSeriesType, optional
             Row-wise weights to apply in the `scoring_class`. Defaults to None.
         """
-
+        utils.check_duplicate_cols(X_rules, 'X_rules')
         self.rule_scores = self.scoring_class.fit(
-            X_rules=X_rules, y=y, sample_weight=sample_weight)
+            X_rules=X_rules, y=y, sample_weight=sample_weight
+        )
         if self.scaling_class is not None:
             self.rule_scores = self.scaling_class.fit(
                 rule_scores=self.rule_scores)

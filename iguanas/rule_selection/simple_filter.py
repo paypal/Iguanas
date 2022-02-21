@@ -1,7 +1,9 @@
 """Filters rules based on performance metrics."""
 from iguanas.rule_selection._base_filter import _BaseFilter
-from typing import Callable
 from iguanas.utils.typing import PandasDataFrameType
+import iguanas.utils.utils as utils
+from typing import Callable
+
 
 FILTERING_FUNCTIONS = {
     '>': lambda x, y: x > y,
@@ -69,6 +71,7 @@ class SimpleFilter(_BaseFilter):
             Row-wise weights to apply. Defaults to None.
         """
 
+        utils.check_duplicate_cols(X_rules, 'X_rules')
         metrics = self.metric(X_rules, y, sample_weight)
         filter_func = FILTERING_FUNCTIONS[self.operator]
         mask = filter_func(metrics, self.threshold)

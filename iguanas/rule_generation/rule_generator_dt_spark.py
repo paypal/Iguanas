@@ -123,6 +123,7 @@ class RuleGeneratorDTSpark(_BaseGenerator):
         if sample_weight is not None:
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [KoalasSeries])
+        utils.check_duplicate_cols(X, 'X')
         # Copy spark tree ensemble - ensures repeatable results when class
         # not instantiated but fit method run for different inputs
         self.tree_ensemble = self.orig_tree_ensemble.copy()
