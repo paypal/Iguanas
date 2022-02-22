@@ -198,11 +198,11 @@ def calc_tps_fps_tns_fns(y_true: Union[PandasSeriesType, np.ndarray, KoalasSerie
 
         # Convert relavent args to numpy arrays
         if is_type(y_true, [PandasSeries]):
-            y_true = y_true.values
+            y_true = y_true.to_numpy()
         if is_type(y_preds, [PandasSeries, PandasDataFrame]):
-            y_preds = y_preds.values
+            y_preds = y_preds.to_numpy()
         if is_type(sample_weight, [PandasSeries]) and sample_weight is not None:
-            sample_weight = sample_weight.values
+            sample_weight = sample_weight.to_numpy()
         # Reshape y_true and sample_weight (if given) into same shape as y_preds
         if y_preds.shape != y_true.shape:
             if sample_weight is not None:
