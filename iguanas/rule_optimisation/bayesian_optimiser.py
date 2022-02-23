@@ -5,7 +5,7 @@ from iguanas.utils.types import NumpyArray, PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.rule_optimisation._base_optimiser import _BaseOptimiser
 import pandas as pd
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Set
 from hyperopt import hp, tpe, fmin
 from hyperopt.pyll import scope
 import numpy as np
@@ -76,7 +76,10 @@ class BayesianOptimiser(_BaseOptimiser):
         The optimisation metric (values) calculated for each original rule 
         (keys).
     non_optimisable_rules : Rules
-        A `Rules` object containing the rules which could not be optimised.    
+        A `Rules` object containing the rules which could not be optimised.  
+    zero_variance_rules : Rules
+        A `Rules` object containing the rules which exclusively contain 
+        features with zero variance.    
     """
 
     def __init__(self, rule_lambdas: Dict[str, Callable],
@@ -100,7 +103,7 @@ class BayesianOptimiser(_BaseOptimiser):
         if self.rule_strings == {}:
             return f'BayesianOptimiser object with {len(self.orig_rule_lambdas)} rules to optimise'
         else:
-            return f'BayesianOptimiser object with {len(self.rule_strings)} rules optimised'
+            return f'BayesianOptimiser object with {len(self.optimisable_rules.rule_strings)} optimised rules and {len(self.non_optimisable_rules.rule_strings)} unoptimisable rules'
 
     def fit(self, X: PandasDataFrameType, y=None, sample_weight=None) -> PandasDataFrameType:
         """
@@ -137,44 +140,71 @@ class BayesianOptimiser(_BaseOptimiser):
         _ = self.orig_rules.as_rule_strings(as_numpy=False)
         if self.verbose > 0:
             print(
-                '--- Checking for rules with features that are missing in `X` ---')
+                '--- Checking for rules with features that are missing in `X` ---'
+            )
         self.rule_names_missing_features, rule_features_in_X = self._return_rules_missing_features(
             rules=self.orig_rules,
             columns=X.columns,
-            verbose=self.verbose)
+            verbose=self.verbose
+        )
+        # If there are rules with missing features in `X`, drop these rules
         if self.rule_names_missing_features:
             self.orig_rules.filter_rules(
-                exclude=self.rule_names_missing_features)
+                exclude=self.rule_names_missing_features
+            )
+        # Filter `X` to rule features
         X = X[rule_features_in_X]
         if self.verbose > 0:
             print(
-                '--- Checking for rules that exclusively contain non-optimisable conditions ---')
-        all_rule_features, self.rule_names_no_opt_conditions = self._return_all_optimisable_rule_features(
-            lambda_kwargs=self.orig_rules.lambda_kwargs, X=X, verbose=self.verbose
+                '--- Checking for rules that exclusively contain non-optimisable conditions ---'
+            )
+        # Return rules with no optimisable conditions (e.g. categorical)
+        self.rule_names_no_opt_conditions = self._return_all_optimisable_rule_features(
+            lambda_kwargs=self.orig_rules.lambda_kwargs,
+            verbose=self.verbose
         )
-        X_min, X_max = self._return_X_min_max(X, all_rule_features)
+        # Get set of features (values) for each rule (keys)
+        rule_features = self.orig_rules.get_rule_features()
+        # Get set of features used in whole rule set
+        rule_features_set = set().union(*self.orig_rules.get_rule_features().values())
+        # Get set of features used in whole rule set (with any % tags included)
+        # to different conditions that use the same feature
+        rule_features_set_tagged = set().union(
+            *[list(lambda_kwarg.keys()) for lambda_kwarg in self.orig_rules.lambda_kwargs.values()]
+        )
+        # Get min, max and int cols in `X`
+        X_min, X_max = self._return_X_min_max(X=X, cols=rule_features_set)
         int_cols = self._return_int_cols(X=X)
-        all_space_funcs = self._return_all_space_funcs(
-            all_rule_features=all_rule_features, X_min=X_min, X_max=X_max,
-            int_cols=int_cols
-        )
         if self.verbose > 0:
             print(
-                '--- Checking for rules that exclusively contain zero-variance features ---')
+                '--- Checking for rules that exclusively contain zero-variance features ---'
+            )
+        # Return rules with exclusively zero variance features
         self.rule_names_zero_var_features = self._return_rules_with_zero_var_features(
-            lambda_kwargs=self.orig_rules.lambda_kwargs, X_min=X_min, X_max=X_max,
-            rule_names_no_opt_conditions=self.rule_names_no_opt_conditions, verbose=self.verbose
+            rule_features=rule_features,
+            rule_names=list(self.orig_rules.rule_lambdas.keys()),
+            X_min=X_min,
+            X_max=X_max,
+            rule_names_no_opt_conditions=self.rule_names_no_opt_conditions,
+            verbose=self.verbose
         )
-        optimisable_rules, self.non_optimisable_rules = self._return_optimisable_rules(
-            rules=self.orig_rules, rule_names_no_opt_conditions=self.rule_names_no_opt_conditions,
+        # Generate dictionary of space functions (for optimisation)
+        all_space_funcs = self._return_all_space_funcs(
+            rule_features_set_tagged=rule_features_set_tagged,
+            X_min=X_min,
+            X_max=X_max,
+            int_cols=int_cols
+        )
+        # Generate optimisable, non-optimisable and zero-variance rule sets
+        self.optimisable_rules, self.non_optimisable_rules, self.zero_variance_rules = self._return_optimisable_rules(
+            rules=self.orig_rules,
+            rule_names_no_opt_conditions=self.rule_names_no_opt_conditions,
             rule_names_zero_var_features=self.rule_names_zero_var_features
         )
-        if not optimisable_rules.rule_lambdas:
+        if not self.optimisable_rules.rule_lambdas:
             raise Exception('There are no optimisable rules in the set')
-        self.optimisable_rules = optimisable_rules
-        orig_X_rules = optimisable_rules.transform(
-            X=X
-        )
+        # Get performance of original, optimisable rules
+        orig_X_rules = self.optimisable_rules.transform(X=X)
         self.orig_rule_performances = dict(
             zip(
                 orig_X_rules.columns.tolist(),
@@ -183,31 +213,46 @@ class BayesianOptimiser(_BaseOptimiser):
         )
         if self.verbose > 0:
             print('--- Optimising rules ---')
+        # Optimise rules
         opt_rule_strings = self._optimise_rules(
-            rule_lambdas=optimisable_rules.rule_lambdas,
-            lambda_kwargs=optimisable_rules.lambda_kwargs,
-            X=X, y=y, sample_weight=sample_weight, int_cols=int_cols,
-            all_space_funcs=all_space_funcs)
-        opt_rules = Rules(
-            rule_strings=opt_rule_strings,
+            rule_lambdas=self.optimisable_rules.rule_lambdas,
+            lambda_kwargs=self.optimisable_rules.lambda_kwargs,
+            X=X,
+            y=y,
+            sample_weight=sample_weight,
+            int_cols=int_cols,
+            all_space_funcs=all_space_funcs
         )
-        opt_X_rules = opt_rules.transform(
-            X=X
-        )
+        # Get performance of optimised rules
+        opt_rules = Rules(rule_strings=opt_rule_strings)
+        opt_X_rules = opt_rules.transform(X=X)
         self.opt_rule_performances = dict(
             zip(
                 opt_X_rules.columns.tolist(),
                 self.metric(opt_X_rules, y, sample_weight)
             )
         )
-        self.rule_strings, self.opt_rule_performances, X_rules = self._return_orig_rule_if_better_perf(
+        # Compare original to optimised rules and return original if better
+        # performing
+        opt_rule_strings, self.opt_rule_performances, X_rules = self._return_orig_rule_if_better_perf(
             orig_rule_performances=self.orig_rule_performances,
             opt_rule_performances=self.opt_rule_performances,
-            orig_rule_strings=optimisable_rules.rule_strings,
+            orig_rule_strings=self.optimisable_rules.rule_strings,
             opt_rule_strings=opt_rules.rule_strings,
             orig_X_rules=orig_X_rules,
             opt_X_rules=opt_X_rules
         )
+        # Combine optimised rules with non-optimised rules (so both can be
+        # applied)
+        self.rule_strings = {
+            **opt_rule_strings, **self.non_optimisable_rules.rule_strings
+        }
+        # If non-optimisable rules present, apply and combine with `X_rules`
+        # (this reduces runtime by not applying the full rule set again)
+        if self.non_optimisable_rules.rule_strings:
+            X_rules = pd.concat(
+                [X_rules, self.non_optimisable_rules.transform(X)], axis=1
+            )
         self._generate_other_rule_formats()
         return X_rules
 
@@ -263,7 +308,7 @@ class BayesianOptimiser(_BaseOptimiser):
         return int_cols
 
     @staticmethod
-    def _return_all_space_funcs(all_rule_features: List[str],
+    def _return_all_space_funcs(rule_features_set_tagged: Set[str],
                                 X_min: PandasSeriesType,
                                 X_max: PandasSeriesType,
                                 int_cols: List[str]) -> Dict[str, hp.uniform]:
@@ -272,21 +317,25 @@ class BayesianOptimiser(_BaseOptimiser):
         each feature in the dataset
         """
         space_funcs = {}
-        for feature in all_rule_features:
+        for feature in rule_features_set_tagged:
             # If features contains %, means that there's more than one
             # occurance of the feature in the rule. To get the column, we need
             # to get the string precending the % symbol.
             col = feature.split('%')[0]
             col_min = X_min[col]
             col_max = X_max[col]
+            # If column is zero variance (and all np.nan), then set the space
+            # function to 0
+            if np.isnan(col_min) and np.isnan(col_max):
+                space_func = 0
             # If column is zero variance (excl. nulls), then set the space
             # function to the minimum value
-            if col_min == col_max:
-                space_funcs[feature] = col_min
-                continue
-            if col in int_cols:
+            elif col_min == col_max:
+                space_func = col_min
+            elif col in int_cols:
                 space_func = scope.int(
-                    hp.uniform(feature, col_min, col_max))
+                    hp.uniform(feature, col_min, col_max)
+                )
             else:
                 space_func = hp.uniform(feature, col_min, col_max)
             space_funcs[feature] = space_func
@@ -299,9 +348,10 @@ class BayesianOptimiser(_BaseOptimiser):
         Returns a dictionary of the space function for each feature in 
         the rule.
         """
-
-        rule_space_funcs = dict((rule_feature, all_space_funcs[rule_feature])
-                                for rule_feature in rule_features)
+        rule_space_funcs = dict(
+            (rule_feature, all_space_funcs[rule_feature])
+            for rule_feature in rule_features
+        )
         return rule_space_funcs
 
     @staticmethod

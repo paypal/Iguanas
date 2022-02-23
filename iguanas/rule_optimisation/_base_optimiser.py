@@ -3,6 +3,7 @@ Base rule optimiser class. Main rule optimisers classes inherit from this one.
 """
 from typing import Callable, Dict, List, Set, Tuple
 import pandas as pd
+import numpy as np
 from iguanas.rules import Rules
 import iguanas.utils as utils
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
@@ -158,7 +159,8 @@ class _BaseOptimiser(Rules):
     @staticmethod
     def _return_X_min_max(X: PandasDataFrameType,
                           cols: List[str]) -> Tuple[PandasSeriesType, PandasSeriesType]:
-        cols = list(set([col.split('%')[0] for col in cols]))
+        """Returns the min and max of columns provided"""
+
         X_min = X[cols].min()
         X_max = X[cols].max()
         return X_min, X_max
@@ -190,15 +192,11 @@ class _BaseOptimiser(Rules):
 
     @staticmethod
     def _return_all_optimisable_rule_features(lambda_kwargs: Dict[str, Dict[str, float]],
-                                              X: PandasDataFrameType,
                                               verbose: int) -> Tuple[List[str], List[str]]:
         """
         Returns a list of all of the features used in each optimisable rule
         within the set.
         """
-        X_isna_means = X.isna().mean()
-        cols_all_null = X_isna_means[X_isna_means == 1].index.tolist()
-        all_rule_features = set()
         rule_names_no_opt_conditions = []
         lambda_kwargs_items = utils.return_progress_ready_range(
             verbose=verbose, range=lambda_kwargs.items()
@@ -206,47 +204,47 @@ class _BaseOptimiser(Rules):
         for rule_name, lambda_kwarg in lambda_kwargs_items:
             if lambda_kwarg == {}:
                 rule_names_no_opt_conditions.append(rule_name)
-                continue
-            rule_features = list(lambda_kwarg.keys())
-            for feature in rule_features:
-                if feature.split('%')[0] in cols_all_null:
-                    rule_names_no_opt_conditions.append(rule_name)
-                    break
-                else:
-                    all_rule_features.add(feature)
         if rule_names_no_opt_conditions:
             warnings.warn(
-                f'Rules `{"`, `".join(rule_names_no_opt_conditions)}` have no optimisable conditions - unable to optimise these rules')
-        all_rule_features = list(all_rule_features)
-        return all_rule_features, rule_names_no_opt_conditions
+                f'Rules `{"`, `".join(rule_names_no_opt_conditions)}` have no optimisable conditions - unable to optimise these rules'
+            )
+        return rule_names_no_opt_conditions
 
     @staticmethod
-    def _return_rules_with_zero_var_features(lambda_kwargs: Dict[str, Dict[str, float]],
+    def _return_rules_with_zero_var_features(rule_features: List[str],
+                                             rule_names: List[str],
                                              X_min: Dict[str, float],
                                              X_max: Dict[str, float],
                                              rule_names_no_opt_conditions: List[str],
                                              verbose: int) -> List[str]:
         """
-        Returns list of rule names that have all zero variance features,
-        so cannot be optimised
+        Returns list of rule names that have all zero variance features, so
+        cannot be optimised.
         """
 
-        zero_var_cols = X_min.index[X_min == X_max].tolist()
-        rule_names_zero_var_features = []
-        lambda_kwargs_items = utils.return_progress_ready_range(
-            verbose=verbose, range=lambda_kwargs.items()
+        # Get zero var features (including np.nan)
+        zero_var_features = X_min.index[
+            X_min.replace(np.nan, 'np.nan') == X_max.replace(np.nan, 'np.nan')
+        ].tolist()
+        # Get rules that exclusively contain zero var features
+        rule_names_all_zero_var = []
+        rule_names = utils.return_progress_ready_range(
+            verbose=verbose, range=rule_names
         )
-        for rule_name, rule_lambda_kwargs in lambda_kwargs_items:
+        for rule_name in rule_names:
+            # If rule has no optimisable conditions, skip
             if rule_name in rule_names_no_opt_conditions:
                 continue
-            rule_features = list(rule_lambda_kwargs.keys())
-            if all([rule_feature in zero_var_cols for rule_feature in rule_features]):
-                rule_names_zero_var_features.append(rule_name)
-                continue
-        if rule_names_zero_var_features:
+            rule_is_all_zero_var = all(
+                [rule_feature in zero_var_features for rule_feature in rule_features[rule_name]]
+            )
+            # If all rule features are zero var, add rule to rule_names_all_zero_var
+            if rule_is_all_zero_var:
+                rule_names_all_zero_var.append(rule_name)
+        if rule_names_all_zero_var:
             warnings.warn(
-                f'Rules `{"`, `".join(rule_names_zero_var_features)}` have all zero variance features based on the dataset `X` - unable to optimise these rules')
-        return rule_names_zero_var_features
+                f'Rules `{"`, `".join(rule_names_all_zero_var)}` have all zero variance features based on the dataset `X` - unable to optimise these rules')
+        return rule_names_all_zero_var
 
     @staticmethod
     def _return_optimisable_rules(rules: Rules,
@@ -260,10 +258,15 @@ class _BaseOptimiser(Rules):
 
         rule_names_to_exclude = rule_names_no_opt_conditions + rule_names_zero_var_features
         non_optimisable_rules = deepcopy(rules)
+        zero_variance_rules = deepcopy(rules)
         rules.filter_rules(exclude=rule_names_to_exclude)
         non_optimisable_rules.filter_rules(
-            include=rule_names_to_exclude)
-        return rules, non_optimisable_rules
+            include=rule_names_no_opt_conditions
+        )
+        zero_variance_rules.filter_rules(
+            include=rule_names_zero_var_features
+        )
+        return rules, non_optimisable_rules, zero_variance_rules
 
     @staticmethod
     def _return_orig_rule_if_better_perf(orig_rule_performances: Dict[str, float],

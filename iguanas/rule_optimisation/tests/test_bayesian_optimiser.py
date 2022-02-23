@@ -43,6 +43,10 @@ def _create_inputs():
         'all_na': lambda **kwargs: "(X['AllNa']>{AllNa})".format(**kwargs),
         'zero_var': lambda **kwargs: "(X['ZeroVar']>{ZeroVar})".format(**kwargs),
         'already_optimal': lambda **kwargs: "(X['A']>={A})".format(**kwargs),
+        'float_with_zero_var': lambda **kwargs: "(X['C']>{C})&(X['ZeroVar']>={ZeroVar})".format(**kwargs),
+        'float_with_all_na_greater': lambda **kwargs: "(X['C']>{C})&(X['AllNa']>{AllNa})".format(**kwargs),
+        'float_with_all_na_is_na': lambda **kwargs: "(X['C']>{C})&(X['AllNa'].isna())".format(**kwargs),
+        'multi_zero_var': lambda **kwargs: "((X['C']>{C})&(X['ZeroVar']>={ZeroVar}))|((X['A']>{A})&(X['ZeroVar']>={ZeroVar%0}))".format(**kwargs),
     }
     lambda_kwargs = {
         'integer': {'A': 9},
@@ -54,7 +58,11 @@ def _create_inputs():
         'missing_col': {'Z': 1},
         'all_na': {'AllNa': 5},
         'zero_var': {'ZeroVar': 1},
-        'already_optimal': {'A': 0}
+        'already_optimal': {'A': 0},
+        'float_with_zero_var': {'C': 1.5, 'ZeroVar': 1},
+        'float_with_all_na_greater': {'C': 1.5, 'AllNa': 1},
+        'float_with_all_na_is_na': {'C': 1.5},
+        'multi_zero_var': {'C': 1.5, 'ZeroVar': 1, 'A': 9, 'ZeroVar%0': 1}
     }
     return rule_lambdas, lambda_kwargs
 
@@ -67,6 +75,12 @@ def _expected_results():
         'is_na': "(X['A']>0)|(X['A'].isna())",
         'mixed': "((X['A']>8)&(X['C']>0.2731178395058975)&(X['E']=='yes')&(X['D']==True))|(X['C']>0.003230558992660632)",
         'already_optimal': "(X['A']>=0)",
+        'float_with_zero_var': "(X['C']>0.003230558992660632)&(X['ZeroVar']>=1)",
+        'float_with_all_na_greater': "(X['C']>1.5)&(X['AllNa']>1)",
+        'float_with_all_na_is_na': "(X['C']>0.003230558992660632)&(X['AllNa'].isna())",
+        'multi_zero_var': "((X['C']>0.001111407676385845)&(X['ZeroVar']>=1))|((X['A']>3)&(X['ZeroVar']>=1))",
+        'categoric': "(X['E']=='yes')",
+        'boolean': "(X['D']==True)"
     }
     opt_rule_strings_weighted = {
         'integer': "(X['A']>0)",
@@ -74,34 +88,56 @@ def _expected_results():
         'is_na': "(X['A']>0)|(X['A'].isna())",
         'mixed': "((X['A']>3)&(X['C']>0.3449413915707924)&(X['E']=='yes')&(X['D']==True))|(X['C']>0.14437974242018892)",
         'already_optimal': "(X['A']>=0)",
+        'float_with_zero_var': "(X['C']>0.14437974242018892)&(X['ZeroVar']>=1)",
+        'float_with_all_na_greater': "(X['C']>1.5)&(X['AllNa']>1)",
+        'float_with_all_na_is_na': "(X['C']>0.14437974242018892)&(X['AllNa'].isna())",
+        'multi_zero_var': "((X['C']>0.003230558992660632)&(X['ZeroVar']>=1))|((X['A']>2)&(X['ZeroVar']>=1))",
+        'categoric': "(X['E']=='yes')",
+        'boolean': "(X['D']==True)"
     }
     orig_rule_performances = {
         'already_optimal': 0.6657771847898598,
         'integer': 0.0,
         'float': 0.0,
         'is_na': 0.0,
-        'mixed': 0.0
+        'mixed': 0.0,
+        'float_with_zero_var': 0.0,
+        'float_with_all_na_greater': 0.0,
+        'float_with_all_na_is_na': 0.0,
+        'multi_zero_var': 0.0
     }
     orig_rule_performances_weighted = {
         'already_optimal': 0.08504038992467365,
         'integer': 0.0,
         'float': 0.0,
         'is_na': 0.0,
-        'mixed': 0.0
+        'mixed': 0.0,
+        'float_with_zero_var': 0.0,
+        'float_with_all_na_greater': 0.0,
+        'float_with_all_na_is_na': 0.0,
+        'multi_zero_var': 0.0
     }
     opt_rule_performances = {
         'float': 0.6642155224279698,
         'mixed': 0.6642155224279698,
         'integer': 0.6422306211224418,
         'already_optimal': 0.6657771847898598,
-        'is_na': 0.6421848260125499
+        'is_na': 0.6421848260125499,
+        'float_with_zero_var': 0.6642155224279698,
+        'float_with_all_na_greater': 0.0,
+        'float_with_all_na_is_na': 0.6642155224279698,
+        'multi_zero_var': 0.6655101087609262
     }
     opt_rule_performances_weighted = {
         'float': 0.0864948723631455,
         'mixed': 0.0864948723631455,
         'integer': 0.07737844641675759,
         'already_optimal': 0.08504038992467365,
-        'is_na': 0.07737778159635708
+        'is_na': 0.07737778159635708,
+        'float_with_zero_var': 0.0864948723631455,
+        'float_with_all_na_greater': 0.0,
+        'float_with_all_na_is_na': 0.0864948723631455,
+        'multi_zero_var': 0.08491056439448814
     }
     return opt_rule_strings, opt_rule_strings_weighted, orig_rule_performances, \
         orig_rule_performances_weighted, opt_rule_performances, opt_rule_performances_weighted
@@ -115,7 +151,13 @@ def _expected_X_rules_mean():
             'float': 0.9968003199680032,
             'mixed': 0.9968003199680032,
             'integer': 0.9032096790320968,
-            'is_na': 0.9033096690330967
+            'is_na': 0.9033096690330967,
+            'float_with_zero_var': 0.99680,
+            'float_with_all_na_greater': 0.00000,
+            'float_with_all_na_is_na': 0.99680,
+            'multi_zero_var': 0.99960,
+            'categoric': 0.49995,
+            'boolean': 0.49995
         },
     )
     X_rules_weight = pd.Series(
@@ -124,7 +166,13 @@ def _expected_X_rules_mean():
             'mixed': 0.8541145885411459,
             'already_optimal': 0.99990001,
             'integer': 0.9032096790320968,
-            'is_na': 0.9033096690330967
+            'is_na': 0.9033096690330967,
+            'float_with_zero_var': 0.8541145885411459,
+            'float_with_all_na_greater': 0.0,
+            'float_with_all_na_is_na': 0.8541145885411459,
+            'multi_zero_var': 0.999000099990001,
+            'categoric': 0.49995000499950004,
+            'boolean': 0.49995000499950004
         },
     )
     X_rules_unlab = pd.Series(
@@ -134,6 +182,12 @@ def _expected_X_rules_mean():
             'integer': 0.0,
             'is_na': 9.999000099990002e-05,
             'already_optimal': 0.209179,
+            'float_with_zero_var': 0.0059994000599940004,
+            'float_with_all_na_greater': 0.0,
+            'float_with_all_na_is_na': 0.0059994000599940004,
+            'multi_zero_var': 0.0,
+            'categoric': 0.49995000499950004,
+            'boolean': 0.49995000499950004
         },
     )
     return X_rules_no_weight, X_rules_weight, X_rules_unlab
@@ -147,20 +201,34 @@ def _expected_results_unlabelled():
         'is_na': "(X['A']>9)|(X['A'].isna())",
         'mixed': "((X['A']>1)&(X['C']>1.5)&(X['E']=='yes')&(X['D']==True))|(X['C']>2.5)",
         'already_optimal': "(X['A']>=8)",
+        'float_with_zero_var': "(X['C']>0.9934712038306385)&(X['ZeroVar']>=1)",
+        'float_with_all_na_greater': "(X['C']>1.5)&(X['AllNa']>1)",
+        'float_with_all_na_is_na': "(X['C']>0.9934712038306385)&(X['AllNa'].isna())",
+        'multi_zero_var': "((X['C']>1.5)&(X['ZeroVar']>=1))|((X['A']>9)&(X['ZeroVar']>=1))",
+        'categoric': "(X['E']=='yes')",
+        'boolean': "(X['D']==True)"
     }
     orig_rule_performances = {
         'is_na': -98.01,
         'integer': -100.0,
         'float': -100.0,
         'mixed': -100.0,
-        'already_optimal': -980100.0
+        'already_optimal': -980100.0,
+        'float_with_zero_var': -100.0,
+        'float_with_all_na_greater': -100.0,
+        'float_with_all_na_is_na': -100.0,
+        'multi_zero_var': -100.0
     }
     opt_rule_performances = {
         'float': -16.0,
         'mixed': -100.0,
         'integer': -100.0,
         'is_na': -98.01,
-        'already_optimal': -39680.63999999999
+        'already_optimal': -39680.63999999999,
+        'float_with_zero_var': -16.0,
+        'float_with_all_na_greater': -100.0,
+        'float_with_all_na_is_na': -16.0,
+        'multi_zero_var': -100.0
     }
     return opt_rule_strings, orig_rule_performances, opt_rule_performances
 
@@ -185,29 +253,24 @@ def test_fit_and_fit_transform(_create_data, _instantiate, _expected_results, _e
     exp_opt_rule_strings, _, exp_orig_rule_performances, _, exp_opt_rule_performances, _ = _expected_results
     exp_X_rules, _, _ = _expected_X_rules_mean
     ro = _instantiate
-    assert ro.__repr__() == 'BayesianOptimiser object with 10 rules to optimise'
-    with pytest.warns(UserWarning,
-                      match="Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules") and \
-            pytest.warns(UserWarning,
-                         match="Rules `categoric`, `boolean`, `all_na` have no optimisable conditions - unable to optimise these rules") and \
-            pytest.warns(UserWarning,
-                         match="Rules `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules"):
+    assert ro.__repr__() == 'BayesianOptimiser object with 14 rules to optimise'
+    with pytest.warns(UserWarning):
         for method in ['fit', 'fit_transform']:
             if method == 'fit':
                 X_rules = ro.fit(X=X, y=y)
             else:
                 X_rules = ro.fit_transform(X=X, y=y)
-            assert ro.__repr__() == 'BayesianOptimiser object with 5 rules optimised'
+            assert ro.__repr__() == 'BayesianOptimiser object with 9 optimised rules and 2 unoptimisable rules'
             pd.testing.assert_series_equal(
-                X_rules.mean().sort_index(), exp_X_rules.sort_index())
+                X_rules.mean().sort_index(), exp_X_rules.sort_index()
+            )
             assert ro.rule_strings == ro.rules.rule_strings == exp_opt_rule_strings
             assert ro.rule_names == list(exp_opt_rule_strings.keys())
             assert ro.orig_rule_performances == exp_orig_rule_performances
             assert ro.opt_rule_performances == exp_opt_rule_performances
             assert ro.rule_names_missing_features == ['missing_col']
-            assert ro.rule_names_no_opt_conditions == [
-                'categoric', 'boolean', 'all_na']
-            assert ro.rule_names_zero_var_features == ['zero_var']
+            assert ro.rule_names_no_opt_conditions == ['categoric', 'boolean']
+            assert ro.rule_names_zero_var_features == ['all_na', 'zero_var']
 
 
 def test_fit_weighted(_create_data, _instantiate, _expected_results,
@@ -216,12 +279,7 @@ def test_fit_weighted(_create_data, _instantiate, _expected_results,
     _, exp_opt_rule_strings, _, exp_orig_rule_performances, _, exp_opt_rule_performances = _expected_results
     _, exp_X_rules, _ = _expected_X_rules_mean
     ro = _instantiate
-    with pytest.warns(UserWarning,
-                      match="Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules") and \
-            pytest.warns(UserWarning,
-                         match="Rules `categoric`, `boolean`, `all_na` have no optimisable conditions - unable to optimise these rules") and \
-            pytest.warns(UserWarning,
-                         match="Rules `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules"):
+    with pytest.warns(UserWarning):
         X_rules = ro.fit(X=X, y=y, sample_weight=sample_weight)
         pd.testing.assert_series_equal(
             X_rules.mean().sort_index(), exp_X_rules.sort_index())
@@ -231,8 +289,8 @@ def test_fit_weighted(_create_data, _instantiate, _expected_results,
         assert ro.opt_rule_performances == exp_opt_rule_performances
         assert ro.rule_names_missing_features == ['missing_col']
         assert ro.rule_names_no_opt_conditions == [
-            'categoric', 'boolean', 'all_na']
-        assert ro.rule_names_zero_var_features == ['zero_var']
+            'categoric', 'boolean']
+        assert ro.rule_names_zero_var_features == ['all_na', 'zero_var']
 
 
 def test_fit_unlabelled(_create_data, _instantiate,
@@ -243,12 +301,7 @@ def test_fit_unlabelled(_create_data, _instantiate,
     apd = AlertsPerDay(n_alerts_expected_per_day=10, no_of_days_in_file=10)
     ro = _instantiate
     ro.metric = apd.fit
-    with pytest.warns(UserWarning,
-                      match="Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules") and \
-            pytest.warns(UserWarning,
-                         match="Rules `categoric`, `boolean`, `all_na` have no optimisable conditions - unable to optimise these rules") and \
-            pytest.warns(UserWarning,
-                         match="Rules `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules"):
+    with pytest.warns(UserWarning):
         X_rules = ro.fit(X=X)
         pd.testing.assert_series_equal(
             X_rules.mean().sort_index(), exp_X_rules.sort_index())
@@ -257,9 +310,8 @@ def test_fit_unlabelled(_create_data, _instantiate,
         assert ro.orig_rule_performances == exp_orig_rule_performances
         assert ro.opt_rule_performances == exp_opt_rule_performances
         assert ro.rule_names_missing_features == ['missing_col']
-        assert ro.rule_names_no_opt_conditions == [
-            'categoric', 'boolean', 'all_na']
-        assert ro.rule_names_zero_var_features == ['zero_var']
+        assert ro.rule_names_no_opt_conditions == ['categoric', 'boolean']
+        assert ro.rule_names_zero_var_features == ['all_na', 'zero_var']
 
 
 def test_transform(_instantiate):
@@ -288,14 +340,25 @@ def test_optimise_rules(_create_data, _instantiate, _expected_results):
     all_space_funcs = {
         'A': scope.int(hp.uniform('A', X['A'].min(), X['A'].max())),
         'C%0': hp.uniform('C%0', X['C'].min(), X['C'].max()),
-        'C': hp.uniform('C', X['C'].min(), X['C'].max())
+        'C': hp.uniform('C', X['C'].min(), X['C'].max()),
+        'ZeroVar': 1,
+        'ZeroVar%0': 1,
+        'AllNa': 0
     }
+    # Update optimised rule_strings for float_with_all_na_greater, since
+    # optimiser outputs rule string with same performance as original
+    exp_opt_rule_strings['float_with_all_na_greater'] = "(X['C']>0.4862189294416758)&(X['AllNa']>0)"
+    exp_opt_rule_strings_weighted[
+        'float_with_all_na_greater'] = "(X['C']>0.4862189294416758)&(X['AllNa']>0)"
     # Add verbose = 1 to test utils.return_progress_ready_range
     ro.verbose = 1
     for exp_result, w in zip([exp_opt_rule_strings, exp_opt_rule_strings_weighted], [None, sample_weight]):
-        opt_rule_strings = ro._optimise_rules(rule_lambdas=ro.orig_rule_lambdas, lambda_kwargs=ro.orig_lambda_kwargs,
-                                              X=X, y=y, sample_weight=w,
-                                              int_cols=int_cols, all_space_funcs=all_space_funcs)
+        opt_rule_strings = ro._optimise_rules(
+            rule_lambdas=ro.orig_rule_lambdas,
+            lambda_kwargs=ro.orig_lambda_kwargs,
+            X=X, y=y, sample_weight=w,
+            int_cols=int_cols, all_space_funcs=all_space_funcs
+        )
         assert opt_rule_strings == exp_result
 
 
@@ -344,7 +407,7 @@ def test_return_all_space_funcs(_create_data, _instantiate):
     X_min = X.min()
     X_max = X.max()
     space_funcs = ro._return_all_space_funcs(
-        all_rule_features=all_rule_features,
+        rule_features_set_tagged=all_rule_features,
         X_min=X_min,
         X_max=X_max,
         int_cols=int_cols)
@@ -455,7 +518,6 @@ def test_errors(_create_data, _instantiate):
         ro.fit(X=X, y=y, sample_weight=[])
     X = pd.DataFrame({'ZeroVar': [0, 0, 0]})
     y = pd.Series([0, 1, 0])
-    with pytest.warns(UserWarning, match="Rules `integer`, `float`, `categoric`, `boolean`, `is_na`, `mixed`, `missing_col`, `all_na`, `already_optimal` use features that are missing from `X` - unable to optimise or apply these rules") and\
-            pytest.warns(UserWarning, match="Rules `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules"):
+    with pytest.warns(UserWarning, match="Rules `integer`, `float`, `categoric`, `boolean`, `is_na`, `mixed`, `missing_col`, `all_na`, `already_optimal`, `float_with_zero_var`, `float_with_all_na_greater`, `float_with_all_na_is_na`, `multi_zero_var` use features that are missing from `X` - unable to optimise or apply these rules"):
         with pytest.raises(Exception, match='There are no optimisable rules in the set'):
             ro.fit(X=X, y=y)
