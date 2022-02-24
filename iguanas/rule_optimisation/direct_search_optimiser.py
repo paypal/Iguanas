@@ -305,12 +305,10 @@ class DirectSearchOptimiser(_BaseOptimiser):
             for i in range(0, num_features):
                 feature_min = X_min[i]
                 feature_max = X_max[i]
-                if np.isnan(feature_min) and np.isnan(feature_max):
-                    feature_vertices = np.array(
-                        [np.nan] * (num_features + 1))
-                else:
-                    feature_vertices = np.random.uniform(
-                        feature_min, feature_max+((feature_max-feature_min)/1000), num_features+1)
+                feature_vertices = np.random.uniform(
+                    feature_min, feature_max +
+                    ((feature_max-feature_min)/1000), num_features+1
+                )
                 initial_simplex[i] = feature_vertices
             initial_simplex = initial_simplex.T
             return initial_simplex

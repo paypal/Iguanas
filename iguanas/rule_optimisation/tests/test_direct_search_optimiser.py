@@ -2410,7 +2410,27 @@ def test_optimise_rules_unlabelled(_instantiate_unlabelled, _create_inputs, _cre
     lambda_kwargs_ = {
         rule_name: lambda_kwarg for rule_name, lambda_kwarg in lambda_kwargs.items() if rule_name not in rules_to_drop}
     opt_rule_strings = ro._optimise_rules(
-        rule_lambdas_, lambda_kwargs_, X, None, None)
+        rule_lambdas_, lambda_kwargs_, X, None, None
+    )
+    assert opt_rule_strings == exp_rule_strings
+
+
+def test_optimise_rules_numpy(_instantiate, _create_data):
+    X, y, _ = _create_data
+    exp_rule_strings = {
+        'already_optimal': "(X['A'].to_numpy(na_value=np.nan)>=4.5)",
+        'float': "(X['C'].to_numpy(na_value=np.nan)>0.0003641365574362787)",
+        'integer': "(X['A'].to_numpy(na_value=np.nan)>4.5)",
+        'is_na': "(X['A'].to_numpy(na_value=np.nan)>4.5)|(pd.isna(X['A'].to_numpy(na_value=np.nan)))",
+        'mixed': "((X['A'].to_numpy(na_value=np.nan)>5.966666666666709)&(X['C'].to_numpy(na_value=np.nan)>0.6372486347111281)&(X['E'].to_numpy(na_value=np.nan)=='yes')&(X['D'].to_numpy(na_value=np.nan)==True))|(X['C'].to_numpy(na_value=np.nan)>0.0003641365574362787)"
+    }
+    ro = _instantiate
+    rules = Rules(rule_strings=exp_rule_strings)
+    rule_lambdas = rules.as_rule_lambdas(as_numpy=True, with_kwargs=True)
+    lambda_kwargs = rules.lambda_kwargs
+    opt_rule_strings = ro._optimise_rules(
+        rule_lambdas, lambda_kwargs, X, y, None
+    )
     assert opt_rule_strings == exp_rule_strings
 
 
