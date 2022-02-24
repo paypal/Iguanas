@@ -30,6 +30,46 @@ class _BaseOptimiser(Rules):
     metric : Callable
         The optimisation function used to calculate the metric which the rules
         are optimised for (e.g. F1 score).
+
+    Attributes
+    ----------
+    rule_strings : Dict[str, str]
+        The optimised + unoptimisable (but applicable) rules, defined using the
+        standard Iguanas string format (values) and their names (keys).
+    rule_lambdas : Dict[str, object]
+        The optimised rules + unoptimisable (but applicable), defined using the
+        standard Iguanas lambda expression format (values) and their names 
+        (keys).
+    lambda_kwargs : Dict[str, object]
+        The keyword arguments for the optimised + unoptimisable (but 
+        applicable) rules defined using the standard Iguanas lambda expression 
+        format.
+    rules : Rules
+        The Rules object containing the optimised + unoptimisable (but 
+        applicable) rules.
+    rule_names : List[str]
+        The names of the optimised + unoptimisable (but applicable) rules.
+    rule_names_missing_features : List[str]
+        Names of rules which use features that are not present in the dataset
+        (and therefore can't be optimised or applied).
+    rule_names_no_opt_conditions : List[str]
+        Names of rules which have no optimisable conditions (e.g. rules that
+        only contain string-based conditions).
+    rule_names_zero_var_features : List[str]
+        Names of rules which exclusively contain zero variance features (based
+        on `X`), so cannot be optimised.
+    opt_rule_performances : Dict[str, float]
+        The optimisation metric (values) calculated for each optimised rule
+        (keys).
+    orig_rule_performances : Dict[str, float]
+        The optimisation metric (values) calculated for each original rule
+        (keys).
+    non_optimisable_rules : Rules
+        A `Rules` object containing the rules which contained exclusively 
+        non-optimisable conditions.
+    zero_varaince_rules : Rules
+        A `Rules` object containing the rules which contained exclusively zero
+        variance features. 
     """
 
     def __init__(self, rule_lambdas: Dict[str, Callable[[Dict], str]],
@@ -61,8 +101,10 @@ class _BaseOptimiser(Rules):
         Returns
         -------
         PandasDataFrameType
-            The binary columns of the optimised rules on the fitted dataset.
+            The binary columns of the optimised + unoptimisable (but 
+            applicable) rules on the fitted dataset.
         """
+
         return self.fit(X=X, y=y, sample_weight=sample_weight)
 
     @classmethod

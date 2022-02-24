@@ -75,18 +75,21 @@ class DirectSearchOptimiser(_BaseOptimiser):
     Attributes
     ----------
     rule_strings : Dict[str, str]
-        The optimised rules, defined using the standard Iguanas string
-        format (values) and their names (keys).
+        The optimised + unoptimisable (but applicable) rules, defined using the
+        standard Iguanas string format (values) and their names (keys).
     rule_lambdas : Dict[str, object]
-        The optimised rules, defined using the standard Iguanas lambda
-        expression format (values) and their names (keys).
+        The optimised rules + unoptimisable (but applicable), defined using the
+        standard Iguanas lambda expression format (values) and their names 
+        (keys).
     lambda_kwargs : Dict[str, object]
-        The keyword arguments for the optimised rules defined using the
-        standard Iguanas lambda expression format.
+        The keyword arguments for the optimised + unoptimisable (but 
+        applicable) rules defined using the standard Iguanas lambda expression 
+        format.
     rules : Rules
-        The Rules object containing the optimised rules.
+        The Rules object containing the optimised + unoptimisable (but 
+        applicable) rules.
     rule_names : List[str]
-        The names of the optimised rules.
+        The names of the optimised + unoptimisable (but applicable) rules.
     rule_names_missing_features : List[str]
         Names of rules which use features that are not present in the dataset
         (and therefore can't be optimised or applied).
@@ -103,7 +106,11 @@ class DirectSearchOptimiser(_BaseOptimiser):
         The optimisation metric (values) calculated for each original rule
         (keys).
     non_optimisable_rules : Rules
-        A `Rules` object containing the rules which could not be optimised.
+        A `Rules` object containing the rules which contained exclusively 
+        non-optimisable conditions.
+    zero_varaince_rules : Rules
+        A `Rules` object containing the rules which contained exclusively zero
+        variance features.
     """
 
     def __init__(self,
@@ -164,7 +171,8 @@ class DirectSearchOptimiser(_BaseOptimiser):
         Returns
         -------
         PandasDataFrameType
-            The binary columns of the optimised rules on the fitted dataset.
+            The binary columns of the optimised + unoptimisable (but 
+            applicable) rules on the fitted dataset.
         """
 
         _, _, orig_X_rules = self._prepare_rules_for_opt(
