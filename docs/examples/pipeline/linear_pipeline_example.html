@@ -790,7 +790,7 @@ div.rendered_html tbody tr:hover {
 <h1>Linear Pipeline Example<a class="headerlink" href="#Linear-Pipeline-Example" title="Permalink to this headline">¶</a></h1>
 <p>A Linear Pipeline is a sequence of steps that are applied sequentially to a dataset. Each step should be an instantiated class with both <code class="docutils literal notranslate"><span class="pre">fit</span></code> and <code class="docutils literal notranslate"><span class="pre">transform</span></code> methods. The final step should be an instantiated class with both <code class="docutils literal notranslate"><span class="pre">fit</span></code> and <code class="docutils literal notranslate"><span class="pre">predict</span></code> methods.</p>
 <p>The below diagram shows the high level structure of a Linear Pipeline:</p>
-<center><p><img alt="054259f56e424b469a7d2a304b96dc4d" src="../../_images/linear_pipeline_structure.png" /></p>
+<center><p><img alt="217a7fcfce61455da83d5bae084e2faa" src="../../_images/linear_pipeline_structure.png" /></p>
 </center><p>It is used to carry out multiple processes sequentially, using the output of the last step as the input to the next step. One such use case is when we want to:</p>
 <ol class="arabic simple">
 <li><p>Generate a set of rules.</p></li>
@@ -803,7 +803,7 @@ div.rendered_html tbody tr:hover {
 <li><p>Use the resulting rule set to optimise a decision engine.</p></li>
 </ol>
 <p>An example of this workflow is shown below:</p>
-<center><p><img alt="f9e7f0a3651d4a29b7e13e1de2820969" src="../../_images/linear_pipeline_example.png" /></p>
+<center><p><img alt="4c51796f2be946579c0e289c64d29ee8" src="../../_images/linear_pipeline_example.png" /></p>
 </center><p>To create this workflow in Iguanas, each step will be added to a Linear Pipeline (whilst maintaining the order shown).</p>
 <p><strong>We’ll see how this workflow can be generated in the following example.</strong></p>
 <hr class="docutils" />
@@ -987,7 +987,10 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+<span></span><span class="n">lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span>
+    <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span> <span class="c1"># Set to 1 to see overall progress</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -997,7 +1000,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 <section id="fit-method">
 <h3><code class="docutils literal notranslate"><span class="pre">fit</span></code> method<a class="headerlink" href="#fit-method" title="Permalink to this headline">¶</a></h3>
 <p>By running the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method, we sequentially run the <code class="docutils literal notranslate"><span class="pre">fit_transform</span></code> methods of each step in the pipeline, except for the last step, where the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method is run:</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
@@ -1009,6 +1012,14 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 <span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00&lt;00:00, 44.24it/s]
+</pre></div></div>
 </div>
 <section id="Outputs">
 <h4>Outputs<a class="headerlink" href="#Outputs" title="Permalink to this headline">¶</a></h4>
@@ -1039,17 +1050,17 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;RGDT_Rule_20220208_0&#39;: &#34;(X[&#39;Age&#39;]&gt;14.5)&amp;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
- &#39;RGDT_Rule_20220208_5&#39;: &#34;(X[&#39;Embarked_C&#39;]==True)&amp;(X[&#39;Pclass&#39;]&lt;=1)&#34;,
- &#39;RGDT_Rule_20220208_8&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;14.85)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
- &#39;RGDT_Rule_20220208_9&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;14.9771)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
- &#39;RGDT_Rule_20220208_13&#39;: &#34;(X[&#39;Fare&#39;]&gt;52.2771)&#34;,
- &#39;RGDT_Rule_20220208_16&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=1)&amp;(X[&#39;Sex_male&#39;]==False)&#34;,
- &#39;RGDT_Rule_20220208_17&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
- &#39;RGDT_Rule_20220208_18&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_male&#39;]==False)&#34;,
- &#39;RGDT_Rule_20220208_19&#39;: &#34;(X[&#39;Sex_female&#39;]==True)&#34;,
- &#39;RGDT_Rule_20220208_20&#39;: &#34;(X[&#39;Sex_male&#39;]==False)&#34;,
- &#39;RGDT_Rule_20220208_21&#39;: &#34;(X[&#39;SibSp&#39;]&gt;=1)&#34;}
+{&#39;RGDT_Rule_20220221_0&#39;: &#34;(X[&#39;Age&#39;]&gt;14.5)&amp;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220221_5&#39;: &#34;(X[&#39;Embarked_C&#39;]==True)&amp;(X[&#39;Pclass&#39;]&lt;=1)&#34;,
+ &#39;RGDT_Rule_20220221_8&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;14.85)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220221_9&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;14.9771)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220221_13&#39;: &#34;(X[&#39;Fare&#39;]&gt;52.2771)&#34;,
+ &#39;RGDT_Rule_20220221_16&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=1)&amp;(X[&#39;Sex_male&#39;]==False)&#34;,
+ &#39;RGDT_Rule_20220221_17&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220221_18&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_male&#39;]==False)&#34;,
+ &#39;RGDT_Rule_20220221_19&#39;: &#34;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220221_20&#39;: &#34;(X[&#39;Sex_male&#39;]==False)&#34;,
+ &#39;RGDT_Rule_20220221_21&#39;: &#34;(X[&#39;SibSp&#39;]&gt;=1)&#34;}
 </pre></div></div>
 </div>
 </section>
@@ -1057,7 +1068,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 <section id="fit_predict-method">
 <h3><code class="docutils literal notranslate"><span class="pre">fit_predict</span></code> method<a class="headerlink" href="#fit_predict-method" title="Permalink to this headline">¶</a></h3>
 <p>By running the <code class="docutils literal notranslate"><span class="pre">fit_predict</span></code> method, we sequentially run the <code class="docutils literal notranslate"><span class="pre">fit_transform</span></code> methods of each step in the pipeline, except for the last step, where the <code class="docutils literal notranslate"><span class="pre">fit_predict</span></code> method is run:</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
@@ -1069,6 +1080,14 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 <span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00&lt;00:00, 63.26it/s]
+</pre></div></div>
 </div>
 <section id="id1">
 <h4>Outputs<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
@@ -1088,18 +1107,19 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0      0
-1      0
-2      1
-3      1
-4      1
+PassengerId
+7      0
+719    0
+686    1
+74     1
+883    1
       ..
-591    1
-592    0
-593    1
-594    1
-595    1
-Name: Stage=0, Decision=1, Length: 596, dtype: int64
+107    1
+271    0
+861    1
+436    1
+103    1
+Length: 596, dtype: int64
 </pre></div></div>
 </div>
 </section>
@@ -1134,18 +1154,19 @@ Name: Stage=0, Decision=1, Length: 596, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0      1
-1      0
-2      0
-3      1
-4      1
+PassengerId
+710    1
+440    0
+841    0
+721    1
+40     1
       ..
-290    0
-291    0
-292    1
-293    1
-294    0
-Name: Stage=0, Decision=1, Length: 295, dtype: int64
+716    0
+526    0
+382    1
+141    1
+174    0
+Length: 295, dtype: int64
 </pre></div></div>
 </div>
 <p>We can now calculate the F1 score of our pipeline using the test data:</p>
@@ -1259,7 +1280,8 @@ Name: Stage=0, Decision=1, Length: 295, dtype: int64
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span>
     <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span>
-    <span class="n">use_init_data</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;optimiser&#39;</span><span class="p">]</span>
+    <span class="n">use_init_data</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;optimiser&#39;</span><span class="p">],</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">2</span> <span class="c1"># Set to 2 to see current step being trained</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -1279,13 +1301,30 @@ Name: Stage=0, Decision=1, Length: 295, dtype: int64
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+--- Applying `fit_transform` method for step `generator` ---
+--- Applying `fit_transform` method for step `optimiser` ---
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/jlaidler/Documents/Iguanas/iguanas/rule_optimisation/_base_optimiser.py:218: UserWarning: Rules `RGDT_Rule_20220208_6`, `RGDT_Rule_20220208_7`, `RGDT_Rule_20220208_12`, `RGDT_Rule_20220208_19`, `RGDT_Rule_20220208_20` have no optimisable conditions - unable to optimise these rules
+/Users/jlaidler/Documents/Iguanas/iguanas/rule_optimisation/_base_optimiser.py:218: UserWarning: Rules `RGDT_Rule_20220221_6`, `RGDT_Rule_20220221_7`, `RGDT_Rule_20220221_12`, `RGDT_Rule_20220221_19`, `RGDT_Rule_20220221_20` have no optimisable conditions - unable to optimise these rules
   warnings.warn(
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+--- Applying `fit` method or step `rbs_optimiser` ---
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -1312,17 +1351,17 @@ Name: Stage=0, Decision=1, Length: 295, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;RGDT_Rule_20220208_1&#39;: &#34;(X[&#39;Age&#39;]&gt;10.941004768044909)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
- &#39;RGDT_Rule_20220208_2&#39;: &#34;(X[&#39;Age&#39;]&gt;47.0)&amp;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;52.2771)&#34;,
- &#39;RGDT_Rule_20220208_4&#39;: &#34;(X[&#39;Age&#39;]&gt;10.941004768044909)&#34;,
- &#39;RGDT_Rule_20220208_5&#39;: &#34;(X[&#39;Embarked_C&#39;]==True)&amp;(X[&#39;Pclass&#39;]&lt;=2)&#34;,
- &#39;RGDT_Rule_20220208_8&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;14.85)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
- &#39;RGDT_Rule_20220208_9&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;14.9771)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
- &#39;RGDT_Rule_20220208_10&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;47.162206755851706)&#34;,
- &#39;RGDT_Rule_20220208_15&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&#34;,
- &#39;RGDT_Rule_20220208_16&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_male&#39;]==False)&#34;,
- &#39;RGDT_Rule_20220208_17&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
- &#39;RGDT_Rule_20220208_18&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_male&#39;]==False)&#34;}
+{&#39;RGDT_Rule_20220221_1&#39;: &#34;(X[&#39;Age&#39;]&gt;10.941004768044909)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220221_2&#39;: &#34;(X[&#39;Age&#39;]&gt;47)&amp;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;52.2771)&#34;,
+ &#39;RGDT_Rule_20220221_4&#39;: &#34;(X[&#39;Age&#39;]&gt;10.941004768044909)&#34;,
+ &#39;RGDT_Rule_20220221_5&#39;: &#34;(X[&#39;Embarked_C&#39;]==True)&amp;(X[&#39;Pclass&#39;]&lt;=2)&#34;,
+ &#39;RGDT_Rule_20220221_8&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;14.85)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220221_9&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;14.9771)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220221_10&#39;: &#34;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Fare&#39;]&gt;47.162206755851706)&#34;,
+ &#39;RGDT_Rule_20220221_15&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&#34;,
+ &#39;RGDT_Rule_20220221_16&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_male&#39;]==False)&#34;,
+ &#39;RGDT_Rule_20220221_17&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+ &#39;RGDT_Rule_20220221_18&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex_male&#39;]==False)&#34;}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1339,13 +1378,30 @@ Name: Stage=0, Decision=1, Length: 295, dtype: int64
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+--- Applying `fit_transform` method for step `generator` ---
+--- Applying `fit_transform` method for step `optimiser` ---
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/jlaidler/Documents/Iguanas/iguanas/rule_optimisation/_base_optimiser.py:218: UserWarning: Rules `RGDT_Rule_20220208_6`, `RGDT_Rule_20220208_7`, `RGDT_Rule_20220208_12`, `RGDT_Rule_20220208_19`, `RGDT_Rule_20220208_20` have no optimisable conditions - unable to optimise these rules
+/Users/jlaidler/Documents/Iguanas/iguanas/rule_optimisation/_base_optimiser.py:218: UserWarning: Rules `RGDT_Rule_20220221_6`, `RGDT_Rule_20220221_7`, `RGDT_Rule_20220221_12`, `RGDT_Rule_20220221_19`, `RGDT_Rule_20220221_20` have no optimisable conditions - unable to optimise these rules
   warnings.warn(
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+--- Applying `fit` method or step `rbs_optimiser` ---
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">

@@ -190,6 +190,10 @@
 <span class="sd">        class in the pipeline, the tag for the rule optimiser should be added </span>
 <span class="sd">        to the `use_init_data` list, as the rule optimiser requires the initial</span>
 <span class="sd">        dataset to optimise the rules. Defaults to None.</span>
+<span class="sd">    verbose : int, optional</span>
+<span class="sd">        Controls the verbosity - the higher, the more messages. &gt;0 : gives</span>
+<span class="sd">        the overall progress of the training of the pipeline; &gt;1 : shows the </span>
+<span class="sd">        current step being trained.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -202,8 +206,9 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">steps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
-                 <span class="n">use_init_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">_BasePipeline</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+                 <span class="n">use_init_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">_BasePipeline</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span>
             <span class="n">use_init_data</span><span class="p">,</span> <span class="s1">&#39;use_init_data&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">ClassList</span><span class="p">,</span> <span class="n">ClassNoneType</span><span class="p">]</span>
         <span class="p">)</span>
@@ -236,7 +241,14 @@
                 <span class="n">sample_weight</span><span class="p">,</span> <span class="s1">&#39;sample_weight&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
         <span class="n">X_init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_copy_X_if_use_init_data</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">steps_</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">return_progress_ready_range</span><span class="p">(</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps_</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;--- Applying `fit_transform` method for step `</span><span class="si">{</span><span class="n">step_tag</span><span class="si">}</span><span class="s1">` ---&#39;</span>
+                <span class="p">)</span>
             <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_X</span><span class="p">(</span><span class="n">step_tag</span><span class="o">=</span><span class="n">step_tag</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">X_init</span><span class="o">=</span><span class="n">X_init</span><span class="p">)</span>
             <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_fit_transform</span><span class="p">(</span>
                 <span class="n">step_tag</span><span class="o">=</span><span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
@@ -245,6 +257,10 @@
         <span class="n">final_step_tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">final_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_X</span><span class="p">(</span><span class="n">step_tag</span><span class="o">=</span><span class="n">final_step_tag</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">X_init</span><span class="o">=</span><span class="n">X_init</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;--- Applying `fit` method or step `</span><span class="si">{</span><span class="n">final_step_tag</span><span class="si">}</span><span class="s1">` ---&#39;</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_fit</span><span class="p">(</span>
             <span class="n">step_tag</span><span class="o">=</span><span class="n">final_step_tag</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">final_step</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
             <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span>

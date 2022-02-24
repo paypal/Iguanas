@@ -1013,6 +1013,29 @@ extracted from the dict; else, just return <cite>df</cite>.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.utils.utils.check_duplicate_cols">
+<span class="sig-prename descclassname"><span class="pre">iguanas.utils.utils.</span></span><span class="sig-name descname"><span class="pre">check_duplicate_cols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/iguanas/utils/utils.html#check_duplicate_cols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.utils.utils.check_duplicate_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks for duplicate columns in <cite>X</cite> - if duplicates found, raises an
+Exception.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X</strong><span class="classifier">Union[PandasDataFrameType, KoalasDataFrameType]</span></dt><dd><p>The dataset.</p>
+</dd>
+<dt><strong>X_name</strong><span class="classifier">str</span></dt><dd><p>The name of the dataset (used in the Exception message).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><dl class="simple">
+<dt>Exception</dt><dd><p>If duplicate columns found in <cite>X</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 

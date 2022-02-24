@@ -785,7 +785,7 @@ div.rendered_html tbody tr:hover {
 <h1>Parallel Pipeline Example<a class="headerlink" href="#Parallel-Pipeline-Example" title="Permalink to this headline">¶</a></h1>
 <p>A Parallel Pipeline is a set of steps which run independently - their outputs are then combined and returned. Each step should be an instantiated class with both <code class="docutils literal notranslate"><span class="pre">fit</span></code> and <code class="docutils literal notranslate"><span class="pre">transform</span></code> methods.</p>
 <p>The below diagram shows the high level structure of a Parallel Pipeline:</p>
-<center><p><img alt="2ab1a895774443a9995eb80f37a842a2" src="../../_images/parallel_pipeline_structure.png" /></p>
+<center><p><img alt="2ebc95861c104289b2d96968afe68d3a" src="../../_images/parallel_pipeline_structure.png" /></p>
 </center><p>It is used to carry out multiple processes seperately and combine their outputs. One such use case is when we want to both:</p>
 <ol class="arabic simple">
 <li><p>Generate a new rule set, and:</p></li>
@@ -793,7 +793,7 @@ div.rendered_html tbody tr:hover {
 <li><p>Use the combined rule sets to optimise a decision engine</p></li>
 </ol>
 <p>An example of this workflow is shown below:</p>
-<center><p><img alt="e85982be533847b4a076f56ab69fb91a" src="../../_images/parallel_pipeline_example.png" /></p>
+<center><p><img alt="a0a7f87e7d0f47018f362e1cf2ef06ad" src="../../_images/parallel_pipeline_example.png" /></p>
 </center><p>To create this workflow in Iguanas, the rule generation and rule optimisation steps are added to a Parallel Pipeline, so they run separately and their outputs are combined. This Parallel Pipeline is then added to a Linear Pipeline, along with the decision engine optimisation step, so that the output of the Parallel Pipeline is fed into the decision engine optimiser.</p>
 <p><strong>We’ll see how this workflow can be generated in the following example.</strong></p>
 <hr class="docutils" />
@@ -969,7 +969,10 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># Instantiate the ParallelPipeline</span>
-<span class="n">pp</span> <span class="o">=</span> <span class="n">ParallelPipeline</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+<span class="n">pp</span> <span class="o">=</span> <span class="n">ParallelPipeline</span><span class="p">(</span>
+    <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span> <span class="c1"># Set to 1 to see overall progress</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1026,7 +1029,10 @@ must specify which rules predict what case, using the <code class="docutils lite
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># Instatiate the LinearPipeline</span>
-<span class="n">lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+<span class="n">lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span>
+    <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">2</span> <span class="c1"># Set to 2 to see current step being trained</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1037,7 +1043,7 @@ must specify which rules predict what case, using the <code class="docutils lite
 <h3><code class="docutils literal notranslate"><span class="pre">fit</span></code> method<a class="headerlink" href="#fit-method" title="Permalink to this headline">¶</a></h3>
 <p>By running the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method, we sequentially run the <code class="docutils literal notranslate"><span class="pre">fit_transform</span></code> methods of each step in the pipeline, except for the last step, where the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method is run.</p>
 <p><strong>Note:</strong> we need to pass the unprocessed data to the rule optimiser step - we can do this by feeding a dictionary to the parameter <code class="docutils literal notranslate"><span class="pre">X</span></code>, where the key of the dictionary corresponds to the step where the given dataset (value) should be passed:</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
@@ -1052,6 +1058,16 @@ must specify which rules predict what case, using the <code class="docutils lite
 <span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+--- Applying `fit_transform` method for step `pp` ---
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00&lt;00:00, 19.23it/s]
+--- Applying `fit` method or step `rbs_optimiser` ---
+</pre></div></div>
 </div>
 <section id="Outputs">
 <h4>Outputs<a class="headerlink" href="#Outputs" title="Permalink to this headline">¶</a></h4>
@@ -1082,7 +1098,7 @@ must specify which rules predict what case, using the <code class="docutils lite
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;RGDT_Rule_20220208_1&#39;: &#34;(X[&#39;Embarked_Q&#39;]==True)&amp;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
+{&#39;RGDT_Rule_20220221_1&#39;: &#34;(X[&#39;Embarked_Q&#39;]==True)&amp;(X[&#39;Embarked_S&#39;]==False)&amp;(X[&#39;Sex_female&#39;]==True)&#34;,
  &#39;CombinedRule&#39;: &#34;(X[&#39;Pclass&#39;]&lt;=2)&amp;(X[&#39;Sex&#39;]==&#39;female&#39;)&#34;}
 </pre></div></div>
 </div>
@@ -1092,7 +1108,7 @@ must specify which rules predict what case, using the <code class="docutils lite
 <h3><code class="docutils literal notranslate"><span class="pre">fit_predict</span></code> method<a class="headerlink" href="#fit_predict-method" title="Permalink to this headline">¶</a></h3>
 <p>By running the <code class="docutils literal notranslate"><span class="pre">fit_predict</span></code> method, we sequentially run the <code class="docutils literal notranslate"><span class="pre">fit_transform</span></code> methods of each step in the pipeline, except for the last step, where the <code class="docutils literal notranslate"><span class="pre">fit_predict</span></code> method is run.</p>
 <p><strong>Note:</strong> we need to pass the unprocessed data to the rule optimiser step - we can do this by feeding a dictionary to the parameter <code class="docutils literal notranslate"><span class="pre">X</span></code>, where the key of the dictionary corresponds to the step where the given dataset (value) should be passed:</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
@@ -1107,6 +1123,16 @@ must specify which rules predict what case, using the <code class="docutils lite
 <span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+--- Applying `fit_transform` method for step `pp` ---
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00&lt;00:00, 23.22it/s]
+--- Applying `fit` method or step `rbs_optimiser` ---
+</pre></div></div>
 </div>
 <section id="id1">
 <h4>Outputs<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
@@ -1126,18 +1152,19 @@ must specify which rules predict what case, using the <code class="docutils lite
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0      0
-1      0
-2      0
-3      0
-4      0
+PassengerId
+7      0
+719    0
+686    0
+74     0
+883    0
       ..
-591    0
-592    0
-593    0
-594    1
-595    0
-Name: Stage=0, Decision=1, Length: 596, dtype: int64
+107    0
+271    0
+861    0
+436    1
+103    0
+Length: 596, dtype: int64
 </pre></div></div>
 </div>
 </section>
@@ -1178,18 +1205,19 @@ Name: Stage=0, Decision=1, Length: 596, dtype: int64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0      0
-1      0
-2      0
-3      1
-4      0
+PassengerId
+710    0
+440    0
+841    0
+721    1
+40     0
       ..
-290    0
-291    0
-292    0
-293    0
-294    0
-Name: Stage=0, Decision=1, Length: 295, dtype: int64
+716    0
+526    0
+382    0
+141    0
+174    0
+Length: 295, dtype: int64
 </pre></div></div>
 </div>
 <p>This approach is very powerful when optimising hyperparameters for the overall performance of a Rules-Based System - see the <code class="docutils literal notranslate"><span class="pre">BayesSearchCV</span></code> class in the <code class="docutils literal notranslate"><span class="pre">rule_selection</span></code> module for more information.</p>

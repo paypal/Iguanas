@@ -159,6 +159,7 @@
                 
   <h1>Source code for iguanas.utils.utils</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Contains functions that are shared across Iguanas modules.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">exception</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">KoalasDataFrame</span><span class="p">,</span> <span class="n">KoalasSeries</span><span class="p">,</span> <span class="n">PandasDataFrame</span><span class="p">,</span> \
     <span class="n">PandasSeries</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">KoalasDataFrameType</span><span class="p">,</span> <span class="n">KoalasSeriesType</span><span class="p">,</span> \
@@ -358,11 +359,11 @@
 
         <span class="c1"># Convert relavent args to numpy arrays</span>
         <span class="k">if</span> <span class="n">is_type</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">]):</span>
-            <span class="n">y_true</span> <span class="o">=</span> <span class="n">y_true</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">y_true</span> <span class="o">=</span> <span class="n">y_true</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">is_type</span><span class="p">(</span><span class="n">y_preds</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">,</span> <span class="n">PandasDataFrame</span><span class="p">]):</span>
-            <span class="n">y_preds</span> <span class="o">=</span> <span class="n">y_preds</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">y_preds</span> <span class="o">=</span> <span class="n">y_preds</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">is_type</span><span class="p">(</span><span class="n">sample_weight</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">])</span> <span class="ow">and</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">sample_weight</span> <span class="o">=</span> <span class="n">sample_weight</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">sample_weight</span> <span class="o">=</span> <span class="n">sample_weight</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
         <span class="c1"># Reshape y_true and sample_weight (if given) into same shape as y_preds</span>
         <span class="k">if</span> <span class="n">y_preds</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">y_true</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -775,6 +776,31 @@
         <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">step_tag</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="check_duplicate_cols"><a class="viewcode-back" href="../../../api/utils.html#iguanas.utils.utils.check_duplicate_cols">[docs]</a><span class="k">def</span> <span class="nf">check_duplicate_cols</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">KoalasDataFrameType</span><span class="p">],</span>
+                         <span class="n">X_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks for duplicate columns in `X` - if duplicates found, raises an</span>
+<span class="sd">    Exception.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X : Union[PandasDataFrameType, KoalasDataFrameType]</span>
+<span class="sd">        The dataset.</span>
+<span class="sd">    X_name : str</span>
+<span class="sd">        The name of the dataset (used in the Exception message).</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        If duplicate columns found in `X`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">X_cols_dups_mask</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">X_cols_dups_mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">X_cols_dups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">X_cols_dups_mask</span><span class="p">]))</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;&quot;&quot;`</span><span class="si">{</span><span class="n">X_name</span><span class="si">}</span><span class="s2">` contains duplicate column names - these are: &#39;</span><span class="si">{</span><span class="s2">&quot;&#39;, &#39;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">X_cols_dups</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;&quot;&quot;&quot;</span><span class="p">)</span></div>
 </pre></div>
 
               </div>

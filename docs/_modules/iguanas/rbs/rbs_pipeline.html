@@ -220,6 +220,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">X_rules</span><span class="p">,</span> <span class="s1">&#39;X_rules&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">])</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_duplicate_cols</span><span class="p">(</span><span class="n">X_rules</span><span class="p">,</span> <span class="s1">&#39;X_rules&#39;</span><span class="p">)</span>
         <span class="n">stage_level_preds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stage_level_preds</span><span class="p">(</span><span class="n">X_rules</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
         <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pipeline_pred</span><span class="p">(</span><span class="n">stage_level_preds</span><span class="p">,</span> <span class="n">X_rules</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">y_pred</span></div>

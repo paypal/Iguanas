@@ -166,6 +166,7 @@
     <span class="n">RandomForestScorer</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasSeriesType</span>
 <span class="kn">from</span> <span class="nn">iguanas.rule_scoring.rule_score_scalers</span> <span class="kn">import</span> <span class="n">MinMaxScaler</span><span class="p">,</span> <span class="n">ConstantScaler</span>
+<span class="kn">import</span> <span class="nn">iguanas.utils.utils</span> <span class="k">as</span> <span class="nn">utils</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
 
@@ -212,9 +213,10 @@
 <span class="sd">        sample_weight : PandasSeriesType, optional</span>
 <span class="sd">            Row-wise weights to apply in the `scoring_class`. Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_duplicate_cols</span><span class="p">(</span><span class="n">X_rules</span><span class="p">,</span> <span class="s1">&#39;X_rules&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scoring_class</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-            <span class="n">X_rules</span><span class="o">=</span><span class="n">X_rules</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">)</span>
+            <span class="n">X_rules</span><span class="o">=</span><span class="n">X_rules</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rule_scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_class</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
                 <span class="n">rule_scores</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_scores</span><span class="p">)</span></div>

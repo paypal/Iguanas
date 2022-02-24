@@ -333,7 +333,10 @@
    "outputs": [],
    "source": [
     "# Instantiate the ParallelPipeline\n",
-    "pp = ParallelPipeline(steps=steps)"
+    "pp = ParallelPipeline(\n",
+    "    steps=steps,\n",
+    "    verbose=1 # Set to 1 to see overall progress\n",
+    ")"
    ]
   },
   {
@@ -422,7 +425,10 @@
    "outputs": [],
    "source": [
     "# Instatiate the LinearPipeline\n",
-    "lp = LinearPipeline(steps=steps)"
+    "lp = LinearPipeline(\n",
+    "    steps=steps,\n",
+    "    verbose=2 # Set to 2 to see current step being trained\n",
+    ")"
    ]
   },
   {
@@ -456,7 +462,17 @@
    "execution_count": 13,
    "id": "e9041d5f",
    "metadata": {},
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "--- Applying `fit_transform` method for step `pp` ---\n",
+      "100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00, 19.23it/s]\n",
+      "--- Applying `fit` method or step `rbs_optimiser` ---\n"
+     ]
+    }
+   ],
    "source": [
     "lp.fit(\n",
     "    X={\n",
@@ -519,7 +535,7 @@
     {
      "data": {
       "text/plain": [
-       "{'RGDT_Rule_20220208_1': \"(X['Embarked_Q']==True)&(X['Embarked_S']==False)&(X['Sex_female']==True)\",\n",
+       "{'RGDT_Rule_20220221_1': \"(X['Embarked_Q']==True)&(X['Embarked_S']==False)&(X['Sex_female']==True)\",\n",
        " 'CombinedRule': \"(X['Pclass']<=2)&(X['Sex']=='female')\"}"
       ]
      },
@@ -555,7 +571,17 @@
    "execution_count": 16,
    "id": "363b1244",
    "metadata": {},
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "--- Applying `fit_transform` method for step `pp` ---\n",
+      "100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00, 23.22it/s]\n",
+      "--- Applying `fit` method or step `rbs_optimiser` ---\n"
+     ]
+    }
+   ],
    "source": [
     "y_pred_train = lp.fit_predict(\n",
     "    X={\n",
@@ -592,18 +618,19 @@
     {
      "data": {
       "text/plain": [
-       "0      0\n",
-       "1      0\n",
-       "2      0\n",
-       "3      0\n",
-       "4      0\n",
+       "PassengerId\n",
+       "7      0\n",
+       "719    0\n",
+       "686    0\n",
+       "74     0\n",
+       "883    0\n",
        "      ..\n",
-       "591    0\n",
-       "592    0\n",
-       "593    0\n",
-       "594    1\n",
-       "595    0\n",
-       "Name: Stage=0, Decision=1, Length: 596, dtype: int64"
+       "107    0\n",
+       "271    0\n",
+       "861    0\n",
+       "436    1\n",
+       "103    0\n",
+       "Length: 596, dtype: int64"
       ]
      },
      "execution_count": 17,
@@ -673,18 +700,19 @@
     {
      "data": {
       "text/plain": [
-       "0      0\n",
-       "1      0\n",
-       "2      0\n",
-       "3      1\n",
-       "4      0\n",
+       "PassengerId\n",
+       "710    0\n",
+       "440    0\n",
+       "841    0\n",
+       "721    1\n",
+       "40     0\n",
        "      ..\n",
-       "290    0\n",
-       "291    0\n",
-       "292    0\n",
-       "293    0\n",
-       "294    0\n",
-       "Name: Stage=0, Decision=1, Length: 295, dtype: int64"
+       "716    0\n",
+       "526    0\n",
+       "382    0\n",
+       "141    0\n",
+       "174    0\n",
+       "Length: 295, dtype: int64"
       ]
      },
      "execution_count": 19,
