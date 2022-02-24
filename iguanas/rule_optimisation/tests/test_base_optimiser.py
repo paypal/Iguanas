@@ -130,7 +130,7 @@ def test_return_X_min_max(_create_data, _instantiate):
     X, _, _ = _create_data
     ro = _instantiate
     X_min, X_max = ro._return_X_min_max(
-        X, ['A', 'ZeroVar', 'C', 'AllNa', 'C%0'])
+        X, ['A', 'ZeroVar', 'C', 'AllNa'])
     pd.testing.assert_series_equal(X_min.sort_index(), expected_X_min)
     pd.testing.assert_series_equal(X_max.sort_index(), expected_X_max)
 
@@ -148,36 +148,39 @@ def test_return_rules_missing_features(_create_data, _create_inputs, _instantiat
 
 
 def test_return_all_optimisable_rule_features(_instantiate, _create_data, _create_inputs):
-    exp_all_features = ['A', 'C', 'C%0', 'Z', 'ZeroVar']
-    exp_rule_name_no_opt_conds = ['all_na', 'boolean', 'categoric']
+    exp_rule_name_no_opt_conds = ['boolean', 'categoric']
     ro = _instantiate
     X, _,  _ = _create_data
     _, lambda_kwargs = _create_inputs
-    with pytest.warns(UserWarning, match="Rules `categoric`, `boolean`, `all_na` have no optimisable conditions - unable to optimise these rules"):
-        all_features, rule_names_no_opt_conditions = ro._return_all_optimisable_rule_features(
-            lambda_kwargs=lambda_kwargs, X=X, verbose=0)
-        all_features.sort()
+    with pytest.warns(UserWarning, match="Rules `categoric`, `boolean` have no optimisable conditions - unable to optimise these rules"):
+        rule_names_no_opt_conditions = ro._return_all_optimisable_rule_features(
+            lambda_kwargs=lambda_kwargs,
+            verbose=0
+        )
         rule_names_no_opt_conditions.sort()
-        assert all_features == exp_all_features
         assert rule_names_no_opt_conditions == exp_rule_name_no_opt_conds
 
 
 def test_return_rules_with_zero_var_features(_instantiate, _create_inputs):
     ro = _instantiate
-    _, lambda_kwargs = _create_inputs
+    rule_lambdas, lambda_kwargs = _create_inputs
+    rules = Rules(rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs)
     X_min = pd.Series({
         'A': 0.0, 'AllNa': np.nan, 'C': 0.0003641365574362787, 'ZeroVar': 1.0
     })
     X_max = pd.Series({
         'A': 9.0, 'AllNa': np.nan, 'C': 0.9999680225821261, 'ZeroVar': 1.0
     })
-    with pytest.warns(UserWarning, match="Rules `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules"):
+    with pytest.warns(UserWarning, match="Rules `all_na`, `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules"):
         zero_var_rules = ro._return_rules_with_zero_var_features(
-            lambda_kwargs=lambda_kwargs, X_min=X_min, X_max=X_max,
-            rule_names_no_opt_conditions=['all_na', 'boolean', 'categoric'],
+            rule_features=rules.get_rule_features(),
+            rule_names=list(rule_lambdas.keys()),
+            X_min=X_min,
+            X_max=X_max,
+            rule_names_no_opt_conditions=['boolean', 'categoric'],
             verbose=0
         )
-        assert zero_var_rules == ['zero_var']
+        assert zero_var_rules == ['all_na', 'zero_var']
 
 
 def test_return_optimisable_rules(_instantiate, _create_inputs):
@@ -185,15 +188,24 @@ def test_return_optimisable_rules(_instantiate, _create_inputs):
     r = Rules(rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs)
     r.filter_rules(exclude=['missing_col'])
     ro = _instantiate
-    rules, non_optimisable_rules = ro._return_optimisable_rules(rules=r, rule_names_no_opt_conditions=[
-        'all_na', 'boolean', 'categoric', 'already_optimal'], rule_names_zero_var_features=['zero_var'])
+    rules, non_optimisable_rules, zero_var_rules = ro._return_optimisable_rules(
+        rules=r,
+        rule_names_no_opt_conditions=['boolean', 'categoric'],
+        rule_names_zero_var_features=['all_na', 'zero_var']
+    )
     rule_names_opt = list(rules.rule_lambdas.keys())
     rule_names_non_opt = list(non_optimisable_rules.rule_lambdas.keys())
+    rule_names_zero_var = list(zero_var_rules.rule_lambdas.keys())
     rule_names_opt.sort()
     rule_names_non_opt.sort()
-    assert rule_names_opt == ['float', 'integer', 'is_na', 'mixed']
+    rule_names_zero_var.sort()
+    assert rule_names_opt == [
+        'already_optimal', 'float', 'integer', 'is_na', 'mixed'
+    ]
     assert rule_names_non_opt == [
-        'all_na', 'already_optimal', 'boolean', 'categoric', 'zero_var']
+        'boolean', 'categoric'
+    ]
+    assert rule_names_zero_var == ['all_na', 'zero_var']
 
 
 def test_return_orig_rule_if_better_perf(_instantiate):

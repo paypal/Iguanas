@@ -446,9 +446,9 @@ def test_fit_predict_class_accessor_in_class(_create_data, _instantiate_classes)
     # With sample_weight
     lp.fit(X=X, y=y, sample_weight=sample_weight)
     y_pred = lp.predict(X=X)
-    assert y_pred.sum() == 61
+    assert y_pred.sum() == 36
     y_pred = lp.fit_predict(X=X, y=y, sample_weight=sample_weight)
-    assert y_pred.sum() == 61
+    assert y_pred.sum() == 36
 
 
 def test_get_params(_instantiate_classes):

@@ -1,12 +1,13 @@
 """
 Base rule optimiser class. Main rule optimisers classes inherit from this one.
 """
-from typing import Callable, Dict, List, Set, Tuple
-import pandas as pd
-import numpy as np
 from iguanas.rules import Rules
 import iguanas.utils as utils
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
+from iguanas.utils.types import NumpyArray, PandasDataFrame, PandasSeries
+from typing import Callable, Dict, List, Set, Tuple
+import pandas as pd
+import numpy as np
 import warnings
 from copy import deepcopy
 import matplotlib.pyplot as plt
@@ -139,6 +140,157 @@ class _BaseOptimiser(Rules):
         plt.ylabel(
             'Performance uplift (of the provided optimisation metric)')
         plt.show()
+
+    def _prepare_rules_for_opt(self,
+                               X: PandasDataFrameType,
+                               y: PandasSeriesType,
+                               sample_weight: PandasSeriesType) -> Tuple[
+                                   PandasSeriesType,
+                                   PandasSeriesType,
+                                   PandasDataFrameType]:
+        """
+        Performs the following before rule optimisation can take place:
+
+            1. Checks if any rules contain features missing in `X` - if so,
+            these rules are dropped.
+            2. Checks for rules that exclusively contain non-optimisable 
+            conditions - if so, these rules are not optimised (but are added
+            to the final rule set).
+            3. Checks for rules that exclusively contain zero variance features 
+            - if so, these rules are not optimised (but are added to the final
+            rule set).
+            4. Creates the `Rules` object `optimisable_rules` - these are the
+            rules that are used in the optimisation process.            
+        """
+
+        utils.check_allowed_types(X, 'X', [PandasDataFrame])
+        if y is not None:
+            utils.check_allowed_types(y, 'y', [PandasSeries])
+        if sample_weight is not None:
+            utils.check_allowed_types(
+                sample_weight, 'sample_weight', [PandasSeries])
+        utils.check_duplicate_cols(X, 'X')
+        self.orig_rules = Rules(
+            rule_lambdas=self.orig_rule_lambdas.copy(),
+            lambda_kwargs=self.orig_lambda_kwargs.copy(),
+        )
+        _ = self.orig_rules.as_rule_strings(as_numpy=False)
+        if self.verbose > 0:
+            print(
+                '--- Checking for rules with features that are missing in `X` ---'
+            )
+        self.rule_names_missing_features, rule_features_in_X = self._return_rules_missing_features(
+            rules=self.orig_rules,
+            columns=X.columns,
+            verbose=self.verbose
+        )
+        # If there are rules with missing features in `X`, drop these rules
+        if self.rule_names_missing_features:
+            self.orig_rules.filter_rules(
+                exclude=self.rule_names_missing_features
+            )
+        # Filter `X` to rule features
+        X = X[rule_features_in_X]
+        if self.verbose > 0:
+            print(
+                '--- Checking for rules that exclusively contain non-optimisable conditions ---'
+            )
+        # Return rules with no optimisable conditions (e.g. categorical)
+        self.rule_names_no_opt_conditions = self._return_all_optimisable_rule_features(
+            lambda_kwargs=self.orig_rules.lambda_kwargs,
+            verbose=self.verbose
+        )
+        # Get set of features (values) for each rule (keys)
+        rule_features = self.orig_rules.get_rule_features()
+        # Get set of features used in whole rule set
+        rule_features_set = set().union(*self.orig_rules.get_rule_features().values())
+        # Get min, max of `X`
+        X_min, X_max = self._return_X_min_max(
+            X=X,
+            cols=rule_features_set
+        )
+        if self.verbose > 0:
+            print(
+                '--- Checking for rules that exclusively contain zero-variance features ---'
+            )
+        # Return rules with exclusively zero variance features
+        self.rule_names_zero_var_features = self._return_rules_with_zero_var_features(
+            rule_features=rule_features,
+            rule_names=list(self.orig_rules.rule_lambdas.keys()),
+            X_min=X_min,
+            X_max=X_max,
+            rule_names_no_opt_conditions=self.rule_names_no_opt_conditions,
+            verbose=self.verbose
+        )
+        # Generate optimisable, non-optimisable and zero-variance rule sets
+        self.optimisable_rules, self.non_optimisable_rules, self.zero_variance_rules = self._return_optimisable_rules(
+            rules=self.orig_rules,
+            rule_names_no_opt_conditions=self.rule_names_no_opt_conditions,
+            rule_names_zero_var_features=self.rule_names_zero_var_features
+        )
+        if not self.optimisable_rules.rule_lambdas:
+            raise Exception('There are no optimisable rules in the set')
+        # Get performance of original, optimisable rules
+        orig_X_rules = self.optimisable_rules.transform(X=X)
+        self.orig_rule_performances = dict(
+            zip(
+                orig_X_rules.columns.tolist(),
+                self.metric(orig_X_rules, y, sample_weight)
+            )
+        )
+        if self.verbose > 0:
+            print('--- Optimising rules ---')
+        return X_min, X_max, orig_X_rules
+
+    def _return_final_rule_set(self,
+                               X: PandasDataFrameType,
+                               y: PandasSeriesType,
+                               sample_weight: PandasSeriesType,
+                               opt_rule_strings: Dict[str, str],
+                               orig_X_rules: PandasDataFrameType) -> PandasDataFrameType:
+        """
+        Performs the following before generating the final rule set:
+
+            1. Calculates the performance of the optimised rules.
+            2. Compares the performance of the optimised rules to the original
+            rules - if the original rule is better performing, it's added to 
+            the final rule set; else the optimised rule is added.
+            3. Any rules that exclusively contain non-optimisable conditions
+            are added to the final rule set.            
+        """
+
+        # Get performance of optimised rules
+        opt_rules = Rules(rule_strings=opt_rule_strings)
+        opt_X_rules = opt_rules.transform(X=X)
+        self.opt_rule_performances = dict(
+            zip(
+                opt_X_rules.columns.tolist(),
+                self.metric(opt_X_rules, y, sample_weight)
+            )
+        )
+        # Compare original to optimised rules and return original if better
+        # performing
+        opt_rule_strings, self.opt_rule_performances, X_rules = self._return_orig_rule_if_better_perf(
+            orig_rule_performances=self.orig_rule_performances,
+            opt_rule_performances=self.opt_rule_performances,
+            orig_rule_strings=self.optimisable_rules.rule_strings,
+            opt_rule_strings=opt_rules.rule_strings,
+            orig_X_rules=orig_X_rules,
+            opt_X_rules=opt_X_rules
+        )
+        # Combine optimised rules with non-optimised rules (so both can be
+        # applied)
+        self.rule_strings = {
+            **opt_rule_strings, **self.non_optimisable_rules.rule_strings
+        }
+        # If non-optimisable rules present, apply and combine with `X_rules`
+        # (this reduces runtime by not applying the full rule set again)
+        if self.non_optimisable_rules.rule_strings:
+            X_rules = pd.concat(
+                [X_rules, self.non_optimisable_rules.transform(X)], axis=1
+            )
+        self._generate_other_rule_formats()
+        return X_rules
 
     @staticmethod
     def _calculate_performance_comparison(orig_rule_performances: Dict[str, float],
