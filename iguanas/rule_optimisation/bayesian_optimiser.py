@@ -175,11 +175,9 @@ class BayesianOptimiser(_BaseOptimiser):
         """Optimises each rule in the set"""
 
         opt_rule_strings = {}
-        if self.verbose == 1:
-            rule_lambdas_items = utils.return_progress_ready_range(
-                verbose=self.verbose, range=rule_lambdas.items())
-        else:
-            rule_lambdas_items = rule_lambdas.items()
+        rule_lambdas_items = utils.return_progress_ready_range(
+            verbose=self.verbose, range=rule_lambdas.items()
+        )
         with Parallel(n_jobs=self.num_cores) as parallel:
             opt_rule_strings_list = parallel(delayed(self._optimise_single_rule)(
                 rule_name, rule_lambda, lambda_kwargs, X, y, sample_weight,
