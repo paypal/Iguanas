@@ -57,11 +57,6 @@ class _ConvertRuleDictsToRuleStrings:
                 'is_not': False,
                 'conversion_function': self._create_condition_string_for_is_in_operator
             },
-            'equal_field': {
-                'operator': '==',
-                'is_not': None,
-                'conversion_function': self._create_condition_string_for_field_level_comparison
-            },
             'not_begins_with': {
                 'operator': 'startswith',
                 'is_not': True,
@@ -86,11 +81,6 @@ class _ConvertRuleDictsToRuleStrings:
                 'operator': 'isin',
                 'is_not': True,
                 'conversion_function': self._create_condition_string_for_is_in_operator
-            },
-            'not_equal_field': {
-                'operator': '!=',
-                'is_not': None,
-                'conversion_function': self._create_condition_string_for_field_level_comparison
             },
             'equal': {
                 'operator': '==',
@@ -132,6 +122,36 @@ class _ConvertRuleDictsToRuleStrings:
                 'is_not': None,
                 'conversion_function': self._create_condition_string_for_is_empty_operator
             },
+            'equal_field': {
+                'operator': '==',
+                'is_not': None,
+                'conversion_function': self._create_condition_string_for_field_level_comparison
+            },
+            'not_equal_field': {
+                'operator': '!=',
+                'is_not': None,
+                'conversion_function': self._create_condition_string_for_field_level_comparison
+            },
+            'greater_or_equal_field': {
+                'operator': '>=',
+                'is_not': None,
+                'conversion_function': self._create_condition_string_for_field_level_comparison
+            },
+            'greater_field': {
+                'operator': '>',
+                'is_not': None,
+                'conversion_function': self._create_condition_string_for_field_level_comparison
+            },
+            'less_or_equal_field': {
+                'operator': '<=',
+                'is_not': None,
+                'conversion_function': self._create_condition_string_for_field_level_comparison
+            },
+            'less_field': {
+                'operator': '<',
+                'is_not': None,
+                'conversion_function': self._create_condition_string_for_field_level_comparison
+            }
         }
 
     def convert(self, as_numpy: bool) -> Dict[str, str]:
