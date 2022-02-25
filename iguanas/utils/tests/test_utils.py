@@ -336,6 +336,16 @@ def test_check_allowed_types():
         utils.check_allowed_types(2, 'X', [PandasDataFrame])
 
 
+def test_check_duplicate_cols():
+    X1 = pd.DataFrame({'A': [1, 2, 3]})
+    X2 = pd.DataFrame({'A': [0, 1, 2]})
+    X = pd.concat([X1, X2], axis=1)
+    with pytest.raises(Exception, match="`X` contains duplicate column names - these are: 'A'"):
+        utils.check_duplicate_cols(X, 'X')
+    X.columns = ['A', 'B']
+    utils.check_duplicate_cols(X, 'X')
+
+
 def _test_y_preds(y_preds, rule_descriptions, y, sample_weight):
     if y_preds.ndim == 1:
         y_preds = pd.DataFrame(y_preds)

@@ -239,6 +239,7 @@
 <span class="sd">            Row-wise weights to apply. Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_duplicate_cols</span><span class="p">(</span><span class="n">X_rules</span><span class="p">,</span> <span class="s1">&#39;X_rules&#39;</span><span class="p">)</span>
         <span class="n">sorted_rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_rules</span><span class="p">(</span>
             <span class="n">X_rules</span><span class="o">=</span><span class="n">X_rules</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span>
             <span class="n">sorting_metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sorting_metric</span><span class="p">,</span>

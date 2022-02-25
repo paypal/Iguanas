@@ -19,13 +19,13 @@ class DirectSearchOptimiser(_BaseOptimiser):
     Parameters
     ----------
     rule_lambdas : Dict[str, Callable]
-        Set of rules defined using the standard Iguanas lambda expression 
+        Set of rules defined using the standard Iguanas lambda expression
         format (values) and their names (keys).
     lambda_kwargs : Dict[str, Dict[str, float]]
         For each rule (keys), a dictionary containing the features used in
         the rule (keys) and the current values (values).
     metric : Callable
-        The optimisation function used to calculate the metric which the 
+        The optimisation function used to calculate the metric which the
         rules are optimised for (e.g. F1 score).
     x0 : dict, optional
         Dictionary of the initial guess (values) for each rule (keys). If
@@ -33,40 +33,40 @@ class DirectSearchOptimiser(_BaseOptimiser):
         the `lambda_kwargs` parameter). See scipy.optimize.minimize()
         documentation for more information. Defaults to None.
     method : str, optional
-        Type of solver. See scipy.optimize.minimize() documentation for 
+        Type of solver. See scipy.optimize.minimize() documentation for
         more information. Defaults to None.
     jac : dict, optional
         Dictionary of the method for computing the gradient vector (values)
-        for each rule (keys). See scipy.optimize.minimize() documentation 
+        for each rule (keys). See scipy.optimize.minimize() documentation
         for more information. Defaults to None.
     hess : dict, optional
         Dictionary of the method for computing the Hessian matrix (values)
-        for each rule (keys). See scipy.optimize.minimize() documentation 
+        for each rule (keys). See scipy.optimize.minimize() documentation
         for more information. Defaults to None.
     hessp : dict, optional
         Dictionary of the Hessian of objective function times an arbitrary
-        vector p (values) for each rule (keys). See 
-        scipy.optimize.minimize() documentation for more information. 
+        vector p (values) for each rule (keys). See
+        scipy.optimize.minimize() documentation for more information.
         Defaults to None.
     bounds : dict, optional
-        Dictionary of the bounds on variables (values) for each rule 
-        (keys). See scipy.optimize.minimize() documentation for more 
+        Dictionary of the bounds on variables (values) for each rule
+        (keys). See scipy.optimize.minimize() documentation for more
         information. Defaults to None.
     constraints : dict, optional
         Dictionary of the constraints definition (values) for each rule
-        (keys). See scipy.optimize.minimize() documentation for more 
+        (keys). See scipy.optimize.minimize() documentation for more
         information. Defaults to None.
     tol : dict, optional
         Dictionary of the tolerance for termination (values) for each rule
-        (keys). See scipy.optimize.minimize() documentation for more 
+        (keys). See scipy.optimize.minimize() documentation for more
         information. Defaults to None.
     callback : dict, optional
         Dictionary of the callbacks (values) for each rule (keys). See
-        scipy.optimize.minimize() documentation for more information. 
+        scipy.optimize.minimize() documentation for more information.
         Defaults to None.
     options : dict, optional
         Dictionary of the solver options (values) for each rule (keys). See
-        scipy.optimize.minimize() documentation for more information. 
+        scipy.optimize.minimize() documentation for more information.
         Defaults to None.
     verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : shows
@@ -75,35 +75,42 @@ class DirectSearchOptimiser(_BaseOptimiser):
     Attributes
     ----------
     rule_strings : Dict[str, str]
-        The optimised rules, defined using the standard Iguanas string 
-        format (values) and their names (keys).   
+        The optimised + unoptimisable (but applicable) rules, defined using the
+        standard Iguanas string format (values) and their names (keys).
     rule_lambdas : Dict[str, object]
-        The optimised rules, defined using the standard Iguanas lambda 
-        expression format (values) and their names (keys).   
+        The optimised rules + unoptimisable (but applicable), defined using the
+        standard Iguanas lambda expression format (values) and their names 
+        (keys).
     lambda_kwargs : Dict[str, object]
-        The keyword arguments for the optimised rules defined using the 
-        standard Iguanas lambda expression format.
+        The keyword arguments for the optimised + unoptimisable (but 
+        applicable) rules defined using the standard Iguanas lambda expression 
+        format.
     rules : Rules
-        The Rules object containing the optimised rules.
+        The Rules object containing the optimised + unoptimisable (but 
+        applicable) rules.
     rule_names : List[str]
-        The names of the optimised rules.
-    rule_names_missing_features : List[str] 
-        Names of rules which use features that are not present in the dataset 
+        The names of the optimised + unoptimisable (but applicable) rules.
+    rule_names_missing_features : List[str]
+        Names of rules which use features that are not present in the dataset
         (and therefore can't be optimised or applied).
-    rule_names_no_opt_conditions : List[str] 
-        Names of rules which have no optimisable conditions (e.g. rules that 
+    rule_names_no_opt_conditions : List[str]
+        Names of rules which have no optimisable conditions (e.g. rules that
         only contain string-based conditions).
-    rule_names_zero_var_features : List[str] 
-        Names of rules which exclusively contain zero variance features (based 
+    rule_names_zero_var_features : List[str]
+        Names of rules which exclusively contain zero variance features (based
         on `X`), so cannot be optimised.
-    opt_rule_performances : Dict[str, float] 
-        The optimisation metric (values) calculated for each optimised rule 
+    opt_rule_performances : Dict[str, float]
+        The optimisation metric (values) calculated for each optimised rule
         (keys).
-    orig_rule_performances : Dict[str, float] 
-        The optimisation metric (values) calculated for each original rule 
+    orig_rule_performances : Dict[str, float]
+        The optimisation metric (values) calculated for each original rule
         (keys).
-    non_optimisable_rules : Rules 
-        A `Rules` object containing the rules which could not be optimised.    
+    non_optimisable_rules : Rules
+        A `Rules` object containing the rules which contained exclusively 
+        non-optimisable conditions.
+    zero_varaince_rules : Rules
+        A `Rules` object containing the rules which contained exclusively zero
+        variance features.
     """
 
     def __init__(self,
@@ -144,7 +151,7 @@ class DirectSearchOptimiser(_BaseOptimiser):
         if self.rule_strings == {}:
             return f'DirectSearchOptimiser object with {len(self.orig_rule_lambdas)} rules to optimise'
         else:
-            return f'DirectSearchOptimiser object with {len(self.rule_strings)} rules optimised'
+            return f'DirectSearchOptimiser object with {len(self.optimisable_rules.rule_strings)} optimised rules and {len(self.non_optimisable_rules.rule_strings)} unoptimisable rules'
 
     def fit(self, X: PandasDataFrameType, y=None, sample_weight=None) -> PandasDataFrameType:
         """
@@ -156,7 +163,7 @@ class DirectSearchOptimiser(_BaseOptimiser):
         X : PandasDataFrameType
             The feature set.
         y : PandasSeriesType, optional
-            The binary target column. Not required if optimising rules on 
+            The binary target column. Not required if optimising rules on
             unlabelled data. Defaults to None.
         sample_weight : PandasSeriesType, optional
             Record-wise weights to apply. Defaults to None.
@@ -164,83 +171,29 @@ class DirectSearchOptimiser(_BaseOptimiser):
         Returns
         -------
         PandasDataFrameType
-            The binary columns of the optimised rules on the fitted dataset.        
+            The binary columns of the optimised + unoptimisable (but 
+            applicable) rules on the fitted dataset.
         """
 
-        utils.check_allowed_types(X, 'X', [PandasDataFrame])
-        if y is not None:
-            utils.check_allowed_types(y, 'y', [PandasSeries])
-        if sample_weight is not None:
-            utils.check_allowed_types(
-                sample_weight, 'sample_weight', [PandasSeries])
-        self.orig_rules = Rules(
-            rule_lambdas=self.orig_rule_lambdas.copy(),
-            lambda_kwargs=self.orig_lambda_kwargs.copy(),
+        _, _, orig_X_rules = self._prepare_rules_for_opt(
+            X=X,
+            y=y,
+            sample_weight=sample_weight
         )
-        _ = self.orig_rules.as_rule_strings(as_numpy=False)
-        if self.verbose > 0:
-            print(
-                '--- Checking for rules with features that are missing in `X` ---')
-        self.rule_names_missing_features, rule_features_in_X = self._return_rules_missing_features(
-            rules=self.orig_rules,
-            columns=X.columns,
-            verbose=self.verbose)
-        if self.rule_names_missing_features:
-            self.orig_rules.filter_rules(
-                exclude=self.rule_names_missing_features)
-        X = X[rule_features_in_X]
-        if self.verbose > 0:
-            print(
-                '--- Checking for rules that exclusively contain non-optimisable conditions ---')
-        all_rule_features, self.rule_names_no_opt_conditions = self._return_all_optimisable_rule_features(
-            lambda_kwargs=self.orig_rules.lambda_kwargs, X=X, verbose=self.verbose
-        )
-        X_min, X_max = self._return_X_min_max(X, all_rule_features)
-        if self.verbose > 0:
-            print(
-                '--- Checking for rules that exclusively contain zero-variance features ---')
-        self.rule_names_zero_var_features = self._return_rules_with_zero_var_features(
-            lambda_kwargs=self.orig_rules.lambda_kwargs, X_min=X_min, X_max=X_max,
-            rule_names_no_opt_conditions=self.rule_names_no_opt_conditions, verbose=self.verbose
-        )
-        optimisable_rules, self.non_optimisable_rules = self._return_optimisable_rules(
-            rules=self.orig_rules, rule_names_no_opt_conditions=self.rule_names_no_opt_conditions,
-            rule_names_zero_var_features=self.rule_names_zero_var_features
-        )
-        if not optimisable_rules.rule_lambdas:
-            raise Exception('There are no optimisable rules in the set')
-        self.optimisable_rules = optimisable_rules
-        orig_X_rules = optimisable_rules.transform(X=X)
-        self.orig_rule_performances = dict(
-            zip(
-                orig_X_rules.columns.tolist(),
-                self.metric(orig_X_rules, y, sample_weight)
-            )
-        )
-        if self.verbose > 0:
-            print('--- Optimising rules ---')
         opt_rule_strings = self._optimise_rules(
-            rule_lambdas=optimisable_rules.rule_lambdas,
-            lambda_kwargs=optimisable_rules.lambda_kwargs,
-            X=X, y=y, sample_weight=sample_weight
+            rule_lambdas=self.optimisable_rules.rule_lambdas,
+            lambda_kwargs=self.optimisable_rules.lambda_kwargs,
+            X=X,
+            y=y,
+            sample_weight=sample_weight
         )
-        opt_rules = Rules(rule_strings=opt_rule_strings)
-        opt_X_rules = opt_rules.transform(X=X)
-        self.opt_rule_performances = dict(
-            zip(
-                opt_X_rules.columns.tolist(),
-                self.metric(opt_X_rules, y, sample_weight)
-            )
+        X_rules = self._return_final_rule_set(
+            X=X,
+            y=y,
+            sample_weight=sample_weight,
+            opt_rule_strings=opt_rule_strings,
+            orig_X_rules=orig_X_rules
         )
-        self.rule_strings, self.opt_rule_performances, X_rules = self._return_orig_rule_if_better_perf(
-            orig_rule_performances=self.orig_rule_performances,
-            opt_rule_performances=self.opt_rule_performances,
-            orig_rule_strings=optimisable_rules.rule_strings,
-            opt_rule_strings=opt_rules.rule_strings,
-            orig_X_rules=orig_X_rules,
-            opt_X_rules=opt_X_rules
-        )
-        self._generate_other_rule_formats()
         return X_rules
 
     @classmethod
@@ -278,7 +231,7 @@ class DirectSearchOptimiser(_BaseOptimiser):
         each rule.
 
         Parameters
-        ----------        
+        ----------
         X : PandasDataFrameType
             The feature set.
         lambda_kwargs : Dict[str, Dict[str, float]]
@@ -293,12 +246,11 @@ class DirectSearchOptimiser(_BaseOptimiser):
 
         x0 = cls._param_base_calc(
             X=X, lambda_kwargs=lambda_kwargs, param='x0',
-            func=lambda X_min, X_max: (
-                (X_max-X_min)/2).astype(float)
+            func=lambda X_min, X_max: ((X_max+X_min)/2).astype(float)
         )
         return x0
 
-    @classmethod
+    @ classmethod
     def create_initial_simplexes(cls, X: PandasDataFrameType,
                                  lambda_kwargs: Dict[str, dict],
                                  shape: str) -> Dict[str, np.ndarray]:
@@ -353,12 +305,10 @@ class DirectSearchOptimiser(_BaseOptimiser):
             for i in range(0, num_features):
                 feature_min = X_min[i]
                 feature_max = X_max[i]
-                if np.isnan(feature_min) and np.isnan(feature_max):
-                    feature_vertices = np.array(
-                        [np.nan] * (num_features + 1))
-                else:
-                    feature_vertices = np.random.uniform(
-                        feature_min, feature_max+((feature_max-feature_min)/1000), num_features+1)
+                feature_vertices = np.random.uniform(
+                    feature_min, feature_max +
+                    ((feature_max-feature_min)/1000), num_features+1
+                )
                 initial_simplex[i] = feature_vertices
             initial_simplex = initial_simplex.T
             return initial_simplex
@@ -423,11 +373,9 @@ class DirectSearchOptimiser(_BaseOptimiser):
             return -result
 
         opt_rule_strings = {}
-        if self.verbose == 1:
-            rule_lambdas_items = utils.return_progress_ready_range(
-                verbose=self.verbose, range=rule_lambdas.items())
-        else:
-            rule_lambdas_items = rule_lambdas.items()
+        rule_lambdas_items = utils.return_progress_ready_range(
+            verbose=self.verbose == 1, range=rule_lambdas.items()
+        )
         for rule_name, rule_lambda in rule_lambdas_items:
             minimize_kwargs = self._return_kwargs_for_minimize(
                 rule_name=rule_name)
@@ -502,8 +450,20 @@ class DirectSearchOptimiser(_BaseOptimiser):
             if sum(cols_missing) > 0:
                 missing_feat_rules.append(rule_name)
                 continue
+            # Get min/max of features in rule, convert to np array
+            X_min_rule_feats = X_min.loc[cols].to_numpy(dtype=np.number)
+            X_max_rule_feats = X_max.loc[cols].to_numpy(dtype=np.number)
+            # If nans, convert to 0
+            X_min_rule_feats = np.where(
+                np.isnan(X_min_rule_feats), 0, X_min_rule_feats
+            )
+            X_max_rule_feats = np.where(
+                np.isnan(X_max_rule_feats), 0, X_max_rule_feats
+            )
+            # Apply function
             results[rule_name] = func(
-                X_min.loc[cols].to_numpy(), X_max.loc[cols].to_numpy()
+                X_min_rule_feats,
+                X_max_rule_feats
             )
         if non_opt_rules:
             warnings.warn(

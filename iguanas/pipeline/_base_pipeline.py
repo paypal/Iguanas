@@ -16,7 +16,11 @@ class _BasePipeline:
     Parameters
     ----------
     steps : List[Tuple[str, object]]
-        The steps to be applied as part of the pipeline.         
+        The steps to be applied as part of the pipeline.       
+    verbose : int, optional
+        Controls the verbosity - the higher, the more messages. >0 : gives
+        the overall progress of the training of the pipeline; >1 : shows the 
+        current step being trained.  
 
     Attributes
     ----------
@@ -27,8 +31,11 @@ class _BasePipeline:
         pipeline.
     """
 
-    def __init__(self, steps: List[Tuple[str, object]]) -> None:
+    def __init__(self,
+                 steps: List[Tuple[str, object]],
+                 verbose: int) -> None:
         self.steps = steps
+        self.verbose = verbose
         self.steps_ = None
         self.rules = None
 

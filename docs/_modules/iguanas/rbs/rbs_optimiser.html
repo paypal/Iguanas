@@ -274,6 +274,7 @@
         <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span>
                 <span class="n">sample_weight</span><span class="p">,</span> <span class="s1">&#39;sample_weight&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">])</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_duplicate_cols</span><span class="p">(</span><span class="n">X_rules</span><span class="p">,</span> <span class="s1">&#39;X_rules&#39;</span><span class="p">)</span>
         <span class="c1"># Get space functions</span>
         <span class="n">space_funcs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_space_funcs</span><span class="p">(</span><span class="n">X_rules</span><span class="p">)</span>
         <span class="c1"># Optimise pipeline</span>

@@ -38,7 +38,9 @@ class RuleApplier:
             Union[PandasDataFrameType, KoalasDataFrameType]
                 The binary columns of the rules.
         """
+
         utils.check_allowed_types(X, 'X', [PandasDataFrame, KoalasDataFrame])
+        utils.check_duplicate_cols(X, 'X')
         X_rules = self._get_X_rules(X)
         return X_rules
 

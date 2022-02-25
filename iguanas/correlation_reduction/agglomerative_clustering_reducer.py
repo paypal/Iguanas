@@ -92,6 +92,7 @@ class AgglomerativeClusteringReducer:
         """
 
         utils.check_allowed_types(X, 'X', [PandasDataFrame])
+        utils.check_duplicate_cols(X, 'X')
         zero_var_cols = X.columns[X.values.var(axis=0) == 0.0].tolist()
         if zero_var_cols:
             raise Exception(

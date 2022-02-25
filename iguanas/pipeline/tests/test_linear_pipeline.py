@@ -98,7 +98,7 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
         ('rbs', rbs)
     ]
     rg_dt._today = '20211220'
-    lp = LinearPipeline(steps)
+    lp = LinearPipeline(steps, verbose=1)  #  Set verbose=1
     # Test fit/predict/fit_predict, no sample_weight
     lp.fit(X, y)
     assert len(lp.get_params()['sf']['rules_to_keep']) == 43
@@ -116,6 +116,7 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
     assert y_pred.mean() == 0.13
     assert f1.fit(y_pred, y) == 0.7826086956521738
     # Test fit/predict/fit_predict, sample_weight given
+    lp.verbose = 2  #  Set verbose=2
     lp.fit(X, y, sample_weight)
     assert len(lp.get_params()['sf']['rules_to_keep']) == 40
     assert len(lp.get_params()['cf']['rules_to_keep']) == 38

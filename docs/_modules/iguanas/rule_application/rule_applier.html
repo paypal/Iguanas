@@ -198,7 +198,9 @@
 <span class="sd">            Union[PandasDataFrameType, KoalasDataFrameType]</span>
 <span class="sd">                The binary columns of the rules.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">KoalasDataFrame</span><span class="p">])</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_duplicate_cols</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">)</span>
         <span class="n">X_rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_X_rules</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">X_rules</span></div>
 

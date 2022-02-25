@@ -60,6 +60,7 @@ class RBSPipeline:
         """
 
         utils.check_allowed_types(X_rules, 'X_rules', [PandasDataFrame])
+        utils.check_duplicate_cols(X_rules, 'X_rules')
         stage_level_preds = self._get_stage_level_preds(X_rules, self.config)
         y_pred = self._get_pipeline_pred(stage_level_preds, X_rules.index)
         return y_pred

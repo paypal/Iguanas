@@ -252,6 +252,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">])</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_duplicate_cols</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">)</span>
         <span class="n">zero_var_cols</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">zero_var_cols</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>

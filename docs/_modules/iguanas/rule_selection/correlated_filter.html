@@ -162,6 +162,7 @@
 <span class="kn">from</span> <span class="nn">iguanas.rule_selection._base_filter</span> <span class="kn">import</span> <span class="n">_BaseFilter</span>
 <span class="kn">from</span> <span class="nn">iguanas.correlation_reduction</span> <span class="kn">import</span> <span class="n">AgglomerativeClusteringReducer</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span>
+<span class="kn">import</span> <span class="nn">iguanas.utils.utils</span> <span class="k">as</span> <span class="nn">utils</span>
 
 
 <div class="viewcode-block" id="CorrelatedFilter"><a class="viewcode-back" href="../../../api/api/iguanas.rule_selection.CorrelatedFilter.html#iguanas.rule_selection.CorrelatedFilter">[docs]</a><span class="k">class</span> <span class="nc">CorrelatedFilter</span><span class="p">(</span><span class="n">_BaseFilter</span><span class="p">):</span>
@@ -215,6 +216,7 @@
 <span class="sd">            `correlation_reduction_class`.  </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_duplicate_cols</span><span class="p">(</span><span class="n">X_rules</span><span class="p">,</span> <span class="s1">&#39;X_rules&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">correlation_reduction_class</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
             <span class="n">X</span><span class="o">=</span><span class="n">X_rules</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span>
         <span class="p">)</span>

@@ -79,6 +79,7 @@ class GreedyFilter(_BaseFilter):
             Row-wise weights to apply. Defaults to None.
         """
 
+        utils.check_duplicate_cols(X_rules, 'X_rules')
         sorted_rules = self._sort_rules(
             X_rules=X_rules, y=y, sample_weight=sample_weight,
             sorting_metric=self.sorting_metric,

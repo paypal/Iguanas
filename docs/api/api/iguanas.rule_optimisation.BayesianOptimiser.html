@@ -714,21 +714,26 @@ function.</p>
 </dd>
 <dt class="field-even">Attributes</dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>rule_strings</strong><span class="classifier">Dict[str, str]</span></dt><dd><p>The optimised rules, defined using the standard Iguanas string 
-format (values) and their names (keys).</p>
+<dt><strong>rule_strings</strong><span class="classifier">Dict[str, str]</span></dt><dd><p>The optimised + unoptimisable (but applicable) rules, defined using the
+standard Iguanas string format (values) and their names (keys).</p>
 </dd>
-<dt><strong>rule_lambdas</strong><span class="classifier">Dict[str, object]</span></dt><dd><p>The optimised rules, defined using the standard Iguanas lambda 
-expression format (values) and their names (keys).</p>
+<dt><strong>rule_lambdas</strong><span class="classifier">Dict[str, object]</span></dt><dd><p>The optimised rules + unoptimisable (but applicable), defined using the
+standard Iguanas lambda expression format (values) and their names 
+(keys).</p>
 </dd>
-<dt><strong>lambda_kwargs</strong><span class="classifier">Dict[str, object]</span></dt><dd><p>The keyword arguments for the optimised rules defined using the 
-standard Iguanas lambda expression format.</p>
+<dt><strong>lambda_kwargs</strong><span class="classifier">Dict[str, object]</span></dt><dd><p>The keyword arguments for the optimised + unoptimisable (but 
+applicable) rules defined using the standard Iguanas lambda expression 
+format.</p>
 </dd>
-<dt><strong>rules</strong><span class="classifier">Rules</span></dt><dd><p>The Rules object containing the optimised rules.</p>
+<dt><strong>rules</strong><span class="classifier">Rules</span></dt><dd><p>The Rules object containing the optimised + unoptimisable (but 
+applicable) rules.</p>
 </dd>
-<dt><strong>rule_names_missing_features</strong><span class="classifier">List[str]</span></dt><dd><p>Names of rules which use features that are not present in the dataset 
+<dt><strong>rule_names</strong><span class="classifier">List[str]</span></dt><dd><p>The names of the optimised + unoptimisable (but applicable) rules.</p>
+</dd>
+<dt><strong>rule_names_missing_features</strong><span class="classifier">List[str]</span></dt><dd><p>Names of rules which use features that are not present in the dataset
 (and therefore can’t be optimised or applied).</p>
 </dd>
-<dt><strong>rule_names_no_opt_conditions</strong><span class="classifier">List[str]</span></dt><dd><p>Names of rules which have no optimisable conditions (e.g. rules that 
+<dt><strong>rule_names_no_opt_conditions</strong><span class="classifier">List[str]</span></dt><dd><p>Names of rules which have no optimisable conditions (e.g. rules that
 only contain string-based conditions).</p>
 </dd>
 <dt><strong>rule_names_zero_var_features</strong><span class="classifier">List[str]</span></dt><dd><p>Names of rules which exclusively contain zero variance features (based
@@ -737,10 +742,14 @@ on <cite>X</cite>), so cannot be optimised.</p>
 <dt><strong>opt_rule_performances</strong><span class="classifier">Dict[str, float]</span></dt><dd><p>The optimisation metric (values) calculated for each optimised rule
 (keys).</p>
 </dd>
-<dt><strong>orig_rule_performances</strong><span class="classifier">Dict[str, float]</span></dt><dd><p>The optimisation metric (values) calculated for each original rule 
+<dt><strong>orig_rule_performances</strong><span class="classifier">Dict[str, float]</span></dt><dd><p>The optimisation metric (values) calculated for each original rule
 (keys).</p>
 </dd>
-<dt><strong>non_optimisable_rules</strong><span class="classifier">Rules</span></dt><dd><p>A <cite>Rules</cite> object containing the rules which could not be optimised.</p>
+<dt><strong>non_optimisable_rules</strong><span class="classifier">Rules</span></dt><dd><p>A <cite>Rules</cite> object containing the rules which contained exclusively 
+non-optimisable conditions.</p>
+</dd>
+<dt><strong>zero_varaince_rules</strong><span class="classifier">Rules</span></dt><dd><p>A <cite>Rules</cite> object containing the rules which contained exclusively zero
+variance features.</p>
 </dd>
 </dl>
 </dd>
@@ -764,7 +773,8 @@ unlabelled data. Defaults to None.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt>PandasDataFrameType</dt><dd><p>The binary columns of the optimised rules on the fitted dataset.</p>
+<dt>PandasDataFrameType</dt><dd><p>The binary columns of the optimised + unoptimisable (but 
+applicable) rules on the fitted dataset.</p>
 </dd>
 </dl>
 </dd>
@@ -874,7 +884,8 @@ unlabelled data. Defaults to None.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt>PandasDataFrameType</dt><dd><p>The binary columns of the optimised rules on the fitted dataset.</p>
+<dt>PandasDataFrameType</dt><dd><p>The binary columns of the optimised + unoptimisable (but 
+applicable) rules on the fitted dataset.</p>
 </dd>
 </dl>
 </dd>

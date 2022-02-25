@@ -683,13 +683,13 @@ format) using Direct Search-type algorithms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>rule_lambdas</strong><span class="classifier">Dict[str, Callable]</span></dt><dd><p>Set of rules defined using the standard Iguanas lambda expression 
+<dt><strong>rule_lambdas</strong><span class="classifier">Dict[str, Callable]</span></dt><dd><p>Set of rules defined using the standard Iguanas lambda expression
 format (values) and their names (keys).</p>
 </dd>
 <dt><strong>lambda_kwargs</strong><span class="classifier">Dict[str, Dict[str, float]]</span></dt><dd><p>For each rule (keys), a dictionary containing the features used in
 the rule (keys) and the current values (values).</p>
 </dd>
-<dt><strong>metric</strong><span class="classifier">Callable</span></dt><dd><p>The optimisation function used to calculate the metric which the 
+<dt><strong>metric</strong><span class="classifier">Callable</span></dt><dd><p>The optimisation function used to calculate the metric which the
 rules are optimised for (e.g. F1 score).</p>
 </dd>
 <dt><strong>x0</strong><span class="classifier">dict, optional</span></dt><dd><p>Dictionary of the initial guess (values) for each rule (keys). If
@@ -697,40 +697,40 @@ None, defaults to the current values used in each rule (taken from
 the <cite>lambda_kwargs</cite> parameter). See scipy.optimize.minimize()
 documentation for more information. Defaults to None.</p>
 </dd>
-<dt><strong>method</strong><span class="classifier">str, optional</span></dt><dd><p>Type of solver. See scipy.optimize.minimize() documentation for 
+<dt><strong>method</strong><span class="classifier">str, optional</span></dt><dd><p>Type of solver. See scipy.optimize.minimize() documentation for
 more information. Defaults to None.</p>
 </dd>
 <dt><strong>jac</strong><span class="classifier">dict, optional</span></dt><dd><p>Dictionary of the method for computing the gradient vector (values)
-for each rule (keys). See scipy.optimize.minimize() documentation 
+for each rule (keys). See scipy.optimize.minimize() documentation
 for more information. Defaults to None.</p>
 </dd>
 <dt><strong>hess</strong><span class="classifier">dict, optional</span></dt><dd><p>Dictionary of the method for computing the Hessian matrix (values)
-for each rule (keys). See scipy.optimize.minimize() documentation 
+for each rule (keys). See scipy.optimize.minimize() documentation
 for more information. Defaults to None.</p>
 </dd>
 <dt><strong>hessp</strong><span class="classifier">dict, optional</span></dt><dd><p>Dictionary of the Hessian of objective function times an arbitrary
-vector p (values) for each rule (keys). See 
-scipy.optimize.minimize() documentation for more information. 
+vector p (values) for each rule (keys). See
+scipy.optimize.minimize() documentation for more information.
 Defaults to None.</p>
 </dd>
-<dt><strong>bounds</strong><span class="classifier">dict, optional</span></dt><dd><p>Dictionary of the bounds on variables (values) for each rule 
-(keys). See scipy.optimize.minimize() documentation for more 
+<dt><strong>bounds</strong><span class="classifier">dict, optional</span></dt><dd><p>Dictionary of the bounds on variables (values) for each rule
+(keys). See scipy.optimize.minimize() documentation for more
 information. Defaults to None.</p>
 </dd>
 <dt><strong>constraints</strong><span class="classifier">dict, optional</span></dt><dd><p>Dictionary of the constraints definition (values) for each rule
-(keys). See scipy.optimize.minimize() documentation for more 
+(keys). See scipy.optimize.minimize() documentation for more
 information. Defaults to None.</p>
 </dd>
 <dt><strong>tol</strong><span class="classifier">dict, optional</span></dt><dd><p>Dictionary of the tolerance for termination (values) for each rule
-(keys). See scipy.optimize.minimize() documentation for more 
+(keys). See scipy.optimize.minimize() documentation for more
 information. Defaults to None.</p>
 </dd>
 <dt><strong>callback</strong><span class="classifier">dict, optional</span></dt><dd><p>Dictionary of the callbacks (values) for each rule (keys). See
-scipy.optimize.minimize() documentation for more information. 
+scipy.optimize.minimize() documentation for more information.
 Defaults to None.</p>
 </dd>
 <dt><strong>options</strong><span class="classifier">dict, optional</span></dt><dd><p>Dictionary of the solver options (values) for each rule (keys). See
-scipy.optimize.minimize() documentation for more information. 
+scipy.optimize.minimize() documentation for more information.
 Defaults to None.</p>
 </dd>
 <dt><strong>verbose</strong><span class="classifier">int, optional</span></dt><dd><p>Controls the verbosity - the higher, the more messages. &gt;0 : shows
@@ -740,35 +740,42 @@ the overall progress of the optimisation process. Defaults to 0.</p>
 </dd>
 <dt class="field-even">Attributes</dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>rule_strings</strong><span class="classifier">Dict[str, str]</span></dt><dd><p>The optimised rules, defined using the standard Iguanas string 
-format (values) and their names (keys).</p>
+<dt><strong>rule_strings</strong><span class="classifier">Dict[str, str]</span></dt><dd><p>The optimised + unoptimisable (but applicable) rules, defined using the
+standard Iguanas string format (values) and their names (keys).</p>
 </dd>
-<dt><strong>rule_lambdas</strong><span class="classifier">Dict[str, object]</span></dt><dd><p>The optimised rules, defined using the standard Iguanas lambda 
-expression format (values) and their names (keys).</p>
+<dt><strong>rule_lambdas</strong><span class="classifier">Dict[str, object]</span></dt><dd><p>The optimised rules + unoptimisable (but applicable), defined using the
+standard Iguanas lambda expression format (values) and their names 
+(keys).</p>
 </dd>
-<dt><strong>lambda_kwargs</strong><span class="classifier">Dict[str, object]</span></dt><dd><p>The keyword arguments for the optimised rules defined using the 
-standard Iguanas lambda expression format.</p>
+<dt><strong>lambda_kwargs</strong><span class="classifier">Dict[str, object]</span></dt><dd><p>The keyword arguments for the optimised + unoptimisable (but 
+applicable) rules defined using the standard Iguanas lambda expression 
+format.</p>
 </dd>
-<dt><strong>rules</strong><span class="classifier">Rules</span></dt><dd><p>The Rules object containing the optimised rules.</p>
+<dt><strong>rules</strong><span class="classifier">Rules</span></dt><dd><p>The Rules object containing the optimised + unoptimisable (but 
+applicable) rules.</p>
 </dd>
-<dt><strong>rule_names</strong><span class="classifier">List[str]</span></dt><dd><p>The names of the optimised rules.</p>
+<dt><strong>rule_names</strong><span class="classifier">List[str]</span></dt><dd><p>The names of the optimised + unoptimisable (but applicable) rules.</p>
 </dd>
-<dt><strong>rule_names_missing_features</strong><span class="classifier">List[str]</span></dt><dd><p>Names of rules which use features that are not present in the dataset 
+<dt><strong>rule_names_missing_features</strong><span class="classifier">List[str]</span></dt><dd><p>Names of rules which use features that are not present in the dataset
 (and therefore can’t be optimised or applied).</p>
 </dd>
-<dt><strong>rule_names_no_opt_conditions</strong><span class="classifier">List[str]</span></dt><dd><p>Names of rules which have no optimisable conditions (e.g. rules that 
+<dt><strong>rule_names_no_opt_conditions</strong><span class="classifier">List[str]</span></dt><dd><p>Names of rules which have no optimisable conditions (e.g. rules that
 only contain string-based conditions).</p>
 </dd>
-<dt><strong>rule_names_zero_var_features</strong><span class="classifier">List[str]</span></dt><dd><p>Names of rules which exclusively contain zero variance features (based 
+<dt><strong>rule_names_zero_var_features</strong><span class="classifier">List[str]</span></dt><dd><p>Names of rules which exclusively contain zero variance features (based
 on <cite>X</cite>), so cannot be optimised.</p>
 </dd>
-<dt><strong>opt_rule_performances</strong><span class="classifier">Dict[str, float]</span></dt><dd><p>The optimisation metric (values) calculated for each optimised rule 
+<dt><strong>opt_rule_performances</strong><span class="classifier">Dict[str, float]</span></dt><dd><p>The optimisation metric (values) calculated for each optimised rule
 (keys).</p>
 </dd>
-<dt><strong>orig_rule_performances</strong><span class="classifier">Dict[str, float]</span></dt><dd><p>The optimisation metric (values) calculated for each original rule 
+<dt><strong>orig_rule_performances</strong><span class="classifier">Dict[str, float]</span></dt><dd><p>The optimisation metric (values) calculated for each original rule
 (keys).</p>
 </dd>
-<dt><strong>non_optimisable_rules</strong><span class="classifier">Rules</span></dt><dd><p>A <cite>Rules</cite> object containing the rules which could not be optimised.</p>
+<dt><strong>non_optimisable_rules</strong><span class="classifier">Rules</span></dt><dd><p>A <cite>Rules</cite> object containing the rules which contained exclusively 
+non-optimisable conditions.</p>
+</dd>
+<dt><strong>zero_varaince_rules</strong><span class="classifier">Rules</span></dt><dd><p>A <cite>Rules</cite> object containing the rules which contained exclusively zero
+variance features.</p>
 </dd>
 </dl>
 </dd>
@@ -783,7 +790,7 @@ format) using Direct Search-type algorithms.</p>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>X</strong><span class="classifier">PandasDataFrameType</span></dt><dd><p>The feature set.</p>
 </dd>
-<dt><strong>y</strong><span class="classifier">PandasSeriesType, optional</span></dt><dd><p>The binary target column. Not required if optimising rules on 
+<dt><strong>y</strong><span class="classifier">PandasSeriesType, optional</span></dt><dd><p>The binary target column. Not required if optimising rules on
 unlabelled data. Defaults to None.</p>
 </dd>
 <dt><strong>sample_weight</strong><span class="classifier">PandasSeriesType, optional</span></dt><dd><p>Record-wise weights to apply. Defaults to None.</p>
@@ -792,7 +799,8 @@ unlabelled data. Defaults to None.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt>PandasDataFrameType</dt><dd><p>The binary columns of the optimised rules on the fitted dataset.</p>
+<dt>PandasDataFrameType</dt><dd><p>The binary columns of the optimised + unoptimisable (but 
+applicable) rules on the fitted dataset.</p>
 </dd>
 </dl>
 </dd>
@@ -980,7 +988,8 @@ unlabelled data. Defaults to None.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt>PandasDataFrameType</dt><dd><p>The binary columns of the optimised rules on the fitted dataset.</p>
+<dt>PandasDataFrameType</dt><dd><p>The binary columns of the optimised + unoptimisable (but 
+applicable) rules on the fitted dataset.</p>
 </dd>
 </dl>
 </dd>

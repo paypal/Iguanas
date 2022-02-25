@@ -307,6 +307,7 @@
         <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span>
                 <span class="n">sample_weight</span><span class="p">,</span> <span class="s1">&#39;sample_weight&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasSeries</span><span class="p">])</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">check_duplicate_cols</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">)</span>
         <span class="c1"># Ensures rule names are the same when fit run without reinstantiating</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rule_name_counter</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_feat_corr_types</span> <span class="o">==</span> <span class="s1">&#39;Infer&#39;</span><span class="p">:</span>

@@ -99,6 +99,7 @@ def test_fit_transform(_create_data, _instantiate_classes):
             ('rg_fraud', rg_fraud),
             ('rg_nonfraud', rg_nonfraud)
         ],
+        verbose=1  # Set verbose=1
     )
     # Test fit_transform
     X_rules = pp.fit_transform(
@@ -126,6 +127,7 @@ def test_fit_transform(_create_data, _instantiate_classes):
     assert len(pp.rule_names) == 56
     assert len(pp.rules.rule_strings) == 56
     # Test fit_transform with sample_weight
+    pp.verbose = 2  # Set verbose=2
     X_rules = pp.fit_transform(
         X={
             'rg_fraud': X[['A', 'B']],

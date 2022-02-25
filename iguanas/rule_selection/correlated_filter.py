@@ -2,6 +2,7 @@
 from iguanas.rule_selection._base_filter import _BaseFilter
 from iguanas.correlation_reduction import AgglomerativeClusteringReducer
 from iguanas.utils.typing import PandasDataFrameType
+import iguanas.utils.utils as utils
 
 
 class CorrelatedFilter(_BaseFilter):
@@ -55,6 +56,7 @@ class CorrelatedFilter(_BaseFilter):
             `correlation_reduction_class`.  
         """
 
+        utils.check_duplicate_cols(X_rules, 'X_rules')
         self.correlation_reduction_class.fit(
             X=X_rules, y=y, sample_weight=sample_weight
         )

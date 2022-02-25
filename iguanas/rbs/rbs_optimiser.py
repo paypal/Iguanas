@@ -114,6 +114,7 @@ class RBSOptimiser(RBSPipeline):
         if sample_weight is not None:
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [PandasSeries])
+        utils.check_duplicate_cols(X_rules, 'X_rules')
         # Get space functions
         space_funcs = self._get_space_funcs(X_rules)
         # Optimise pipeline
