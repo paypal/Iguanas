@@ -24,23 +24,23 @@ class Rules(RuleApplier):
 
     Parameters
     ----------
-    rule_dicts : Dict[str, dict]
+    rule_dicts : Dict[str, dict], optional
         Set of rules defined using thestandard Iguanas dictionary format
         (values) and their names (keys). Defaults to `None`.
-    rule_strings : Dict[str, str] 
+    rule_strings : Dict[str, str], optional
         Set of rules defined using the standard Iguanas string format 
         (values) and their names (keys). Defaults to `None`.
-    rule_lambdas : Dict[str, Callable[[dict], str]] 
+    rule_lambdas : Dict[str, Callable[[dict], str]], optional
         Set of rules defined using the standard Iguanas lambda expression 
         format (values) and their names (keys). Must be given in 
         conjunction with either `lambda_kwargs` or `lambda_args`. Defaults 
         to `None`.
-    lambda_kwargs : Dict[str, dict] 
+    lambda_kwargs : Dict[str, dict], optional 
         For each rule (keys), a dictionary containing the features used in
         the rule (keys) and the current values (values). Only populates 
         when `.as_lambda()` is used with the keyword argument 
         `with_kwargs=True`. Defaults to `None`.
-    lambda_args : Dict[str, list] 
+    lambda_args : Dict[str, list], optional
         For each rule (keys), a list containing the current values used in
         the rule. Only populates when `.as_lambda()` is used with the 
         keyword argument `with_kwargs=False`. Defaults to `None`.    
@@ -69,9 +69,6 @@ class Rules(RuleApplier):
 
     def __init__(self, rule_dicts=None, rule_strings=None,
                  rule_lambdas=None, lambda_kwargs=None, lambda_args=None):
-        if rule_dicts is None and rule_strings is None and rule_lambdas is None:
-            raise ValueError(
-                '`rule_dicts`, `rule_strings` or `rule_lambdas` must be given')
         if rule_lambdas is not None and lambda_kwargs is None and \
                 lambda_args is None:
             raise ValueError(
@@ -249,11 +246,14 @@ class Rules(RuleApplier):
             intersected = set.intersection(set(include), set(exclude))
             if len(intersected) > 0:
                 raise Exception(
-                    '`include` and `exclude` contain similar values')
+                    '`include` and `exclude` contain similar values'
+                )
         for d in [self.rule_strings, self.rule_dicts, self.rule_lambdas]:
             if d != {}:
                 rule_names = list(d.keys())
                 break
+            else:
+                rule_names = []
         for rule_name in rule_names:
             if (include is not None and rule_name not in include) or \
                     (exclude is not None and rule_name in exclude):

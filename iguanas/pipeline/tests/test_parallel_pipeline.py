@@ -11,7 +11,7 @@ from iguanas.metrics import FScore, JaccardSimilarity, Precision
 from iguanas.rule_selection import SimpleFilter, CorrelatedFilter
 from iguanas.correlation_reduction import AgglomerativeClusteringReducer
 from iguanas.rbs import RBSOptimiser, RBSPipeline
-from iguanas.pipeline import ParallelPipeline, ClassAccessor
+from iguanas.pipeline import ParallelPipeline, ClassAccessor, LinearPipeline
 
 f1 = FScore(1)
 js = JaccardSimilarity()
@@ -173,24 +173,93 @@ def test_fit_transform_no_rules(_create_data, _instantiate_classes):
     assert X_rules.sum().sum() == 112
     assert X_rules.shape == (100, 2)
     assert len(pp.rule_names) == 2
-    assert pp.rules is None
+    assert pp.rules.rule_strings == {}
 
 
-def test_exception(_create_data, _instantiate_classes):
+def test_try_except(_create_data, _instantiate_classes):
     X, y, _ = _create_data
     rg_dt, _, sf, _, _ = _instantiate_classes
-    X = X[['A', 'B']]
+    rg_dt1 = deepcopy(rg_dt)
+    sf1 = deepcopy(sf)
+    X1 = pd.DataFrame({'X': [0, 0, 0]})
+    y1 = pd.Series([0, 1, 0])
     pp = ParallelPipeline(
         steps=[
             ('rg_dt', rg_dt),
-            ('sf', sf)
-        ],
+            ('rg_dt1', rg_dt1)
+        ]
     )
-    error_msg = """
-                One or more of the classes in the pipeline has `None` assigned to 
-                the `rules` parameter, whereas other classes in the pipeline have 
-                the `rules` parameter populated. Either set all to `None` or 
-                provide the `rules` parameter for all classes.
-                """
-    with pytest.raises(TypeError, match=error_msg):
-        pp.fit_transform(X, y)
+    # With generator classes
+    with pytest.warns(UserWarning, match='No rules remain in step `rg_dt1` as it raised the following error: "No rules could be generated. Try changing the class parameters."'):
+        X_rules = pp.fit_transform(
+            X={
+                'rg_dt': X,
+                'rg_dt1': X1
+            },
+            y={
+                'rg_dt': y,
+                'rg_dt1': y1
+            },
+        )
+        assert X_rules.sum().sum() == 352
+    # With LinearPipeline classes
+    lp = LinearPipeline(
+        steps=[
+            ('rg_dt', rg_dt),
+            ('sf', sf)
+        ]
+    )
+    lp1 = LinearPipeline(
+        steps=[
+            ('rg_dt1', rg_dt1),
+            ('sf1', sf1)
+        ]
+    )
+    pp = ParallelPipeline(
+        steps=[
+            ('lp', lp),
+            ('lp1', lp1)
+        ]
+    )
+    with pytest.warns(UserWarning, match='No rules remain in step `lp1` as it raised the following error: "No rules could be generated. Try changing the class parameters."'):
+        X_rules = pp.fit_transform(
+            X={
+                'lp': X,
+                'lp1': X1
+            },
+            y={
+                'lp': y,
+                'lp1': y1
+            },
+        )
+        assert X_rules.sum().sum() == 352
+    # No rules remaining
+    sf.threshold = 1
+    lp = LinearPipeline(
+        steps=[
+            ('rg_dt', rg_dt),
+            ('sf', sf)
+        ]
+    )
+    pp = ParallelPipeline(
+        steps=[
+            ('lp', lp),
+            ('lp1', lp1)
+        ]
+    )
+    with pytest.warns(UserWarning) as warnings:
+        X_rules = pp.fit_transform(
+            X={
+                'lp': X,
+                'lp1': X1
+            },
+            y={
+                'lp': y,
+                'lp1': y1
+            },
+        )
+        pd.testing.assert_frame_equal(X_rules, pd.DataFrame())
+        assert pp.rules.rule_strings == {}
+    warnings = [w.message.args[0] for w in warnings]
+    assert 'No rules remain in step `lp` as it raised the following error: "`X` has been reduced to zero columns after the `sf` step in the pipeline."' in warnings
+    assert 'No rules remain in step `lp1` as it raised the following error: "No rules could be generated. Try changing the class parameters."' in warnings

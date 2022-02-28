@@ -5,6 +5,7 @@ from iguanas.pipeline._base_pipeline import _BasePipeline
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.utils.types import PandasDataFrame, PandasSeries, Dictionary, ClassList, ClassNoneType
 import iguanas.utils.utils as utils
+from iguanas.rules import Rules
 
 
 class LinearPipeline(_BasePipeline):
@@ -53,6 +54,7 @@ class LinearPipeline(_BasePipeline):
             use_init_data, 'use_init_data', [ClassList, ClassNoneType]
         )
         self.use_init_data = use_init_data
+        self.rules = Rules()
 
     def fit(self,
             X: Union[PandasDataFrameType, dict],

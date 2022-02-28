@@ -1,12 +1,14 @@
 """Class for creating a Parallel Pipeline."""
 from copy import deepcopy
 from typing import List, Tuple, Union
+from iguanas.exceptions.exceptions import DataFrameSizeError, NoRulesError
 from iguanas.pipeline._base_pipeline import _BasePipeline
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.utils.types import PandasDataFrame, PandasSeries, Dictionary
 import iguanas.utils.utils as utils
 from iguanas.rules import Rules
 import pandas as pd
+import warnings
 
 
 class ParallelPipeline(_BasePipeline):
@@ -43,6 +45,7 @@ class ParallelPipeline(_BasePipeline):
                  steps: List[Tuple[str, object]],
                  verbose=0) -> None:
         _BasePipeline.__init__(self, steps=steps, verbose=verbose)
+        self.rules = Rules()
 
     def fit_transform(self,
                       X: Union[PandasDataFrameType, dict],
@@ -85,14 +88,23 @@ class ParallelPipeline(_BasePipeline):
                 print(
                     f'--- Applying `fit_transform` method for step `{step_tag}` ---'
                 )
-            X_rules_list.append(
-                self._pipeline_fit_transform(
-                    step_tag, step, X, y, sample_weight
+            # Try applying fit_transform for `step`
+            try:
+                X_rules_list.append(
+                    self._pipeline_fit_transform(
+                        step_tag, step, X, y, sample_weight
+                    )
                 )
-            )
-            rules_list.append(step.rules)
+                rules_list.append(step.rules)
+            # If no rules generated/remain, raise warning and skip `step`
+            except (DataFrameSizeError, NoRulesError) as e:
+                warnings.warn(
+                    f'No rules remain in step `{step_tag}` as it raised the following error: "{e}"'
+                )
+                X_rules_list.append(pd.DataFrame())
+                rules_list.append(Rules())
         X_rules = pd.concat(X_rules_list, axis=1)
-        self.rules = self._concat_rules(rules_list)
+        self.rules = sum(rules_list)
         self.rule_names = X_rules.columns.tolist()
         return X_rules
 
@@ -123,33 +135,23 @@ class ParallelPipeline(_BasePipeline):
         utils.check_allowed_types(X, 'X', [PandasDataFrame, Dictionary])
         X_rules_list = []
         for step_tag, step in self.steps_:
-            X_rules_list.append(
-                self._pipeline_transform(
-                    step_tag, step, X
+            # Try applying transform for `step`
+            try:
+                X_rules_list.append(
+                    self._pipeline_transform(
+                        step_tag, step, X
+                    )
                 )
-            )
+            # If no rules present, raise warning and skip `step`; else raise
+            # exception
+            except Exception as e:
+                if str(e) == '`rule_dicts` must be given':
+                    warnings.warn(
+                        f'No rules present in step `{step_tag}` - `transform` method cannot be applied for this step.'
+                    )
+                    X_rules_list.append(pd.DataFrame())
+                else:
+                    raise e
         X_rules = pd.concat(X_rules_list, axis=1)
         self.rule_names = X_rules.columns.tolist()
         return X_rules
-
-    @staticmethod
-    def _concat_rules(rules_list: List[Rules]) -> Rules:
-        """
-        Returns the combined rule set given a list of individual rule sets. If
-        `rules_list` is all None, returns None. If elements in `rules_list` are
-        None, raises an exception.
-        """
-
-        if all([rule is None for rule in rules_list]):
-            return None
-        elif None in rules_list:
-            raise TypeError(
-                """
-                One or more of the classes in the pipeline has `None` assigned to 
-                the `rules` parameter, whereas other classes in the pipeline have 
-                the `rules` parameter populated. Either set all to `None` or 
-                provide the `rules` parameter for all classes.
-                """
-            )
-        else:
-            return sum(rules_list)

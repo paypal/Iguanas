@@ -75,10 +75,11 @@ class _BaseOptimiser(Rules):
     def __init__(self, rule_lambdas: Dict[str, Callable[[Dict], str]],
                  lambda_kwargs: Dict[str, Dict[str, float]],
                  metric: Callable):
-        Rules.__init__(self, rule_strings={})
+        Rules.__init__(self)
         self.orig_rule_lambdas = rule_lambdas
         self.orig_lambda_kwargs = lambda_kwargs
         self.metric = metric
+        self.rules = Rules()
 
     def fit_transform(self,
                       X: PandasDataFrameType,

@@ -581,8 +581,6 @@ def test_get_rule_features(_rule_dicts):
 
 def test_errors():
     with pytest.raises(ValueError):
-        r = Rules()
-    with pytest.raises(ValueError):
         r = Rules(rule_strings="X['A']>2")
         r._rule_dicts_to_rule_strings(as_numpy=False)
     with pytest.raises(ValueError):
@@ -597,7 +595,7 @@ def test_errors():
     with pytest.raises(ValueError, match='`lambda_kwargs` or `lambda_args` must be given when `rule_lambdas` is provided'):
         Rules(rule_lambdas={'Rule1': lambda x: None})
     with pytest.raises(ValueError, match='`rule_lambdas` must be given'):
-        r = Rules(rule_strings={})
+        r = Rules()
         r._rule_lambdas_to_rule_strings()
     with pytest.raises(ValueError, match='`lambda_kwargs` or `lambda_args` must be given'):
         r = Rules(rule_lambdas={'Rule1': lambda x: None}, lambda_kwargs={})

@@ -7,6 +7,7 @@ from iguanas.rbs import RBSPipeline
 import iguanas.utils as utils
 from iguanas.utils.types import PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
+from iguanas.rules import Rules
 
 
 class RBSOptimiser(RBSPipeline):
@@ -84,14 +85,18 @@ class RBSOptimiser(RBSPipeline):
         self.algorithm = algorithm
         self.pos_pred_rules = [] if pos_pred_rules is None else pos_pred_rules
         self.neg_pred_rules = [] if neg_pred_rules is None else neg_pred_rules
-        self.rules = deepcopy(rules)
+        if rules is not None:
+            self.rules = deepcopy(rules)
+        else:
+            self.rules = Rules()
         self.verbose = verbose
         self.kwargs = kwargs
         self.orig_config = deepcopy(pipeline.config)
         self.config_given = self.orig_config != []
         if not self.config_given and self.pos_pred_rules == [] and self.neg_pred_rules == []:
             raise ValueError(
-                'If `config` not provided in `pipeline`, then one or both of `pos_pred_rules` and `neg_pred_rules` must be given.')
+                'If `config` not provided in `pipeline`, then one or both of `pos_pred_rules` and `neg_pred_rules` must be given.'
+            )
 
     def fit(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
             sample_weight=None) -> None:
@@ -127,9 +132,8 @@ class RBSOptimiser(RBSPipeline):
         self.rules_to_keep = [
             rule for stage in self.config for rule in stage[1]
         ]
-        # If `rules` given, filter it
-        if self.rules is not None:
-            self.rules.filter_rules(include=self.rules_to_keep)
+        # Filter `rules`
+        self.rules.filter_rules(include=self.rules_to_keep)
 
     def fit_predict(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
                     sample_weight=None) -> PandasSeriesType:

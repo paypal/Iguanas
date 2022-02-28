@@ -42,13 +42,14 @@ class _BaseGenerator(Rules):
                  metric,
                  target_feat_corr_types,
                  rule_name_prefix) -> None:
+        Rules.__init__(self)
         self.metric = metric
         self.target_feat_corr_types = target_feat_corr_types
         self.rule_name_prefix = rule_name_prefix
+        self.rules = Rules()
         self._rule_name_counter = 0
         _today = date.today()
         self._today = _today.strftime("%Y%m%d")
-        Rules.__init__(self, rule_strings={})
 
     def fit_transform(self,
                       X: Union[PandasDataFrameType, KoalasDataFrameType],
