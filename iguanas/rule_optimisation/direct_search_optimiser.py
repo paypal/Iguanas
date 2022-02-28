@@ -1,13 +1,13 @@
 """Optimises a set of rules using Direct Search algorithms."""
-from iguanas.rules import Rules
 from iguanas.rule_optimisation._base_optimiser import _BaseOptimiser
 import iguanas.utils as utils
 from iguanas.utils.types import NumpyArray, PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 import pandas as pd
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Union, Tuple
 import numpy as np
 from scipy.optimize import minimize
+from joblib import Parallel, delayed
 import warnings
 
 
@@ -79,14 +79,14 @@ class DirectSearchOptimiser(_BaseOptimiser):
         standard Iguanas string format (values) and their names (keys).
     rule_lambdas : Dict[str, object]
         The optimised rules + unoptimisable (but applicable), defined using the
-        standard Iguanas lambda expression format (values) and their names 
+        standard Iguanas lambda expression format (values) and their names
         (keys).
     lambda_kwargs : Dict[str, object]
-        The keyword arguments for the optimised + unoptimisable (but 
-        applicable) rules defined using the standard Iguanas lambda expression 
+        The keyword arguments for the optimised + unoptimisable (but
+        applicable) rules defined using the standard Iguanas lambda expression
         format.
     rules : Rules
-        The Rules object containing the optimised + unoptimisable (but 
+        The Rules object containing the optimised + unoptimisable (but
         applicable) rules.
     rule_names : List[str]
         The names of the optimised + unoptimisable (but applicable) rules.
@@ -106,7 +106,7 @@ class DirectSearchOptimiser(_BaseOptimiser):
         The optimisation metric (values) calculated for each original rule
         (keys).
     non_optimisable_rules : Rules
-        A `Rules` object containing the rules which contained exclusively 
+        A `Rules` object containing the rules which contained exclusively
         non-optimisable conditions.
     zero_varaince_rules : Rules
         A `Rules` object containing the rules which contained exclusively zero
@@ -127,6 +127,7 @@ class DirectSearchOptimiser(_BaseOptimiser):
                  tol=None,
                  callback=None,
                  options=None,
+                 num_cores=1,
                  verbose=0):
 
         _BaseOptimiser.__init__(
@@ -143,6 +144,7 @@ class DirectSearchOptimiser(_BaseOptimiser):
         self.tol = tol
         self.callback = callback
         self.options = options
+        self.num_cores = num_cores
         self.verbose = verbose
         self.rule_strings = {}
         self.rule_names = []
@@ -171,7 +173,7 @@ class DirectSearchOptimiser(_BaseOptimiser):
         Returns
         -------
         PandasDataFrameType
-            The binary columns of the optimised + unoptimisable (but 
+            The binary columns of the optimised + unoptimisable (but
             applicable) rules on the fitted dataset.
         """
 
@@ -345,6 +347,26 @@ class DirectSearchOptimiser(_BaseOptimiser):
                         sample_weight: PandasSeriesType) -> Dict[dict, dict]:
         """Optimise each rule in the set"""
 
+        rule_lambdas_items = utils.return_progress_ready_range(
+            verbose=self.verbose == 1, range=rule_lambdas.items()
+        )
+        with Parallel(n_jobs=self.num_cores) as parallel:
+            opt_rule_strings_list = parallel(delayed(self._optimise_single_rule)(
+                rule_name, rule_lambda, lambda_kwargs, X, y, sample_weight
+            ) for rule_name, rule_lambda in rule_lambdas_items
+            )
+        opt_rule_strings = dict(opt_rule_strings_list)
+        return opt_rule_strings
+
+    def _optimise_single_rule(self,
+                              rule_name: str,
+                              rule_lambda: object,
+                              lambda_kwargs: Dict[str, Dict[str, float]],
+                              X: PandasDataFrameType,
+                              y: PandasSeriesType,
+                              sample_weight: PandasSeriesType) -> Tuple[str, str]:
+        """Optimises a single rule"""
+
         def _objective(rule_vals: List,
                        rule_lambda: dict,
                        rule_features: List,
@@ -372,22 +394,15 @@ class DirectSearchOptimiser(_BaseOptimiser):
                 result = self.metric(y_preds=y_pred)
             return -result
 
-        opt_rule_strings = {}
-        rule_lambdas_items = utils.return_progress_ready_range(
-            verbose=self.verbose == 1, range=rule_lambdas.items()
+        minimize_kwargs = self._return_kwargs_for_minimize(rule_name=rule_name)
+        rule_features = list(lambda_kwargs[rule_name].keys())
+        opt_val = minimize(
+            fun=_objective,
+            args=(rule_lambda, rule_features, X, y, sample_weight),
+            method=self.method, **minimize_kwargs
         )
-        for rule_name, rule_lambda in rule_lambdas_items:
-            minimize_kwargs = self._return_kwargs_for_minimize(
-                rule_name=rule_name)
-            rule_features = list(lambda_kwargs[rule_name].keys())
-            opt_val = minimize(
-                fun=_objective,
-                args=(rule_lambda, rule_features, X, y, sample_weight),
-                method=self.method, **minimize_kwargs
-            )
-            lambda_kwargs_opt = dict(zip(rule_features, opt_val.x))
-            opt_rule_strings[rule_name] = rule_lambda(**lambda_kwargs_opt)
-        return opt_rule_strings
+        lambda_kwargs_opt = dict(zip(rule_features, opt_val.x))
+        return rule_name, rule_lambda(**lambda_kwargs_opt)
 
     def _return_kwargs_for_minimize(self, rule_name: str) -> dict:
         """

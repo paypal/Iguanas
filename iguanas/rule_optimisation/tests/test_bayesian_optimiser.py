@@ -378,7 +378,7 @@ def test_optimise_single_rule(_create_inputs, _instantiate, _create_data, _expec
             rule_name=rule_name, rule_lambda=rule_lambdas[rule_name],
             lambda_kwargs=lambda_kwargs, X=X, y=y, sample_weight=None,
             int_cols=int_cols, all_space_funcs=all_space_funcs)
-        assert exp_opt_rule_strings[rule_name] == opt_rule_string
+        assert rule_name, exp_opt_rule_strings[rule_name] == opt_rule_string
 
 
 def test_return_int_cols(_instantiate):

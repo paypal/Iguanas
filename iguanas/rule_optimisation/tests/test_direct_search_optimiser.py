@@ -2398,8 +2398,8 @@ def test_optimise_rules_unlabelled(_instantiate_unlabelled, _create_inputs, _cre
         'float_with_zero_var': "(X['C']>0.999968022582126)&(X['ZeroVar']>=1.0)",
         'float_with_all_na_greater': "(X['C']>0.5001660795697812)&(X['AllNa']>0.0)",
         'float_with_all_na_is_na': "(X['C']>0.9999680225821261)&(X['AllNa'].isna())",
-        'multi_zero_var': "((X['C']>0.9999680225821261)&(X['ZeroVar']>=1.0))|((X['A']>4.70320544242861)&(X['ZeroVar']>=1.0))"}
-
+        'multi_zero_var': "((X['C']>0.9999680225821261)&(X['ZeroVar']>=1.0))|((X['A']>4.70320544242861)&(X['ZeroVar']>=1.0))"
+    }
     ro = _instantiate_unlabelled
     rule_lambdas, lambda_kwargs = _create_inputs
     rules_to_drop = [
@@ -2432,6 +2432,19 @@ def test_optimise_rules_numpy(_instantiate, _create_data):
         rule_lambdas, lambda_kwargs, X, y, None
     )
     assert opt_rule_strings == exp_rule_strings
+
+
+def test_optimise_single_rule(_create_inputs, _instantiate, _create_data):
+    rule_lambdas, lambda_kwargs = _create_inputs
+    X, y, _ = _create_data
+    exp_result = 'integer', "(X['A']>4.5)"
+    ro = _instantiate
+    rule_name = 'integer'
+    result = ro._optimise_single_rule(
+        rule_name=rule_name, rule_lambda=rule_lambdas[rule_name],
+        lambda_kwargs=lambda_kwargs, X=X, y=y, sample_weight=None
+    )
+    assert result == exp_result
 
 
 def test_return_kwargs_for_minimize(_instantiate):
@@ -2570,6 +2583,7 @@ def _fit(rule_lambdas, lambda_kwargs, X, y, sample_weight, metric, exp_rule_stri
                 metric=metric,
                 x0=x0,
                 bounds=bounds,
+                num_cores=2,
                 verbose=1,
                 method=method,
             )
