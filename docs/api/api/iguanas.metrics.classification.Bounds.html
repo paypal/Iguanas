@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>iguanas.correlation_reduction.AgglomerativeClusteringReducer &#8212; Iguanas  documentation</title>
+    <title>iguanas.metrics.classification.Bounds &#8212; Iguanas  documentation</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet">
   <link href="../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -36,8 +36,8 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="shortcut icon" href="../../_static/iguanas_icon.png"/>
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Metrics" href="../metrics.html" />
-    <link rel="prev" title="Correlation Reduction" href="../correlation_reduction.html" />
+    <link rel="next" title="iguanas.metrics.pairwise.CosineSimilarity" href="iguanas.metrics.pairwise.CosineSimilarity.html" />
+    <link rel="prev" title="iguanas.metrics.classification.Revenue" href="iguanas.metrics.classification.Revenue.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="en">
     
@@ -140,18 +140,18 @@
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
   <div class="bd-toc-item active">
     <ul class="current nav bd-sidenav">
- <li class="toctree-l1 current active has-children">
+ <li class="toctree-l1 has-children">
   <a class="reference internal" href="../correlation_reduction.html">
    Correlation Reduction
   </a>
-  <input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
   <label for="toctree-checkbox-1">
    <i class="fas fa-chevron-down">
    </i>
   </label>
-  <ul class="current">
-   <li class="toctree-l2 current active">
-    <a class="current reference internal" href="#">
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.correlation_reduction.AgglomerativeClusteringReducer.html">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
        iguanas.correlation_reduction
@@ -162,16 +162,16 @@
    </li>
   </ul>
  </li>
- <li class="toctree-l1 has-children">
+ <li class="toctree-l1 current active has-children">
   <a class="reference internal" href="../metrics.html">
    Metrics
   </a>
-  <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
   <label for="toctree-checkbox-2">
    <i class="fas fa-chevron-down">
    </i>
   </label>
-  <ul>
+  <ul class="current">
    <li class="toctree-l2">
     <a class="reference internal" href="iguanas.metrics.classification.Precision.html">
      <code class="xref py py-mod docutils literal notranslate">
@@ -212,8 +212,8 @@
      .Revenue
     </a>
    </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="iguanas.metrics.classification.Bounds.html">
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
        iguanas.metrics.classification
@@ -683,108 +683,51 @@
               
               <div>
                 
-  <section id="iguanas-correlation-reduction-agglomerativeclusteringreducer">
-<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">iguanas.correlation_reduction</span></code>.AgglomerativeClusteringReducer<a class="headerlink" href="#iguanas-correlation-reduction-agglomerativeclusteringreducer" title="Permalink to this headline">¶</a></h1>
+  <section id="iguanas-metrics-classification-bounds">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">iguanas.metrics.classification</span></code>.Bounds<a class="headerlink" href="#iguanas-metrics-classification-bounds" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="iguanas.correlation_reduction.AgglomerativeClusteringReducer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.correlation_reduction.</span></span><span class="sig-name descname"><span class="pre">AgglomerativeClusteringReducer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">similarity_function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_clustermap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/correlation_reduction/agglomerative_clustering_reducer.html#AgglomerativeClusteringReducer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.correlation_reduction.AgglomerativeClusteringReducer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes similar columns (given a similarity function) by calculating the 
-similarity matrix then iteratively running Agglomerative Clustering on the 
-similarity matrix and dropping columns that are correlated. Only one column 
-per cluster is kept.</p>
+<dt class="sig sig-object py" id="iguanas.metrics.classification.Bounds">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iguanas.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">Bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/iguanas/metrics/classification.html#Bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.metrics.classification.Bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates whether the predictor(s) are within the set of bounds provided, 
+by applying the following process:</p>
+<ol class="arabic simple">
+<li><p>Calculate the value of each <cite>metric</cite> in <cite>bounds</cite>.</p></li>
+<li><p>Calculate how far this value is from each <cite>threshold</cite> in <cite>bounds</cite>.</p></li>
+<li><p>For the value that is furthest from its <cite>threshold</cite>, calculate the Sigmoid function using the difference between the value and the <cite>threshold</cite>.</p></li>
+</ol>
+<p>This means that if the final value returned is &gt;= 0.5, the predictor is 
+within the bounds that have been set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>threshold</strong><span class="classifier">float</span></dt><dd><p>The median of the cluster’s similarity metric is compared against this
-threshold - if the median is greater than this threshold, the columns
-within the cluster are deemed correlated, with only the top performing
-column being kept.</p>
-</dd>
-<dt><strong>strategy</strong><span class="classifier">str</span></dt><dd><p>Can be either ‘top_down’ or ‘bottom_up’. ‘top_down’ begins clustering
-from the top, with two clusters per iteration being calculated. 
-‘bottom_up’ begins clustering from the bottom, with half of the total
-number of columns per iteration being used to define the number of
-clusters.</p>
-</dd>
-<dt><strong>similarity_function</strong><span class="classifier">Callable</span></dt><dd><p>The similarity function to use for calculating the similarity between
-columns. It must return a dataframe containing the similarity matrix.
-See the <cite>similarity_functions</cite> module for out-of-the-box functions.</p>
-</dd>
-<dt><strong>metric</strong><span class="classifier">Callable, optional</span></dt><dd><p>Method/function for calculating the performance of each column. This is
-used to determine the top performing column per cluster. If not 
-provided, a random column from the cluster will be kept. Defaults to
-None.</p>
-</dd>
-<dt><strong>print_clustermap</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, the clustermap at each iteration will be printed. Defaults to
-False.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Attributes</dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>columns_to_keep</strong><span class="classifier">List[str]</span></dt><dd><p>The final list of columns with the correlated columns removed.</p>
+<dt><strong>bounds</strong><span class="classifier">List[dict]</span></dt><dd><p>Each bound to be applied - this should be a dictionary containing the 
+following keys: <cite>metric</cite> - the function to be calculated; <cite>operator</cite> -
+the operator used to calculate whether a result is within a bound; 
+<cite>threshold</cite> - the value corresponding to the boundary.</p>
 </dd>
 </dl>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="iguanas.correlation_reduction.AgglomerativeClusteringReducer.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/iguanas/correlation_reduction/agglomerative_clustering_reducer.html#AgglomerativeClusteringReducer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.correlation_reduction.AgglomerativeClusteringReducer.fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the similar columns in the dataset X.</p>
+<dt class="sig sig-object py" id="iguanas.metrics.classification.Bounds.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_preds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">databricks.koalas.series.Series</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_true</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/iguanas/metrics/classification.html#Bounds.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.metrics.classification.Bounds.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the Sigmoid function of the difference between the <cite>metric</cite>
+result and its <cite>threshold</cite> (for the result that is furtherest from its 
+<cite>threshold</cite>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">PandasDataFrameType</span></dt><dd><p>Dataframe to be reduced.</p>
+<dt><strong>y_preds</strong><span class="classifier">Union[NumpyArrayType, PandasSeriesType, KoalasSeriesType, PandasDataFrameType, KoalasDataFrameType]</span></dt><dd><p>The binary predictor column.</p>
 </dd>
-<dt><strong>y</strong><span class="classifier">PandasSeriesType</span></dt><dd><p>Target (if available). Only used in the method/function passed to 
-the <cite>metric</cite> parameter.</p>
+<dt><strong>y_true</strong><span class="classifier">Union[NumpyArrayType, PandasSeriesType, KoalasSeriesType], optional</span></dt><dd><p>The target column.</p>
 </dd>
-<dt><strong>sample_weight</strong><span class="classifier">None</span></dt><dd><p>Row-wise weights to apply (if available). Only used in the 
-method/function passed to the <cite>metric</cite> parameter.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="iguanas.correlation_reduction.AgglomerativeClusteringReducer.transform">
-<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/iguanas/correlation_reduction/agglomerative_clustering_reducer.html#AgglomerativeClusteringReducer.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.correlation_reduction.AgglomerativeClusteringReducer.transform" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes similar columns from the dataset X.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">PandasDataFrameType</span></dt><dd><p>Dataframe to be reduced.</p>
+<dt><strong>sample_weight</strong><span class="classifier">Union[NumpyArrayType, PandasSeriesType, KoalasSeriesType], optional</span></dt><dd><p>Row-wise transaction amounts to apply.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt>PandasDataFrameType</dt><dd><p>Dataframe with the similar columns removed.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="iguanas.correlation_reduction.AgglomerativeClusteringReducer.fit_transform">
-<span class="sig-name descname"><span class="pre">fit_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/iguanas/correlation_reduction/agglomerative_clustering_reducer.html#AgglomerativeClusteringReducer.fit_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.correlation_reduction.AgglomerativeClusteringReducer.fit_transform" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the similar columns in the dataset X, then removes them.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">PandasDataFrameType</span></dt><dd><p>Dataframe of binary columns.</p>
-</dd>
-<dt><strong>y</strong><span class="classifier">None</span></dt><dd><p>Ignored.</p>
-</dd>
-<dt><strong>sample_weight</strong><span class="classifier">None</span></dt><dd><p>Ignored.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>PandasDataFrameType</dt><dd><p>Dataframe with the similar columns removed.</p>
+<dt>Union[float, NumpyArrayType]</dt><dd><p>Result of the Sigmoid function.</p>
 </dd>
 </dl>
 </dd>

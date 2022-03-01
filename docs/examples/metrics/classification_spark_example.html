@@ -780,7 +780,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">iguanas.metrics.classification</span> <span class="kn">import</span> <span class="n">Precision</span><span class="p">,</span> <span class="n">Recall</span><span class="p">,</span> <span class="n">FScore</span><span class="p">,</span> <span class="n">Revenue</span>
+<span></span><span class="kn">from</span> <span class="nn">iguanas.metrics.classification</span> <span class="kn">import</span> <span class="n">Precision</span><span class="p">,</span> <span class="n">Recall</span><span class="p">,</span> <span class="n">FScore</span><span class="p">,</span> <span class="n">Revenue</span><span class="p">,</span> <span class="n">Bounds</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">databricks.koalas</span> <span class="k">as</span> <span class="nn">ks</span>
@@ -811,13 +811,11 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-21/12/06 12:03:25 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+22/03/01 17:05:54 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
 Using Spark&#39;s default log4j profile: org/apache/spark/log4j-defaults.properties
 Setting default log level to &#34;WARN&#34;.
 To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
-21/12/06 12:03:26 WARN Utils: Service &#39;SparkUI&#39; could not bind on port 4040. Attempting port 4041.
-21/12/06 12:03:26 WARN Utils: Service &#39;SparkUI&#39; could not bind on port 4041. Attempting port 4042.
-21/12/06 12:03:26 WARN Utils: Service &#39;SparkUI&#39; could not bind on port 4042. Attempting port 4043.
+22/03/01 17:05:55 WARN Utils: Service &#39;SparkUI&#39; could not bind on port 4040. Attempting port 4041.
 </pre></div></div>
 </div>
 <hr class="docutils" />
@@ -830,6 +828,7 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 <li><p>Recall score</p></li>
 <li><p>Fbeta score</p></li>
 <li><p>Revenue</p></li>
+<li><p>Bounds</p></li>
 </ul>
 <p><strong>Note that the FScore, Precision or Recall classes are ~100 times faster on larger datasets compared to the same functions from Sklearn’s metrics module. They also work with Koalas DataFrames, whereas the Sklearn functions do not.</strong></p>
 <section id="Instantiate-class-and-run-fit-method">
@@ -914,13 +913,39 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 
 </pre></div></div>
 </div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">bounds</span> <span class="o">=</span> <span class="n">Bounds</span><span class="p">(</span>
+    <span class="n">bounds</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">precision</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
+            <span class="s1">&#39;operator&#39;</span><span class="p">:</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;threshold&#39;</span><span class="p">:</span> <span class="mf">0.45</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">recall</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
+            <span class="s1">&#39;operator&#39;</span><span class="p">:</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;threshold&#39;</span><span class="p">:</span> <span class="mf">0.5</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="c1"># Single predictor</span>
+<span class="n">rule_bound_ks</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y_preds</span><span class="o">=</span><span class="n">y_pred_ks</span><span class="p">,</span> <span class="n">y_true</span><span class="o">=</span><span class="n">y_ks</span><span class="p">)</span>
+<span class="c1"># Multiple predictors</span>
+<span class="n">rule_bounds_ks</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y_preds</span><span class="o">=</span><span class="n">y_preds_ks</span><span class="p">,</span> <span class="n">y_true</span><span class="o">=</span><span class="n">y_ks</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </section>
 </section>
 <section id="Outputs">
 <h3>Outputs<a class="headerlink" href="#Outputs" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">fit</span></code> method returns the optimisation metric defined by the class:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -929,7 +954,7 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -939,7 +964,7 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -948,7 +973,7 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -958,7 +983,7 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -967,7 +992,7 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -977,7 +1002,7 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -986,12 +1011,31 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 (1991, array([ 15119, -14481,  11721,  25063, -74931]))
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">rule_bound_ks</span><span class="p">,</span> <span class="n">rule_bounds_ks</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(0.501299373374265,
+ array([0.50753581, 0.48934673, 0.50649652, 0.50753581, 0.48571075]))
 </pre></div></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">fit</span></code> method can be fed into various Iguanas modules as an argument (wherever the <code class="docutils literal notranslate"><span class="pre">metric</span></code> parameter appears). For example, in the RuleGeneratorOpt module, you can set the metric used to optimise the rules using this methodology.</p>
@@ -1003,7 +1047,7 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 <p>Say we want to create a class which calculates the Positive likelihood ratio (TP rate/FP rate).</p>
 <p>The main class structure involves having a <code class="docutils literal notranslate"><span class="pre">fit</span></code> method which has three arguments - the binary predictor(s), the binary target and any event specific weights to apply. This method should return a single numeric value.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1034,8 +1078,8 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </div>
 </div>
 <p>We can then apply the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method to the dataset to check it works:</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1047,16 +1091,8 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-
-</pre></div></div>
-</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1065,7 +1101,7 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="output_area docutils container">

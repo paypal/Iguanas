@@ -21,6 +21,7 @@ Classification Metrics
    Recall
    FScore
    Revenue
+   Bounds
 
 Pairwise Metrics
 ----------------

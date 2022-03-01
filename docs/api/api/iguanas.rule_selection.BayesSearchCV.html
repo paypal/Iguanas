@@ -213,6 +213,16 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.metrics.classification.Bounds.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.metrics.classification
+      </span>
+     </code>
+     .Bounds
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="iguanas.metrics.pairwise.CosineSimilarity.html">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
@@ -729,7 +739,10 @@ Defaults to False.</p>
 set to &lt;= <cite>cv</cite>. Defaults to 1.</p>
 </dd>
 <dt><strong>verbose</strong><span class="classifier">int, optional</span></dt><dd><p>Controls the verbosity - the higher, the more messages. &gt;0 : shows the
-overall progress of the optimisation process. Defaults to 0.</p>
+overall progress of the optimisation process; &gt;1 : shows the progress
+of the fitting of each parameter set to each fold. Note that setting
+<cite>verbose</cite> &gt; 1 only shows the fold-level progress when <cite>num_cores</cite> = 1.
+Defaults to 0.</p>
 </dd>
 </dl>
 </dd>

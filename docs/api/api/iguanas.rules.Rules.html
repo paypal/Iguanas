@@ -213,6 +213,16 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.metrics.classification.Bounds.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.metrics.classification
+      </span>
+     </code>
+     .Bounds
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="iguanas.metrics.pairwise.CosineSimilarity.html">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
@@ -685,23 +695,23 @@ rules can then be reformatted into one of the other representations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>rule_dicts</strong><span class="classifier">Dict[str, dict]</span></dt><dd><p>Set of rules defined using thestandard Iguanas dictionary format
+<dt><strong>rule_dicts</strong><span class="classifier">Dict[str, dict], optional</span></dt><dd><p>Set of rules defined using thestandard Iguanas dictionary format
 (values) and their names (keys). Defaults to <cite>None</cite>.</p>
 </dd>
-<dt><strong>rule_strings</strong><span class="classifier">Dict[str, str]</span></dt><dd><p>Set of rules defined using the standard Iguanas string format 
+<dt><strong>rule_strings</strong><span class="classifier">Dict[str, str], optional</span></dt><dd><p>Set of rules defined using the standard Iguanas string format 
 (values) and their names (keys). Defaults to <cite>None</cite>.</p>
 </dd>
-<dt><strong>rule_lambdas</strong><span class="classifier">Dict[str, Callable[[dict], str]]</span></dt><dd><p>Set of rules defined using the standard Iguanas lambda expression 
+<dt><strong>rule_lambdas</strong><span class="classifier">Dict[str, Callable[[dict], str]], optional</span></dt><dd><p>Set of rules defined using the standard Iguanas lambda expression 
 format (values) and their names (keys). Must be given in 
 conjunction with either <cite>lambda_kwargs</cite> or <cite>lambda_args</cite>. Defaults 
 to <cite>None</cite>.</p>
 </dd>
-<dt><strong>lambda_kwargs</strong><span class="classifier">Dict[str, dict]</span></dt><dd><p>For each rule (keys), a dictionary containing the features used in
+<dt><strong>lambda_kwargs</strong><span class="classifier">Dict[str, dict], optional</span></dt><dd><p>For each rule (keys), a dictionary containing the features used in
 the rule (keys) and the current values (values). Only populates 
 when <cite>.as_lambda()</cite> is used with the keyword argument 
 <cite>with_kwargs=True</cite>. Defaults to <cite>None</cite>.</p>
 </dd>
-<dt><strong>lambda_args</strong><span class="classifier">Dict[str, list]</span></dt><dd><p>For each rule (keys), a list containing the current values used in
+<dt><strong>lambda_args</strong><span class="classifier">Dict[str, list], optional</span></dt><dd><p>For each rule (keys), a list containing the current values used in
 the rule. Only populates when <cite>.as_lambda()</cite> is used with the 
 keyword argument <cite>with_kwargs=False</cite>. Defaults to <cite>None</cite>.</p>
 </dd>

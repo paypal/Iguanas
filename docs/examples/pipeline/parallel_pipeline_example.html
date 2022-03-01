@@ -785,7 +785,7 @@ div.rendered_html tbody tr:hover {
 <h1>Parallel Pipeline Example<a class="headerlink" href="#Parallel-Pipeline-Example" title="Permalink to this headline">¶</a></h1>
 <p>A Parallel Pipeline is a set of steps which run independently - their outputs are then combined and returned. Each step should be an instantiated class with both <code class="docutils literal notranslate"><span class="pre">fit</span></code> and <code class="docutils literal notranslate"><span class="pre">transform</span></code> methods.</p>
 <p>The below diagram shows the high level structure of a Parallel Pipeline:</p>
-<center><p><img alt="2ebc95861c104289b2d96968afe68d3a" src="../../_images/parallel_pipeline_structure.png" /></p>
+<center><p><img alt="1c73e209c3324d60a792dcaf5f151efe" src="../../_images/parallel_pipeline_structure.png" /></p>
 </center><p>It is used to carry out multiple processes seperately and combine their outputs. One such use case is when we want to both:</p>
 <ol class="arabic simple">
 <li><p>Generate a new rule set, and:</p></li>
@@ -793,7 +793,7 @@ div.rendered_html tbody tr:hover {
 <li><p>Use the combined rule sets to optimise a decision engine</p></li>
 </ol>
 <p>An example of this workflow is shown below:</p>
-<center><p><img alt="a0a7f87e7d0f47018f362e1cf2ef06ad" src="../../_images/parallel_pipeline_example.png" /></p>
+<center><p><img alt="e81f969818874302af5bdbb5bb8469d4" src="../../_images/parallel_pipeline_example.png" /></p>
 </center><p>To create this workflow in Iguanas, the rule generation and rule optimisation steps are added to a Parallel Pipeline, so they run separately and their outputs are combined. This Parallel Pipeline is then added to a Linear Pipeline, along with the decision engine optimisation step, so that the output of the Parallel Pipeline is fed into the decision engine optimiser.</p>
 <p><strong>We’ll see how this workflow can be generated in the following example.</strong></p>
 <hr class="docutils" />

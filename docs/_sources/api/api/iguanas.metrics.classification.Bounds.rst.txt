@@ -1,0 +1,10 @@
+﻿:mod:`iguanas.metrics.classification`.Bounds
+===================================================
+
+.. currentmodule:: iguanas.metrics.classification
+
+.. autoclass:: Bounds
+
+.. raw:: html
+
+    <div class="clearer"></div>

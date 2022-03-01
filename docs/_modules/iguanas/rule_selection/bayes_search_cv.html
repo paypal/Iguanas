@@ -230,7 +230,10 @@
 <span class="sd">        set to &lt;= `cv`. Defaults to 1.    </span>
 <span class="sd">    verbose : int, optional</span>
 <span class="sd">        Controls the verbosity - the higher, the more messages. &gt;0 : shows the</span>
-<span class="sd">        overall progress of the optimisation process. Defaults to 0.</span>
+<span class="sd">        overall progress of the optimisation process; &gt;1 : shows the progress</span>
+<span class="sd">        of the fitting of each parameter set to each fold. Note that setting</span>
+<span class="sd">        `verbose` &gt; 1 only shows the fold-level progress when `num_cores` = 1.</span>
+<span class="sd">        Defaults to 0.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -393,7 +396,7 @@
             <span class="n">space</span><span class="o">=</span><span class="n">objective_inputs</span><span class="p">,</span>
             <span class="n">algo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="p">,</span>
             <span class="n">max_evals</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span>
             <span class="n">rstate</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
             <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
         <span class="p">)</span>
@@ -407,12 +410,17 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">params_iter</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">cv_datasets</span> <span class="o">=</span> <span class="n">objective_inputs</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;---- Trialling the following parameter set: </span><span class="si">{</span><span class="n">params_iter</span><span class="si">}</span><span class="s1"> ----&#39;</span>
+            <span class="p">)</span>
         <span class="n">pipeline</span><span class="o">.</span><span class="n">_update_kwargs</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">params_iter</span><span class="p">)</span>
         <span class="c1"># Fit/predict/score on each fold</span>
         <span class="k">with</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span><span class="p">)</span> <span class="k">as</span> <span class="n">parallel</span><span class="p">:</span>
             <span class="n">scores_over_folds</span> <span class="o">=</span> <span class="n">parallel</span><span class="p">(</span><span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fit_predict_on_fold</span><span class="p">)(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_score</span><span class="p">,</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">params_iter</span><span class="p">,</span>
-                <span class="n">fold_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_weight_in_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">fold_idx</span><span class="p">,</span> <span class="n">datasets</span> <span class="ow">in</span> <span class="n">cv_datasets</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="n">fold_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_weight_in_val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">fold_idx</span><span class="p">,</span> <span class="n">datasets</span> <span class="ow">in</span> <span class="n">cv_datasets</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="p">)</span>
         <span class="n">scores_over_folds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">scores_over_folds</span><span class="p">)</span>
         <span class="n">mean_score</span> <span class="o">=</span> <span class="n">scores_over_folds</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
@@ -533,7 +541,8 @@
                              <span class="n">pipeline</span><span class="p">:</span> <span class="n">LinearPipeline</span><span class="p">,</span>
                              <span class="n">params_iter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
                              <span class="n">fold_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                             <span class="n">sample_weight_in_val</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+                             <span class="n">sample_weight_in_val</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                             <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Tries to to fit the pipeline (using a given parameter set) on the</span>
 <span class="sd">        training set, then apply it to the validation set. If no rules remain</span>
@@ -542,6 +551,10 @@
 <span class="sd">        validation set is set to `self.error_score`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;---- Fitting on fold index </span><span class="si">{</span><span class="n">fold_idx</span><span class="si">}</span><span class="s1"> ----&#39;</span>
+            <span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">sample_weight_train</span><span class="p">,</span> <span class="n">sample_weight_val</span> <span class="o">=</span> <span class="n">datasets</span>
             <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">sample_weight_train</span><span class="p">)</span>

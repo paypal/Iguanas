@@ -1,11 +1,12 @@
 """Contains classes for calculating classification metrics."""
-import numpy as np
-from typing import Union
 import iguanas.utils as utils
 from iguanas.utils.types import NumpyArray, PandasDataFrame, PandasSeries, \
     KoalasDataFrame, KoalasSeries
 from iguanas.utils.typing import NumpyArrayType, PandasDataFrameType, \
     PandasSeriesType, KoalasDataFrameType, KoalasSeriesType
+import numpy as np
+from typing import Union, List
+import math
 
 
 class Precision:
@@ -276,3 +277,84 @@ class Revenue:
             revenue = tps_sum - fns_sum + \
                 self.chargeback_multiplier * (tns_sum - fps_sum)
         return revenue
+
+
+class Bounds:
+    """
+    Calculates whether the predictor(s) are within the set of bounds provided, 
+    by applying the following process:
+
+    1. Calculate the value of each `metric` in `bounds`.
+    2. Calculate how far this value is from each `threshold` in `bounds`.
+    3. For the value that is furthest from its `threshold`, calculate the Sigmoid function using the difference between the value and the `threshold`.
+
+    This means that if the final value returned is >= 0.5, the predictor is 
+    within the bounds that have been set.    
+
+    Parameters
+    ----------
+    bounds : List[dict]
+        Each bound to be applied - this should be a dictionary containing the 
+        following keys: `metric` - the function to be calculated; `operator` -
+        the operator used to calculate whether a result is within a bound; 
+        `threshold` - the value corresponding to the boundary.
+    """
+
+    def __init__(self,
+                 bounds: List[dict]):
+
+        self.bounds = bounds
+        self._comparison_funcs = {
+            '>': lambda x, y: x - y,
+            '>=': lambda x, y: x - y,
+            '<': lambda x, y: x + y,
+            '<=': lambda x, y: x + y
+        }
+
+    def fit(self,
+            y_preds: Union[NumpyArrayType, PandasSeriesType, KoalasSeriesType, PandasDataFrameType, KoalasDataFrameType],
+            y_true=None,
+            sample_weight=None) -> Union[float, NumpyArrayType]:
+        """
+        Calculates the Sigmoid function of the difference between the `metric`
+        result and its `threshold` (for the result that is furtherest from its 
+        `threshold`).
+
+        Parameters
+        ----------
+        y_preds : Union[NumpyArrayType, PandasSeriesType, KoalasSeriesType, PandasDataFrameType, KoalasDataFrameType]
+            The binary predictor column.
+        y_true : Union[NumpyArrayType, PandasSeriesType, KoalasSeriesType], optional
+            The target column.
+        sample_weight : Union[NumpyArrayType, PandasSeriesType, KoalasSeriesType], optional
+            Row-wise transaction amounts to apply.
+
+        Returns
+        -------
+        Union[float, NumpyArrayType]
+            Result of the Sigmoid function.
+        """
+
+        num_bounds = len(self.bounds)
+        if y_preds.ndim == 1:
+            result_thr_comp = np.empty(num_bounds)
+        else:
+            result_thr_comp = np.empty((num_bounds, y_preds.shape[1]))
+        for i, bound in enumerate(self.bounds):
+            metric = bound['metric']
+            operator = bound['operator']
+            threshold = bound['threshold']
+            result = metric(y_preds, y_true, sample_weight)
+            comp_func = self._comparison_funcs[operator]
+            result_thr_comp[i] = comp_func(result, threshold)
+        result = result_thr_comp.min(axis=0)
+        if isinstance(result, np.ndarray):
+            return np.array([self._sigmoid(r) for r in result])
+        else:
+            return self._sigmoid(result)
+
+    @staticmethod
+    def _sigmoid(x: float) -> float:
+        """Calculates the Sigmoid function for a given input `x`"""
+
+        return 1/(1+math.e**-x)

@@ -165,6 +165,7 @@
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasSeriesType</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">,</span> <span class="n">ClassList</span><span class="p">,</span> <span class="n">ClassNoneType</span>
 <span class="kn">import</span> <span class="nn">iguanas.utils.utils</span> <span class="k">as</span> <span class="nn">utils</span>
+<span class="kn">from</span> <span class="nn">iguanas.rules</span> <span class="kn">import</span> <span class="n">Rules</span>
 
 
 <div class="viewcode-block" id="LinearPipeline"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline">[docs]</a><span class="k">class</span> <span class="nc">LinearPipeline</span><span class="p">(</span><span class="n">_BasePipeline</span><span class="p">):</span>
@@ -213,6 +214,7 @@
             <span class="n">use_init_data</span><span class="p">,</span> <span class="s1">&#39;use_init_data&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">ClassList</span><span class="p">,</span> <span class="n">ClassNoneType</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_init_data</span> <span class="o">=</span> <span class="n">use_init_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="n">Rules</span><span class="p">()</span>
 
 <div class="viewcode-block" id="LinearPipeline.fit"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
             <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>

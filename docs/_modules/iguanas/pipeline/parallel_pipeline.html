@@ -161,12 +161,14 @@
 <span></span><span class="sd">&quot;&quot;&quot;Class for creating a Parallel Pipeline.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">iguanas.exceptions.exceptions</span> <span class="kn">import</span> <span class="n">DataFrameSizeError</span><span class="p">,</span> <span class="n">NoRulesError</span>
 <span class="kn">from</span> <span class="nn">iguanas.pipeline._base_pipeline</span> <span class="kn">import</span> <span class="n">_BasePipeline</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasSeriesType</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span>
 <span class="kn">import</span> <span class="nn">iguanas.utils.utils</span> <span class="k">as</span> <span class="nn">utils</span>
 <span class="kn">from</span> <span class="nn">iguanas.rules</span> <span class="kn">import</span> <span class="n">Rules</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
 
 <div class="viewcode-block" id="ParallelPipeline"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.ParallelPipeline.html#iguanas.pipeline.ParallelPipeline">[docs]</a><span class="k">class</span> <span class="nc">ParallelPipeline</span><span class="p">(</span><span class="n">_BasePipeline</span><span class="p">):</span>
@@ -203,6 +205,7 @@
                  <span class="n">steps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
                  <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_BasePipeline</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="n">Rules</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ParallelPipeline.fit_transform"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.ParallelPipeline.html#iguanas.pipeline.ParallelPipeline.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                       <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
@@ -245,14 +248,23 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;--- Applying `fit_transform` method for step `</span><span class="si">{</span><span class="n">step_tag</span><span class="si">}</span><span class="s1">` ---&#39;</span>
                 <span class="p">)</span>
-            <span class="n">X_rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_fit_transform</span><span class="p">(</span>
-                    <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span>
+            <span class="c1"># Try applying fit_transform for `step`</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">X_rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_fit_transform</span><span class="p">(</span>
+                        <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">rules</span><span class="p">)</span>
+                <span class="n">rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">rules</span><span class="p">)</span>
+            <span class="c1"># If no rules generated/remain, raise warning and skip `step`</span>
+            <span class="k">except</span> <span class="p">(</span><span class="n">DataFrameSizeError</span><span class="p">,</span> <span class="n">NoRulesError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;No rules remain in step `</span><span class="si">{</span><span class="n">step_tag</span><span class="si">}</span><span class="s1">` as it raised the following error: &quot;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+                <span class="p">)</span>
+                <span class="n">X_rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">())</span>
+                <span class="n">rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Rules</span><span class="p">())</span>
         <span class="n">X_rules</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">X_rules_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_concat_rules</span><span class="p">(</span><span class="n">rules_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">rules_list</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_names</span> <span class="o">=</span> <span class="n">X_rules</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">X_rules</span></div>
 
@@ -283,36 +295,26 @@
         <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">])</span>
         <span class="n">X_rules_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_</span><span class="p">:</span>
-            <span class="n">X_rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_transform</span><span class="p">(</span>
-                    <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">X</span>
+            <span class="c1"># Try applying transform for `step`</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">X_rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_pipeline_transform</span><span class="p">(</span>
+                        <span class="n">step_tag</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">X</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="c1"># If no rules present, raise warning and skip `step`; else raise</span>
+            <span class="c1"># exception</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;`rule_dicts` must be given&#39;</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;No rules present in step `</span><span class="si">{</span><span class="n">step_tag</span><span class="si">}</span><span class="s1">` - `transform` method cannot be applied for this step.&#39;</span>
+                    <span class="p">)</span>
+                    <span class="n">X_rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">e</span>
         <span class="n">X_rules</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">X_rules_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_names</span> <span class="o">=</span> <span class="n">X_rules</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">X_rules</span></div>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_concat_rules</span><span class="p">(</span><span class="n">rules_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Rules</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Rules</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the combined rule set given a list of individual rule sets. If</span>
-<span class="sd">        `rules_list` is all None, returns None. If elements in `rules_list` are</span>
-<span class="sd">        None, raises an exception.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">rule</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules_list</span><span class="p">]):</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">elif</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">rules_list</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">                One or more of the classes in the pipeline has `None` assigned to </span>
-<span class="sd">                the `rules` parameter, whereas other classes in the pipeline have </span>
-<span class="sd">                the `rules` parameter populated. Either set all to `None` or </span>
-<span class="sd">                provide the `rules` parameter for all classes.</span>
-<span class="sd">                &quot;&quot;&quot;</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">rules_list</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">X_rules</span></div></div>
 </pre></div>
 
               </div>
