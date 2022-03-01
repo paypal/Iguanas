@@ -70,7 +70,10 @@ class BayesSearchCV:
         set to <= `cv`. Defaults to 1.    
     verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : shows the
-        overall progress of the optimisation process. Defaults to 0.
+        overall progress of the optimisation process; >1 : shows the progress
+        of the fitting of each parameter set to each fold. Note that setting
+        `verbose` > 1 only shows the fold-level progress when `num_cores` = 1.
+        Defaults to 0.
 
     Attributes
     ----------
@@ -233,7 +236,7 @@ class BayesSearchCV:
             space=objective_inputs,
             algo=self.algorithm,
             max_evals=self.n_iter,
-            verbose=self.verbose,
+            verbose=self.verbose == 1,
             rstate=np.random.RandomState(0),
             **self.kwargs
         )
@@ -247,12 +250,17 @@ class BayesSearchCV:
         """
 
         params_iter, pipeline, cv_datasets = objective_inputs
+        if self.verbose > 1:
+            print(
+                f'---- Trialling the following parameter set: {params_iter} ----'
+            )
         pipeline._update_kwargs(params=params_iter)
         # Fit/predict/score on each fold
         with Parallel(n_jobs=self.num_cores) as parallel:
             scores_over_folds = parallel(delayed(self._fit_predict_on_fold)(
                 self.metric, self.error_score, datasets, pipeline, params_iter,
-                fold_idx, self.sample_weight_in_val) for fold_idx, datasets in cv_datasets.items()
+                fold_idx, self.sample_weight_in_val, self.verbose
+            ) for fold_idx, datasets in cv_datasets.items()
             )
         scores_over_folds = np.array(scores_over_folds)
         mean_score = scores_over_folds.mean()
@@ -373,7 +381,8 @@ class BayesSearchCV:
                              pipeline: LinearPipeline,
                              params_iter: dict,
                              fold_idx: int,
-                             sample_weight_in_val: bool) -> float:
+                             sample_weight_in_val: bool,
+                             verbose: int) -> float:
         """
         Tries to to fit the pipeline (using a given parameter set) on the
         training set, then apply it to the validation set. If no rules remain
@@ -382,6 +391,10 @@ class BayesSearchCV:
         validation set is set to `self.error_score`.
         """
 
+        if verbose > 1:
+            print(
+                f'---- Fitting on fold index {fold_idx} ----'
+            )
         try:
             X_train, X_val, y_train, y_val, sample_weight_train, sample_weight_val = datasets
             pipeline.fit(X_train, y_train, sample_weight_train)

@@ -319,7 +319,7 @@ def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
         cv=3,
         n_iter=5,
         error_score=0,
-        verbose=1
+        verbose=2  #  Set verbose=2 to ensure it works
     )
     with pytest.warns(UserWarning):
         # Test fit/predict/fit_predict, no sample_weight
@@ -1016,7 +1016,8 @@ def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,
         pipeline=lp,
         params_iter=params_iter,
         fold_idx=0,
-        sample_weight_in_val=False
+        sample_weight_in_val=False,
+        verbose=2
     )
     assert fold_score == 0.16666666666666666
     # With sample_weight_in_val=True
@@ -1027,7 +1028,8 @@ def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,
         pipeline=lp,
         params_iter=params_iter,
         fold_idx=0,
-        sample_weight_in_val=True
+        sample_weight_in_val=True,
+        verbose=2
     )
     assert fold_score == 0.25806451612903225
     # Force errors by setting sf filter threshold to 1
@@ -1040,7 +1042,8 @@ def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,
             pipeline=lp,
             params_iter=params_iter,
             fold_idx=0,
-            sample_weight_in_val=True
+            sample_weight_in_val=True,
+            verbose=2
         )
     with pytest.warns(UserWarning, match="No rules remaining for: Pipeline parameter set = {'rg_dt': {'n_total_conditions': 2, 'target_feat_corr_types': None}, 'rbs': {'n_iter': 10}}; Fold index = 0. The metric score for this parameter set & fold will be set to 0"):
         fold_score = bs._fit_predict_on_fold(
@@ -1050,7 +1053,8 @@ def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,
             pipeline=lp,
             params_iter=params_iter,
             fold_idx=0,
-            sample_weight_in_val=True
+            sample_weight_in_val=True,
+            verbose=2
         )
         assert fold_score == 0
 
