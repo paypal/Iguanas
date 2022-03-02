@@ -43,7 +43,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics    
     - name: Unit tests
       run: |                             
-        coverage run --omit iguanas/*/test*.py -m pytest -vv iguanas && coverage report && coverage xml
+        coverage run --omit iguanas/*/test*.py -m pytest -vv --doctest-modules iguanas && coverage report && coverage xml
     - name: Notebook tests
       run: |                             
         pytest iguanas/*/examples/ --nbmake --nbmake-kernel=iguanas

@@ -720,8 +720,34 @@ False.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Attributes</dt>
-<dd class="field-even"><dl class="simple">
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">iguanas.correlation_reduction</span> <span class="kn">import</span> <span class="n">AgglomerativeClusteringReducer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">iguanas.metrics</span> <span class="kn">import</span> <span class="n">JaccardSimilarity</span><span class="p">,</span> <span class="n">Precision</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">js</span> <span class="o">=</span> <span class="n">JaccardSimilarity</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Precision</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span>
+<span class="gp">... </span>    <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span>
+<span class="gp">... </span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">acr</span> <span class="o">=</span> <span class="n">AgglomerativeClusteringReducer</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;bottom_up&#39;</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">similarity_function</span><span class="o">=</span><span class="n">js</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">metric</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">fit</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">acr</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">acr</span><span class="o">.</span><span class="n">columns_to_keep</span><span class="p">)</span>
+<span class="go">[&#39;A&#39;]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl class="simple">
 <dt><strong>columns_to_keep</strong><span class="classifier">List[str]</span></dt><dd><p>The final list of columns with the correlated columns removed.</p>
 </dd>
 </dl>

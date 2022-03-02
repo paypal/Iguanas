@@ -49,6 +49,30 @@ class AgglomerativeClusteringReducer:
     ----------
     columns_to_keep : List[str]
         The final list of columns with the correlated columns removed.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from iguanas.correlation_reduction import AgglomerativeClusteringReducer
+    >>> from iguanas.metrics import JaccardSimilarity, Precision
+    >>> js = JaccardSimilarity()
+    >>> p = Precision()
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> acr = AgglomerativeClusteringReducer(
+    ...     threshold=0.5,
+    ...     strategy='bottom_up', 
+    ...     similarity_function=js.fit,
+    ...     metric=p.fit
+    ... )
+    >>> acr.fit(X=X, y=y)
+    >>> print(acr.columns_to_keep)
+    ['A']
     """
 
     def __init__(self,

@@ -209,6 +209,30 @@
 <span class="sd">    ----------</span>
 <span class="sd">    columns_to_keep : List[str]</span>
 <span class="sd">        The final list of columns with the correlated columns removed.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.correlation_reduction import AgglomerativeClusteringReducer</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import JaccardSimilarity, Precision</span>
+<span class="sd">    &gt;&gt;&gt; js = JaccardSimilarity()</span>
+<span class="sd">    &gt;&gt;&gt; p = Precision()</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; acr = AgglomerativeClusteringReducer(</span>
+<span class="sd">    ...     threshold=0.5,</span>
+<span class="sd">    ...     strategy=&#39;bottom_up&#39;, </span>
+<span class="sd">    ...     similarity_function=js.fit,</span>
+<span class="sd">    ...     metric=p.fit</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; acr.fit(X=X, y=y)</span>
+<span class="sd">    &gt;&gt;&gt; print(acr.columns_to_keep)</span>
+<span class="sd">    [&#39;A&#39;]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
