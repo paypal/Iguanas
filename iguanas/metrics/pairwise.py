@@ -15,6 +15,23 @@ class CosineSimilarity:
     **kwargs : dict
         Any keyword arguments to be used in the sklearn `cosine_similarity`
         function.        
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from iguanas.metrics import CosineSimilarity
+    >>> cs = CosineSimilarity()
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> print(cs.fit(X=X))
+              A         B
+    A  1.000000  0.816497
+    B  0.816497  1.000000
     """
 
     def __init__(self, **kwargs):
@@ -52,7 +69,24 @@ class JaccardSimilarity:
     ----------
     **kwargs : dict
         Any keyword arguments to be used in the sklearn `pairwise_distances`
-        function.        
+        function.     
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from iguanas.metrics import JaccardSimilarity
+    >>> js = JaccardSimilarity()
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> print(js.fit(X=X))   
+              A         B
+    A  1.000000  0.666667
+    B  0.666667  1.000000
     """
 
     def __init__(self, **kwargs):

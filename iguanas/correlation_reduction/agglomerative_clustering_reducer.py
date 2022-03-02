@@ -73,6 +73,12 @@ class AgglomerativeClusteringReducer:
     >>> acr.fit(X=X, y=y)
     >>> print(acr.columns_to_keep)
     ['A']
+    >>> print(acr.transform(X=X))
+       A
+    0  1
+    1  0
+    2  1
+    3  0
     """
 
     def __init__(self,

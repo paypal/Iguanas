@@ -173,6 +173,21 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the Precision for either a single or set of binary</span>
 <span class="sd">    predictors.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import Precision</span>
+<span class="sd">    &gt;&gt;&gt; p = Precision()</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; print(p.fit(y_preds=X, y_true=y))</span>
+<span class="sd">    [1.         0.66666667]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -230,6 +245,21 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the Recall for either a single or set of binary</span>
 <span class="sd">    predictors.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import Recall</span>
+<span class="sd">    &gt;&gt;&gt; r = Recall()</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; print(r.fit(y_preds=X, y_true=y))</span>
+<span class="sd">    [1. 1.]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -291,7 +321,22 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    beta : float</span>
-<span class="sd">        The beta value used to calculate the Fbeta score.        </span>
+<span class="sd">        The beta value used to calculate the Fbeta score.   </span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import FScore</span>
+<span class="sd">    &gt;&gt;&gt; f1 = FScore(beta=1)</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; print(f1.fit(y_preds=X, y_true=y))</span>
+<span class="sd">    [1.  0.8]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
@@ -376,6 +421,27 @@
 <span class="sd">        &#39;Fraud&#39;) or non-fraud (y_type = &#39;NonFraud&#39;).</span>
 <span class="sd">    chargeback_multiplier : int</span>
 <span class="sd">        Multiplier to apply to chargeback transactions.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import Revenue</span>
+<span class="sd">    &gt;&gt;&gt; rev = Revenue(</span>
+<span class="sd">    ...     y_type = &#39;Fraud&#39;,</span>
+<span class="sd">    ...     chargeback_multiplier=2</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; amounts = pd.Series([</span>
+<span class="sd">    ...     100, 20, 50, 30</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; print(rev.fit(y_preds=X, y_true=y, sample_weight=amounts))</span>
+<span class="sd">    [350 310]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chargeback_multiplier</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
@@ -458,6 +524,35 @@
 <span class="sd">        following keys: `metric` - the function to be calculated; `operator` -</span>
 <span class="sd">        the operator used to calculate whether a result is within a bound; </span>
 <span class="sd">        `threshold` - the value corresponding to the boundary.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import Bounds</span>
+<span class="sd">    &gt;&gt;&gt; p = Precision()</span>
+<span class="sd">    &gt;&gt;&gt; r = Recall()</span>
+<span class="sd">    &gt;&gt;&gt; bounds = [</span>
+<span class="sd">    ...     {</span>
+<span class="sd">    ...         &#39;metric&#39;: p.fit,</span>
+<span class="sd">    ...         &#39;operator&#39;: &#39;&gt;&#39;,</span>
+<span class="sd">    ...         &#39;threshold&#39;: 0.7</span>
+<span class="sd">    ...     },</span>
+<span class="sd">    ...     {</span>
+<span class="sd">    ...         &#39;metric&#39;: r.fit,</span>
+<span class="sd">    ...         &#39;operator&#39;: &#39;&gt;&#39;,</span>
+<span class="sd">    ...         &#39;threshold&#39;: 0.7</span>
+<span class="sd">    ...     }</span>
+<span class="sd">    ... ]</span>
+<span class="sd">    &gt;&gt;&gt; b = Bounds(bounds=bounds)</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; print(b.fit(y_preds=X, y_true=y))</span>
+<span class="sd">    [0.57444252 0.49166744]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>

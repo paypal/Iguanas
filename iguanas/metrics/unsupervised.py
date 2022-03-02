@@ -18,6 +18,21 @@ class AlertsPerDay:
         Expected number of alerts per day for the given rule.
     no_of_days_in_file : int
         Number of days of data provided in the file.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from iguanas.metrics import AlertsPerDay
+    >>> apd = AlertsPerDay(
+    ...    n_alerts_expected_per_day=3,
+    ...    no_of_days_in_file=1
+    ... )
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> print(apd.fit(y_preds=X))
+    [-1. -0.]
     """
 
     def __init__(self, n_alerts_expected_per_day: int,
@@ -80,6 +95,20 @@ class PercVolume:
     perc_vol_expected : float
         Expected percentage of the overall volume that the binary predictor
         should flag.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from iguanas.metrics import PercVolume
+    >>> apd = PercVolume(
+    ...    perc_vol_expected=0.5,
+    ... )
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> print(apd.fit(y_preds=X))
+    [-0.     -0.0625]
     """
 
     def __init__(self, perc_vol_expected: float):

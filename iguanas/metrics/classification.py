@@ -13,6 +13,21 @@ class Precision:
     """
     Calculates the Precision for either a single or set of binary
     predictors.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from iguanas.metrics import Precision
+    >>> p = Precision()
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> print(p.fit(y_preds=X, y_true=y))
+    [1.         0.66666667]
     """
 
     def __repr__(self):
@@ -70,6 +85,21 @@ class Recall:
     """
     Calculates the Recall for either a single or set of binary
     predictors.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from iguanas.metrics import Recall
+    >>> r = Recall()
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> print(r.fit(y_preds=X, y_true=y))
+    [1. 1.]
     """
 
     def __repr__(self):
@@ -131,7 +161,22 @@ class FScore:
     Parameters
     ----------
     beta : float
-        The beta value used to calculate the Fbeta score.        
+        The beta value used to calculate the Fbeta score.   
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from iguanas.metrics import FScore
+    >>> f1 = FScore(beta=1)
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> print(f1.fit(y_preds=X, y_true=y))
+    [1.  0.8]
     """
 
     def __init__(self, beta: float):
@@ -216,6 +261,27 @@ class Revenue:
         'Fraud') or non-fraud (y_type = 'NonFraud').
     chargeback_multiplier : int
         Multiplier to apply to chargeback transactions.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from iguanas.metrics import Revenue
+    >>> rev = Revenue(
+    ...     y_type = 'Fraud',
+    ...     chargeback_multiplier=2
+    ... )
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> amounts = pd.Series([
+    ...     100, 20, 50, 30
+    ... ])
+    >>> print(rev.fit(y_preds=X, y_true=y, sample_weight=amounts))
+    [350 310]
     """
 
     def __init__(self, y_type: str, chargeback_multiplier: int):
@@ -298,6 +364,35 @@ class Bounds:
         following keys: `metric` - the function to be calculated; `operator` -
         the operator used to calculate whether a result is within a bound; 
         `threshold` - the value corresponding to the boundary.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from iguanas.metrics import Bounds
+    >>> p = Precision()
+    >>> r = Recall()
+    >>> bounds = [
+    ...     {
+    ...         'metric': p.fit,
+    ...         'operator': '>',
+    ...         'threshold': 0.7
+    ...     },
+    ...     {
+    ...         'metric': r.fit,
+    ...         'operator': '>',
+    ...         'threshold': 0.7
+    ...     }
+    ... ]
+    >>> b = Bounds(bounds=bounds)
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> print(b.fit(y_preds=X, y_true=y))
+    [0.57444252 0.49166744]
     """
 
     def __init__(self,
