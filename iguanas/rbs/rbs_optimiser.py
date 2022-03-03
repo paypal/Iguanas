@@ -63,6 +63,49 @@ class RBSOptimiser(RBSPipeline):
         The rules used in the optimised pipeline.    
     rules : Rules
         The Rules object containing the rules remaining after optimisation.
+
+    Examples
+    --------
+    >>> from iguanas.rbs import RBSPipeline, RBSOptimiser
+    >>> from iguanas.rule_generation import RuleGeneratorDT
+    >>> from iguanas.metrics import FScore
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> import pandas as pd
+    >>> f1 = FScore(beta=1)
+    >>> rg = RuleGeneratorDT(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     tree_ensemble=RandomForestClassifier(random_state=0), 
+    ...     rule_name_prefix='Rule'
+    ... )
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> X_rules = rg.fit(X=X, y=y)
+    >>> rbso = RBSOptimiser(
+    ...     pipeline = RBSPipeline(
+    ...         config=[
+    ...             (1, rg.rule_names)
+    ...         ], 
+    ...         final_decision=0
+    ...     ),
+    ...     metric=f1.fit,
+    ...     n_iter=10
+    ... )
+    >>> rbso.fit(X_rules=X_rules, y=y)
+    >>> print(rbso.rules_to_keep)
+    ['Rule_1']
+    >>> y_pred = rbso.predict(X_rules=X_rules)
+    >>> print(y_pred)
+    0    1
+    1    0
+    2    1
+    3    0
+    dtype: int64
     """
 
     def __init__(self,

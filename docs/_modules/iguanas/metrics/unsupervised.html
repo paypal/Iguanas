@@ -178,6 +178,21 @@
 <span class="sd">        Expected number of alerts per day for the given rule.</span>
 <span class="sd">    no_of_days_in_file : int</span>
 <span class="sd">        Number of days of data provided in the file.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import AlertsPerDay</span>
+<span class="sd">    &gt;&gt;&gt; apd = AlertsPerDay(</span>
+<span class="sd">    ...    n_alerts_expected_per_day=3,</span>
+<span class="sd">    ...    no_of_days_in_file=1</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; print(apd.fit(y_preds=X))</span>
+<span class="sd">    [-1. -0.]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_alerts_expected_per_day</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -240,6 +255,20 @@
 <span class="sd">    perc_vol_expected : float</span>
 <span class="sd">        Expected percentage of the overall volume that the binary predictor</span>
 <span class="sd">        should flag.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import PercVolume</span>
+<span class="sd">    &gt;&gt;&gt; apd = PercVolume(</span>
+<span class="sd">    ...    perc_vol_expected=0.5,</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; print(apd.fit(y_preds=X))</span>
+<span class="sd">    [-0.     -0.0625]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perc_vol_expected</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>

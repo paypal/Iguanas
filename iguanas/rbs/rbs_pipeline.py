@@ -30,7 +30,42 @@ class RBSPipeline:
     ValueError
         `config` must be a list.
     ValueError
-        `final_decision` must be either 0 or 1.    
+        `final_decision` must be either 0 or 1.   
+
+    Examples
+    --------
+    >>> from iguanas.rbs import RBSPipeline
+    >>> from iguanas.rule_generation import RuleGeneratorDT
+    >>> from iguanas.metrics import FScore
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> import pandas as pd
+    >>> f1 = FScore(beta=1)
+    >>> rg = RuleGeneratorDT(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     tree_ensemble=RandomForestClassifier(random_state=0), 
+    ...     rule_name_prefix='Rule'
+    ... )
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> X_rules = rg.fit(X=X, y=y)
+    >>> rbsp = RBSPipeline(
+    ...     config=[
+    ...         (1, rg.rule_names)
+    ...     ], 
+    ...     final_decision=0
+    ... )
+    >>> rbsp.predict(X_rules=X_rules)
+    0    1
+    1    1
+    2    1
+    3    0
+    dtype: int64
     """
 
     def __init__(self,

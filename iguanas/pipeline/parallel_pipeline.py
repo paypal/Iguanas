@@ -39,6 +39,55 @@ class ParallelPipeline(_BasePipeline):
     rules : Rules
         The Rules object containing the rules produced from fitting the 
         pipeline.
+
+    Examples
+    --------
+    >>> from iguanas.pipeline import ParallelPipeline
+    >>> from iguanas.rbs import RBSOptimiser, RBSPipeline
+    >>> from iguanas.rule_generation import RuleGeneratorDT, RuleGeneratorOpt
+    >>> from iguanas.metrics import FScore
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> import pandas as pd
+    >>> f1 = FScore(beta=1)
+    >>> rg_dt = RuleGeneratorDT(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     tree_ensemble=RandomForestClassifier(random_state=0), 
+    ...     rule_name_prefix='RuleGenDT'
+    ... )
+    >>> rg_opt = RuleGeneratorOpt(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     num_rules_keep=10,
+    ...     rule_name_prefix='RuleGenOpt'
+    ... )
+    >>> pp = ParallelPipeline(
+    ...     steps=[
+    ...         ('rg_dt', rg_dt), 
+    ...         ('rg_opt', rg_opt)
+    ...     ]
+    ... )
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> X_rules = pp.fit_transform(X=X, y=y)
+    >>> print(X_rules)
+       RuleGenDT_0  RuleGenDT_1  RuleGenDT_2  RuleGenOpt_0
+    0            1            1            1             1
+    1            0            0            1             0
+    2            1            1            1             1
+    3            0            0            0             0
+    >>> X_rules = pp.transform(X=X)
+    >>> print(X_rules)
+       RuleGenDT_0  RuleGenDT_1  RuleGenDT_2  RuleGenOpt_0
+    0            1            1            1             1
+    1            0            0            1             0
+    2            1            1            1             1
+    3            0            0            0             0
     """
 
     def __init__(self,
