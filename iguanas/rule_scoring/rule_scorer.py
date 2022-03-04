@@ -29,6 +29,36 @@ class RuleScorer:
     ----------
     rule_scores : Dict[str, int]
         Contains the generated score (values) for each rule (keys).
+
+    Examples
+    --------
+    >>> from iguanas.rule_scoring import RuleScorer, PerformanceScorer, ConstantScaler
+    >>> import pandas as pd
+    >>> from iguanas.metrics import FScore
+    >>> f1 = FScore(beta=1)
+    >>> X_rules = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> rs = RuleScorer(
+    ... scoring_class=PerformanceScorer(metric=f1.fit),
+    ... scaling_class=ConstantScaler(limit=100)
+    ... )
+    >>> rs.fit(X_rules=X_rules, y=y)
+    >>> print(rs.rule_scores)
+    A    100
+    B     80
+    dtype: int64
+    >>> X_scores = rs.transform(X_rules=X_rules)
+    >>> print(X_scores)
+         A   B
+    0  100  80
+    1    0  80
+    2  100  80
+    3    0   0
     """
 
     def __init__(self, scoring_class: Union[PerformanceScorer, LogRegScorer,

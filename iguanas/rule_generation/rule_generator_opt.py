@@ -90,6 +90,42 @@ class RuleGeneratorOpt(_BaseGenerator):
         The Rules object containing the generated rules.
     rule_names : List[str]
         The names of the generated rules.
+
+    Examples
+    --------
+    >>> from iguanas.rule_generation import RuleGeneratorOpt
+    >>> from iguanas.metrics import FScore
+    >>> import pandas as pd
+    >>> f1 = FScore(beta=1)
+    >>> rg = RuleGeneratorOpt(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     num_rules_keep=10,
+    ...     rule_name_prefix='Rule'
+    ... )
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> X_rules = rg.fit(X=X, y=y)
+    >>> print(X_rules)
+       Rule_0
+    0       1
+    1       0
+    2       1
+    3       0
+    >>> print(rg.rule_strings)
+    {'Rule_0': "(X['A']==True)"}
+    >>> X_rules = rg.transform(X=X)
+    >>> print(X_rules)
+       Rule_0
+    0       1
+    1       0
+    2       1
+    3       0
     """
 
     def __init__(self, metric: Callable,

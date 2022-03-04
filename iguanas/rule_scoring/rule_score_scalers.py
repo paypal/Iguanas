@@ -19,7 +19,24 @@ class ConstantScaler:
     Parameters
     ----------
     limit : int
-        The limit to apply when scaling the scores.            
+        The limit to apply when scaling the scores.      
+
+    Examples
+    --------
+    >>> from iguanas.rule_scoring import ConstantScaler
+    >>> import pandas as pd
+    >>> rule_scores = pd.Series({
+    ...     'Rule1Score': 0.9,
+    ...     'Rule2Score': 0.01,
+    ...     'Rule3Score': 0.3,
+    ... })
+    >>> cs = ConstantScaler(limit=100)
+    >>> scaled_scores = cs.fit(rule_scores=rule_scores)
+    >>> print(scaled_scores)     
+    Rule1Score    100
+    Rule2Score      1
+    Rule3Score     33
+    dtype: int64
     """
 
     def __init__(self, limit: int):
@@ -65,7 +82,24 @@ class MinMaxScaler:
     min_value : int 
         The minimum value of the scaled rule score range.
     max_value : int 
-        The maximum value of the scaled rule score range.        
+        The maximum value of the scaled rule score range.   
+
+    Examples
+    --------
+    >>> from iguanas.rule_scoring import MinMaxScaler
+    >>> import pandas as pd
+    >>> rule_scores = pd.Series({
+    ...     'Rule1Score': 0.9,
+    ...     'Rule2Score': 0.01,
+    ...     'Rule3Score': 0.3,
+    ... })
+    >>> mms = MinMaxScaler(min_value=-100, max_value=0)
+    >>> scaled_scores = mms.fit(rule_scores=rule_scores)
+    >>> print(scaled_scores)
+    Rule1Score   -100
+    Rule2Score      0
+    Rule3Score    -33
+    dtype: int64
     """
 
     def __init__(self, min_value: int, max_value: int):

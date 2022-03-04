@@ -85,6 +85,55 @@ class BayesianOptimiser(_BaseOptimiser):
     zero_varaince_rules : Rules
         A `Rules` object containing the rules which contained exclusively zero
         variance features.
+
+    Examples
+    --------
+    >>> from iguanas.rule_optimisation import BayesianOptimiser
+    >>> from iguanas.rules import Rules
+    >>> from iguanas.metrics import FScore
+    >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [0.9, 0.2, 0.1, 0.3],
+    ...     'B': [0.01, 0.2, 0.5, 0.1]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> f1 = FScore(beta=1)
+    >>> rule_strings = {
+    ...     'Rule1': "X['A']>0",
+    ...     'Rule2': "X['B']>1",
+    ...     'Rule3': "(X['A']>0)|(X['B']>0)"
+    ... }
+    >>> rules = Rules(rule_strings=rule_strings)
+    >>> rule_lambdas = rules.as_rule_lambdas(
+    ...     as_numpy=False, 
+    ...     with_kwargs=True
+    ... )
+    >>> bo = BayesianOptimiser(
+    ...     rule_lambdas=rule_lambdas, 
+    ...     lambda_kwargs=rules.lambda_kwargs, 
+    ...     metric=f1.fit, 
+    ...     n_iter=10
+    ... )
+    >>> X_rules = bo.fit(X=X, y=y)
+    >>> print(X_rules)
+       Rule1  Rule2  Rule3
+    0      1      0      1
+    1      1      0      0
+    2      1      1      1
+    3      1      0      0
+    >>> print(bo.rule_strings)
+    {'Rule1': "(X['A']>0)", 'Rule2': "(X['B']>0.2481631882805597)", 'Rule3': "(X['A']>0.648569854008818)|(X['B']>0.2481631882805597)"}
+    >>> print(bo.opt_rule_performances)
+    {'Rule1': 0.6666666666666666, 'Rule2': 0.6666666666666666, 'Rule3': 1.0}
+    >>> X_rules = bo.transform(X=X)
+    >>> print(X_rules)
+       Rule1  Rule2  Rule3
+    0      1      0      1
+    1      1      0      0
+    2      1      1      1
+    3      1      0      0
     """
 
     def __init__(self, rule_lambdas: Dict[str, Callable],
