@@ -16,7 +16,27 @@ class PerformanceScorer:
     ----------
     metric : Callable
         The method/function to calculate the metric used to score the rules. 
-        Should have parameters `y_true`, `y_pred` and `sample_weight`.        
+        Should have parameters `y_true`, `y_pred` and `sample_weight`.    
+
+    Examples
+    --------
+    >>> from iguanas.rule_scoring import PerformanceScorer
+    >>> import pandas as pd
+    >>> from iguanas.metrics import FScore
+    >>> f1 = FScore(beta=1)
+    >>> X_rules = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> ps = PerformanceScorer(metric=f1.fit)
+    >>> rule_scores = ps.fit(X_rules=X_rules, y=y)
+    >>> print(rule_scores)    
+    A    1.0
+    B    0.8
+    dtype: float64
     """
 
     def __init__(self, metric: Callable):
@@ -63,6 +83,24 @@ class LogRegScorer:
     **kwargs: dict, optional
         Keyword arguments associated with Sklearn's `LogisisticRegression()` 
         class constructor.
+
+    Examples
+    --------
+    >>> from iguanas.rule_scoring import LogRegScorer
+    >>> import pandas as pd    
+    >>> X_rules = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> lrs = LogRegScorer()
+    >>> rule_scores = lrs.fit(X_rules=X_rules, y=y)
+    >>> print(rule_scores)
+    A    2.158956
+    B    1.410809
+    dtype: float64
     """
 
     def __init__(self, *args, **kwargs):
@@ -112,6 +150,24 @@ class RandomForestScorer:
     **kwargs : tuple, optional
         Keyword arguments associated with Sklearn's 
         `RandomForestClassifier()` class constructor.
+
+    Examples
+    --------
+    >>> from iguanas.rule_scoring import RandomForestScorer
+    >>> import pandas as pd
+    >>> X_rules = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> rfs = RandomForestScorer()
+    >>> rule_scores = rfs.fit(X_rules=X_rules, y=y)
+    >>> print(rule_scores)
+    A    0.773762
+    B    0.226238
+    dtype: float64
     """
 
     def __init__(self, *args, **kwargs):
