@@ -7,11 +7,12 @@ First of all, thank you for taking the time to contribute to the project! We lov
 - [Getting started](#getting-started)
 - [Testing](#testing)
 - [Submitting a change](#submitting-a-change)
-- [Sphinx documentation process](#sphinx-documentation-process)
+- [Sphinx documentation process](#documentation-update-process)
+  - [Updating an existing class](#updating-an-existing-class)
   - [Adding a class to an existing module](#adding-a-class-to-an-existing-module)
   - [Adding a new module](#adding-a-new-module)
   - [Updating the documentation](#updating-the-documentation)
-- [Styleguide](#styleguide)
+- [Style guide](#style-guide)
   - [Code](#code)
   - [Docstrings](#docstrings)
   - [Notebooks](#notebooks)
@@ -104,17 +105,29 @@ You can submit a change by raising a [pull-request](https://github.com/paypal/Ig
 
 Please ensure that, before raising a pull-request:
 
-- Your contribution conforms to the [Style guide](#styleguide).
+- The branch you merge into is the `dev` branch, not the main `branch` (as the `dev` branch is used for staging changes before they are merged with the `main` branch).
+- Commit messages are concise and informative.
+- Your contribution conforms to the [Style guide](#style-guide).
 - Your code has been profiled thouroughly to ensure runtime is optimised.
 - Unit tests are added/extended.
-- Unit test coverage is >95%.
-- Docstrings are added in the [numpy](https://numpydoc.readthedocs.io/en/latest/format.html) format, using the same style as the existing docstrings.
-- An example notebook is added, in the same style as the existing notebooks.
-- The documentation has been updated by running the [Documentation update process](#sphinx-documentation-process).
+- Unit test coverage is 100%.
+- Docstrings are added/updated in the [numpy](https://numpydoc.readthedocs.io/en/latest/format.html) format, using the same style as the existing docstrings. Class docstrings should also include examples.
+- If a new class/module is added, an example notebook should be created, in the same style as the existing notebooks.
+- The documentation has been updated by running the [Documentation update process](#documentation-update-process).
+
+**Note:** when a pull-request is raised, the `Build` workflow will run, which ensures that unit tests, doctests and notebook tests all successfully run on multiple versions of Python. If the `Build` fails, the merge will also fail - if this happens, please consult the logs in the [Actions](https://github.com/paypal/Iguanas/actions) area of the repo to see where the `Build` has failed.
 
 ## Documentation update process
 
-To ensure that any changes or additions to Iguanas are reflected in the documentation, there are a few changes that need to be made to the files in the `run_doc` folder (located in the Iguanas parent directory). The changes that need to be made depend on whether a class has been added to an existing module, or a new module has been created:
+To ensure that any changes or additions to Iguanas are reflected in the documentation, there are a few changes that need to be made to the files in the `run_doc` folder (located in the Iguanas parent directory). The changes that need to be made depend on whether:
+
+1. A class has been updated.
+2. A class has been added to an existing module.
+3. A new module has been created.
+
+### Updating an existing class
+
+If an existing class has been updated, you can go straight to the [Updating the documentation](#updating-the-documentation) step.
 
 ### Adding a class to an existing module
 
@@ -133,13 +146,14 @@ If a new module has been added to Iguanas, the following `.rst` files need to be
 
 ### Updating the documentation
 
-Once the necessary changes have been made, the documentation can be updated by running the following command:
+Once the necessary changes have been made, the documentation can be updated by running the following commands:
 
 ```bash
-sh <path-to-Iguanas-repo>/run_doc/autodoc.sh
+cd <path-to-Iguanas-repo>/run_doc
+sh autodoc.sh
 ```
 
-## Styleguide
+## Style guide
 
 ### Code
 
@@ -147,7 +161,7 @@ Python code should follow the [PEP 8](https://www.python.org/dev/peps/pep-0008/)
 
 ### Docstrings
 
-Docstrings should follow the [numpy](https://numpydoc.readthedocs.io/en/latest/format.html) format.
+Docstrings should follow the [numpy](https://numpydoc.readthedocs.io/en/latest/format.html) format. Each class docstring should include an example.
 
 ### Notebooks
 
@@ -171,7 +185,7 @@ You can request a new feature in the [Issues](https://github.com/paypal/Iguanas/
 
 You can find the Code of Conduct [here](https://github.com/paypal/Iguanas/blob/main/CODE_OF_CONDUCT.md).
 
-## I need more help!
+## I need more help
 
 If you have any other queries or questions, feel free to contact James Laidler:
 
