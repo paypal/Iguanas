@@ -105,8 +105,9 @@ You can submit a change by raising a [pull-request](https://github.com/paypal/Ig
 
 Please ensure that, before raising a pull-request:
 
-- The branch you merge into is the `dev` branch, not the main `branch` (as the `dev` branch is used for staging changes before they are merged with the `main` branch).
+- You merge your branch into the `dev` branch, not the main `branch` (as the `dev` branch is used for staging changes before they are merged with the `main` branch).
 - Commit messages are concise and informative.
+- A comment is added to your PR giving a summary of the changes and why they were made.
 - Your contribution conforms to the [Style guide](#style-guide).
 - Your code has been profiled thouroughly to ensure runtime is optimised.
 - Unit tests are added/extended.
