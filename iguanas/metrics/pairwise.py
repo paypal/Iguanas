@@ -20,14 +20,11 @@ class CosineSimilarity:
     --------
     >>> import pandas as pd
     >>> from iguanas.metrics import CosineSimilarity
-    >>> cs = CosineSimilarity()
     >>> X = pd.DataFrame({
     ...     'A': [1, 0, 1, 0],
     ...     'B': [1, 1, 1, 0]
-    ... })
-    >>> y = pd.Series([
-    ...     1, 0, 1, 0
-    ... ])
+    ... })    
+    >>> cs = CosineSimilarity()
     >>> print(cs.fit(X=X))
               A         B
     A  1.000000  0.816497
@@ -75,14 +72,11 @@ class JaccardSimilarity:
     --------
     >>> import pandas as pd
     >>> from iguanas.metrics import JaccardSimilarity
-    >>> js = JaccardSimilarity()
     >>> X = pd.DataFrame({
     ...     'A': [1, 0, 1, 0],
     ...     'B': [1, 1, 1, 0]
-    ... })
-    >>> y = pd.Series([
-    ...     1, 0, 1, 0
-    ... ])
+    ... })    
+    >>> js = JaccardSimilarity()
     >>> print(js.fit(X=X))   
               A         B
     A  1.000000  0.666667

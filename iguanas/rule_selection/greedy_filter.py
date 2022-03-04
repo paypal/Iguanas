@@ -43,6 +43,35 @@ class GreedyFilter(_BaseFilter):
     score : float
         The combined performance (i.e. the value of `metric`) of the rules
         which give the best combined performance.
+
+    Examples
+    --------
+    >>> from iguanas.metrics import Precision, FScore
+    >>> from iguanas.rule_selection import GreedyFilter
+    >>> import pandas as pd
+    >>> X_rules = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> p = Precision()
+    >>> f1 = FScore(beta=1)
+    >>> gf = GreedyFilter(
+    ...     metric=f1.fit,
+    ...     sorting_metric=p.fit
+    ... )
+    >>> gf.fit(X_rules=X_rules, y=y)
+    >>> print(gf.rules_to_keep)
+    ['A']
+    >>> X_rules = gf.transform(X_rules=X_rules)
+    >>> print(X_rules)
+       A
+    0  1
+    1  0
+    2  1
+    3  0
     """
 
     def __init__(self,

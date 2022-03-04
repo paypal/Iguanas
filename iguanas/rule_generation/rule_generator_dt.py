@@ -76,13 +76,6 @@ class RuleGeneratorDT(_BaseGenerator):
     >>> from iguanas.metrics import FScore
     >>> from sklearn.ensemble import RandomForestClassifier
     >>> import pandas as pd
-    >>> f1 = FScore(beta=1)
-    >>> rg = RuleGeneratorDT(
-    ...     metric=f1.fit, 
-    ...     n_total_conditions=2, 
-    ...     tree_ensemble=RandomForestClassifier(random_state=0), 
-    ...     rule_name_prefix='Rule'
-    ... )
     >>> X = pd.DataFrame({
     ...     'A': [1, 0, 1, 0],
     ...     'B': [1, 1, 1, 0]
@@ -90,6 +83,13 @@ class RuleGeneratorDT(_BaseGenerator):
     >>> y = pd.Series([
     ...     1, 0, 1, 0
     ... ])
+    >>> f1 = FScore(beta=1)
+    >>> rg = RuleGeneratorDT(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     tree_ensemble=RandomForestClassifier(random_state=0), 
+    ...     rule_name_prefix='Rule'
+    ... )
     >>> X_rules = rg.fit(X=X, y=y)
     >>> print(X_rules)
        Rule_0  Rule_1  Rule_2

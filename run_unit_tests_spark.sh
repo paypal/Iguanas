@@ -1,1 +1,0 @@
-pytest ./iguanas/*/tests/*spark* 

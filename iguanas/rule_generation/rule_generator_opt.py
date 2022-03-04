@@ -96,13 +96,6 @@ class RuleGeneratorOpt(_BaseGenerator):
     >>> from iguanas.rule_generation import RuleGeneratorOpt
     >>> from iguanas.metrics import FScore
     >>> import pandas as pd
-    >>> f1 = FScore(beta=1)
-    >>> rg = RuleGeneratorOpt(
-    ...     metric=f1.fit, 
-    ...     n_total_conditions=2, 
-    ...     num_rules_keep=10,
-    ...     rule_name_prefix='Rule'
-    ... )
     >>> X = pd.DataFrame({
     ...     'A': [1, 0, 1, 0],
     ...     'B': [1, 1, 1, 0]
@@ -110,6 +103,13 @@ class RuleGeneratorOpt(_BaseGenerator):
     >>> y = pd.Series([
     ...     1, 0, 1, 0
     ... ])
+    >>> f1 = FScore(beta=1)
+    >>> rg = RuleGeneratorOpt(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     num_rules_keep=10,
+    ...     rule_name_prefix='Rule'
+    ... )
     >>> X_rules = rg.fit(X=X, y=y)
     >>> print(X_rules)
        Rule_0

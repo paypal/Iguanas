@@ -53,6 +53,13 @@ class LinearPipeline(_BasePipeline):
     >>> from iguanas.metrics import FScore
     >>> from sklearn.ensemble import RandomForestClassifier
     >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
     >>> # Pipeline ending with a transformer ---
     >>> f1 = FScore(beta=1)
     >>> rg = RuleGeneratorDT(
@@ -76,13 +83,6 @@ class LinearPipeline(_BasePipeline):
     ...         ('sf', sf)
     ...     ]
     ... )
-    >>> X = pd.DataFrame({
-    ...     'A': [1, 0, 1, 0],
-    ...     'B': [1, 1, 1, 0]
-    ... })
-    >>> y = pd.Series([
-    ...     1, 0, 1, 0
-    ... ])
     >>> lp.fit(X=X, y=y)
     >>> print(lp.get_params()['sf']['rules_to_keep'])
     ['Rule_0', 'Rule_1']

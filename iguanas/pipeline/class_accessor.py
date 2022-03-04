@@ -24,6 +24,13 @@ class ClassAccessor:
     >>> from iguanas.metrics import FScore
     >>> from sklearn.ensemble import RandomForestClassifier
     >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
     >>> f1 = FScore(beta=1)
     >>> rg = RuleGeneratorDT(
     ...     metric=f1.fit, 
@@ -36,13 +43,6 @@ class ClassAccessor:
     ...         ('rg', rg)
     ...     ]
     ... )
-    >>> X = pd.DataFrame({
-    ...     'A': [1, 0, 1, 0],
-    ...     'B': [1, 1, 1, 0]
-    ... })
-    >>> y = pd.Series([
-    ...     1, 0, 1, 0
-    ... ])
     >>> lp.fit(X=X, y=y)
     >>> pipeline_params = lp.get_params()
     >>> ca = ClassAccessor(

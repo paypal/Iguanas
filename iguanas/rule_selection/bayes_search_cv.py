@@ -88,6 +88,97 @@ class BayesSearchCV:
         The parameter set that produced the best mean score.
     pipeline_ : LinearPipeline
         The optimised LinearPipeline.
+
+    Examples
+    --------
+    >>> from iguanas.rule_generation import RuleGeneratorDT
+    >>> from iguanas.rbs import RBSOptimiser, RBSPipeline
+    >>> from iguanas.rule_selection import SimpleFilter, BayesSearchCV
+    >>> from iguanas.pipeline import LinearPipeline, ClassAccessor
+    >>> from iguanas.metrics import FScore, Precision
+    >>> from iguanas.space import UniformFloat, UniformInteger, Choice
+    >>> from sklearn.datasets import make_classification
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> import pandas as pd
+    >>> X, y = make_classification(
+    ...     n_samples=1000, 
+    ...     n_features=4,
+    ...     n_informative=2, 
+    ...     n_redundant=0,
+    ...     random_state=0, 
+    ...     shuffle=False
+    ... )
+    >>> X, y = pd.DataFrame(X, columns=['A', 'B', 'C', 'D']), pd.Series(y)
+    >>> f1 = FScore(beta=1)
+    >>> p = Precision()
+    >>> # Set up pipeline ---
+    >>> rg = RuleGeneratorDT(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     tree_ensemble=RandomForestClassifier(n_estimators=10, random_state=0), 
+    ...     rule_name_prefix='Rule'
+    ... )
+    >>> sf = SimpleFilter(
+    ...     threshold=0.1, 
+    ...     operator='>',
+    ...     metric=f1.fit
+    ... )
+    >>> rbso = RBSOptimiser(
+    ...     pipeline = RBSPipeline(
+    ...         config=[
+    ...             [1, ClassAccessor(class_tag='sf', class_attribute='rules_to_keep')]
+    ...         ], 
+    ...         final_decision=0
+    ...     ),
+    ...     metric=f1.fit,
+    ...     n_iter=10,
+    ...     rules = ClassAccessor(class_tag='rg', class_attribute='rules')
+    ... )
+    >>> lp = LinearPipeline(
+    ...     steps=[
+    ...         ('rg', rg),
+    ...         ('sf', sf),
+    ...         ('rbso', rbso)
+    ...     ]
+    ... )
+    >>> # Provide search spaces ---
+    >>> search_spaces = {
+    ...     'rg': {
+    ...         'n_total_conditions': UniformInteger(1, 10)
+    ...     },
+    ...     'sf': {
+    ...         'threshold': UniformFloat(0, 1),        
+    ...         'metric': Choice([f1.fit, p.fit])
+    ...     }
+    ... }
+    >>> # Apply BayesSearchCV ---
+    >>> bs = BayesSearchCV(
+    ...     pipeline=lp, 
+    ...     search_spaces=search_spaces, 
+    ...     metric=f1.fit, 
+    ...     cv=3, 
+    ...     n_iter=10, 
+    ...     num_cores=3, 
+    ...     error_score=0
+    ... )
+    >>> bs.fit(X=X, y=y)
+    >>> final_rules = bs.pipeline_.get_params()['rbso']['rules']
+    >>> print(bs.best_score)
+    0.9290788317962232
+    >>> print(bs.best_params)
+    {'rg': {'n_total_conditions': 1.0}, 'sf': {'metric': <bound method Precision.fit of Precision>, 'threshold': 0.5286917420754508}}
+    >>> print(bs.best_index)
+    3
+    >>> print(final_rules.rule_strings)
+    {'Rule_6': "(X['A']>1.53757)", 'Rule_13': "(X['B']>-0.06546)", 'Rule_17': "(X['B']>-0.26593)"}
+    >>> y_pred = bs.predict(X=X)
+    >>> print(y_pred.head())
+    0    0
+    1    0
+    2    0
+    3    0
+    4    0
+    dtype: int64
     """
 
     def __init__(self,

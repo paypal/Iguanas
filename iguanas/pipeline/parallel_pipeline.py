@@ -48,6 +48,13 @@ class ParallelPipeline(_BasePipeline):
     >>> from iguanas.metrics import FScore
     >>> from sklearn.ensemble import RandomForestClassifier
     >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
     >>> f1 = FScore(beta=1)
     >>> rg_dt = RuleGeneratorDT(
     ...     metric=f1.fit, 
@@ -67,13 +74,6 @@ class ParallelPipeline(_BasePipeline):
     ...         ('rg_opt', rg_opt)
     ...     ]
     ... )
-    >>> X = pd.DataFrame({
-    ...     'A': [1, 0, 1, 0],
-    ...     'B': [1, 1, 1, 0]
-    ... })
-    >>> y = pd.Series([
-    ...     1, 0, 1, 0
-    ... ])
     >>> X_rules = pp.fit_transform(X=X, y=y)
     >>> print(X_rules)
        RuleGenDT_0  RuleGenDT_1  RuleGenDT_2  RuleGenOpt_0

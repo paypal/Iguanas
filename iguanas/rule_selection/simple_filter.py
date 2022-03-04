@@ -39,6 +39,35 @@ class SimpleFilter(_BaseFilter):
     rules : Rules
         The Iguanas `Rules` object containing the rules which remain after the
         filter has been applied.
+
+    Examples
+    --------
+    >>> from iguanas.metrics import FScore
+    >>> from iguanas.rule_selection import SimpleFilter
+    >>> import pandas as pd
+    >>> X_rules = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> f1 = FScore(beta=1)
+    >>> sf = SimpleFilter(
+    ...     threshold=0.8,
+    ...     operator='>',
+    ...     metric=f1.fit    
+    ... )
+    >>> sf.fit(X_rules=X_rules, y=y)
+    >>> print(sf.rules_to_keep)
+    ['A']
+    >>> X_rules = sf.transform(X_rules=X_rules)
+    >>> print(X_rules)
+       A
+    0  1
+    1  0
+    2  1
+    3  0
     """
 
     def __init__(self,

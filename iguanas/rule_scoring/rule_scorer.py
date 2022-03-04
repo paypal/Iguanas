@@ -35,7 +35,6 @@ class RuleScorer:
     >>> from iguanas.rule_scoring import RuleScorer, PerformanceScorer, ConstantScaler
     >>> import pandas as pd
     >>> from iguanas.metrics import FScore
-    >>> f1 = FScore(beta=1)
     >>> X_rules = pd.DataFrame({
     ...     'A': [1, 0, 1, 0],
     ...     'B': [1, 1, 1, 0]
@@ -43,6 +42,7 @@ class RuleScorer:
     >>> y = pd.Series([
     ...     1, 0, 1, 0
     ... ])
+    >>> f1 = FScore(beta=1)
     >>> rs = RuleScorer(
     ... scoring_class=PerformanceScorer(metric=f1.fit),
     ... scaling_class=ConstantScaler(limit=100)

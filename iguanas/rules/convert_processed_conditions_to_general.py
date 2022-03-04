@@ -34,6 +34,46 @@ class ConvertProcessedConditionsToGeneral:
     rules : Rules
         Class containing the rule stored in the standard Iguanas string format.
         See the `rules` module for more information.
+
+    Examples
+    --------
+    >>> from iguanas.rules import ConvertProcessedConditionsToGeneral, ReturnMappings
+    >>> import pandas as pd
+    >>> import numpy as np
+    >>> X = pd.DataFrame({
+    ...     'num': [1, 2, np.nan, 1],
+    ...     'country': [np.nan, 'UK', np.nan, np.nan],
+    ... })
+    >>> X_processed = pd.DataFrame({
+    ...     'num': [1, 2, -1, 1],
+    ...     'country_missing': [1, 0, 1, 1],
+    ...     'country_UK': [0, 1, 0, 0]
+    ... })
+    >>> rule_strings = {
+    ...     'Rule1': "(X['num']<=1)",
+    ...     'Rule2': "(X['country_missing']==True)",
+    ...     'Rule3': "(X['country_UK']==True)"
+    ... }        
+    >>> rm = ReturnMappings()
+    >>> imputed_mappings = rm.return_imputed_values_mapping(
+    ...     [['num'], -1], 
+    ...     [['country'], 'missing']
+    ... )
+    >>> ohe_categories = rm.return_ohe_categories_mapping(
+    ...     pre_ohe_cols=X.columns, 
+    ...     post_ohe_cols=X_processed.columns, 
+    ...     pre_ohe_dtypes=X.dtypes
+    ... )
+    >>> cpcg = ConvertProcessedConditionsToGeneral(
+    ...     imputed_values=imputed_mappings, 
+    ...     ohe_categories=ohe_categories
+    ... )
+    >>> rule_strings = cpcg.convert(
+    ...     rule_strings=rule_strings, 
+    ...     X=X_processed
+    ... )
+    >>> print(rule_strings)
+    {'Rule1': "((X['num']<=1)|(X['num'].isna()))", 'Rule2': "(X['country'].isna())", 'Rule3': "(X['country']=='UK')"}
     """
 
     def __init__(self, imputed_values=None, ohe_categories=None):
@@ -272,6 +312,35 @@ class ReturnMappings:
     """
     Generates mapping dictionaries (for imputed values and OHE values) which 
     are required in the `ConvertProcessedConditionsToGeneral` class.
+
+    Examples
+    --------
+    >>> from iguanas.rules import ReturnMappings
+    >>> import pandas as pd
+    >>> import numpy as np
+    >>> X = pd.DataFrame({
+    ...     'num': [1, 2, np.nan, 1],
+    ...     'country': [np.nan, 'UK', np.nan, np.nan],
+    ... })
+    >>> X_processed = pd.DataFrame({
+    ...     'num': [1, 2, -1, 1],
+    ...     'country_missing': [1, 0, 1, 1],
+    ...     'country_UK': [0, 1, 0, 0]
+    ... })
+    >>> rm = ReturnMappings()
+    >>> imputed_mappings = rm.return_imputed_values_mapping(
+    ...     [['num'], -1], 
+    ...     [['country'], 'missing']
+    ... )
+    >>> print(imputed_mappings)
+    {'num': -1, 'country': 'missing'}
+    >>> ohe_categories = rm.return_ohe_categories_mapping(
+    ...     pre_ohe_cols=X.columns, 
+    ...     post_ohe_cols=X_processed.columns, 
+    ...     pre_ohe_dtypes=X.dtypes
+    ... )
+    >>> print(ohe_categories)
+    {'country_missing': 'missing', 'country_UK': 'UK'}
     """
 
     @staticmethod

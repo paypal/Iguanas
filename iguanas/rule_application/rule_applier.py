@@ -22,19 +22,16 @@ class RuleApplier:
     --------
     >>> from iguanas.rule_application import RuleApplier
     >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })    
     >>> rule_strings = {
     ...     'Rule1': "X['A']==1",
     ...     'Rule2': "X['B']==1",
     ...     'Rule3': "(X['A']==1)&(X['B']==1)"
     ... }
     >>> ra = RuleApplier(rule_strings=rule_strings)
-    >>> X = pd.DataFrame({
-    ...     'A': [1, 0, 1, 0],
-    ...     'B': [1, 1, 1, 0]
-    ... })
-    >>> y = pd.Series([
-    ...     1, 0, 1, 0
-    ... ])
     >>> X_rules = ra.transform(X=X)
     >>> print(X_rules)     
        Rule1  Rule2  Rule3

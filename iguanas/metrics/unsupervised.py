@@ -23,14 +23,14 @@ class AlertsPerDay:
     --------
     >>> import pandas as pd
     >>> from iguanas.metrics import AlertsPerDay
-    >>> apd = AlertsPerDay(
-    ...    n_alerts_expected_per_day=3,
-    ...    no_of_days_in_file=1
-    ... )
     >>> X = pd.DataFrame({
     ...     'A': [1, 0, 1, 0],
     ...     'B': [1, 1, 1, 0]
     ... })
+    >>> apd = AlertsPerDay(
+    ...    n_alerts_expected_per_day=3,
+    ...    no_of_days_in_file=1
+    ... )
     >>> print(apd.fit(y_preds=X))
     [-1. -0.]
     """
@@ -100,13 +100,13 @@ class PercVolume:
     --------
     >>> import pandas as pd
     >>> from iguanas.metrics import PercVolume
-    >>> apd = PercVolume(
-    ...    perc_vol_expected=0.5,
-    ... )
     >>> X = pd.DataFrame({
     ...     'A': [1, 0, 1, 0],
     ...     'B': [1, 1, 1, 0]
     ... })
+    >>> apd = PercVolume(
+    ...    perc_vol_expected=0.5,
+    ... )
     >>> print(apd.fit(y_preds=X))
     [-0.     -0.0625]
     """

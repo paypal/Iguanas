@@ -64,7 +64,43 @@ class Rules(RuleApplier):
         rule.
     rule_features : Dict[str, set]
         For each rule (keys), a set containing the features used in the rule
-        (only populates when the `.get_rules_features()` method is used).    
+        (only populates when the `.get_rules_features()` method is used).   
+
+    Examples
+    --------
+    >>> from iguanas.rules import Rules
+    >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0],
+    ...     'C': [0.9, 0.2, 0.3, 0.4]
+    ... })
+    >>> rule_strings = {
+    ... 'Rule1': "X['A']==True",
+    ... 'Rule2': "X['B']==True",
+    ... 'Rule3': "X['C']>0.5"
+    ... }
+    >>> rules = Rules(rule_strings=rule_strings)
+    >>> # Covert to lambda format (used for rule optimisation) ---
+    >>> rule_lambdas = rules.as_rule_lambdas(as_numpy=False, with_kwargs=True)
+    >>> print(rules.lambda_kwargs)
+    {'Rule1': {}, 'Rule2': {}, 'Rule3': {'C': 0.5}}
+    >>> # Apply rules to dataset ---
+    >>> X_rules = rules.transform(X=X)
+    >>> print(X_rules)
+       Rule1  Rule2  Rule3
+    0      1      1      1
+    1      0      1      0
+    2      1      1      0
+    3      0      0      0
+    >>> # Get features used in each rule ---
+    >>> rule_features = rules.get_rule_features()
+    >>> print(rule_features)
+    {'Rule1': {'A'}, 'Rule2': {'B'}, 'Rule3': {'C'}}
+    >>> # Filter rule set by name ---
+    >>> rules.filter_rules(exclude='Rule1')
+    >>> print(rules.rule_strings) 
+    {'Rule2': "X['B']==True", 'Rule3': "X['C']>0.5"}
     """
 
     def __init__(self, rule_dicts=None, rule_strings=None,

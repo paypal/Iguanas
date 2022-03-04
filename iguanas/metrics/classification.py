@@ -18,7 +18,6 @@ class Precision:
     --------
     >>> import pandas as pd
     >>> from iguanas.metrics import Precision
-    >>> p = Precision()
     >>> X = pd.DataFrame({
     ...     'A': [1, 0, 1, 0],
     ...     'B': [1, 1, 1, 0]
@@ -26,6 +25,7 @@ class Precision:
     >>> y = pd.Series([
     ...     1, 0, 1, 0
     ... ])
+    >>> p = Precision()
     >>> print(p.fit(y_preds=X, y_true=y))
     [1.         0.66666667]
     """
@@ -90,7 +90,6 @@ class Recall:
     --------
     >>> import pandas as pd
     >>> from iguanas.metrics import Recall
-    >>> r = Recall()
     >>> X = pd.DataFrame({
     ...     'A': [1, 0, 1, 0],
     ...     'B': [1, 1, 1, 0]
@@ -98,6 +97,7 @@ class Recall:
     >>> y = pd.Series([
     ...     1, 0, 1, 0
     ... ])
+    >>> r = Recall()
     >>> print(r.fit(y_preds=X, y_true=y))
     [1. 1.]
     """
@@ -167,7 +167,6 @@ class FScore:
     --------
     >>> import pandas as pd
     >>> from iguanas.metrics import FScore
-    >>> f1 = FScore(beta=1)
     >>> X = pd.DataFrame({
     ...     'A': [1, 0, 1, 0],
     ...     'B': [1, 1, 1, 0]
@@ -175,6 +174,7 @@ class FScore:
     >>> y = pd.Series([
     ...     1, 0, 1, 0
     ... ])
+    >>> f1 = FScore(beta=1)
     >>> print(f1.fit(y_preds=X, y_true=y))
     [1.  0.8]
     """
@@ -266,10 +266,6 @@ class Revenue:
     --------
     >>> import pandas as pd
     >>> from iguanas.metrics import Revenue
-    >>> rev = Revenue(
-    ...     y_type = 'Fraud',
-    ...     chargeback_multiplier=2
-    ... )
     >>> X = pd.DataFrame({
     ...     'A': [1, 0, 1, 0],
     ...     'B': [1, 1, 1, 0]
@@ -280,6 +276,10 @@ class Revenue:
     >>> amounts = pd.Series([
     ...     100, 20, 50, 30
     ... ])
+    >>> rev = Revenue(
+    ...     y_type = 'Fraud',
+    ...     chargeback_multiplier=2
+    ... )
     >>> print(rev.fit(y_preds=X, y_true=y, sample_weight=amounts))
     [350 310]
     """
@@ -371,6 +371,13 @@ class Bounds:
     >>> from iguanas.metrics import Bounds
     >>> p = Precision()
     >>> r = Recall()
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
     >>> bounds = [
     ...     {
     ...         'metric': p.fit,
@@ -384,13 +391,6 @@ class Bounds:
     ...     }
     ... ]
     >>> b = Bounds(bounds=bounds)
-    >>> X = pd.DataFrame({
-    ...     'A': [1, 0, 1, 0],
-    ...     'B': [1, 1, 1, 0]
-    ... })
-    >>> y = pd.Series([
-    ...     1, 0, 1, 0
-    ... ])
     >>> print(b.fit(y_preds=X, y_true=y))
     [0.57444252 0.49166744]
     """
