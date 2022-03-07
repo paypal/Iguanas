@@ -79,7 +79,8 @@ class ConvertProcessedConditionsToGeneral:
     def __init__(self, imputed_values=None, ohe_categories=None):
         if imputed_values is None and ohe_categories is None:
             raise ValueError(
-                'Either `imputed_values` or `ohe_categories` must be given')
+                'Either `imputed_values` or `ohe_categories` must be given'
+            )
         self.imputed_values = imputed_values
         self.ohe_categories = ohe_categories
         if ohe_categories is not None:
@@ -219,7 +220,8 @@ class ConvertProcessedConditionsToGeneral:
                 value = condition_string.split(operator)[1]
                 return feature, operator, value
         raise Exception(
-            'Operator not currently supported in Iguanas. Rule cannot be parsed.')
+            'Operator not currently supported in Iguanas. Rule cannot be parsed.'
+        )
 
     @staticmethod
     def _add_null_condition_to_imputed_numeric_rule(feature: str,

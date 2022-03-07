@@ -7,6 +7,13 @@ class DataFrameSizeWarning(Warning):
 
 class NoRulesWarning(Warning):
     """
-    Custom warning for no rules can be generated.
+    Custom warning for when rules cannot be generated.
+    """
+    pass
+
+
+class RulesNotOptimisedWarning(Warning):
+    """
+    Custom warning for when rules cannot be optimised.
     """
     pass

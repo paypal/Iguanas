@@ -1,3 +1,5 @@
-from .warnings import DataFrameSizeWarning, NoRulesWarning
+from .warnings import DataFrameSizeWarning, NoRulesWarning, RulesNotOptimisedWarning
 
-__all__ = ['DataFrameSizeWarning', 'NoRulesWarning']
+__all__ = [
+    'DataFrameSizeWarning', 'NoRulesWarning', 'RulesNotOptimisedWarning'
+]

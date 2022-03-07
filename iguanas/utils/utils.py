@@ -323,7 +323,8 @@ def calc_tps_fps_tns_fns(y_true: Union[PandasSeriesType, np.ndarray, KoalasSerie
 
     if tps == False and fps == False and tns == False and fns == False and tps_fps == False and tps_fns == False:
         raise ValueError(
-            'One of the parameters `tps`, `fps`, `tns`, `fns`, `tps_fps` or `tps_fns` must be True')
+            'One of the parameters `tps`, `fps`, `tns`, `fns`, `tps_fps` or `tps_fns` must be True'
+        )
     if is_type(y_true, [KoalasSeries, KoalasDataFrame]) and is_type(y_preds, [KoalasSeries, KoalasDataFrame]):
         spark_df = create_spark_df(
             X=y_preds, y=y_true, sample_weight=sample_weight)
@@ -639,5 +640,6 @@ def check_duplicate_cols(X: Union[PandasDataFrameType, KoalasDataFrameType],
     X_cols_dups_mask = X.columns.duplicated()
     if X_cols_dups_mask.sum() > 0:
         X_cols_dups = list(set(X.columns[X_cols_dups_mask]))
-        raise Exception(
-            f"""`{X_name}` contains duplicate column names - these are: '{"', '".join(X_cols_dups)}'""")
+        raise ValueError(
+            f"""`{X_name}` contains duplicate column names - these are: '{"', '".join(X_cols_dups)}'"""
+        )

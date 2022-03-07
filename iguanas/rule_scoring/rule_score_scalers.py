@@ -65,7 +65,8 @@ class ConstantScaler:
             rule_scores_scaled = rule_scores * multiplier
         else:
             raise ValueError(
-                'rule_scores must contain only negative scores or only positive scores, not a mixture')
+                'rule_scores must contain only negative scores or only positive scores, not a mixture'
+            )
         return round(rule_scores_scaled).astype(int)
 
 
@@ -122,7 +123,8 @@ class MinMaxScaler:
         """
         if not (all(rule_scores <= 0) or all(rule_scores >= 0)):
             raise ValueError(
-                'rule_scores must contain only negative scores or only positive scores, not a mixture')
+                'rule_scores must contain only negative scores or only positive scores, not a mixture'
+            )
         if self.min_value < 0 and all(rule_scores >= 0):
             rule_scores = -rule_scores
         rule_scores_scaled_arr = minmax_scale(rule_scores, feature_range=(

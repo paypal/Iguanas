@@ -12,6 +12,7 @@ from iguanas.rule_selection import SimpleFilter, CorrelatedFilter
 from iguanas.correlation_reduction import AgglomerativeClusteringReducer
 from iguanas.rbs import RBSOptimiser, RBSPipeline
 from iguanas.pipeline import ParallelPipeline, ClassAccessor, LinearPipeline
+from iguanas.warnings import NoRulesWarning
 
 f1 = FScore(1)
 js = JaccardSimilarity()
@@ -190,7 +191,7 @@ def test_try_except(_create_data, _instantiate_classes):
         ]
     )
     # With generator classes
-    with pytest.warns(UserWarning, match='No rules remain in step `rg_dt1` as it raised the following error: "No rules could be generated. Try changing the class parameters."'):
+    with pytest.warns(NoRulesWarning, match='No rules remain in step `rg_dt1` as it raised the following error: "No rules could be generated. Try changing the class parameters."'):
         X_rules = pp.fit_transform(
             X={
                 'rg_dt': X,
@@ -200,6 +201,14 @@ def test_try_except(_create_data, _instantiate_classes):
                 'rg_dt': y,
                 'rg_dt1': y1
             },
+        )
+        assert X_rules.sum().sum() == 352
+    with pytest.warns(NoRulesWarning, match='No rules present in step `rg_dt1` - `transform` method cannot be applied for this step.'):
+        X_rules = pp.transform(
+            X={
+                'rg_dt': X,
+                'rg_dt1': X1
+            }
         )
         assert X_rules.sum().sum() == 352
     # With LinearPipeline classes
@@ -221,7 +230,7 @@ def test_try_except(_create_data, _instantiate_classes):
             ('lp1', lp1)
         ]
     )
-    with pytest.warns(UserWarning, match='No rules remain in step `lp1` as it raised the following error: "No rules could be generated. Try changing the class parameters."'):
+    with pytest.warns(NoRulesWarning, match='No rules remain in step `lp1` as it raised the following error: "No rules could be generated. Try changing the class parameters."'):
         X_rules = pp.fit_transform(
             X={
                 'lp': X,
@@ -231,6 +240,14 @@ def test_try_except(_create_data, _instantiate_classes):
                 'lp': y,
                 'lp1': y1
             },
+        )
+        assert X_rules.sum().sum() == 352
+    with pytest.warns(NoRulesWarning, match='No rules present in step `lp1` - `transform` method cannot be applied for this step.'):
+        X_rules = pp.transform(
+            X={
+                'lp': X,
+                'lp1': X1
+            }
         )
         assert X_rules.sum().sum() == 352
     # No rules remaining
@@ -247,7 +264,7 @@ def test_try_except(_create_data, _instantiate_classes):
             ('lp1', lp1)
         ]
     )
-    with pytest.warns(UserWarning) as warnings:
+    with pytest.warns(NoRulesWarning) as warnings:
         X_rules = pp.fit_transform(
             X={
                 'lp': X,
@@ -263,3 +280,15 @@ def test_try_except(_create_data, _instantiate_classes):
     warnings = [w.message.args[0] for w in warnings]
     assert 'No rules remain in step `lp` as it raised the following error: "`X` has been reduced to zero columns after the `sf` step in the pipeline."' in warnings
     assert 'No rules remain in step `lp1` as it raised the following error: "No rules could be generated. Try changing the class parameters."' in warnings
+    with pytest.warns(NoRulesWarning) as warnings:
+        X_rules = pp.transform(
+            X={
+                'lp': X,
+                'lp1': X1
+            }
+        )
+        pd.testing.assert_frame_equal(X_rules, pd.DataFrame())
+        assert pp.rules.rule_strings == {}
+    warnings = [w.message.args[0] for w in warnings]
+    assert 'No rules present in step `lp` - `transform` method cannot be applied for this step.' in warnings
+    assert 'No rules present in step `lp1` - `transform` method cannot be applied for this step.' in warnings

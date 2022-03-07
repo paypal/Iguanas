@@ -1,12 +1,13 @@
 """Class for creating a Parallel Pipeline."""
-from copy import deepcopy
-from typing import List, Tuple, Union
 from iguanas.exceptions.exceptions import DataFrameSizeError, NoRulesError
 from iguanas.pipeline._base_pipeline import _BasePipeline
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.utils.types import PandasDataFrame, PandasSeries, Dictionary
 import iguanas.utils.utils as utils
 from iguanas.rules import Rules
+from iguanas.warnings import NoRulesWarning
+from copy import deepcopy
+from typing import List, Tuple, Union
 import pandas as pd
 import warnings
 
@@ -148,7 +149,8 @@ class ParallelPipeline(_BasePipeline):
             # If no rules generated/remain, raise warning and skip `step`
             except (DataFrameSizeError, NoRulesError) as e:
                 warnings.warn(
-                    f'No rules remain in step `{step_tag}` as it raised the following error: "{e}"'
+                    message=f'No rules remain in step `{step_tag}` as it raised the following error: "{e}"',
+                    category=NoRulesWarning
                 )
                 X_rules_list.append(pd.DataFrame())
                 rules_list.append(Rules())
@@ -194,9 +196,10 @@ class ParallelPipeline(_BasePipeline):
             # If no rules present, raise warning and skip `step`; else raise
             # exception
             except Exception as e:
-                if str(e) == '`rule_dicts` must be given':
+                if str(e) == '`rule_dicts` must be given' or str(e) == '`X` has been reduced to zero columns after the `sf` step in the pipeline.':
                     warnings.warn(
-                        f'No rules present in step `{step_tag}` - `transform` method cannot be applied for this step.'
+                        message=f'No rules present in step `{step_tag}` - `transform` method cannot be applied for this step.',
+                        category=NoRulesWarning
                     )
                     X_rules_list.append(pd.DataFrame())
                 else:

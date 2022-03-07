@@ -3,6 +3,7 @@ from iguanas.rule_optimisation._base_optimiser import _BaseOptimiser
 import iguanas.utils as utils
 from iguanas.utils.types import NumpyArray, PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
+from iguanas.warnings import RulesNotOptimisedWarning
 import pandas as pd
 from typing import Callable, Dict, List, Union, Tuple
 import numpy as np
@@ -368,7 +369,8 @@ class DirectSearchOptimiser(_BaseOptimiser):
 
         if shape not in ["Origin-based", "Minimum-based", "Random-based"]:
             raise ValueError(
-                '`shape` must be either "Origin-based", "Minimum-based" or "Random-based"')
+                '`shape` must be either "Origin-based", "Minimum-based" or "Random-based"'
+            )
         if shape == 'Origin-based':
             initial_simplexes = cls._param_base_calc(
                 X=X, lambda_kwargs=lambda_kwargs, param='initial_simplex',
@@ -494,7 +496,8 @@ class DirectSearchOptimiser(_BaseOptimiser):
             return param_dict[rule_name]
         else:
             raise TypeError(
-                f'`{param_name}` must be a dictionary with each element aligning with a rule.')
+                f'`{param_name}` must be a dictionary with each element aligning with a rule.'
+            )
 
     @staticmethod
     def _param_base_calc(X: PandasDataFrameType,
@@ -533,8 +536,12 @@ class DirectSearchOptimiser(_BaseOptimiser):
             )
         if non_opt_rules:
             warnings.warn(
-                f'Rules `{"`, `".join(non_opt_rules)}` have no optimisable conditions - unable to calculate `{param}` for these rules')
+                message=f'Rules `{"`, `".join(non_opt_rules)}` have no optimisable conditions - unable to calculate `{param}` for these rules',
+                category=RulesNotOptimisedWarning
+            )
         if missing_feat_rules:
             warnings.warn(
-                f'Rules `{"`, `".join(missing_feat_rules)}` use features that are missing from `X` - unable to calculate `{param}` for these rules')
+                message=f'Rules `{"`, `".join(missing_feat_rules)}` use features that are missing from `X` - unable to calculate `{param}` for these rules',
+                category=RulesNotOptimisedWarning
+            )
         return results

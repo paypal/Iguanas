@@ -2,6 +2,7 @@ import pytest
 from iguanas.rule_optimisation.bayesian_optimiser import BayesianOptimiser
 from iguanas.metrics.classification import FScore
 from iguanas.rules import Rules
+from iguanas.warnings import RulesNotOptimisedWarning
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -140,7 +141,7 @@ def test_return_rules_missing_features(_create_data, _create_inputs, _instantiat
     rule_lambdas, lambda_kwargs = _create_inputs
     r = Rules(rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs)
     ro = _instantiate
-    with pytest.warns(UserWarning, match="Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules"):
+    with pytest.warns(RulesNotOptimisedWarning, match="Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules"):
         rule_names_missing_features, rule_features_in_X = ro._return_rules_missing_features(
             rules=r, columns=X.columns, verbose=0)
     assert rule_names_missing_features == ['missing_col']
@@ -152,7 +153,7 @@ def test_return_all_optimisable_rule_features(_instantiate, _create_data, _creat
     ro = _instantiate
     X, _,  _ = _create_data
     _, lambda_kwargs = _create_inputs
-    with pytest.warns(UserWarning, match="Rules `categoric`, `boolean` have no optimisable conditions - unable to optimise these rules"):
+    with pytest.warns(RulesNotOptimisedWarning, match="Rules `categoric`, `boolean` have no optimisable conditions - unable to optimise these rules"):
         rule_names_no_opt_conditions = ro._return_all_optimisable_rule_features(
             lambda_kwargs=lambda_kwargs,
             verbose=0
@@ -171,7 +172,7 @@ def test_return_rules_with_zero_var_features(_instantiate, _create_inputs):
     X_max = pd.Series({
         'A': 9.0, 'AllNa': np.nan, 'C': 0.9999680225821261, 'ZeroVar': 1.0
     })
-    with pytest.warns(UserWarning, match="Rules `all_na`, `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules"):
+    with pytest.warns(RulesNotOptimisedWarning, match="Rules `all_na`, `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules"):
         zero_var_rules = ro._return_rules_with_zero_var_features(
             rule_features=rules.get_rule_features(),
             rule_names=list(rule_lambdas.keys()),

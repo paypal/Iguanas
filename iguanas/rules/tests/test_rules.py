@@ -589,7 +589,7 @@ def test_errors():
     with pytest.raises(ValueError):
         r = Rules(rule_strings={'ABC': {}})
         r._rule_dicts_to_rule_lambdas(as_numpy=True, with_kwargs=True)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError, match='`include` and `exclude` contain similar values'):
         r = Rules(rule_strings={'Rule1': {}})
         r.filter_rules(include=['Rule1'], exclude=['Rule1'])
     with pytest.raises(ValueError, match='`lambda_kwargs` or `lambda_args` must be given when `rule_lambdas` is provided'):

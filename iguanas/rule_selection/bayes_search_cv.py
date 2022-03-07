@@ -13,6 +13,7 @@ from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.utils.types import PandasDataFrame, PandasSeries, Dictionary
 import iguanas.utils as utils
 from iguanas.space import Choice
+from iguanas.warnings import NoRulesWarning
 
 
 class BayesSearchCV:
@@ -444,7 +445,8 @@ class BayesSearchCV:
                 return df_dict
             else:
                 raise TypeError(
-                    '`df` must be a Pandas Series/DataFrame or a dict')
+                    '`df` must be a Pandas Series/DataFrame or a dict'
+                )
         df_train, df_val = (
             _splitter(df, idxs) for idxs in [train_idxs, val_idxs]
         )
@@ -507,12 +509,13 @@ class BayesSearchCV:
                 fold_score = metric(y_pred_val, y_val)
         except (DataFrameSizeError, NoRulesError):
             if error_score == 'raise':
-                raise Exception(
-                    f"""No rules remaining for: Pipeline parameter set = {params_iter}; Fold index = {fold_idx}."""
+                raise NoRulesError(
+                    f"No rules remaining for: Pipeline parameter set = {params_iter}; Fold index = {fold_idx}."
                 )
             else:
                 warnings.warn(
-                    f"""No rules remaining for: Pipeline parameter set = {params_iter}; Fold index = {fold_idx}. The metric score for this parameter set & fold will be set to {error_score}"""
+                    message=f"No rules remaining for: Pipeline parameter set = {params_iter}; Fold index = {fold_idx}. The metric score for this parameter set & fold will be set to {error_score}",
+                    category=NoRulesWarning
                 )
                 fold_score = error_score
         return fold_score

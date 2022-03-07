@@ -1,11 +1,12 @@
 import pytest
 import numpy as np
 import pandas as pd
-from iguanas.rule_generation import RuleGeneratorDT
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
-from iguanas.metrics.classification import FScore
 import random
+from iguanas.rule_generation import RuleGeneratorDT
+from iguanas.metrics.classification import FScore
+from iguanas.exceptions import NoRulesError
 
 
 @pytest.fixture
@@ -301,7 +302,7 @@ def test_extract_rules_from_ensemble_error(rg_instantiated):
     rg, params = rg_instantiated
     rf = params['tree_ensemble']
     rf.fit(X, y, None)
-    with pytest.raises(Exception, match='No rules could be generated. Try changing the class parameters.'):
+    with pytest.raises(NoRulesError, match='No rules could be generated. Try changing the class parameters.'):
         rg._extract_rules_from_ensemble(
             X, y, rf, params['num_cores'], None, ['A'], ['A'])
 

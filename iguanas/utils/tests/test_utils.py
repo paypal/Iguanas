@@ -340,7 +340,7 @@ def test_check_duplicate_cols():
     X1 = pd.DataFrame({'A': [1, 2, 3]})
     X2 = pd.DataFrame({'A': [0, 1, 2]})
     X = pd.concat([X1, X2], axis=1)
-    with pytest.raises(Exception, match="`X` contains duplicate column names - these are: 'A'"):
+    with pytest.raises(ValueError, match="`X` contains duplicate column names - these are: 'A'"):
         utils.check_duplicate_cols(X, 'X')
     X.columns = ['A', 'B']
     utils.check_duplicate_cols(X, 'X')

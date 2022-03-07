@@ -256,5 +256,5 @@ def test_error(agg_instantiated, create_data, cos_sim):
         'A': [0, 0, 0],
         'B': [0, 0, 0]
     })
-    with pytest.raises(Exception, match="Columns A, B have zero variance, which will result in NaN values for the similarity matrix"):
+    with pytest.raises(ValueError, match="Columns A, B have zero variance, which will result in NaN values for the similarity matrix"):
         agg.fit(X)

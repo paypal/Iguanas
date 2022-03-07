@@ -224,7 +224,8 @@ class RuleGeneratorDT(_BaseGenerator):
         )
         if not self.rule_strings:
             raise NoRulesError(
-                'No rules could be generated. Try changing the class parameters.')
+                'No rules could be generated. Try changing the class parameters.'
+            )
         X_rules = self.transform(X=X)
         return X_rules
 

@@ -3,15 +3,16 @@ Generates rules using decision trees (applied to Koalas/Spark
 dataframes).
 """
 import numpy as np
-import iguanas.utils as utils
-from iguanas.rule_generation._base_generator import _BaseGenerator
-from iguanas.utils.types import KoalasDataFrame, KoalasSeries
-from iguanas.utils.typing import KoalasDataFrameType, KoalasSeriesType
 from typing import Callable, List, Set, Tuple
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.classification import RandomForestClassifier, DecisionTreeClassificationModel
 from pyspark.sql import DataFrame
 import warnings
+from iguanas.exceptions.exceptions import NoRulesError
+import iguanas.utils as utils
+from iguanas.rule_generation._base_generator import _BaseGenerator
+from iguanas.utils.types import KoalasDataFrame, KoalasSeries
+from iguanas.utils.typing import KoalasDataFrameType, KoalasSeriesType
 
 
 class RuleGeneratorDTSpark(_BaseGenerator):
@@ -206,7 +207,8 @@ class RuleGeneratorDTSpark(_BaseGenerator):
         for i, decision_tree in enumerate(tree_ensemble.trees):
             if decision_tree.depth == 0:
                 warnings.warn(
-                    f'Decision Tree {i} has a depth of zero - skipping')
+                    f'Decision Tree {i} has a depth of zero - skipping'
+                )
                 continue
             dt_rule_strings_set = self._extract_rules_from_dt(
                 columns=X.columns.tolist(), decision_tree=decision_tree,
@@ -219,8 +221,9 @@ class RuleGeneratorDTSpark(_BaseGenerator):
             for rule_string in rule_strings_set
         )
         if not self.rule_strings:
-            raise Exception(
-                'No rules could be generated. Try changing the class parameters.')
+            raise NoRulesError(
+                'No rules could be generated. Try changing the class parameters.'
+            )
         X_rules = self.transform(X=X)
         return X_rules
 

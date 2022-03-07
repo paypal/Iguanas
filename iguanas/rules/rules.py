@@ -108,7 +108,8 @@ class Rules(RuleApplier):
         if rule_lambdas is not None and lambda_kwargs is None and \
                 lambda_args is None:
             raise ValueError(
-                '`lambda_kwargs` or `lambda_args` must be given when `rule_lambdas` is provided')
+                '`lambda_kwargs` or `lambda_args` must be given when `rule_lambdas` is provided'
+            )
         self.rule_dicts = {} if rule_dicts is None else rule_dicts
         self.rule_strings = {} if rule_strings is None else rule_strings
         self.rule_lambdas = {} if rule_lambdas is None else rule_lambdas
@@ -131,7 +132,8 @@ class Rules(RuleApplier):
             sim_keys = dict1_keys.intersection(dict2_keys)
             if sim_keys:
                 raise ValueError(
-                    f"""Attempting to add rule sets with similar keys in `{rule_format}`. Similar keys are '{"', '".join(sim_keys)}'.""")
+                    f"""Attempting to add rule sets with similar keys in `{rule_format}`. Similar keys are '{"', '".join(sim_keys)}'."""
+                )
 
         # Raise exception if there are similar keys in any of the rule formats
         check_list = [
@@ -281,7 +283,7 @@ class Rules(RuleApplier):
         if include is not None and exclude is not None:
             intersected = set.intersection(set(include), set(exclude))
             if len(intersected) > 0:
-                raise Exception(
+                raise ValueError(
                     '`include` and `exclude` contain similar values'
                 )
         for d in [self.rule_strings, self.rule_dicts, self.rule_lambdas]:

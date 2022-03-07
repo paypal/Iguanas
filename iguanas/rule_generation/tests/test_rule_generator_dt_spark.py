@@ -2,11 +2,12 @@ import pytest
 import numpy as np
 import pandas as pd
 import databricks.koalas as ks
+import random
+from iguanas.exceptions.exceptions import NoRulesError
 from iguanas.rule_generation import RuleGeneratorDTSpark
 from iguanas.metrics.classification import FScore
 from pyspark.ml.classification import RandomForestClassifier as RandomForestClassifierSpark
 from pyspark.ml.feature import VectorAssembler
-import random
 
 
 @pytest.fixture
@@ -221,7 +222,7 @@ def test_extract_rules_from_ensemble_error(rg_instantiated, train_rf):
         featuresCol='features', impurity='gini'
     )
     rf_trained = rf.fit(spark_df)
-    with pytest.raises(Exception, match='No rules could be generated. Try changing the class parameters.'):
+    with pytest.raises(NoRulesError, match='No rules could be generated. Try changing the class parameters.'):
         with pytest.warns(UserWarning, match='Decision Tree 0 has a depth of zero - skipping'):
             X_rules = rg._extract_rules_from_ensemble(
                 X, y, None, rf_trained, ['A', 'B'], ['A', 'B']

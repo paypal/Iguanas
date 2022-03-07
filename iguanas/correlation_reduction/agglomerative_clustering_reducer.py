@@ -91,7 +91,8 @@ class AgglomerativeClusteringReducer:
         self.threshold = threshold
         if strategy not in ['top_down', 'bottom_up']:
             raise ValueError(
-                "`strategy` must be either 'top_down' or 'bottom_up'")
+                "`strategy` must be either 'top_down' or 'bottom_up'"
+            )
         self.strategy = strategy
         self.similarity_function = similarity_function
         self.metric = metric
@@ -125,8 +126,9 @@ class AgglomerativeClusteringReducer:
         utils.check_duplicate_cols(X, 'X')
         zero_var_cols = X.columns[X.values.var(axis=0) == 0.0].tolist()
         if zero_var_cols:
-            raise Exception(
-                f'Columns {", ".join(zero_var_cols)} have zero variance, which will result in NaN values for the similarity matrix')
+            raise ValueError(
+                f'Columns {", ".join(zero_var_cols)} have zero variance, which will result in NaN values for the similarity matrix'
+            )
         if self.metric is not None:
             self.columns_performance = pd.Series(
                 data=self.metric(X, y, sample_weight),

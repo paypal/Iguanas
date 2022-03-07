@@ -289,7 +289,8 @@ class _ConvertRuleDictsToRuleStrings:
                 field, str_value, str_operator, as_numpy, is_not)
         else:
             raise Exception(
-                'Operator not currently supported in Iguanas. Rule cannot be parsed.')
+                'Operator not currently supported in Iguanas. Rule cannot be parsed.'
+            )
         return condition_string
 
     def _parse_value_lambda(self, condition_dict: Dict[str, Union[str, float]], field: str,

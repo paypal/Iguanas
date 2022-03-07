@@ -79,7 +79,8 @@ class RuleApplier:
                 X_rule = eval(rule_string)
             except KeyError as e:
                 raise KeyError(
-                    f'Feature {e} in rule `{rule_name}` not found in `X`')
+                    f'Feature {e} in rule `{rule_name}` not found in `X`'
+                )
             if utils.is_type(X_rule, (PandasSeries, KoalasSeries)):
                 X_rule = X_rule.fillna(False).astype(int)
                 X_rule.name = rule_name

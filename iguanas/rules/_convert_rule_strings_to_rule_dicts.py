@@ -242,7 +242,8 @@ class _ConvertRuleStringsToRuleDicts:
                         condition_string=condition_string, operator=str_operator)
                 return feature, dict_operator, value
         raise Exception(
-            'Operator not currently supported in Iguanas. Rule cannot be parsed.')
+            'Operator not currently supported in Iguanas. Rule cannot be parsed.'
+        )
 
     @staticmethod
     def _find_top_level_parentheses_idx(rule_string: str) -> Dict[int, int]:
