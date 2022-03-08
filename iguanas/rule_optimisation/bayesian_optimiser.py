@@ -136,19 +136,21 @@ class BayesianOptimiser(_BaseOptimiser):
     3      1      0      0
     """
 
-    def __init__(self, rule_lambdas: Dict[str, Callable],
+    def __init__(self,
+                 rule_lambdas: Dict[str, Callable],
                  lambda_kwargs: Dict[str, Dict[str, float]],
                  metric: Callable,
-                 n_iter: int, algorithm=tpe.suggest, num_cores=1, verbose=0,
+                 n_iter: int,
+                 algorithm=tpe.suggest,
+                 num_cores=1,
+                 verbose=0,
                  **kwargs):
         _BaseOptimiser.__init__(
             self, rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs,
-            metric=metric
+            metric=metric, num_cores=num_cores, verbose=verbose
         )
         self.n_iter = n_iter
         self.algorithm = algorithm
-        self.verbose = verbose
-        self.num_cores = num_cores
         self.kwargs = kwargs
         self.rule_strings = {}
         self.rule_names = []

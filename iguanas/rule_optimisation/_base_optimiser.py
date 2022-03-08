@@ -32,6 +32,11 @@ class _BaseOptimiser(Rules):
     metric : Callable
         The optimisation function used to calculate the metric which the rules
         are optimised for (e.g. F1 score).
+    num_cores : int, optional
+        The number of cores to use when optimising the rule thresholds.
+        Defaults to 1.
+    verbose : int, optional
+        Controls the verbosity - the higher, the more messages.
 
     Attributes
     ----------
@@ -74,13 +79,18 @@ class _BaseOptimiser(Rules):
         variance features. 
     """
 
-    def __init__(self, rule_lambdas: Dict[str, Callable[[Dict], str]],
+    def __init__(self,
+                 rule_lambdas: Dict[str, Callable[[Dict], str]],
                  lambda_kwargs: Dict[str, Dict[str, float]],
-                 metric: Callable):
+                 metric: Callable,
+                 num_cores: int,
+                 verbose: int):
         Rules.__init__(self)
         self.orig_rule_lambdas = rule_lambdas
         self.orig_lambda_kwargs = lambda_kwargs
         self.metric = metric
+        self.num_cores = num_cores
+        self.verbose = verbose
         self.rules = Rules()
 
     def fit_transform(self,

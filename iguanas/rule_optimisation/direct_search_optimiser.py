@@ -187,7 +187,7 @@ class DirectSearchOptimiser(_BaseOptimiser):
 
         _BaseOptimiser.__init__(
             self, rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs,
-            metric=metric
+            metric=metric, num_cores=num_cores, verbose=verbose
         )
         self.x0 = x0
         self.method = method
@@ -199,8 +199,6 @@ class DirectSearchOptimiser(_BaseOptimiser):
         self.tol = tol
         self.callback = callback
         self.options = options
-        self.num_cores = num_cores
-        self.verbose = verbose
         self.rule_strings = {}
         self.rule_names = []
 
