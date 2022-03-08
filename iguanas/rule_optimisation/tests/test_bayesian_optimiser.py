@@ -256,7 +256,7 @@ def test_fit_and_fit_transform(_create_data, _instantiate, _expected_results, _e
     exp_X_rules, _, _ = _expected_X_rules_mean
     ro = _instantiate
     assert ro.__repr__() == 'BayesianOptimiser object with 14 rules to optimise'
-    with pytest.warns(RulesNotOptimisedWarning):
+    with pytest.warns(RulesNotOptimisedWarning) as warnings:
         for method in ['fit', 'fit_transform']:
             if method == 'fit':
                 X_rules = ro.fit(X=X, y=y)
@@ -273,6 +273,11 @@ def test_fit_and_fit_transform(_create_data, _instantiate, _expected_results, _e
             assert ro.rule_names_missing_features == ['missing_col']
             assert ro.rule_names_no_opt_conditions == ['categoric', 'boolean']
             assert ro.rule_names_zero_var_features == ['all_na', 'zero_var']
+    # Assert warnings
+    warnings = [w.message.args[0] for w in warnings]
+    assert 'Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules' in warnings
+    assert 'Rules `categoric`, `boolean` have no optimisable conditions - unable to optimise these rules' in warnings
+    assert 'Rules `all_na`, `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules' in warnings
 
 
 def test_fit_weighted(_create_data, _instantiate, _expected_results,
@@ -281,7 +286,7 @@ def test_fit_weighted(_create_data, _instantiate, _expected_results,
     _, exp_opt_rule_strings, _, exp_orig_rule_performances, _, exp_opt_rule_performances = _expected_results
     _, exp_X_rules, _ = _expected_X_rules_mean
     ro = _instantiate
-    with pytest.warns(RulesNotOptimisedWarning):
+    with pytest.warns(RulesNotOptimisedWarning) as warnings:
         X_rules = ro.fit(X=X, y=y, sample_weight=sample_weight)
         pd.testing.assert_series_equal(
             X_rules.mean().sort_index(), exp_X_rules.sort_index())
@@ -293,6 +298,11 @@ def test_fit_weighted(_create_data, _instantiate, _expected_results,
         assert ro.rule_names_no_opt_conditions == [
             'categoric', 'boolean']
         assert ro.rule_names_zero_var_features == ['all_na', 'zero_var']
+        # Assert warnings
+        warnings = [w.message.args[0] for w in warnings]
+        assert 'Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules' in warnings
+        assert 'Rules `categoric`, `boolean` have no optimisable conditions - unable to optimise these rules' in warnings
+        assert 'Rules `all_na`, `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules' in warnings
 
 
 def test_fit_unlabelled(_create_data, _instantiate,
@@ -303,7 +313,7 @@ def test_fit_unlabelled(_create_data, _instantiate,
     apd = AlertsPerDay(n_alerts_expected_per_day=10, no_of_days_in_file=10)
     ro = _instantiate
     ro.metric = apd.fit
-    with pytest.warns(RulesNotOptimisedWarning):
+    with pytest.warns(RulesNotOptimisedWarning) as warnings:
         X_rules = ro.fit(X=X)
         pd.testing.assert_series_equal(
             X_rules.mean().sort_index(), exp_X_rules.sort_index())
@@ -314,6 +324,11 @@ def test_fit_unlabelled(_create_data, _instantiate,
         assert ro.rule_names_missing_features == ['missing_col']
         assert ro.rule_names_no_opt_conditions == ['categoric', 'boolean']
         assert ro.rule_names_zero_var_features == ['all_na', 'zero_var']
+        # Assert warnings
+        warnings = [w.message.args[0] for w in warnings]
+        assert 'Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules' in warnings
+        assert 'Rules `categoric`, `boolean` have no optimisable conditions - unable to optimise these rules' in warnings
+        assert 'Rules `all_na`, `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules' in warnings
 
 
 def test_transform(_instantiate):

@@ -580,13 +580,13 @@ def test_get_rule_features(_rule_dicts):
 
 
 def test_errors():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='`rule_dicts` must be given'):
         r = Rules(rule_strings="X['A']>2")
         r._rule_dicts_to_rule_strings(as_numpy=False)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='`rule_strings` must be given'):
         r = Rules(rule_dicts={'ABC': {}})
         r._rule_strings_to_rule_dicts()
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='`rule_dicts` must be given'):
         r = Rules(rule_strings={'ABC': {}})
         r._rule_dicts_to_rule_lambdas(as_numpy=True, with_kwargs=True)
     with pytest.raises(ValueError, match='`include` and `exclude` contain similar values'):

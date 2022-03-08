@@ -536,12 +536,10 @@ class DirectSearchOptimiser(_BaseOptimiser):
             )
         if non_opt_rules:
             warnings.warn(
-                message=f'Rules `{"`, `".join(non_opt_rules)}` have no optimisable conditions - unable to calculate `{param}` for these rules',
-                category=RulesNotOptimisedWarning
+                f'Rules `{"`, `".join(non_opt_rules)}` have no optimisable conditions - unable to calculate `{param}` for these rules'
             )
         if missing_feat_rules:
             warnings.warn(
-                message=f'Rules `{"`, `".join(missing_feat_rules)}` use features that are missing from `X` - unable to calculate `{param}` for these rules',
-                category=RulesNotOptimisedWarning
+                f'Rules `{"`, `".join(missing_feat_rules)}` use features that are missing from `X` - unable to calculate `{param}` for these rules',
             )
         return results
