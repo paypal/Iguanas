@@ -69,6 +69,9 @@ class DirectSearchOptimiser(_BaseOptimiser):
         Dictionary of the solver options (values) for each rule (keys). See
         scipy.optimize.minimize() documentation for more information.
         Defaults to None.
+    num_cores : int, optional
+        The number of cores to use when optimising the rule thresholds.
+        Defaults to 1.
     verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : shows
         the overall progress of the optimisation process. Defaults to 0.

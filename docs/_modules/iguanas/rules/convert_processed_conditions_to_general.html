@@ -194,12 +194,53 @@
 <span class="sd">    rules : Rules</span>
 <span class="sd">        Class containing the rule stored in the standard Iguanas string format.</span>
 <span class="sd">        See the `rules` module for more information.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rules import ConvertProcessedConditionsToGeneral, ReturnMappings</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;num&#39;: [1, 2, np.nan, 1],</span>
+<span class="sd">    ...     &#39;country&#39;: [np.nan, &#39;UK&#39;, np.nan, np.nan],</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; X_processed = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;num&#39;: [1, 2, -1, 1],</span>
+<span class="sd">    ...     &#39;country_missing&#39;: [1, 0, 1, 1],</span>
+<span class="sd">    ...     &#39;country_UK&#39;: [0, 1, 0, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; rule_strings = {</span>
+<span class="sd">    ...     &#39;Rule1&#39;: &quot;(X[&#39;num&#39;]&lt;=1)&quot;,</span>
+<span class="sd">    ...     &#39;Rule2&#39;: &quot;(X[&#39;country_missing&#39;]==True)&quot;,</span>
+<span class="sd">    ...     &#39;Rule3&#39;: &quot;(X[&#39;country_UK&#39;]==True)&quot;</span>
+<span class="sd">    ... }        </span>
+<span class="sd">    &gt;&gt;&gt; rm = ReturnMappings()</span>
+<span class="sd">    &gt;&gt;&gt; imputed_mappings = rm.return_imputed_values_mapping(</span>
+<span class="sd">    ...     [[&#39;num&#39;], -1], </span>
+<span class="sd">    ...     [[&#39;country&#39;], &#39;missing&#39;]</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; ohe_categories = rm.return_ohe_categories_mapping(</span>
+<span class="sd">    ...     pre_ohe_cols=X.columns, </span>
+<span class="sd">    ...     post_ohe_cols=X_processed.columns, </span>
+<span class="sd">    ...     pre_ohe_dtypes=X.dtypes</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; cpcg = ConvertProcessedConditionsToGeneral(</span>
+<span class="sd">    ...     imputed_values=imputed_mappings, </span>
+<span class="sd">    ...     ohe_categories=ohe_categories</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; rule_strings = cpcg.convert(</span>
+<span class="sd">    ...     rule_strings=rule_strings, </span>
+<span class="sd">    ...     X=X_processed</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(rule_strings)</span>
+<span class="sd">    {&#39;Rule1&#39;: &quot;((X[&#39;num&#39;]&lt;=1)|(X[&#39;num&#39;].isna()))&quot;, &#39;Rule2&#39;: &quot;(X[&#39;country&#39;].isna())&quot;, &#39;Rule3&#39;: &quot;(X[&#39;country&#39;]==&#39;UK&#39;)&quot;}</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imputed_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ohe_categories</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">imputed_values</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ohe_categories</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Either `imputed_values` or `ohe_categories` must be given&#39;</span><span class="p">)</span>
+                <span class="s1">&#39;Either `imputed_values` or `ohe_categories` must be given&#39;</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">imputed_values</span> <span class="o">=</span> <span class="n">imputed_values</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ohe_categories</span> <span class="o">=</span> <span class="n">ohe_categories</span>
         <span class="k">if</span> <span class="n">ohe_categories</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -339,7 +380,8 @@
                 <span class="n">value</span> <span class="o">=</span> <span class="n">condition_string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">operator</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
                 <span class="k">return</span> <span class="n">feature</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">value</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-            <span class="s1">&#39;Operator not currently supported in Iguanas. Rule cannot be parsed.&#39;</span><span class="p">)</span>
+            <span class="s1">&#39;Operator not currently supported in Iguanas. Rule cannot be parsed.&#39;</span>
+        <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_add_null_condition_to_imputed_numeric_rule</span><span class="p">(</span><span class="n">feature</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -432,6 +474,35 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates mapping dictionaries (for imputed values and OHE values) which </span>
 <span class="sd">    are required in the `ConvertProcessedConditionsToGeneral` class.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rules import ReturnMappings</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;num&#39;: [1, 2, np.nan, 1],</span>
+<span class="sd">    ...     &#39;country&#39;: [np.nan, &#39;UK&#39;, np.nan, np.nan],</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; X_processed = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;num&#39;: [1, 2, -1, 1],</span>
+<span class="sd">    ...     &#39;country_missing&#39;: [1, 0, 1, 1],</span>
+<span class="sd">    ...     &#39;country_UK&#39;: [0, 1, 0, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; rm = ReturnMappings()</span>
+<span class="sd">    &gt;&gt;&gt; imputed_mappings = rm.return_imputed_values_mapping(</span>
+<span class="sd">    ...     [[&#39;num&#39;], -1], </span>
+<span class="sd">    ...     [[&#39;country&#39;], &#39;missing&#39;]</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(imputed_mappings)</span>
+<span class="sd">    {&#39;num&#39;: -1, &#39;country&#39;: &#39;missing&#39;}</span>
+<span class="sd">    &gt;&gt;&gt; ohe_categories = rm.return_ohe_categories_mapping(</span>
+<span class="sd">    ...     pre_ohe_cols=X.columns, </span>
+<span class="sd">    ...     post_ohe_cols=X_processed.columns, </span>
+<span class="sd">    ...     pre_ohe_dtypes=X.dtypes</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(ohe_categories)</span>
+<span class="sd">    {&#39;country_missing&#39;: &#39;missing&#39;, &#39;country_UK&#39;: &#39;UK&#39;}</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="ReturnMappings.return_imputed_values_mapping"><a class="viewcode-back" href="../../../api/api/iguanas.rules.ReturnMappings.html#iguanas.rules.ReturnMappings.return_imputed_values_mapping">[docs]</a>    <span class="nd">@staticmethod</span>

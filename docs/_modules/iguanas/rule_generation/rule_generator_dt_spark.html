@@ -163,15 +163,16 @@
 <span class="sd">dataframes).</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">iguanas.utils</span> <span class="k">as</span> <span class="nn">utils</span>
-<span class="kn">from</span> <span class="nn">iguanas.rule_generation._base_generator</span> <span class="kn">import</span> <span class="n">_BaseGenerator</span>
-<span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">KoalasDataFrame</span><span class="p">,</span> <span class="n">KoalasSeries</span>
-<span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">KoalasDataFrameType</span><span class="p">,</span> <span class="n">KoalasSeriesType</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">from</span> <span class="nn">pyspark.ml.feature</span> <span class="kn">import</span> <span class="n">VectorAssembler</span>
 <span class="kn">from</span> <span class="nn">pyspark.ml.classification</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">DecisionTreeClassificationModel</span>
 <span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="kn">import</span> <span class="n">DataFrame</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">iguanas.exceptions.exceptions</span> <span class="kn">import</span> <span class="n">NoRulesError</span>
+<span class="kn">import</span> <span class="nn">iguanas.utils</span> <span class="k">as</span> <span class="nn">utils</span>
+<span class="kn">from</span> <span class="nn">iguanas.rule_generation._base_generator</span> <span class="kn">import</span> <span class="n">_BaseGenerator</span>
+<span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">KoalasDataFrame</span><span class="p">,</span> <span class="n">KoalasSeries</span>
+<span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">KoalasDataFrameType</span><span class="p">,</span> <span class="n">KoalasSeriesType</span>
 
 
 <div class="viewcode-block" id="RuleGeneratorDTSpark"><a class="viewcode-back" href="../../../api/api/iguanas.rule_generation.RuleGeneratorDTSpark.html#iguanas.rule_generation.RuleGeneratorDTSpark">[docs]</a><span class="k">class</span> <span class="nc">RuleGeneratorDTSpark</span><span class="p">(</span><span class="n">_BaseGenerator</span><span class="p">):</span>
@@ -227,6 +228,43 @@
 <span class="sd">        The Rules object containing the generated rules.</span>
 <span class="sd">    rule_names : List[str]</span>
 <span class="sd">        The names of the generated rules.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rule_generation import RuleGeneratorDTSpark</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import FScore</span>
+<span class="sd">    &gt;&gt;&gt; from pyspark.ml.classification import RandomForestClassifier</span>
+<span class="sd">    &gt;&gt;&gt; import databricks.koalas as ks</span>
+<span class="sd">    &gt;&gt;&gt; X = ks.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = ks.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; f1 = FScore(beta=1)</span>
+<span class="sd">    &gt;&gt;&gt; rg = RuleGeneratorDTSpark(</span>
+<span class="sd">    ...     metric=f1.fit, </span>
+<span class="sd">    ...     n_total_conditions=2, </span>
+<span class="sd">    ...     tree_ensemble=RandomForestClassifier(numTrees=100, seed=0), </span>
+<span class="sd">    ...     rule_name_prefix=&#39;Rule&#39;</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = rg.fit(X=X, y=y)</span>
+<span class="sd">    &gt;&gt;&gt; print(X_rules)</span>
+<span class="sd">       Rule_0</span>
+<span class="sd">    0       1</span>
+<span class="sd">    1       0</span>
+<span class="sd">    2       1</span>
+<span class="sd">    3       0</span>
+<span class="sd">    &gt;&gt;&gt; print(rg.rule_strings)</span>
+<span class="sd">    {&#39;Rule_0&#39;: &quot;(X[&#39;A&#39;]==True)&quot;}</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = rg.transform(X=X)</span>
+<span class="sd">    &gt;&gt;&gt; print(X_rules)</span>
+<span class="sd">       Rule_0</span>
+<span class="sd">    0       1</span>
+<span class="sd">    1       0</span>
+<span class="sd">    2       1</span>
+<span class="sd">    3       0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
@@ -329,7 +367,8 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">decision_tree</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tree_ensemble</span><span class="o">.</span><span class="n">trees</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">decision_tree</span><span class="o">.</span><span class="n">depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">&#39;Decision Tree </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> has a depth of zero - skipping&#39;</span><span class="p">)</span>
+                    <span class="sa">f</span><span class="s1">&#39;Decision Tree </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> has a depth of zero - skipping&#39;</span>
+                <span class="p">)</span>
                 <span class="k">continue</span>
             <span class="n">dt_rule_strings_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_rules_from_dt</span><span class="p">(</span>
                 <span class="n">columns</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">decision_tree</span><span class="o">=</span><span class="n">decision_tree</span><span class="p">,</span>
@@ -342,8 +381,9 @@
             <span class="k">for</span> <span class="n">rule_string</span> <span class="ow">in</span> <span class="n">rule_strings_set</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                <span class="s1">&#39;No rules could be generated. Try changing the class parameters.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">NoRulesError</span><span class="p">(</span>
+                <span class="s1">&#39;No rules could be generated. Try changing the class parameters.&#39;</span>
+            <span class="p">)</span>
         <span class="n">X_rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">X_rules</span>
 

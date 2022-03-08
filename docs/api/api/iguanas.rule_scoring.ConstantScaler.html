@@ -704,6 +704,23 @@ the scores are also converted to int.</p>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">iguanas.rule_scoring</span> <span class="kn">import</span> <span class="n">ConstantScaler</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rule_scores</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;Rule1Score&#39;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;Rule2Score&#39;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;Rule3Score&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span> <span class="o">=</span> <span class="n">ConstantScaler</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scaled_scores</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">rule_scores</span><span class="o">=</span><span class="n">rule_scores</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">scaled_scores</span><span class="p">)</span>     
+<span class="go">Rule1Score    100</span>
+<span class="go">Rule2Score      1</span>
+<span class="go">Rule3Score     33</span>
+<span class="go">dtype: int64</span>
+</pre></div>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.rule_scoring.ConstantScaler.fit">
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule_scores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.series.Series</span></span></span><a class="reference internal" href="../../_modules/iguanas/rule_scoring/rule_score_scalers.html#ConstantScaler.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_scoring.ConstantScaler.fit" title="Permalink to this definition">¶</a></dt>

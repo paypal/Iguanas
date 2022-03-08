@@ -180,14 +180,11 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">    &gt;&gt;&gt; from iguanas.metrics import CosineSimilarity</span>
-<span class="sd">    &gt;&gt;&gt; cs = CosineSimilarity()</span>
 <span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
 <span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
 <span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
-<span class="sd">    ... })</span>
-<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
-<span class="sd">    ...     1, 0, 1, 0</span>
-<span class="sd">    ... ])</span>
+<span class="sd">    ... })    </span>
+<span class="sd">    &gt;&gt;&gt; cs = CosineSimilarity()</span>
 <span class="sd">    &gt;&gt;&gt; print(cs.fit(X=X))</span>
 <span class="sd">              A         B</span>
 <span class="sd">    A  1.000000  0.816497</span>
@@ -235,14 +232,11 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">    &gt;&gt;&gt; from iguanas.metrics import JaccardSimilarity</span>
-<span class="sd">    &gt;&gt;&gt; js = JaccardSimilarity()</span>
 <span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
 <span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
 <span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
-<span class="sd">    ... })</span>
-<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
-<span class="sd">    ...     1, 0, 1, 0</span>
-<span class="sd">    ... ])</span>
+<span class="sd">    ... })    </span>
+<span class="sd">    &gt;&gt;&gt; js = JaccardSimilarity()</span>
 <span class="sd">    &gt;&gt;&gt; print(js.fit(X=X))   </span>
 <span class="sd">              A         B</span>
 <span class="sd">    A  1.000000  0.666667</span>

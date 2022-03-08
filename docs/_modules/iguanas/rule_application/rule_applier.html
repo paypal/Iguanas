@@ -176,7 +176,29 @@
 <span class="sd">    ----------</span>
 <span class="sd">    rule_strings : Dict[str, str]</span>
 <span class="sd">        Set of rules defined using the standard Iguanas string format </span>
-<span class="sd">        (values) and their names (keys).        </span>
+<span class="sd">        (values) and their names (keys).   </span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rule_application import RuleApplier</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })    </span>
+<span class="sd">    &gt;&gt;&gt; rule_strings = {</span>
+<span class="sd">    ...     &#39;Rule1&#39;: &quot;X[&#39;A&#39;]==1&quot;,</span>
+<span class="sd">    ...     &#39;Rule2&#39;: &quot;X[&#39;B&#39;]==1&quot;,</span>
+<span class="sd">    ...     &#39;Rule3&#39;: &quot;(X[&#39;A&#39;]==1)&amp;(X[&#39;B&#39;]==1)&quot;</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; ra = RuleApplier(rule_strings=rule_strings)</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = ra.transform(X=X)</span>
+<span class="sd">    &gt;&gt;&gt; print(X_rules)     </span>
+<span class="sd">       Rule1  Rule2  Rule3</span>
+<span class="sd">    0      1      1      1</span>
+<span class="sd">    1      0      1      0</span>
+<span class="sd">    2      1      1      1</span>
+<span class="sd">    3      0      0      0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -217,7 +239,8 @@
                 <span class="n">X_rule</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">rule_string</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">&#39;Feature </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1"> in rule `</span><span class="si">{</span><span class="n">rule_name</span><span class="si">}</span><span class="s1">` not found in `X`&#39;</span><span class="p">)</span>
+                    <span class="sa">f</span><span class="s1">&#39;Feature </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1"> in rule `</span><span class="si">{</span><span class="n">rule_name</span><span class="si">}</span><span class="s1">` not found in `X`&#39;</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">is_type</span><span class="p">(</span><span class="n">X_rule</span><span class="p">,</span> <span class="p">(</span><span class="n">PandasSeries</span><span class="p">,</span> <span class="n">KoalasSeries</span><span class="p">)):</span>
                 <span class="n">X_rule</span> <span class="o">=</span> <span class="n">X_rule</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
                 <span class="n">X_rule</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">rule_name</span>

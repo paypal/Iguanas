@@ -173,6 +173,7 @@
 <span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span>
 <span class="kn">import</span> <span class="nn">iguanas.utils</span> <span class="k">as</span> <span class="nn">utils</span>
 <span class="kn">from</span> <span class="nn">iguanas.space</span> <span class="kn">import</span> <span class="n">Choice</span>
+<span class="kn">from</span> <span class="nn">iguanas.warnings</span> <span class="kn">import</span> <span class="n">NoRulesWarning</span>
 
 
 <div class="viewcode-block" id="BayesSearchCV"><a class="viewcode-back" href="../../../api/api/iguanas.rule_selection.BayesSearchCV.html#iguanas.rule_selection.BayesSearchCV">[docs]</a><span class="k">class</span> <span class="nc">BayesSearchCV</span><span class="p">:</span>
@@ -248,6 +249,97 @@
 <span class="sd">        The parameter set that produced the best mean score.</span>
 <span class="sd">    pipeline_ : LinearPipeline</span>
 <span class="sd">        The optimised LinearPipeline.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rule_generation import RuleGeneratorDT</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rbs import RBSOptimiser, RBSPipeline</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rule_selection import SimpleFilter, BayesSearchCV</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.pipeline import LinearPipeline, ClassAccessor</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import FScore, Precision</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.space import UniformFloat, UniformInteger, Choice</span>
+<span class="sd">    &gt;&gt;&gt; from sklearn.datasets import make_classification</span>
+<span class="sd">    &gt;&gt;&gt; from sklearn.ensemble import RandomForestClassifier</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; X, y = make_classification(</span>
+<span class="sd">    ...     n_samples=1000, </span>
+<span class="sd">    ...     n_features=4,</span>
+<span class="sd">    ...     n_informative=2, </span>
+<span class="sd">    ...     n_redundant=0,</span>
+<span class="sd">    ...     random_state=0, </span>
+<span class="sd">    ...     shuffle=False</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; X, y = pd.DataFrame(X, columns=[&#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;]), pd.Series(y)</span>
+<span class="sd">    &gt;&gt;&gt; f1 = FScore(beta=1)</span>
+<span class="sd">    &gt;&gt;&gt; p = Precision()</span>
+<span class="sd">    &gt;&gt;&gt; # Set up pipeline ---</span>
+<span class="sd">    &gt;&gt;&gt; rg = RuleGeneratorDT(</span>
+<span class="sd">    ...     metric=f1.fit, </span>
+<span class="sd">    ...     n_total_conditions=2, </span>
+<span class="sd">    ...     tree_ensemble=RandomForestClassifier(n_estimators=10, random_state=0), </span>
+<span class="sd">    ...     rule_name_prefix=&#39;Rule&#39;</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; sf = SimpleFilter(</span>
+<span class="sd">    ...     threshold=0.1, </span>
+<span class="sd">    ...     operator=&#39;&gt;&#39;,</span>
+<span class="sd">    ...     metric=f1.fit</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; rbso = RBSOptimiser(</span>
+<span class="sd">    ...     pipeline = RBSPipeline(</span>
+<span class="sd">    ...         config=[</span>
+<span class="sd">    ...             [1, ClassAccessor(class_tag=&#39;sf&#39;, class_attribute=&#39;rules_to_keep&#39;)]</span>
+<span class="sd">    ...         ], </span>
+<span class="sd">    ...         final_decision=0</span>
+<span class="sd">    ...     ),</span>
+<span class="sd">    ...     metric=f1.fit,</span>
+<span class="sd">    ...     n_iter=10,</span>
+<span class="sd">    ...     rules = ClassAccessor(class_tag=&#39;rg&#39;, class_attribute=&#39;rules&#39;)</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; lp = LinearPipeline(</span>
+<span class="sd">    ...     steps=[</span>
+<span class="sd">    ...         (&#39;rg&#39;, rg),</span>
+<span class="sd">    ...         (&#39;sf&#39;, sf),</span>
+<span class="sd">    ...         (&#39;rbso&#39;, rbso)</span>
+<span class="sd">    ...     ]</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; # Provide search spaces ---</span>
+<span class="sd">    &gt;&gt;&gt; search_spaces = {</span>
+<span class="sd">    ...     &#39;rg&#39;: {</span>
+<span class="sd">    ...         &#39;n_total_conditions&#39;: UniformInteger(1, 10)</span>
+<span class="sd">    ...     },</span>
+<span class="sd">    ...     &#39;sf&#39;: {</span>
+<span class="sd">    ...         &#39;threshold&#39;: UniformFloat(0, 1),        </span>
+<span class="sd">    ...         &#39;metric&#39;: Choice([f1.fit, p.fit])</span>
+<span class="sd">    ...     }</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; # Apply BayesSearchCV ---</span>
+<span class="sd">    &gt;&gt;&gt; bs = BayesSearchCV(</span>
+<span class="sd">    ...     pipeline=lp, </span>
+<span class="sd">    ...     search_spaces=search_spaces, </span>
+<span class="sd">    ...     metric=f1.fit, </span>
+<span class="sd">    ...     cv=3, </span>
+<span class="sd">    ...     n_iter=10, </span>
+<span class="sd">    ...     num_cores=3, </span>
+<span class="sd">    ...     error_score=0</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; bs.fit(X=X, y=y)</span>
+<span class="sd">    &gt;&gt;&gt; final_rules = bs.pipeline_.get_params()[&#39;rbso&#39;][&#39;rules&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; print(bs.best_score)</span>
+<span class="sd">    0.9290788317962232</span>
+<span class="sd">    &gt;&gt;&gt; print(bs.best_params)</span>
+<span class="sd">    {&#39;rg&#39;: {&#39;n_total_conditions&#39;: 1.0}, &#39;sf&#39;: {&#39;metric&#39;: &lt;bound method Precision.fit of Precision&gt;, &#39;threshold&#39;: 0.5286917420754508}}</span>
+<span class="sd">    &gt;&gt;&gt; print(bs.best_index)</span>
+<span class="sd">    3</span>
+<span class="sd">    &gt;&gt;&gt; print(final_rules.rule_strings)</span>
+<span class="sd">    {&#39;Rule_6&#39;: &quot;(X[&#39;A&#39;]&gt;1.53757)&quot;, &#39;Rule_13&#39;: &quot;(X[&#39;B&#39;]&gt;-0.06546)&quot;, &#39;Rule_17&#39;: &quot;(X[&#39;B&#39;]&gt;-0.26593)&quot;}</span>
+<span class="sd">    &gt;&gt;&gt; y_pred = bs.predict(X=X)</span>
+<span class="sd">    &gt;&gt;&gt; print(y_pred.head())</span>
+<span class="sd">    0    0</span>
+<span class="sd">    1    0</span>
+<span class="sd">    2    0</span>
+<span class="sd">    3    0</span>
+<span class="sd">    4    0</span>
+<span class="sd">    dtype: int64</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -513,7 +605,8 @@
                 <span class="k">return</span> <span class="n">df_dict</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="s1">&#39;`df` must be a Pandas Series/DataFrame or a dict&#39;</span><span class="p">)</span>
+                    <span class="s1">&#39;`df` must be a Pandas Series/DataFrame or a dict&#39;</span>
+                <span class="p">)</span>
         <span class="n">df_train</span><span class="p">,</span> <span class="n">df_val</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">_splitter</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">idxs</span><span class="p">)</span> <span class="k">for</span> <span class="n">idxs</span> <span class="ow">in</span> <span class="p">[</span><span class="n">train_idxs</span><span class="p">,</span> <span class="n">val_idxs</span><span class="p">]</span>
         <span class="p">)</span>
@@ -576,12 +669,13 @@
                 <span class="n">fold_score</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">y_pred_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="n">DataFrameSizeError</span><span class="p">,</span> <span class="n">NoRulesError</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">error_score</span> <span class="o">==</span> <span class="s1">&#39;raise&#39;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;No rules remaining for: Pipeline parameter set = </span><span class="si">{</span><span class="n">params_iter</span><span class="si">}</span><span class="s2">; Fold index = </span><span class="si">{</span><span class="n">fold_idx</span><span class="si">}</span><span class="s2">.&quot;&quot;&quot;</span>
+                <span class="k">raise</span> <span class="n">NoRulesError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;No rules remaining for: Pipeline parameter set = </span><span class="si">{</span><span class="n">params_iter</span><span class="si">}</span><span class="s2">; Fold index = </span><span class="si">{</span><span class="n">fold_idx</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;No rules remaining for: Pipeline parameter set = </span><span class="si">{</span><span class="n">params_iter</span><span class="si">}</span><span class="s2">; Fold index = </span><span class="si">{</span><span class="n">fold_idx</span><span class="si">}</span><span class="s2">. The metric score for this parameter set &amp; fold will be set to </span><span class="si">{</span><span class="n">error_score</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
+                    <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;No rules remaining for: Pipeline parameter set = </span><span class="si">{</span><span class="n">params_iter</span><span class="si">}</span><span class="s2">; Fold index = </span><span class="si">{</span><span class="n">fold_idx</span><span class="si">}</span><span class="s2">. The metric score for this parameter set &amp; fold will be set to </span><span class="si">{</span><span class="n">error_score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">category</span><span class="o">=</span><span class="n">NoRulesWarning</span>
                 <span class="p">)</span>
                 <span class="n">fold_score</span> <span class="o">=</span> <span class="n">error_score</span>
         <span class="k">return</span> <span class="n">fold_score</span>

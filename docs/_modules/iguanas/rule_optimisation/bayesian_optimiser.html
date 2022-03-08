@@ -245,6 +245,55 @@
 <span class="sd">    zero_varaince_rules : Rules</span>
 <span class="sd">        A `Rules` object containing the rules which contained exclusively zero</span>
 <span class="sd">        variance features.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rule_optimisation import BayesianOptimiser</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rules import Rules</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import FScore</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [0.9, 0.2, 0.1, 0.3],</span>
+<span class="sd">    ...     &#39;B&#39;: [0.01, 0.2, 0.5, 0.1]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; f1 = FScore(beta=1)</span>
+<span class="sd">    &gt;&gt;&gt; rule_strings = {</span>
+<span class="sd">    ...     &#39;Rule1&#39;: &quot;X[&#39;A&#39;]&gt;0&quot;,</span>
+<span class="sd">    ...     &#39;Rule2&#39;: &quot;X[&#39;B&#39;]&gt;1&quot;,</span>
+<span class="sd">    ...     &#39;Rule3&#39;: &quot;(X[&#39;A&#39;]&gt;0)|(X[&#39;B&#39;]&gt;0)&quot;</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; rules = Rules(rule_strings=rule_strings)</span>
+<span class="sd">    &gt;&gt;&gt; rule_lambdas = rules.as_rule_lambdas(</span>
+<span class="sd">    ...     as_numpy=False, </span>
+<span class="sd">    ...     with_kwargs=True</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; bo = BayesianOptimiser(</span>
+<span class="sd">    ...     rule_lambdas=rule_lambdas, </span>
+<span class="sd">    ...     lambda_kwargs=rules.lambda_kwargs, </span>
+<span class="sd">    ...     metric=f1.fit, </span>
+<span class="sd">    ...     n_iter=10</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = bo.fit(X=X, y=y)</span>
+<span class="sd">    &gt;&gt;&gt; print(X_rules)</span>
+<span class="sd">       Rule1  Rule2  Rule3</span>
+<span class="sd">    0      1      0      1</span>
+<span class="sd">    1      1      0      0</span>
+<span class="sd">    2      1      1      1</span>
+<span class="sd">    3      1      0      0</span>
+<span class="sd">    &gt;&gt;&gt; print(bo.rule_strings)</span>
+<span class="sd">    {&#39;Rule1&#39;: &quot;(X[&#39;A&#39;]&gt;0)&quot;, &#39;Rule2&#39;: &quot;(X[&#39;B&#39;]&gt;0.2481631882805597)&quot;, &#39;Rule3&#39;: &quot;(X[&#39;A&#39;]&gt;0.648569854008818)|(X[&#39;B&#39;]&gt;0.2481631882805597)&quot;}</span>
+<span class="sd">    &gt;&gt;&gt; print(bo.opt_rule_performances)</span>
+<span class="sd">    {&#39;Rule1&#39;: 0.6666666666666666, &#39;Rule2&#39;: 0.6666666666666666, &#39;Rule3&#39;: 1.0}</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = bo.transform(X=X)</span>
+<span class="sd">    &gt;&gt;&gt; print(X_rules)</span>
+<span class="sd">       Rule1  Rule2  Rule3</span>
+<span class="sd">    0      1      0      1</span>
+<span class="sd">    1      1      0      0</span>
+<span class="sd">    2      1      1      1</span>
+<span class="sd">    3      1      0      0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rule_lambdas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">],</span>

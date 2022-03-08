@@ -190,7 +190,42 @@
 <span class="sd">    ValueError</span>
 <span class="sd">        `config` must be a list.</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        `final_decision` must be either 0 or 1.    </span>
+<span class="sd">        `final_decision` must be either 0 or 1.   </span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rbs import RBSPipeline</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rule_generation import RuleGeneratorDT</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import FScore</span>
+<span class="sd">    &gt;&gt;&gt; from sklearn.ensemble import RandomForestClassifier</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; f1 = FScore(beta=1)</span>
+<span class="sd">    &gt;&gt;&gt; rg = RuleGeneratorDT(</span>
+<span class="sd">    ...     metric=f1.fit, </span>
+<span class="sd">    ...     n_total_conditions=2, </span>
+<span class="sd">    ...     tree_ensemble=RandomForestClassifier(random_state=0), </span>
+<span class="sd">    ...     rule_name_prefix=&#39;Rule&#39;</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = rg.fit(X=X, y=y)</span>
+<span class="sd">    &gt;&gt;&gt; rbsp = RBSPipeline(</span>
+<span class="sd">    ...     config=[</span>
+<span class="sd">    ...         (1, rg.rule_names)</span>
+<span class="sd">    ...     ], </span>
+<span class="sd">    ...     final_decision=0</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; rbsp.predict(X_rules=X_rules)</span>
+<span class="sd">    0    1</span>
+<span class="sd">    1    1</span>
+<span class="sd">    2    1</span>
+<span class="sd">    3    0</span>
+<span class="sd">    dtype: int64</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>

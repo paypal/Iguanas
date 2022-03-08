@@ -213,6 +213,13 @@
 <span class="sd">    &gt;&gt;&gt; from iguanas.metrics import FScore</span>
 <span class="sd">    &gt;&gt;&gt; from sklearn.ensemble import RandomForestClassifier</span>
 <span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
 <span class="sd">    &gt;&gt;&gt; # Pipeline ending with a transformer ---</span>
 <span class="sd">    &gt;&gt;&gt; f1 = FScore(beta=1)</span>
 <span class="sd">    &gt;&gt;&gt; rg = RuleGeneratorDT(</span>
@@ -236,29 +243,28 @@
 <span class="sd">    ...         (&#39;sf&#39;, sf)</span>
 <span class="sd">    ...     ]</span>
 <span class="sd">    ... )</span>
-<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
-<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
-<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
-<span class="sd">    ... })</span>
-<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
-<span class="sd">    ...     1, 0, 1, 0</span>
-<span class="sd">    ... ])</span>
 <span class="sd">    &gt;&gt;&gt; lp.fit(X=X, y=y)</span>
 <span class="sd">    &gt;&gt;&gt; print(lp.get_params()[&#39;sf&#39;][&#39;rules_to_keep&#39;])</span>
+<span class="sd">    [&#39;Rule_0&#39;, &#39;Rule_1&#39;]</span>
 <span class="sd">    &gt;&gt;&gt; X_rules = lp.transform(X=X)</span>
 <span class="sd">    &gt;&gt;&gt; print(X_rules)</span>
+<span class="sd">       Rule_0  Rule_1</span>
+<span class="sd">    0       1       1</span>
+<span class="sd">    1       0       0</span>
+<span class="sd">    2       1       1</span>
+<span class="sd">    3       0       0</span>
 <span class="sd">    &gt;&gt;&gt; # Pipeline ending with a predictor ---</span>
 <span class="sd">    &gt;&gt;&gt; rbso = RBSOptimiser(</span>
-<span class="sd">    ... pipeline=RBSPipeline(</span>
-<span class="sd">    ...     config=[], </span>
-<span class="sd">    ...     final_decision=0</span>
-<span class="sd">    ... ), </span>
-<span class="sd">    ... metric=f1.fit, </span>
-<span class="sd">    ... n_iter=10,</span>
-<span class="sd">    ... pos_pred_rules=ClassAccessor(</span>
-<span class="sd">    ...     class_tag=&#39;sf&#39;, </span>
-<span class="sd">    ...     class_attribute=&#39;rules_to_keep&#39;</span>
-<span class="sd">    ... )</span>
+<span class="sd">    ...     pipeline=RBSPipeline(</span>
+<span class="sd">    ...         config=[], </span>
+<span class="sd">    ...         final_decision=0</span>
+<span class="sd">    ...     ), </span>
+<span class="sd">    ...     metric=f1.fit, </span>
+<span class="sd">    ...     n_iter=10,</span>
+<span class="sd">    ...     pos_pred_rules=ClassAccessor(</span>
+<span class="sd">    ...         class_tag=&#39;sf&#39;, </span>
+<span class="sd">    ...         class_attribute=&#39;rules_to_keep&#39;</span>
+<span class="sd">    ...     )</span>
 <span class="sd">    ... )</span>
 <span class="sd">    &gt;&gt;&gt; lp = LinearPipeline(</span>
 <span class="sd">    ...     steps=[</span>
@@ -267,17 +273,16 @@
 <span class="sd">    ...         (&#39;rbso&#39;, rbso)</span>
 <span class="sd">    ...     ]</span>
 <span class="sd">    ... )</span>
-<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
-<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
-<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
-<span class="sd">    ... })</span>
-<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
-<span class="sd">    ...     1, 0, 1, 0</span>
-<span class="sd">    ... ])</span>
 <span class="sd">    &gt;&gt;&gt; lp.fit(X=X, y=y)</span>
 <span class="sd">    &gt;&gt;&gt; print(lp.get_params()[&#39;rbso&#39;][&#39;rules_to_keep&#39;])</span>
+<span class="sd">    [&#39;Rule_1&#39;]</span>
 <span class="sd">    &gt;&gt;&gt; y_pred = lp.predict(X=X)</span>
 <span class="sd">    &gt;&gt;&gt; print(y_pred)</span>
+<span class="sd">    0    1</span>
+<span class="sd">    1    0</span>
+<span class="sd">    2    1</span>
+<span class="sd">    3    0</span>
+<span class="sd">    dtype: int64</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>

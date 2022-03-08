@@ -184,6 +184,13 @@
 <span class="sd">    &gt;&gt;&gt; from iguanas.metrics import FScore</span>
 <span class="sd">    &gt;&gt;&gt; from sklearn.ensemble import RandomForestClassifier</span>
 <span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
 <span class="sd">    &gt;&gt;&gt; f1 = FScore(beta=1)</span>
 <span class="sd">    &gt;&gt;&gt; rg = RuleGeneratorDT(</span>
 <span class="sd">    ...     metric=f1.fit, </span>
@@ -196,13 +203,6 @@
 <span class="sd">    ...         (&#39;rg&#39;, rg)</span>
 <span class="sd">    ...     ]</span>
 <span class="sd">    ... )</span>
-<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
-<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
-<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
-<span class="sd">    ... })</span>
-<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
-<span class="sd">    ...     1, 0, 1, 0</span>
-<span class="sd">    ... ])</span>
 <span class="sd">    &gt;&gt;&gt; lp.fit(X=X, y=y)</span>
 <span class="sd">    &gt;&gt;&gt; pipeline_params = lp.get_params()</span>
 <span class="sd">    &gt;&gt;&gt; ca = ClassAccessor(</span>

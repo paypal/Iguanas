@@ -159,14 +159,15 @@
                 
   <h1>Source code for iguanas.pipeline.parallel_pipeline</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Class for creating a Parallel Pipeline.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">iguanas.exceptions.exceptions</span> <span class="kn">import</span> <span class="n">DataFrameSizeError</span><span class="p">,</span> <span class="n">NoRulesError</span>
 <span class="kn">from</span> <span class="nn">iguanas.pipeline._base_pipeline</span> <span class="kn">import</span> <span class="n">_BasePipeline</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasSeriesType</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">PandasSeries</span><span class="p">,</span> <span class="n">Dictionary</span>
 <span class="kn">import</span> <span class="nn">iguanas.utils.utils</span> <span class="k">as</span> <span class="nn">utils</span>
 <span class="kn">from</span> <span class="nn">iguanas.rules</span> <span class="kn">import</span> <span class="n">Rules</span>
+<span class="kn">from</span> <span class="nn">iguanas.warnings</span> <span class="kn">import</span> <span class="n">NoRulesWarning</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
@@ -199,6 +200,55 @@
 <span class="sd">    rules : Rules</span>
 <span class="sd">        The Rules object containing the rules produced from fitting the </span>
 <span class="sd">        pipeline.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.pipeline import ParallelPipeline</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rbs import RBSOptimiser, RBSPipeline</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rule_generation import RuleGeneratorDT, RuleGeneratorOpt</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import FScore</span>
+<span class="sd">    &gt;&gt;&gt; from sklearn.ensemble import RandomForestClassifier</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; f1 = FScore(beta=1)</span>
+<span class="sd">    &gt;&gt;&gt; rg_dt = RuleGeneratorDT(</span>
+<span class="sd">    ...     metric=f1.fit, </span>
+<span class="sd">    ...     n_total_conditions=2, </span>
+<span class="sd">    ...     tree_ensemble=RandomForestClassifier(random_state=0), </span>
+<span class="sd">    ...     rule_name_prefix=&#39;RuleGenDT&#39;</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; rg_opt = RuleGeneratorOpt(</span>
+<span class="sd">    ...     metric=f1.fit, </span>
+<span class="sd">    ...     n_total_conditions=2, </span>
+<span class="sd">    ...     num_rules_keep=10,</span>
+<span class="sd">    ...     rule_name_prefix=&#39;RuleGenOpt&#39;</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; pp = ParallelPipeline(</span>
+<span class="sd">    ...     steps=[</span>
+<span class="sd">    ...         (&#39;rg_dt&#39;, rg_dt), </span>
+<span class="sd">    ...         (&#39;rg_opt&#39;, rg_opt)</span>
+<span class="sd">    ...     ]</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = pp.fit_transform(X=X, y=y)</span>
+<span class="sd">    &gt;&gt;&gt; print(X_rules)</span>
+<span class="sd">       RuleGenDT_0  RuleGenDT_1  RuleGenDT_2  RuleGenOpt_0</span>
+<span class="sd">    0            1            1            1             1</span>
+<span class="sd">    1            0            0            1             0</span>
+<span class="sd">    2            1            1            1             1</span>
+<span class="sd">    3            0            0            0             0</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = pp.transform(X=X)</span>
+<span class="sd">    &gt;&gt;&gt; print(X_rules)</span>
+<span class="sd">       RuleGenDT_0  RuleGenDT_1  RuleGenDT_2  RuleGenOpt_0</span>
+<span class="sd">    0            1            1            1             1</span>
+<span class="sd">    1            0            0            1             0</span>
+<span class="sd">    2            1            1            1             1</span>
+<span class="sd">    3            0            0            0             0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -259,7 +309,8 @@
             <span class="c1"># If no rules generated/remain, raise warning and skip `step`</span>
             <span class="k">except</span> <span class="p">(</span><span class="n">DataFrameSizeError</span><span class="p">,</span> <span class="n">NoRulesError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">&#39;No rules remain in step `</span><span class="si">{</span><span class="n">step_tag</span><span class="si">}</span><span class="s1">` as it raised the following error: &quot;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+                    <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;No rules remain in step `</span><span class="si">{</span><span class="n">step_tag</span><span class="si">}</span><span class="s1">` as it raised the following error: &quot;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">,</span>
+                    <span class="n">category</span><span class="o">=</span><span class="n">NoRulesWarning</span>
                 <span class="p">)</span>
                 <span class="n">X_rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">())</span>
                 <span class="n">rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Rules</span><span class="p">())</span>
@@ -305,9 +356,10 @@
             <span class="c1"># If no rules present, raise warning and skip `step`; else raise</span>
             <span class="c1"># exception</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;`rule_dicts` must be given&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;`rule_dicts` must be given&#39;</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;`X` has been reduced to zero columns after the `sf` step in the pipeline.&#39;</span><span class="p">:</span>
                     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s1">&#39;No rules present in step `</span><span class="si">{</span><span class="n">step_tag</span><span class="si">}</span><span class="s1">` - `transform` method cannot be applied for this step.&#39;</span>
+                        <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;No rules present in step `</span><span class="si">{</span><span class="n">step_tag</span><span class="si">}</span><span class="s1">` - `transform` method cannot be applied for this step.&#39;</span><span class="p">,</span>
+                        <span class="n">category</span><span class="o">=</span><span class="n">NoRulesWarning</span>
                     <span class="p">)</span>
                     <span class="n">X_rules_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">())</span>
                 <span class="k">else</span><span class="p">:</span>

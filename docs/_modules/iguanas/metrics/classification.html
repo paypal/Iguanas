@@ -178,7 +178,6 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">    &gt;&gt;&gt; from iguanas.metrics import Precision</span>
-<span class="sd">    &gt;&gt;&gt; p = Precision()</span>
 <span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
 <span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
 <span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
@@ -186,6 +185,7 @@
 <span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
 <span class="sd">    ...     1, 0, 1, 0</span>
 <span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; p = Precision()</span>
 <span class="sd">    &gt;&gt;&gt; print(p.fit(y_preds=X, y_true=y))</span>
 <span class="sd">    [1.         0.66666667]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -250,7 +250,6 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">    &gt;&gt;&gt; from iguanas.metrics import Recall</span>
-<span class="sd">    &gt;&gt;&gt; r = Recall()</span>
 <span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
 <span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
 <span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
@@ -258,6 +257,7 @@
 <span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
 <span class="sd">    ...     1, 0, 1, 0</span>
 <span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; r = Recall()</span>
 <span class="sd">    &gt;&gt;&gt; print(r.fit(y_preds=X, y_true=y))</span>
 <span class="sd">    [1. 1.]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -327,7 +327,6 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">    &gt;&gt;&gt; from iguanas.metrics import FScore</span>
-<span class="sd">    &gt;&gt;&gt; f1 = FScore(beta=1)</span>
 <span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
 <span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
 <span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
@@ -335,6 +334,7 @@
 <span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
 <span class="sd">    ...     1, 0, 1, 0</span>
 <span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; f1 = FScore(beta=1)</span>
 <span class="sd">    &gt;&gt;&gt; print(f1.fit(y_preds=X, y_true=y))</span>
 <span class="sd">    [1.  0.8]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -426,10 +426,6 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">    &gt;&gt;&gt; from iguanas.metrics import Revenue</span>
-<span class="sd">    &gt;&gt;&gt; rev = Revenue(</span>
-<span class="sd">    ...     y_type = &#39;Fraud&#39;,</span>
-<span class="sd">    ...     chargeback_multiplier=2</span>
-<span class="sd">    ... )</span>
 <span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
 <span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
 <span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
@@ -440,6 +436,10 @@
 <span class="sd">    &gt;&gt;&gt; amounts = pd.Series([</span>
 <span class="sd">    ...     100, 20, 50, 30</span>
 <span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; rev = Revenue(</span>
+<span class="sd">    ...     y_type = &#39;Fraud&#39;,</span>
+<span class="sd">    ...     chargeback_multiplier=2</span>
+<span class="sd">    ... )</span>
 <span class="sd">    &gt;&gt;&gt; print(rev.fit(y_preds=X, y_true=y, sample_weight=amounts))</span>
 <span class="sd">    [350 310]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -531,6 +531,13 @@
 <span class="sd">    &gt;&gt;&gt; from iguanas.metrics import Bounds</span>
 <span class="sd">    &gt;&gt;&gt; p = Precision()</span>
 <span class="sd">    &gt;&gt;&gt; r = Recall()</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
 <span class="sd">    &gt;&gt;&gt; bounds = [</span>
 <span class="sd">    ...     {</span>
 <span class="sd">    ...         &#39;metric&#39;: p.fit,</span>
@@ -544,13 +551,6 @@
 <span class="sd">    ...     }</span>
 <span class="sd">    ... ]</span>
 <span class="sd">    &gt;&gt;&gt; b = Bounds(bounds=bounds)</span>
-<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
-<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
-<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
-<span class="sd">    ... })</span>
-<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
-<span class="sd">    ...     1, 0, 1, 0</span>
-<span class="sd">    ... ])</span>
 <span class="sd">    &gt;&gt;&gt; print(b.fit(y_preds=X, y_true=y))</span>
 <span class="sd">    [0.57444252 0.49166744]</span>
 <span class="sd">    &quot;&quot;&quot;</span>

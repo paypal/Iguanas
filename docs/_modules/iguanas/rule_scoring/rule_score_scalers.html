@@ -179,7 +179,24 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    limit : int</span>
-<span class="sd">        The limit to apply when scaling the scores.            </span>
+<span class="sd">        The limit to apply when scaling the scores.      </span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rule_scoring import ConstantScaler</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; rule_scores = pd.Series({</span>
+<span class="sd">    ...     &#39;Rule1Score&#39;: 0.9,</span>
+<span class="sd">    ...     &#39;Rule2Score&#39;: 0.01,</span>
+<span class="sd">    ...     &#39;Rule3Score&#39;: 0.3,</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; cs = ConstantScaler(limit=100)</span>
+<span class="sd">    &gt;&gt;&gt; scaled_scores = cs.fit(rule_scores=rule_scores)</span>
+<span class="sd">    &gt;&gt;&gt; print(scaled_scores)     </span>
+<span class="sd">    Rule1Score    100</span>
+<span class="sd">    Rule2Score      1</span>
+<span class="sd">    Rule3Score     33</span>
+<span class="sd">    dtype: int64</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
@@ -208,7 +225,8 @@
             <span class="n">rule_scores_scaled</span> <span class="o">=</span> <span class="n">rule_scores</span> <span class="o">*</span> <span class="n">multiplier</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;rule_scores must contain only negative scores or only positive scores, not a mixture&#39;</span><span class="p">)</span>
+                <span class="s1">&#39;rule_scores must contain only negative scores or only positive scores, not a mixture&#39;</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">rule_scores_scaled</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span></div></div>
 
 
@@ -225,7 +243,24 @@
 <span class="sd">    min_value : int </span>
 <span class="sd">        The minimum value of the scaled rule score range.</span>
 <span class="sd">    max_value : int </span>
-<span class="sd">        The maximum value of the scaled rule score range.        </span>
+<span class="sd">        The maximum value of the scaled rule score range.   </span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rule_scoring import MinMaxScaler</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; rule_scores = pd.Series({</span>
+<span class="sd">    ...     &#39;Rule1Score&#39;: 0.9,</span>
+<span class="sd">    ...     &#39;Rule2Score&#39;: 0.01,</span>
+<span class="sd">    ...     &#39;Rule3Score&#39;: 0.3,</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; mms = MinMaxScaler(min_value=-100, max_value=0)</span>
+<span class="sd">    &gt;&gt;&gt; scaled_scores = mms.fit(rule_scores=rule_scores)</span>
+<span class="sd">    &gt;&gt;&gt; print(scaled_scores)</span>
+<span class="sd">    Rule1Score   -100</span>
+<span class="sd">    Rule2Score      0</span>
+<span class="sd">    Rule3Score    -33</span>
+<span class="sd">    dtype: int64</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_value</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">max_value</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
@@ -248,7 +283,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">rule_scores</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">all</span><span class="p">(</span><span class="n">rule_scores</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;rule_scores must contain only negative scores or only positive scores, not a mixture&#39;</span><span class="p">)</span>
+                <span class="s1">&#39;rule_scores must contain only negative scores or only positive scores, not a mixture&#39;</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_value</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">rule_scores</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">rule_scores</span> <span class="o">=</span> <span class="o">-</span><span class="n">rule_scores</span>
         <span class="n">rule_scores_scaled_arr</span> <span class="o">=</span> <span class="n">minmax_scale</span><span class="p">(</span><span class="n">rule_scores</span><span class="p">,</span> <span class="n">feature_range</span><span class="o">=</span><span class="p">(</span>

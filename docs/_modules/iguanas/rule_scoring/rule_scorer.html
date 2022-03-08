@@ -189,6 +189,36 @@
 <span class="sd">    ----------</span>
 <span class="sd">    rule_scores : Dict[str, int]</span>
 <span class="sd">        Contains the generated score (values) for each rule (keys).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rule_scoring import RuleScorer, PerformanceScorer, ConstantScaler</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import FScore</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; f1 = FScore(beta=1)</span>
+<span class="sd">    &gt;&gt;&gt; rs = RuleScorer(</span>
+<span class="sd">    ... scoring_class=PerformanceScorer(metric=f1.fit),</span>
+<span class="sd">    ... scaling_class=ConstantScaler(limit=100)</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; rs.fit(X_rules=X_rules, y=y)</span>
+<span class="sd">    &gt;&gt;&gt; print(rs.rule_scores)</span>
+<span class="sd">    A    100</span>
+<span class="sd">    B     80</span>
+<span class="sd">    dtype: int64</span>
+<span class="sd">    &gt;&gt;&gt; X_scores = rs.transform(X_rules=X_rules)</span>
+<span class="sd">    &gt;&gt;&gt; print(X_scores)</span>
+<span class="sd">         A   B</span>
+<span class="sd">    0  100  80</span>
+<span class="sd">    1    0  80</span>
+<span class="sd">    2  100  80</span>
+<span class="sd">    3    0   0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scoring_class</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PerformanceScorer</span><span class="p">,</span> <span class="n">LogRegScorer</span><span class="p">,</span>

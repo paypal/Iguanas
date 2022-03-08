@@ -746,8 +746,101 @@ Defaults to 0.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Attributes</dt>
-<dd class="field-even"><dl class="simple">
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">iguanas.rule_generation</span> <span class="kn">import</span> <span class="n">RuleGeneratorDT</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">iguanas.rbs</span> <span class="kn">import</span> <span class="n">RBSOptimiser</span><span class="p">,</span> <span class="n">RBSPipeline</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">iguanas.rule_selection</span> <span class="kn">import</span> <span class="n">SimpleFilter</span><span class="p">,</span> <span class="n">BayesSearchCV</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">iguanas.pipeline</span> <span class="kn">import</span> <span class="n">LinearPipeline</span><span class="p">,</span> <span class="n">ClassAccessor</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">iguanas.metrics</span> <span class="kn">import</span> <span class="n">FScore</span><span class="p">,</span> <span class="n">Precision</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">iguanas.space</span> <span class="kn">import</span> <span class="n">UniformFloat</span><span class="p">,</span> <span class="n">UniformInteger</span><span class="p">,</span> <span class="n">Choice</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_classification</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_classification</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">n_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">n_features</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">n_informative</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">n_redundant</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">]),</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f1</span> <span class="o">=</span> <span class="n">FScore</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Precision</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Set up pipeline ---</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rg</span> <span class="o">=</span> <span class="n">RuleGeneratorDT</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">n_total_conditions</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">tree_ensemble</span><span class="o">=</span><span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> 
+<span class="gp">... </span>    <span class="n">rule_name_prefix</span><span class="o">=</span><span class="s1">&#39;Rule&#39;</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sf</span> <span class="o">=</span> <span class="n">SimpleFilter</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">operator</span><span class="o">=</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rbso</span> <span class="o">=</span> <span class="n">RBSOptimiser</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">RBSPipeline</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">config</span><span class="o">=</span><span class="p">[</span>
+<span class="gp">... </span>            <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">ClassAccessor</span><span class="p">(</span><span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;sf&#39;</span><span class="p">,</span> <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rules_to_keep&#39;</span><span class="p">)]</span>
+<span class="gp">... </span>        <span class="p">],</span> 
+<span class="gp">... </span>        <span class="n">final_decision</span><span class="o">=</span><span class="mi">0</span>
+<span class="gp">... </span>    <span class="p">),</span>
+<span class="gp">... </span>    <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">rules</span> <span class="o">=</span> <span class="n">ClassAccessor</span><span class="p">(</span><span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;rg&#39;</span><span class="p">,</span> <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rules&#39;</span><span class="p">)</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">steps</span><span class="o">=</span><span class="p">[</span>
+<span class="gp">... </span>        <span class="p">(</span><span class="s1">&#39;rg&#39;</span><span class="p">,</span> <span class="n">rg</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="p">(</span><span class="s1">&#39;sf&#39;</span><span class="p">,</span> <span class="n">sf</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="p">(</span><span class="s1">&#39;rbso&#39;</span><span class="p">,</span> <span class="n">rbso</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Provide search spaces ---</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">search_spaces</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s1">&#39;rg&#39;</span><span class="p">:</span> <span class="p">{</span>
+<span class="gp">... </span>        <span class="s1">&#39;n_total_conditions&#39;</span><span class="p">:</span> <span class="n">UniformInteger</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="p">},</span>
+<span class="gp">... </span>    <span class="s1">&#39;sf&#39;</span><span class="p">:</span> <span class="p">{</span>
+<span class="gp">... </span>        <span class="s1">&#39;threshold&#39;</span><span class="p">:</span> <span class="n">UniformFloat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>        
+<span class="gp">... </span>        <span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">Choice</span><span class="p">([</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">fit</span><span class="p">])</span>
+<span class="gp">... </span>    <span class="p">}</span>
+<span class="gp">... </span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Apply BayesSearchCV ---</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bs</span> <span class="o">=</span> <span class="n">BayesSearchCV</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">pipeline</span><span class="o">=</span><span class="n">lp</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">search_spaces</span><span class="o">=</span><span class="n">search_spaces</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">num_cores</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">error_score</span><span class="o">=</span><span class="mi">0</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bs</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">final_rules</span> <span class="o">=</span> <span class="n">bs</span><span class="o">.</span><span class="n">pipeline_</span><span class="o">.</span><span class="n">get_params</span><span class="p">()[</span><span class="s1">&#39;rbso&#39;</span><span class="p">][</span><span class="s1">&#39;rules&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">best_score</span><span class="p">)</span>
+<span class="go">0.9290788317962232</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">best_params</span><span class="p">)</span>
+<span class="go">{&#39;rg&#39;: {&#39;n_total_conditions&#39;: 1.0}, &#39;sf&#39;: {&#39;metric&#39;: &lt;bound method Precision.fit of Precision&gt;, &#39;threshold&#39;: 0.5286917420754508}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">best_index</span><span class="p">)</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">final_rules</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">)</span>
+<span class="go">{&#39;Rule_6&#39;: &quot;(X[&#39;A&#39;]&gt;1.53757)&quot;, &#39;Rule_13&#39;: &quot;(X[&#39;B&#39;]&gt;-0.06546)&quot;, &#39;Rule_17&#39;: &quot;(X[&#39;B&#39;]&gt;-0.26593)&quot;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y_pred</span> <span class="o">=</span> <span class="n">bs</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+<span class="go">0    0</span>
+<span class="go">1    0</span>
+<span class="go">2    0</span>
+<span class="go">3    0</span>
+<span class="go">4    0</span>
+<span class="go">dtype: int64</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl class="simple">
 <dt><strong>cv_results</strong><span class="classifier">PandasDataFrameType</span></dt><dd><p>Shows the scores per fold, mean score and standard deviation of the
 score for each trialled parameter set.</p>
 </dd>

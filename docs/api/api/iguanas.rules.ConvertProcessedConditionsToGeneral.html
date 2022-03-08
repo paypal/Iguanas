@@ -710,8 +710,50 @@ general format - e.g. if a rule condition is
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Attributes</dt>
-<dd class="field-even"><dl class="simple">
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">iguanas.rules</span> <span class="kn">import</span> <span class="n">ConvertProcessedConditionsToGeneral</span><span class="p">,</span> <span class="n">ReturnMappings</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;num&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;country&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s1">&#39;UK&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X_processed</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;num&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;country_missing&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;country_UK&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rule_strings</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s1">&#39;Rule1&#39;</span><span class="p">:</span> <span class="s2">&quot;(X[&#39;num&#39;]&lt;=1)&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;Rule2&#39;</span><span class="p">:</span> <span class="s2">&quot;(X[&#39;country_missing&#39;]==True)&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;Rule3&#39;</span><span class="p">:</span> <span class="s2">&quot;(X[&#39;country_UK&#39;]==True)&quot;</span>
+<span class="gp">... </span><span class="p">}</span>        
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rm</span> <span class="o">=</span> <span class="n">ReturnMappings</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">imputed_mappings</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">return_imputed_values_mapping</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[[</span><span class="s1">&#39;num&#39;</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> 
+<span class="gp">... </span>    <span class="p">[[</span><span class="s1">&#39;country&#39;</span><span class="p">],</span> <span class="s1">&#39;missing&#39;</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ohe_categories</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">return_ohe_categories_mapping</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">pre_ohe_cols</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">post_ohe_cols</span><span class="o">=</span><span class="n">X_processed</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">pre_ohe_dtypes</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">dtypes</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cpcg</span> <span class="o">=</span> <span class="n">ConvertProcessedConditionsToGeneral</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">imputed_values</span><span class="o">=</span><span class="n">imputed_mappings</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">ohe_categories</span><span class="o">=</span><span class="n">ohe_categories</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rule_strings</span> <span class="o">=</span> <span class="n">cpcg</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">rule_strings</span><span class="o">=</span><span class="n">rule_strings</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">X</span><span class="o">=</span><span class="n">X_processed</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">rule_strings</span><span class="p">)</span>
+<span class="go">{&#39;Rule1&#39;: &quot;((X[&#39;num&#39;]&lt;=1)|(X[&#39;num&#39;].isna()))&quot;, &#39;Rule2&#39;: &quot;(X[&#39;country&#39;].isna())&quot;, &#39;Rule3&#39;: &quot;(X[&#39;country&#39;]==&#39;UK&#39;)&quot;}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl class="simple">
 <dt><strong>rules</strong><span class="classifier">Rules</span></dt><dd><p>Class containing the rule stored in the standard Iguanas string format.
 See the <cite>rules</cite> module for more information.</p>
 </dd>
