@@ -103,9 +103,13 @@ sh <path-to-Iguanas-repo>/run_nb_makes_spark.sh
 
 You can submit a change by raising a [pull-request](https://github.com/paypal/Iguanas/pulls) and assigning the reviewer as James Laidler.
 
+For which branch to merge into, see below:
+
+- If your branch contains only bug fixes, merge directly into the `main` branch.
+- If your branch contains either major or minor changes, merge into the `dev` branch, **not the `main` branch** (as the `dev` branch is used for staging major and minor changes before they are merged with the `main` branch).
+
 Please ensure that, before raising a pull-request:
 
-- You merge your branch into the `dev` branch, not the main `branch` (as the `dev` branch is used for staging changes before they are merged with the `main` branch).
 - Commit messages are concise and informative.
 - A comment is added to your PR giving a summary of the changes and why they were made.
 - Your contribution conforms to the [Style guide](#style-guide).
