@@ -47,6 +47,13 @@ class RuleGeneratorDT(_BaseGenerator):
         correlated features wrt the target (under the key `NegativeCorr`),
         or 'Infer' (where each target-feature correlation type is inferred
         from the data). Defaults to None.
+    infer_dtypes : bool, optional
+        Dictates whether the column datatypes should be inferred from the data.
+        If True, the integer, float and categorical-type (e.g. one hot encoded)
+        columns are inferred from the values in the dataset `X`. If False, the
+        datatypes from the dataset are used (i.e. `X.dtypes`). Note that if 
+        False, any categorical-type columns should be stored as the `bool`
+        datatype. Defaults to True.
     verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : gives
         the overall progress of the training of the ensemble model and the
@@ -108,12 +115,14 @@ class RuleGeneratorDT(_BaseGenerator):
     3       0       0       0
     """
 
-    def __init__(self, metric: Callable,
+    def __init__(self,
+                 metric: Callable,
                  n_total_conditions: int,
                  tree_ensemble: Union[RandomForestClassifier, ExtraTreesClassifier],
                  precision_threshold=0,
                  num_cores=1,
                  target_feat_corr_types=None,
+                 infer_dtypes=True,
                  verbose=0,
                  rule_name_prefix='RGDT_Rule'):
 
@@ -122,12 +131,13 @@ class RuleGeneratorDT(_BaseGenerator):
             metric=metric,
             target_feat_corr_types=target_feat_corr_types,
             rule_name_prefix=rule_name_prefix,
+            infer_dtypes=infer_dtypes,
+            verbose=verbose
         )
         self.tree_ensemble = tree_ensemble
         self.n_total_conditions = n_total_conditions
         self.precision_threshold = precision_threshold
         self.num_cores = num_cores
-        self.verbose = verbose
         self.rule_strings = {}
         self.rule_names = []
 
@@ -179,7 +189,9 @@ class RuleGeneratorDT(_BaseGenerator):
             )
         if self.verbose:
             print('--- Returning column datatypes ---')
-        columns_int, columns_cat, _ = utils.return_columns_types(X)
+        columns_int, columns_cat, _ = self._return_columns_types(
+            infer_dtypes=self.infer_dtypes, X=X
+        )
         if self.verbose:
             print('--- Training tree ensemble ---')
         trained_tree_ensemble = self._train_ensemble(

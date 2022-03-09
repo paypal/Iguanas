@@ -46,53 +46,6 @@ def concat(objs: List[Union[PandasDataFrameType, PandasSeriesType, KoalasDataFra
             return ks.concat(objs, **kwargs)
 
 
-def return_columns_types(X: Union[PandasDataFrameType, KoalasDataFrameType]) -> Tuple[List, List, List]:
-    """
-    Returns the integer, float and OHE categorical columns for a given dataset.
-
-    Parameters
-    ----------
-    X : Union[PandasDataFrameType, KoalasDataFrameType])
-        Dataset.
-
-    Returns
-    -------
-    Tuple[List, List, List]
-        List of integer columns, list of float columns, list of OHE categorical 
-        columns.
-    """
-
-    num_cols = X.shape[1]
-    int64_cols = list(
-        X.dtypes.index[(X.dtypes == 'Int64') | (X.dtypes == 'int64')]
-    )
-    if len(int64_cols) == num_cols:
-        int_cols = int64_cols
-        float_cols = []
-    elif int64_cols:
-        X_no_int64 = X.drop(int64_cols, axis=1)
-    else:
-        X_no_int64 = X
-    if is_type(X, [PandasDataFrame]) and len(int64_cols) < num_cols:
-        int_mask = np.sum(X_no_int64.to_numpy() -
-                          X_no_int64.to_numpy().round(), axis=0) == 0
-    elif is_type(X, [KoalasDataFrame]) and len(int64_cols) < num_cols:
-        int_mask = ((X_no_int64 - X_no_int64.round()).sum() == 0).to_numpy()
-    if len(int64_cols) < num_cols:
-        int_cols = int64_cols + list(X_no_int64.columns[int_mask])
-        float_cols = list(X_no_int64.columns[~int_mask])
-    if int_cols:
-        poss_ohe_cols_mask = (X[int_cols].nunique() == 2)
-        poss_ohe_cols = poss_ohe_cols_mask[poss_ohe_cols_mask].index.tolist()
-        min_zero_mask = (X[poss_ohe_cols].min() == 0)
-        max_one_mask = (X[poss_ohe_cols].max() == 1)
-        ohe_mask = min_zero_mask.to_numpy() * max_one_mask.to_numpy()
-        ohe_cat_cols = [poss_ohe_cols[i] for i, m in enumerate(ohe_mask) if m]
-    else:
-        ohe_cat_cols = []
-    return int_cols, ohe_cat_cols, float_cols
-
-
 def create_spark_df(X: KoalasDataFrameType, y: KoalasSeriesType,
                     sample_weight=None) -> PySparkDataFrameType:
     """

@@ -7,7 +7,7 @@ import math
 from datetime import date
 from iguanas.rules.rules import Rules
 import iguanas.utils as utils
-from iguanas.utils.types import KoalasSeries, KoalasDataFrame
+from iguanas.utils.types import KoalasSeries, KoalasDataFrame, PandasDataFrame, Boolean
 from iguanas.utils.typing import KoalasDataFrameType, KoalasSeriesType,\
     PandasDataFrameType, PandasSeriesType
 
@@ -33,6 +33,15 @@ class _BaseGenerator(Rules):
         correlated features wrt the target (under the key `NegativeCorr`),
         or 'Infer' (where each target-feature correlation type is inferred 
         from the data). Defaults to None.
+    infer_dtypes : bool, optional
+        Dictates whether the column datatypes should be inferred from the data.
+        If True, the integer, float and categorical-type (e.g. one hot encoded)
+        columns are inferred from the values in the dataset `X`. If False, the
+        datatypes from the dataset are used (i.e. `X.dtypes`). Note that if 
+        False, any categorical-type columns should be stored as the `bool`
+        datatype. Defaults to True.
+    verbose : int, optional
+        Controls the verbosity - the higher, the more messages.
     rule_name_prefix : str
         Prefix to use for each rule name. If None, the standard prefix is 
         used. Defaults to None.
@@ -41,10 +50,14 @@ class _BaseGenerator(Rules):
     def __init__(self,
                  metric,
                  target_feat_corr_types,
+                 infer_dtypes,
+                 verbose,
                  rule_name_prefix) -> None:
         Rules.__init__(self)
         self.metric = metric
         self.target_feat_corr_types = target_feat_corr_types
+        self.infer_dtypes = infer_dtypes
+        self.verbose = verbose
         self.rule_name_prefix = rule_name_prefix
         self.rules = Rules()
         self._rule_name_counter = 0
@@ -347,6 +360,73 @@ class _BaseGenerator(Rules):
             return _calc_target_ratios_koalas(X, y)
         else:
             return _calc_target_ratios_numpy(X, y)
+
+    def _return_columns_types(self,
+                              infer_dtypes: bool,
+                              X: Union[PandasDataFrameType, KoalasDataFrameType]) -> Tuple[List[str]]:
+        """
+        Returns the integer, float and categorical-type (e.g. one hot encoded)
+        columns in `X`. If `infer_dtypes` is True, the integer, float and 
+        categorical-type (e.g. one hot encoded) columns are inferred from the
+        values in the dataset `X`. If False, the datatypes from the dataset are
+        used (i.e. `X.dtypes`).
+        """
+
+        utils.check_allowed_types(infer_dtypes, 'infer_dtypes', [Boolean])
+        if infer_dtypes:
+            columns_int, columns_cat, columns_float = self._infer_dtypes_from_X(
+                X=X
+            )
+        else:
+            columns_cat = X.select_dtypes(include=bool).columns.tolist()
+            columns_int = X.select_dtypes(
+                include=int).columns.tolist() + columns_cat
+            columns_float = X.select_dtypes(include=float).columns.tolist()
+        return columns_int, columns_cat, columns_float
+
+    @staticmethod
+    def _infer_dtypes_from_X(X: Union[PandasDataFrameType, KoalasDataFrameType]) -> Tuple[List, List, List]:
+        """
+        Returns the integer, float and categorical-type columns for a given
+        dataset.
+        """
+
+        # If bool cols exist, convert to int
+        bool_cols = X.select_dtypes(include=bool).columns.tolist()
+        if bool_cols:
+            X[bool_cols] = X[bool_cols].astype(int)
+        num_cols = X.shape[1]
+        int64_cols = list(
+            X.dtypes.index[(X.dtypes == 'Int64') | (X.dtypes == 'int64')]
+        )
+        if len(int64_cols) == num_cols:
+            int_cols = int64_cols
+            float_cols = []
+        elif int64_cols:
+            X_no_int64 = X.drop(int64_cols, axis=1)
+        else:
+            X_no_int64 = X
+        if utils.is_type(X, [PandasDataFrame]) and len(int64_cols) < num_cols:
+            int_mask = np.sum(X_no_int64.to_numpy() -
+                              X_no_int64.to_numpy().round(), axis=0) == 0
+        elif utils.is_type(X, [KoalasDataFrame]) and len(int64_cols) < num_cols:
+            int_mask = ((X_no_int64 - X_no_int64.round()).sum()
+                        == 0).to_numpy()
+        if len(int64_cols) < num_cols:
+            int_cols = int64_cols + list(X_no_int64.columns[int_mask])
+            float_cols = list(X_no_int64.columns[~int_mask])
+        if int_cols:
+            poss_ohe_cols_mask = (X[int_cols].nunique() == 2)
+            poss_ohe_cols = poss_ohe_cols_mask[poss_ohe_cols_mask].index.tolist(
+            )
+            min_zero_mask = (X[poss_ohe_cols].min() == 0)
+            max_one_mask = (X[poss_ohe_cols].max() == 1)
+            ohe_mask = min_zero_mask.to_numpy() * max_one_mask.to_numpy()
+            ohe_cat_cols = [poss_ohe_cols[i]
+                            for i, m in enumerate(ohe_mask) if m]
+        else:
+            ohe_cat_cols = []
+        return int_cols, ohe_cat_cols, float_cols
 
     def _generate_other_rule_formats(self) -> None:
         """Generates other rule formats from `self.rule_strings`"""

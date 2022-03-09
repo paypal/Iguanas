@@ -46,6 +46,13 @@ class RuleGeneratorDTSpark(_BaseGenerator):
         correlated features wrt the target (under the key `NegativeCorr`),
         or 'Infer' (where each target-feature correlation type is inferred 
         from the data). Defaults to None.
+    infer_dtypes : bool, optional
+        Dictates whether the column datatypes should be inferred from the data.
+        If True, the integer, float and categorical-type (e.g. one hot encoded)
+        columns are inferred from the values in the dataset `X`. If False, the
+        datatypes from the dataset are used (i.e. `X.dtypes`). Note that if 
+        False, any categorical-type columns should be stored as the `bool`
+        datatype. Defaults to True.
     verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : gives
         the overall progress of the training of the ensemble model and the
@@ -107,25 +114,29 @@ class RuleGeneratorDTSpark(_BaseGenerator):
     3       0
     """
 
-    def __init__(self, metric: Callable,
+    def __init__(self,
+                 metric: Callable,
                  n_total_conditions: int,
                  tree_ensemble: RandomForestClassifier,
                  precision_threshold=0,
                  target_feat_corr_types=None,
-                 verbose=0, rule_name_prefix='RGDT_Rule'):
+                 infer_dtypes=True,
+                 verbose=0,
+                 rule_name_prefix='RGDT_Rule'):
 
         _BaseGenerator.__init__(
             self,
             metric=metric,
             target_feat_corr_types=target_feat_corr_types,
             rule_name_prefix=rule_name_prefix,
+            infer_dtypes=infer_dtypes,
+            verbose=verbose
         )
         self.orig_tree_ensemble = tree_ensemble
         self.orig_tree_ensemble.setMaxDepth(n_total_conditions)
         self.orig_tree_ensemble.setSeed(0)
         self.orig_tree_ensemble.setLabelCol('label_')
         self.precision_threshold = precision_threshold
-        self.verbose = verbose
         self.rule_strings = {}
         self.rule_names = []
 
@@ -161,6 +172,8 @@ class RuleGeneratorDTSpark(_BaseGenerator):
         if sample_weight is not None:
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [KoalasSeries])
+        # Ensures rule names are the same when fit run without reinstantiating
+        self._rule_name_counter = 0
         # Copy spark tree ensemble - ensures repeatable results when class
         # not instantiated but fit method run for different inputs
         self.tree_ensemble = self.orig_tree_ensemble.copy()
@@ -173,7 +186,9 @@ class RuleGeneratorDTSpark(_BaseGenerator):
             )
         if self.verbose:
             print('--- Returning column datatypes ---')
-        columns_int, columns_cat, _ = utils.return_columns_types(X)
+        columns_int, columns_cat, _ = self._return_columns_types(
+            infer_dtypes=self.infer_dtypes, X=X
+        )
         if self.verbose:
             print('--- Creating Spark DataFrame for training ---')
         spark_df = self._create_train_spark_df(

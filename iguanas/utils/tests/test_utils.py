@@ -26,36 +26,6 @@ def test_concat(create_data):
     pd.testing.assert_frame_equal(X, pd.concat([y_preds, y_true], axis=1))
 
 
-def test_return_columns_types():
-    X = pd.DataFrame({
-        'A': [2.5, 3.5, 1, 1, 2.5],
-        'B': [1, 0, 0, 1, 1],
-        'C': [1, 2, 0, 0, 1]
-    })
-    int_cols, cat_cols, float_cols = utils.return_columns_types(X)
-    assert int_cols == ['B', 'C']
-    assert cat_cols == ['B']
-    assert float_cols == ['A']
-    # Test when all ints
-    X = pd.DataFrame({
-        'A': [1, 0, 0, 1, 1],
-        'B': [1, 0, 0, 1, 1],
-    })
-    int_cols, cat_cols, float_cols = utils.return_columns_types(X)
-    assert int_cols == ['A', 'B']
-    assert cat_cols == ['A', 'B']
-    assert float_cols == []
-    # Test when all floats
-    X = pd.DataFrame({
-        'A': [1.2, 0, 0, 1.1, 1],
-        'B': [1.5, 0, 0, 1, 1.1],
-    })
-    int_cols, cat_cols, float_cols = utils.return_columns_types(X)
-    assert int_cols == []
-    assert cat_cols == []
-    assert float_cols == ['A', 'B']
-
-
 def test_calc_tps_fps_tns_fns(create_data):
     y_true, y_preds, weights = create_data
     # Without weights

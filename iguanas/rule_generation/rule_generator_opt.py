@@ -69,6 +69,13 @@ class RuleGeneratorOpt(_BaseGenerator):
         `PositiveCorr`) and negatively correlated features wrt the target 
         (under the key `NegativeCorr`), or 'Infer' (where each target-feature 
         correlation type is inferred from the data). Defaults to None.
+    infer_dtypes : bool, optional
+        Dictates whether the column datatypes should be inferred from the data.
+        If True, the integer, float and categorical-type (e.g. one hot encoded)
+        columns are inferred from the values in the dataset `X`. If False, the
+        datatypes from the dataset are used (i.e. `X.dtypes`). Note that if 
+        False, any categorical-type columns should be stored as the `bool`
+        datatype. Defaults to True.
     verbose : int, optional 
         Controls the verbosity - the higher, the more messages. >0 : gives the
         progress of the training of the rules. Defaults to 0.
@@ -128,17 +135,26 @@ class RuleGeneratorOpt(_BaseGenerator):
     3       0
     """
 
-    def __init__(self, metric: Callable,
-                 n_total_conditions: int, num_rules_keep: int, n_points=10,
-                 ratio_window=2, one_cond_rule_opt_metric=f1.fit,
-                 remove_corr_rules=True, target_feat_corr_types=None,
-                 verbose=0, rule_name_prefix='RGO_Rule'):
+    def __init__(self,
+                 metric: Callable,
+                 n_total_conditions: int,
+                 num_rules_keep: int,
+                 n_points=10,
+                 ratio_window=2,
+                 one_cond_rule_opt_metric=f1.fit,
+                 remove_corr_rules=True,
+                 target_feat_corr_types=None,
+                 infer_dtypes=True,
+                 verbose=0,
+                 rule_name_prefix='RGO_Rule'):
 
         _BaseGenerator.__init__(
             self,
             metric=metric,
             target_feat_corr_types=target_feat_corr_types,
             rule_name_prefix=rule_name_prefix,
+            infer_dtypes=infer_dtypes,
+            verbose=verbose,
         )
         self.n_total_conditions = n_total_conditions
         self.num_rules_keep = num_rules_keep
@@ -146,7 +162,6 @@ class RuleGeneratorOpt(_BaseGenerator):
         self.ratio_window = ratio_window
         self.one_cond_rule_opt_metric = one_cond_rule_opt_metric
         self.remove_corr_rules = remove_corr_rules
-        self.verbose = verbose
         self.rule_strings = {}
         self.rule_names = []
 
@@ -192,10 +207,14 @@ class RuleGeneratorOpt(_BaseGenerator):
             )
         X_rules = pd.DataFrame()
         rule_strings = {}
-        columns_int, columns_cat, columns_float = utils.return_columns_types(
-            X)
+        if self.verbose > 0:
+            print('--- Returning column datatypes ---')
+        columns_int, columns_cat, columns_float = self._return_columns_types(
+            infer_dtypes=self.infer_dtypes, X=X
+        )
         columns_num = [
-            col for col in columns_int if col not in columns_cat] + columns_float
+            col for col in columns_int if col not in columns_cat
+        ] + columns_float
         if columns_num:
             if self.verbose > 0:
                 print(
