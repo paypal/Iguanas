@@ -206,6 +206,13 @@
 <span class="sd">        correlated features wrt the target (under the key `NegativeCorr`),</span>
 <span class="sd">        or &#39;Infer&#39; (where each target-feature correlation type is inferred </span>
 <span class="sd">        from the data). Defaults to None.</span>
+<span class="sd">    infer_dtypes : bool, optional</span>
+<span class="sd">        Dictates whether the column datatypes should be inferred from the data.</span>
+<span class="sd">        If True, the integer, float and categorical-type (e.g. one hot encoded)</span>
+<span class="sd">        columns are inferred from the values in the dataset `X`. If False, the</span>
+<span class="sd">        datatypes from the dataset are used (i.e. `X.dtypes`). Note that if </span>
+<span class="sd">        False, any categorical-type columns should be stored as the `bool`</span>
+<span class="sd">        datatype. Defaults to True.</span>
 <span class="sd">    verbose : int, optional</span>
 <span class="sd">        Controls the verbosity - the higher, the more messages. &gt;0 : gives</span>
 <span class="sd">        the overall progress of the training of the ensemble model and the</span>
@@ -267,25 +274,29 @@
 <span class="sd">    3       0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
                  <span class="n">n_total_conditions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                  <span class="n">tree_ensemble</span><span class="p">:</span> <span class="n">RandomForestClassifier</span><span class="p">,</span>
                  <span class="n">precision_threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                  <span class="n">target_feat_corr_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rule_name_prefix</span><span class="o">=</span><span class="s1">&#39;RGDT_Rule&#39;</span><span class="p">):</span>
+                 <span class="n">infer_dtypes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">rule_name_prefix</span><span class="o">=</span><span class="s1">&#39;RGDT_Rule&#39;</span><span class="p">):</span>
 
         <span class="n">_BaseGenerator</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
             <span class="n">target_feat_corr_types</span><span class="o">=</span><span class="n">target_feat_corr_types</span><span class="p">,</span>
             <span class="n">rule_name_prefix</span><span class="o">=</span><span class="n">rule_name_prefix</span><span class="p">,</span>
+            <span class="n">infer_dtypes</span><span class="o">=</span><span class="n">infer_dtypes</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">orig_tree_ensemble</span> <span class="o">=</span> <span class="n">tree_ensemble</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">orig_tree_ensemble</span><span class="o">.</span><span class="n">setMaxDepth</span><span class="p">(</span><span class="n">n_total_conditions</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">orig_tree_ensemble</span><span class="o">.</span><span class="n">setSeed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">orig_tree_ensemble</span><span class="o">.</span><span class="n">setLabelCol</span><span class="p">(</span><span class="s1">&#39;label_&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">precision_threshold</span> <span class="o">=</span> <span class="n">precision_threshold</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_names</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -295,7 +306,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;RuleGeneratorDTSpark(metric=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="si">}</span><span class="s1">, n_total_conditions=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_tree_ensemble</span><span class="o">.</span><span class="n">getMaxDepth</span><span class="p">()</span><span class="si">}</span><span class="s1">, tree_ensemble=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">orig_tree_ensemble</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">, precision_threshold=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">precision_threshold</span><span class="si">}</span><span class="s1">, target_feat_corr_types=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target_feat_corr_types</span><span class="si">}</span><span class="s1">)&#39;</span>
 
-<div class="viewcode-block" id="RuleGeneratorDTSpark.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_generation.RuleGeneratorDTSpark.html#iguanas.rule_generation.RuleGeneratorDTSpark.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">KoalasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">KoalasSeriesType</span><span class="p">,</span>
+<div class="viewcode-block" id="RuleGeneratorDTSpark.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_generation.RuleGeneratorDTSpark.html#iguanas.rule_generation.RuleGeneratorDTSpark.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">X</span><span class="p">:</span> <span class="n">KoalasDataFrameType</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">:</span> <span class="n">KoalasSeriesType</span><span class="p">,</span>
             <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KoalasDataFrameType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates rules by extracting the highest performing branches in a tree</span>
@@ -321,6 +334,8 @@
         <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">utils</span><span class="o">.</span><span class="n">check_allowed_types</span><span class="p">(</span>
                 <span class="n">sample_weight</span><span class="p">,</span> <span class="s1">&#39;sample_weight&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">KoalasSeries</span><span class="p">])</span>
+        <span class="c1"># Ensures rule names are the same when fit run without reinstantiating</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rule_name_counter</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="c1"># Copy spark tree ensemble - ensures repeatable results when class</span>
         <span class="c1"># not instantiated but fit method run for different inputs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tree_ensemble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orig_tree_ensemble</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -333,7 +348,9 @@
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;--- Returning column datatypes ---&#39;</span><span class="p">)</span>
-        <span class="n">columns_int</span><span class="p">,</span> <span class="n">columns_cat</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">return_columns_types</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">columns_int</span><span class="p">,</span> <span class="n">columns_cat</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_columns_types</span><span class="p">(</span>
+            <span class="n">infer_dtypes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">infer_dtypes</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;--- Creating Spark DataFrame for training ---&#39;</span><span class="p">)</span>
         <span class="n">spark_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_train_spark_df</span><span class="p">(</span>
@@ -346,15 +363,14 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;--- Extracting rules from tree ensemble ---&#39;</span><span class="p">)</span>
         <span class="n">X_rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_rules_from_ensemble</span><span class="p">(</span>
-            <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span>
-            <span class="n">tree_ensemble</span><span class="o">=</span><span class="n">trained_tree_ensemble</span><span class="p">,</span> <span class="n">columns_int</span><span class="o">=</span><span class="n">columns_int</span><span class="p">,</span>
+            <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">tree_ensemble</span><span class="o">=</span><span class="n">trained_tree_ensemble</span><span class="p">,</span> <span class="n">columns_int</span><span class="o">=</span><span class="n">columns_int</span><span class="p">,</span>
             <span class="n">columns_cat</span><span class="o">=</span><span class="n">columns_cat</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_generate_other_rule_formats</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">X_rules</span></div>
 
-    <span class="k">def</span> <span class="nf">_extract_rules_from_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">KoalasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">KoalasSeriesType</span><span class="p">,</span>
-                                     <span class="n">sample_weight</span><span class="p">:</span> <span class="n">KoalasSeriesType</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_extract_rules_from_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                     <span class="n">X</span><span class="p">:</span> <span class="n">KoalasDataFrameType</span><span class="p">,</span>
                                      <span class="n">tree_ensemble</span><span class="p">:</span> <span class="n">RandomForestClassifier</span><span class="p">,</span>
                                      <span class="n">columns_int</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                                      <span class="n">columns_cat</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">KoalasDataFrameType</span><span class="p">:</span>
@@ -387,7 +403,8 @@
         <span class="n">X_rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">X_rules</span>
 
-    <span class="k">def</span> <span class="nf">_extract_rules_from_dt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="k">def</span> <span class="nf">_extract_rules_from_dt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                               <span class="n">columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                                <span class="n">decision_tree</span><span class="p">:</span> <span class="n">DecisionTreeClassificationModel</span><span class="p">,</span>
                                <span class="n">columns_int</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                                <span class="n">columns_cat</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -409,7 +426,8 @@
             <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_create_train_spark_df</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">KoalasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">KoalasSeriesType</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_create_train_spark_df</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">KoalasDataFrameType</span><span class="p">,</span>
+                               <span class="n">y</span><span class="p">:</span> <span class="n">KoalasSeriesType</span><span class="p">,</span>
                                <span class="n">sample_weight</span><span class="p">:</span> <span class="n">KoalasSeriesType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a Spark DataFrame from `X`, `y` and `sample_weight` (if </span>

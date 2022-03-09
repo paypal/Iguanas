@@ -349,7 +349,8 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="n">final_step</span><span class="o">.</span><span class="n">rules</span></div>
 
-<div class="viewcode-block" id="LinearPipeline.predict"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
+<div class="viewcode-block" id="LinearPipeline.predict"><a class="viewcode-back" href="../../../api/api/iguanas.pipeline.LinearPipeline.html#iguanas.pipeline.LinearPipeline.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sequentially runs the `transform` method of each step in the pipeline,</span>
 <span class="sd">        except for the last step, where the `predict` method is run. Note that</span>

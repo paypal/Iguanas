@@ -714,27 +714,6 @@ Series/DataFrames.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="iguanas.utils.utils.return_columns_types">
-<span class="sig-prename descclassname"><span class="pre">iguanas.utils.utils.</span></span><span class="sig-name descname"><span class="pre">return_columns_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/iguanas/utils/utils.html#return_columns_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.utils.utils.return_columns_types" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the integer, float and OHE categorical columns for a given dataset.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">Union[PandasDataFrameType, KoalasDataFrameType])</span></dt><dd><p>Dataset.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>Tuple[List, List, List]</dt><dd><p>List of integer columns, list of float columns, list of OHE categorical 
-columns.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="iguanas.utils.utils.create_spark_df">
 <span class="sig-prename descclassname"><span class="pre">iguanas.utils.utils.</span></span><span class="sig-name descname"><span class="pre">create_spark_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">databricks.koalas.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">databricks.koalas.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pyspark.sql.dataframe.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/utils/utils.html#create_spark_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.utils.utils.create_spark_df" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a Spark DataFrame from the features and target given as Koalas 

@@ -368,7 +368,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;DirectSearchOptimiser object with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimisable_rules</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">)</span><span class="si">}</span><span class="s1"> optimised rules and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">non_optimisable_rules</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">)</span><span class="si">}</span><span class="s1"> unoptimisable rules&#39;</span>
 
-<div class="viewcode-block" id="DirectSearchOptimiser.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_optimisation.DirectSearchOptimiser.html#iguanas.rule_optimisation.DirectSearchOptimiser.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
+<div class="viewcode-block" id="DirectSearchOptimiser.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_optimisation.DirectSearchOptimiser.html#iguanas.rule_optimisation.DirectSearchOptimiser.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Optimises a set of rules (given in the standard Iguanas lambda expression</span>
 <span class="sd">        format) using Direct Search-type algorithms.</span>
@@ -412,7 +415,8 @@
         <span class="k">return</span> <span class="n">X_rules</span></div>
 
 <div class="viewcode-block" id="DirectSearchOptimiser.create_bounds"><a class="viewcode-back" href="../../../api/api/iguanas.rule_optimisation.DirectSearchOptimiser.html#iguanas.rule_optimisation.DirectSearchOptimiser.create_bounds">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">create_bounds</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">create_bounds</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                      <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
                       <span class="n">lambda_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the `bounds` parameter using the min and max of each feature in</span>
@@ -439,7 +443,8 @@
         <span class="k">return</span> <span class="n">bounds</span></div>
 
 <div class="viewcode-block" id="DirectSearchOptimiser.create_x0"><a class="viewcode-back" href="../../../api/api/iguanas.rule_optimisation.DirectSearchOptimiser.html#iguanas.rule_optimisation.DirectSearchOptimiser.create_x0">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">create_x0</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">create_x0</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                  <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
                   <span class="n">lambda_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the `x0` parameter using the mid-range value of each feature in</span>
@@ -466,7 +471,8 @@
         <span class="k">return</span> <span class="n">x0</span></div>
 
 <div class="viewcode-block" id="DirectSearchOptimiser.create_initial_simplexes"><a class="viewcode-back" href="../../../api/api/iguanas.rule_optimisation.DirectSearchOptimiser.html#iguanas.rule_optimisation.DirectSearchOptimiser.create_initial_simplexes">[docs]</a>    <span class="o">@</span> <span class="nb">classmethod</span>
-    <span class="k">def</span> <span class="nf">create_initial_simplexes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">create_initial_simplexes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                                 <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
                                  <span class="n">lambda_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
                                  <span class="n">shape</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -643,7 +649,9 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">minimize_kwargs</span>
 
-    <span class="k">def</span> <span class="nf">_return_opt_param_for_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">param_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_return_opt_param_for_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                   <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                   <span class="n">param_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
                                    <span class="n">rule_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Returns the keyword-argument for the given parameter and rule.&quot;&quot;&quot;</span>
 
@@ -663,7 +671,8 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_param_base_calc</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
                          <span class="n">lambda_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
-                         <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+                         <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                         <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Base calculator for input parameters&quot;&quot;&quot;</span>
 
         <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>

@@ -429,7 +429,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">pipeline_</span><span class="o">.</span><span class="n">_update_kwargs</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">best_params</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pipeline_</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BayesSearchCV.predict"><a class="viewcode-back" href="../../../api/api/iguanas.rule_selection.BayesSearchCV.html#iguanas.rule_selection.BayesSearchCV.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
+<div class="viewcode-block" id="BayesSearchCV.predict"><a class="viewcode-back" href="../../../api/api/iguanas.rule_selection.BayesSearchCV.html#iguanas.rule_selection.BayesSearchCV.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Predict using the optimised pipeline.</span>
 
@@ -589,7 +590,8 @@
 <span class="sd">        sets.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">_splitter</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">idxs</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_splitter</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasSeriesType</span><span class="p">,</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+                      <span class="n">idxs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasSeriesType</span><span class="p">,</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
             <span class="c1"># If the data is a Pandas data object, return the filtered object</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)):</span>
                 <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idxs</span><span class="p">]</span>
@@ -681,9 +683,12 @@
         <span class="k">return</span> <span class="n">fold_score</span>
 
     <span class="o">@</span> <span class="nb">staticmethod</span>
-    <span class="k">def</span> <span class="nf">_update_cv_results</span><span class="p">(</span><span class="n">cv_results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">params_iter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-                           <span class="n">fold_idxs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">scores_over_folds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                           <span class="n">mean_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">std_dev_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_update_cv_results</span><span class="p">(</span><span class="n">cv_results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                           <span class="n">params_iter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                           <span class="n">fold_idxs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                           <span class="n">scores_over_folds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                           <span class="n">mean_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                           <span class="n">std_dev_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates the cv_results dictionary with the results for the given</span>
 <span class="sd">        parameter set.</span>
@@ -704,7 +709,8 @@
         <span class="k">return</span> <span class="n">cv_results</span>
 
     <span class="o">@</span> <span class="nb">staticmethod</span>
-    <span class="k">def</span> <span class="nf">_reformat_best_params</span><span class="p">(</span><span class="n">best_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">search_spaces</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_reformat_best_params</span><span class="p">(</span><span class="n">best_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                              <span class="n">search_spaces</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reformats the output of hyperopt&#39;s fmin function into the same</span>
 <span class="sd">        dictionary format that is used to define the search_spaces. This allows</span>

@@ -199,10 +199,12 @@
 <span class="sd">    dtype: int64</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="o">=</span> <span class="n">limit</span>
 
-<div class="viewcode-block" id="ConstantScaler.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_scoring.ConstantScaler.html#iguanas.rule_scoring.ConstantScaler.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rule_scores</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
+<div class="viewcode-block" id="ConstantScaler.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_scoring.ConstantScaler.html#iguanas.rule_scoring.ConstantScaler.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">rule_scores</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Scales the rule scores.</span>
 
@@ -263,11 +265,14 @@
 <span class="sd">    dtype: int64</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_value</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">max_value</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">min_value</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">max_value</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_value</span> <span class="o">=</span> <span class="n">min_value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_value</span> <span class="o">=</span> <span class="n">max_value</span>
 
-<div class="viewcode-block" id="MinMaxScaler.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_scoring.MinMaxScaler.html#iguanas.rule_scoring.MinMaxScaler.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rule_scores</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
+<div class="viewcode-block" id="MinMaxScaler.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_scoring.MinMaxScaler.html#iguanas.rule_scoring.MinMaxScaler.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">rule_scores</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasSeriesType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Scales the rule scores.</span>
 

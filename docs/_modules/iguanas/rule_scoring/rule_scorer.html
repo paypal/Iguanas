@@ -221,14 +221,18 @@
 <span class="sd">    3    0   0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scoring_class</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PerformanceScorer</span><span class="p">,</span> <span class="n">LogRegScorer</span><span class="p">,</span>
-                                            <span class="n">RandomForestScorer</span><span class="p">],</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">scoring_class</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
+                     <span class="n">PerformanceScorer</span><span class="p">,</span> <span class="n">LogRegScorer</span><span class="p">,</span> <span class="n">RandomForestScorer</span>
+                 <span class="p">],</span>
                  <span class="n">scaling_class</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">scoring_class</span> <span class="o">=</span> <span class="n">scoring_class</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scaling_class</span> <span class="o">=</span> <span class="n">scaling_class</span>
 
-<div class="viewcode-block" id="RuleScorer.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_scoring.RuleScorer.html#iguanas.rule_scoring.RuleScorer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+<div class="viewcode-block" id="RuleScorer.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_scoring.RuleScorer.html#iguanas.rule_scoring.RuleScorer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
             <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates rule scores using the rule binary columns and the binary </span>
@@ -251,7 +255,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">rule_scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_class</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
                 <span class="n">rule_scores</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_scores</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="RuleScorer.transform"><a class="viewcode-back" href="../../../api/api/iguanas.rule_scoring.RuleScorer.html#iguanas.rule_scoring.RuleScorer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
+<div class="viewcode-block" id="RuleScorer.transform"><a class="viewcode-back" href="../../../api/api/iguanas.rule_scoring.RuleScorer.html#iguanas.rule_scoring.RuleScorer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transforms the rule binary columns to show the generated scores applied</span>
 <span class="sd">        to the dataset (i.e. replaces the 1 in `X_rules` with the generated </span>
@@ -271,7 +276,9 @@
         <span class="n">X_scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_scores</span> <span class="o">*</span> <span class="n">X_rules</span>
         <span class="k">return</span> <span class="n">X_scores</span></div>
 
-<div class="viewcode-block" id="RuleScorer.fit_transform"><a class="viewcode-back" href="../../../api/api/iguanas.rule_scoring.RuleScorer.html#iguanas.rule_scoring.RuleScorer.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+<div class="viewcode-block" id="RuleScorer.fit_transform"><a class="viewcode-back" href="../../../api/api/iguanas.rule_scoring.RuleScorer.html#iguanas.rule_scoring.RuleScorer.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                      <span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+                      <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
                       <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates rule scores using the rule binary columns and the binary </span>

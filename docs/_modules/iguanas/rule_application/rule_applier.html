@@ -206,7 +206,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span> <span class="o">=</span> <span class="n">rule_strings</span>
 
 <div class="viewcode-block" id="RuleApplier.transform"><a class="viewcode-back" href="../../../api/api/iguanas.rule_application.RuleApplier.html#iguanas.rule_application.RuleApplier.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                  <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">KoalasDataFrameType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">KoalasDataFrameType</span><span class="p">]:</span>
+                  <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">KoalasDataFrameType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
+                      <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">KoalasDataFrameType</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the set of rules to a dataset, `X`.</span>
 
@@ -226,7 +227,8 @@
         <span class="n">X_rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_X_rules</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">X_rules</span></div>
 
-    <span class="k">def</span> <span class="nf">_get_X_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">KoalasDataFrameType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
+    <span class="k">def</span> <span class="nf">_get_X_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                     <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">KoalasDataFrameType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
             <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">KoalasDataFrameType</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the binary columns of the list of rules applied to the </span>

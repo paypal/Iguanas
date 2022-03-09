@@ -207,6 +207,13 @@
 <span class="sd">        correlated features wrt the target (under the key `NegativeCorr`),</span>
 <span class="sd">        or &#39;Infer&#39; (where each target-feature correlation type is inferred</span>
 <span class="sd">        from the data). Defaults to None.</span>
+<span class="sd">    infer_dtypes : bool, optional</span>
+<span class="sd">        Dictates whether the column datatypes should be inferred from the data.</span>
+<span class="sd">        If True, the integer, float and categorical-type (e.g. one hot encoded)</span>
+<span class="sd">        columns are inferred from the values in the dataset `X`. If False, the</span>
+<span class="sd">        datatypes from the dataset are used (i.e. `X.dtypes`). Note that if </span>
+<span class="sd">        False, any categorical-type columns should be stored as the `bool`</span>
+<span class="sd">        datatype. Defaults to True.</span>
 <span class="sd">    verbose : int, optional</span>
 <span class="sd">        Controls the verbosity - the higher, the more messages. &gt;0 : gives</span>
 <span class="sd">        the overall progress of the training of the ensemble model and the</span>
@@ -268,12 +275,14 @@
 <span class="sd">    3       0       0       0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
                  <span class="n">n_total_conditions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                  <span class="n">tree_ensemble</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">ExtraTreesClassifier</span><span class="p">],</span>
                  <span class="n">precision_threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                  <span class="n">num_cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">target_feat_corr_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">infer_dtypes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                  <span class="n">rule_name_prefix</span><span class="o">=</span><span class="s1">&#39;RGDT_Rule&#39;</span><span class="p">):</span>
 
@@ -282,12 +291,13 @@
             <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
             <span class="n">target_feat_corr_types</span><span class="o">=</span><span class="n">target_feat_corr_types</span><span class="p">,</span>
             <span class="n">rule_name_prefix</span><span class="o">=</span><span class="n">rule_name_prefix</span><span class="p">,</span>
+            <span class="n">infer_dtypes</span><span class="o">=</span><span class="n">infer_dtypes</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tree_ensemble</span> <span class="o">=</span> <span class="n">tree_ensemble</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_total_conditions</span> <span class="o">=</span> <span class="n">n_total_conditions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">precision_threshold</span> <span class="o">=</span> <span class="n">precision_threshold</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span> <span class="o">=</span> <span class="n">num_cores</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_names</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -297,7 +307,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;RuleGeneratorDT(metric=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="si">}</span><span class="s1">, n_total_conditions=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_total_conditions</span><span class="si">}</span><span class="s1">, tree_ensemble=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_ensemble</span><span class="si">}</span><span class="s1">, precision_threshold=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">precision_threshold</span><span class="si">}</span><span class="s1">, num_cores=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span><span class="si">}</span><span class="s1">, target_feat_corr_types=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target_feat_corr_types</span><span class="si">}</span><span class="s1">)&#39;</span>
 
-<div class="viewcode-block" id="RuleGeneratorDT.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_generation.RuleGeneratorDT.html#iguanas.rule_generation.RuleGeneratorDT.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+<div class="viewcode-block" id="RuleGeneratorDT.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_generation.RuleGeneratorDT.html#iguanas.rule_generation.RuleGeneratorDT.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
             <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates rules by extracting the highest performing branches in a tree</span>
@@ -339,7 +351,9 @@
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;--- Returning column datatypes ---&#39;</span><span class="p">)</span>
-        <span class="n">columns_int</span><span class="p">,</span> <span class="n">columns_cat</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">return_columns_types</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">columns_int</span><span class="p">,</span> <span class="n">columns_cat</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_columns_types</span><span class="p">(</span>
+            <span class="n">infer_dtypes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">infer_dtypes</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;--- Training tree ensemble ---&#39;</span><span class="p">)</span>
         <span class="n">trained_tree_ensemble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_ensemble</span><span class="p">(</span>
@@ -349,20 +363,18 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;--- Extracting rules from tree ensemble ---&#39;</span><span class="p">)</span>
         <span class="n">X_rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_rules_from_ensemble</span><span class="p">(</span>
             <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
-            <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
             <span class="n">num_cores</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span><span class="p">,</span>
             <span class="n">tree_ensemble</span><span class="o">=</span><span class="n">trained_tree_ensemble</span><span class="p">,</span>
             <span class="n">columns_int</span><span class="o">=</span><span class="n">columns_int</span><span class="p">,</span>
-            <span class="n">columns_cat</span><span class="o">=</span><span class="n">columns_cat</span><span class="p">,</span>
-            <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span>
+            <span class="n">columns_cat</span><span class="o">=</span><span class="n">columns_cat</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_generate_other_rule_formats</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">X_rules</span></div>
 
-    <span class="k">def</span> <span class="nf">_extract_rules_from_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_extract_rules_from_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                     <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
                                      <span class="n">tree_ensemble</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">ExtraTreesClassifier</span><span class="p">],</span>
                                      <span class="n">num_cores</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                                     <span class="n">sample_weight</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
                                      <span class="n">columns_int</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                                      <span class="n">columns_cat</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -389,9 +401,11 @@
         <span class="n">X_rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">X_rules</span>
 
-    <span class="k">def</span> <span class="nf">_extract_rules_from_dt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="k">def</span> <span class="nf">_extract_rules_from_dt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                               <span class="n">columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                                <span class="n">decision_tree</span><span class="p">:</span> <span class="n">DecisionTreeClassifier</span><span class="p">,</span>
-                               <span class="n">columns_int</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">columns_cat</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+                               <span class="n">columns_int</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                               <span class="n">columns_cat</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Removes low precision DTs and returns the rules from the DT.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -410,7 +424,8 @@
             <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_train_ensemble</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_train_ensemble</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+                        <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
                         <span class="n">tree_ensemble</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RandomForestClassifier</span><span class="p">,</span>
                                              <span class="n">ExtraTreesClassifier</span><span class="p">],</span>
                         <span class="n">sample_weight</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
@@ -429,8 +444,7 @@
         <span class="k">return</span> <span class="n">tree_ensemble</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_get_dt_attributes</span><span class="p">(</span><span class="n">decision_tree</span><span class="p">:</span> <span class="n">DecisionTreeClassifier</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_get_dt_attributes</span><span class="p">(</span><span class="n">decision_tree</span><span class="p">:</span> <span class="n">DecisionTreeClassifier</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Returns the attributes associated with a given DT&quot;&quot;&quot;</span>
 
         <span class="n">left</span> <span class="o">=</span> <span class="n">decision_tree</span><span class="o">.</span><span class="n">tree_</span><span class="o">.</span><span class="n">children_left</span>

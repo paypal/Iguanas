@@ -339,7 +339,8 @@
 <span class="sd">    [1.  0.8]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -444,7 +445,9 @@
 <span class="sd">    [350 310]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chargeback_multiplier</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">y_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">chargeback_multiplier</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">y_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Fraud&#39;</span><span class="p">,</span> <span class="s1">&#39;NonFraud&#39;</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`y_type` must be either &quot;Fraud&quot; or &quot;NonFraud&quot;&#39;</span><span class="p">)</span>

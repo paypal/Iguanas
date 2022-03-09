@@ -321,7 +321,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;BayesianOptimiser object with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimisable_rules</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">)</span><span class="si">}</span><span class="s1"> optimised rules and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">non_optimisable_rules</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">)</span><span class="si">}</span><span class="s1"> unoptimisable rules&#39;</span>
 
-<div class="viewcode-block" id="BayesianOptimiser.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_optimisation.BayesianOptimiser.html#iguanas.rule_optimisation.BayesianOptimiser.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
+<div class="viewcode-block" id="BayesianOptimiser.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_optimisation.BayesianOptimiser.html#iguanas.rule_optimisation.BayesianOptimiser.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Optimises a set of rules (given in the standard Iguanas lambda expression</span>
 <span class="sd">        format) using Bayesian Optimisation.</span>
@@ -378,10 +381,14 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">X_rules</span></div>
 
-    <span class="k">def</span> <span class="nf">_optimise_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rule_lambdas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Dict</span><span class="p">],</span> <span class="nb">str</span><span class="p">]],</span>
-                        <span class="n">lambda_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
-                        <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span> <span class="n">sample_weight</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
-                        <span class="n">int_cols</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">all_space_funcs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_optimise_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                        <span class="n">rule_lambdas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Dict</span><span class="p">],</span> <span class="nb">str</span><span class="p">]],</span>
+                        <span class="n">lambda_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+                        <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+                        <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+                        <span class="n">sample_weight</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+                        <span class="n">int_cols</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+                        <span class="n">all_space_funcs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Optimises each rule in the set&quot;&quot;&quot;</span>
 
         <span class="n">opt_rule_strings</span> <span class="o">=</span> <span class="p">{}</span>
@@ -483,7 +490,8 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_optimise_rule_thresholds</span><span class="p">(</span><span class="n">rule_lambda</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Dict</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
                                   <span class="n">rule_space_funcs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">hp</span><span class="o">.</span><span class="n">uniform</span><span class="p">],</span>
-                                  <span class="n">X_</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+                                  <span class="n">X_</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+                                  <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
                                   <span class="n">sample_weight</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
                                   <span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
                                   <span class="n">algorithm</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>

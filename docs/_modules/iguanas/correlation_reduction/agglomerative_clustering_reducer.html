@@ -266,7 +266,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;AgglomerativeClusteringReducer(threshold=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="si">}</span><span class="s1">, strategy=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">strategy</span><span class="si">}</span><span class="s1">, similarity_function=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">similarity_function</span><span class="si">}</span><span class="s1">, metric=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="si">}</span><span class="s1">, print_clustermap=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">print_clustermap</span><span class="si">}</span><span class="s1">)&#39;</span>
 
-<div class="viewcode-block" id="AgglomerativeClusteringReducer.fit"><a class="viewcode-back" href="../../../api/api/iguanas.correlation_reduction.AgglomerativeClusteringReducer.html#iguanas.correlation_reduction.AgglomerativeClusteringReducer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="AgglomerativeClusteringReducer.fit"><a class="viewcode-back" href="../../../api/api/iguanas.correlation_reduction.AgglomerativeClusteringReducer.html#iguanas.correlation_reduction.AgglomerativeClusteringReducer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the similar columns in the dataset X.</span>
 
@@ -327,7 +330,8 @@
                 <span class="k">break</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">columns_to_keep</span> <span class="o">=</span> <span class="n">columns_to_keep</span></div>
 
-<div class="viewcode-block" id="AgglomerativeClusteringReducer.transform"><a class="viewcode-back" href="../../../api/api/iguanas.correlation_reduction.AgglomerativeClusteringReducer.html#iguanas.correlation_reduction.AgglomerativeClusteringReducer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
+<div class="viewcode-block" id="AgglomerativeClusteringReducer.transform"><a class="viewcode-back" href="../../../api/api/iguanas.correlation_reduction.AgglomerativeClusteringReducer.html#iguanas.correlation_reduction.AgglomerativeClusteringReducer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Removes similar columns from the dataset X.</span>
 
@@ -369,7 +373,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_bottom_up</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clusters</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span> <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_bottom_up</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                   <span class="n">clusters</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+                   <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                    <span class="n">similarity_df</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
                    <span class="n">columns_to_keep</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -403,7 +409,9 @@
                 <span class="n">columns_to_drop</span> <span class="o">=</span> <span class="n">columns_to_drop</span> <span class="o">+</span> <span class="n">columns</span>
         <span class="k">return</span> <span class="n">columns_to_drop</span><span class="p">,</span> <span class="n">columns_to_keep</span>
 
-    <span class="k">def</span> <span class="nf">_top_down</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clusters</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span> <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_top_down</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">clusters</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+                  <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                   <span class="n">similarity_df</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
                   <span class="n">columns_to_keep</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -433,7 +441,8 @@
                 <span class="n">columns_to_drop</span> <span class="o">=</span> <span class="n">columns_to_drop</span> <span class="o">+</span> <span class="n">columns</span>
         <span class="k">return</span> <span class="n">columns_to_drop</span><span class="p">,</span> <span class="n">columns_to_keep</span>
 
-    <span class="k">def</span> <span class="nf">_set_n_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">similarity_df</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_set_n_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                        <span class="n">similarity_df</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Sets the number of clusters to use&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="s1">&#39;top_down&#39;</span><span class="p">:</span>
