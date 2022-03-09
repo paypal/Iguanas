@@ -61,14 +61,18 @@ class RuleScorer:
     3    0   0
     """
 
-    def __init__(self, scoring_class: Union[PerformanceScorer, LogRegScorer,
-                                            RandomForestScorer],
+    def __init__(self,
+                 scoring_class: Union[
+                     PerformanceScorer, LogRegScorer, RandomForestScorer
+                 ],
                  scaling_class=None):
 
         self.scoring_class = scoring_class
         self.scaling_class = scaling_class
 
-    def fit(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
+    def fit(self,
+            X_rules: PandasDataFrameType,
+            y: PandasSeriesType,
             sample_weight=None) -> None:
         """
         Generates rule scores using the rule binary columns and the binary 
@@ -91,7 +95,8 @@ class RuleScorer:
             self.rule_scores = self.scaling_class.fit(
                 rule_scores=self.rule_scores)
 
-    def transform(self, X_rules: PandasDataFrameType) -> PandasDataFrameType:
+    def transform(self,
+                  X_rules: PandasDataFrameType) -> PandasDataFrameType:
         """
         Transforms the rule binary columns to show the generated scores applied
         to the dataset (i.e. replaces the 1 in `X_rules` with the generated 
@@ -111,7 +116,9 @@ class RuleScorer:
         X_scores = self.rule_scores * X_rules
         return X_scores
 
-    def fit_transform(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
+    def fit_transform(self,
+                      X_rules: PandasDataFrameType,
+                      y: PandasSeriesType,
                       sample_weight=None) -> PandasDataFrameType:
         """
         Generates rule scores using the rule binary columns and the binary 

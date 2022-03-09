@@ -141,7 +141,9 @@ class RBSOptimiser(RBSPipeline):
                 'If `config` not provided in `pipeline`, then one or both of `pos_pred_rules` and `neg_pred_rules` must be given.'
             )
 
-    def fit(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
+    def fit(self,
+            X_rules: PandasDataFrameType,
+            y: PandasSeriesType,
             sample_weight=None) -> None:
         """
         Optimises the pipeline for the given dataset.
@@ -178,7 +180,9 @@ class RBSOptimiser(RBSPipeline):
         # Filter `rules`
         self.rules.filter_rules(include=self.rules_to_keep)
 
-    def fit_predict(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
+    def fit_predict(self,
+                    X_rules: PandasDataFrameType,
+                    y: PandasSeriesType,
                     sample_weight=None) -> PandasSeriesType:
         """
         Optimises the pipeline for the given dataset and applies the pipeline 
@@ -203,7 +207,8 @@ class RBSOptimiser(RBSPipeline):
         self.fit(X_rules, y, sample_weight)
         return self.predict(X_rules)
 
-    def _get_space_funcs(self, X_rules: PandasDataFrameType) -> dict:
+    def _get_space_funcs(self,
+                         X_rules: PandasDataFrameType) -> dict:
         """Returns the space functions for each rule."""
 
         if self.config_given:
@@ -261,7 +266,8 @@ class RBSOptimiser(RBSPipeline):
         )
         return opt_thresholds
 
-    def _generate_config(self, opt_thresholds: dict) -> None:
+    def _generate_config(self,
+                         opt_thresholds: dict) -> None:
         """Generates final pipeline config based on optimisation"""
 
         if self.config_given:
@@ -270,7 +276,8 @@ class RBSOptimiser(RBSPipeline):
             opt_thresholds = self._convert_opt_thr(opt_thresholds)
             self.config = self._create_config(opt_thresholds)
 
-    def _create_config(self, space_funcs: dict) -> dict:
+    def _create_config(self,
+                       space_funcs: dict) -> dict:
         """Creates pipeline config from space functions"""
 
         config = []

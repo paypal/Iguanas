@@ -31,13 +31,15 @@ class CosineSimilarity:
     B  0.816497  1.000000
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self,
+                 **kwargs):
         self.kwargs = kwargs
 
     def __repr__(self):
         return 'CosineSimilarity'
 
-    def fit(self, X: PandasDataFrameType) -> PandasDataFrameType:
+    def fit(self,
+            X: PandasDataFrameType) -> PandasDataFrameType:
         """
         Computes the cosine similarity between columns in X.
 
@@ -83,13 +85,15 @@ class JaccardSimilarity:
     B  0.666667  1.000000
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self,
+                 **kwargs):
         self.kwargs = kwargs
 
     def __repr__(self):
         return 'JaccardSimilarity'
 
-    def fit(self, X: PandasDataFrameType) -> PandasDataFrameType:
+    def fit(self,
+            X: PandasDataFrameType) -> PandasDataFrameType:
         """
         Computes the Jaccard similarity between columns in X.
 

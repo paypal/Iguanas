@@ -39,10 +39,13 @@ class PerformanceScorer:
     dtype: float64
     """
 
-    def __init__(self, metric: Callable):
+    def __init__(self,
+                 metric: Callable):
         self.metric = metric
 
-    def fit(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
+    def fit(self,
+            X_rules: PandasDataFrameType,
+            y: PandasSeriesType,
             sample_weight=None) -> PandasDataFrameType:
         """
         Generates rule scores from a weighting function.
@@ -103,12 +106,16 @@ class LogRegScorer:
     dtype: float64
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self,
+                 *args,
+                 **kwargs):
 
         self.args = args
         self.kwargs = kwargs
 
-    def fit(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
+    def fit(self,
+            X_rules: PandasDataFrameType,
+            y: PandasSeriesType,
             sample_weight=None) -> PandasDataFrameType:
         """
         Generates rule scores from the coefficients of a trained Logistic 
@@ -170,12 +177,16 @@ class RandomForestScorer:
     dtype: float64
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self,
+                 *args,
+                 **kwargs):
 
         self.args = args
         self.kwargs = kwargs
 
-    def fit(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
+    def fit(self,
+            X_rules: PandasDataFrameType,
+            y: PandasSeriesType,
             sample_weight=None) -> PandasDataFrameType:
         """
         Generates rule scores from the feature importance of a trained Random

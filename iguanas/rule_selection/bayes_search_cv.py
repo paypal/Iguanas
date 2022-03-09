@@ -269,7 +269,8 @@ class BayesSearchCV:
             self.pipeline_._update_kwargs(params=self.best_params)
             self.pipeline_.fit(X, y, sample_weight)
 
-    def predict(self, X: Union[PandasDataFrameType, dict]) -> PandasSeriesType:
+    def predict(self,
+                X: Union[PandasDataFrameType, dict]) -> PandasSeriesType:
         """
         Predict using the optimised pipeline.
 
@@ -429,7 +430,8 @@ class BayesSearchCV:
         sets.
         """
 
-        def _splitter(df, idxs):
+        def _splitter(df: Union[PandasSeriesType, PandasDataFrameType, dict],
+                      idxs: np.ndarray) -> Union[PandasSeriesType, PandasDataFrameType, dict]:
             # If the data is a Pandas data object, return the filtered object
             if isinstance(df, (pd.Series, pd.DataFrame)):
                 return df.iloc[idxs]
@@ -521,9 +523,12 @@ class BayesSearchCV:
         return fold_score
 
     @ staticmethod
-    def _update_cv_results(cv_results: dict, params_iter: dict,
-                           fold_idxs: List[int], scores_over_folds: np.ndarray,
-                           mean_score: float, std_dev_score: float) -> dict:
+    def _update_cv_results(cv_results: dict,
+                           params_iter: dict,
+                           fold_idxs: List[int],
+                           scores_over_folds: np.ndarray,
+                           mean_score: float,
+                           std_dev_score: float) -> dict:
         """
         Updates the cv_results dictionary with the results for the given
         parameter set.
@@ -544,7 +549,8 @@ class BayesSearchCV:
         return cv_results
 
     @ staticmethod
-    def _reformat_best_params(best_params: dict, search_spaces: dict) -> dict:
+    def _reformat_best_params(best_params: dict,
+                              search_spaces: dict) -> dict:
         """
         Reformats the output of hyperopt's fmin function into the same
         dictionary format that is used to define the search_spaces. This allows

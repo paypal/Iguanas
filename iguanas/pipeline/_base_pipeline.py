@@ -61,7 +61,8 @@ class _BasePipeline:
                 pipeline_params.update(step_param_dict)
         return pipeline_params
 
-    def _update_kwargs(self, params: dict) -> None:
+    def _update_kwargs(self,
+                       params: dict) -> None:
         """
         Updates the given parameters of the given steps in the pipeline.
 

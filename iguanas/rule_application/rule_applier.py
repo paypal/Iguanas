@@ -46,7 +46,8 @@ class RuleApplier:
         self.rule_strings = rule_strings
 
     def transform(self,
-                  X: Union[PandasDataFrameType, KoalasDataFrameType]) -> Union[PandasDataFrameType, KoalasDataFrameType]:
+                  X: Union[PandasDataFrameType, KoalasDataFrameType]) -> Union[
+                      PandasDataFrameType, KoalasDataFrameType]:
         """
         Applies the set of rules to a dataset, `X`.
 
@@ -66,7 +67,8 @@ class RuleApplier:
         X_rules = self._get_X_rules(X)
         return X_rules
 
-    def _get_X_rules(self, X: Union[PandasDataFrameType, KoalasDataFrameType]) -> Union[
+    def _get_X_rules(self,
+                     X: Union[PandasDataFrameType, KoalasDataFrameType]) -> Union[
             PandasDataFrameType, KoalasDataFrameType]:
         """
         Returns the binary columns of the list of rules applied to the 

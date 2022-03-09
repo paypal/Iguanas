@@ -208,7 +208,10 @@ class DirectSearchOptimiser(_BaseOptimiser):
         else:
             return f'DirectSearchOptimiser object with {len(self.optimisable_rules.rule_strings)} optimised rules and {len(self.non_optimisable_rules.rule_strings)} unoptimisable rules'
 
-    def fit(self, X: PandasDataFrameType, y=None, sample_weight=None) -> PandasDataFrameType:
+    def fit(self,
+            X: PandasDataFrameType,
+            y=None,
+            sample_weight=None) -> PandasDataFrameType:
         """
         Optimises a set of rules (given in the standard Iguanas lambda expression
         format) using Direct Search-type algorithms.
@@ -252,7 +255,8 @@ class DirectSearchOptimiser(_BaseOptimiser):
         return X_rules
 
     @classmethod
-    def create_bounds(cls, X: PandasDataFrameType,
+    def create_bounds(cls,
+                      X: PandasDataFrameType,
                       lambda_kwargs: Dict[str, float]) -> Dict[str, np.ndarray]:
         """
         Creates the `bounds` parameter using the min and max of each feature in
@@ -279,7 +283,8 @@ class DirectSearchOptimiser(_BaseOptimiser):
         return bounds
 
     @classmethod
-    def create_x0(cls, X: PandasDataFrameType,
+    def create_x0(cls,
+                  X: PandasDataFrameType,
                   lambda_kwargs: Dict[str, dict]) -> Dict[str, np.ndarray]:
         """
         Creates the `x0` parameter using the mid-range value of each feature in
@@ -306,7 +311,8 @@ class DirectSearchOptimiser(_BaseOptimiser):
         return x0
 
     @ classmethod
-    def create_initial_simplexes(cls, X: PandasDataFrameType,
+    def create_initial_simplexes(cls,
+                                 X: PandasDataFrameType,
                                  lambda_kwargs: Dict[str, dict],
                                  shape: str) -> Dict[str, np.ndarray]:
         """
@@ -483,7 +489,9 @@ class DirectSearchOptimiser(_BaseOptimiser):
             )
         return minimize_kwargs
 
-    def _return_opt_param_for_rule(self, param_name: str, param_dict: dict,
+    def _return_opt_param_for_rule(self,
+                                   param_name: str,
+                                   param_dict: dict,
                                    rule_name: str) -> Union[str, float, dict]:
         """Returns the keyword-argument for the given parameter and rule."""
 
@@ -503,7 +511,8 @@ class DirectSearchOptimiser(_BaseOptimiser):
     @staticmethod
     def _param_base_calc(X: PandasDataFrameType,
                          lambda_kwargs: Dict[str, Dict[str, float]],
-                         param: str, func: Callable) -> np.ndarray:
+                         param: str,
+                         func: Callable) -> np.ndarray:
         """Base calculator for input parameters"""
 
         results = {}

@@ -20,7 +20,8 @@ class _ConvertRuleDictsToRuleStrings:
         and their names (keys).
     """
 
-    def __init__(self, rule_dicts: Dict[str, dict]):
+    def __init__(self,
+                 rule_dicts: Dict[str, dict]):
         self.rule_dicts = rule_dicts
         self.rule_strings = {}
         self._lambda_kwargs = {}
@@ -154,7 +155,8 @@ class _ConvertRuleDictsToRuleStrings:
             }
         }
 
-    def convert(self, as_numpy: bool) -> Dict[str, str]:
+    def convert(self,
+                as_numpy: bool) -> Dict[str, str]:
         """
         Converts a set of rules (each being represented in the standard Iguanas 
         dictionary format) into the standard Iguanas string format.        
@@ -178,7 +180,8 @@ class _ConvertRuleDictsToRuleStrings:
             self.rule_strings[rule_name] = rule_string
         return self.rule_strings
 
-    def _convert_to_lambda(self, as_numpy: bool,
+    def _convert_to_lambda(self,
+                           as_numpy: bool,
                            with_kwargs: bool) -> Tuple[Dict, Dict, Dict, Dict]:
         """
         Converts a set of rules (each being represented in the standard Iguanas 
@@ -217,7 +220,9 @@ class _ConvertRuleDictsToRuleStrings:
             self._lambda_kwargs, self._lambda_args, self._rule_features = {}, [], []
         return rule_lambdas, lambda_kwargs, lambda_args, rule_features
 
-    def _convert_rule(self, rule_dict: Dict[str, Dict], as_numpy: bool) -> str:
+    def _convert_rule(self,
+                      rule_dict: Dict[str, Dict],
+                      as_numpy: bool) -> str:
         """
         Converts a rule stored in the standard Iguanas dictionary format into the
         standard Iguanas string format.
@@ -228,8 +233,10 @@ class _ConvertRuleDictsToRuleStrings:
         rule_string = rule_string[1:-1]
         return rule_string
 
-    def _recurse_convert_rule_dict_conditions(self, rule_dict: Dict[str, Dict],
-                                              as_numpy: bool, as_lambda: bool,
+    def _recurse_convert_rule_dict_conditions(self,
+                                              rule_dict: Dict[str, Dict],
+                                              as_numpy: bool,
+                                              as_lambda: bool,
                                               with_kwargs: bool) -> str:
         """Recursively converts a rule dictionary to rule string"""
 
@@ -241,8 +248,10 @@ class _ConvertRuleDictsToRuleStrings:
         rule_string = f'({str_condition.join(str_rule_list)})'
         return rule_string
 
-    def _convert_rule_dict_conditions(self, rules_list: List[Dict],
-                                      as_numpy: bool, as_lambda: bool,
+    def _convert_rule_dict_conditions(self,
+                                      rules_list: List[Dict],
+                                      as_numpy: bool,
+                                      as_lambda: bool,
                                       with_kwargs: bool) -> List[str]:
         """
         Loops through list of dictionary conditions - if it is a single 
@@ -266,8 +275,10 @@ class _ConvertRuleDictsToRuleStrings:
                 str_rule_list.append(rule_string)
         return str_rule_list
 
-    def _create_condition_string_from_dict(self, condition_dict: Dict[str, Union[str, float]],
-                                           as_numpy: bool, as_lambda: bool,
+    def _create_condition_string_from_dict(self,
+                                           condition_dict: Dict[str, Union[str, float]],
+                                           as_numpy: bool,
+                                           as_lambda: bool,
                                            with_kwargs: bool) -> str:
         """Converts a single condition dictionary to the string format"""
 
@@ -293,7 +304,9 @@ class _ConvertRuleDictsToRuleStrings:
             )
         return condition_string
 
-    def _parse_value_lambda(self, condition_dict: Dict[str, Union[str, float]], field: str,
+    def _parse_value_lambda(self,
+                            condition_dict: Dict[str, Union[str, float]],
+                            field: str,
                             with_kwargs: bool) -> str:
         """
         Parses the values from the dictionary (depending on whether the end 

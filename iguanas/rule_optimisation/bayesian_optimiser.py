@@ -161,7 +161,10 @@ class BayesianOptimiser(_BaseOptimiser):
         else:
             return f'BayesianOptimiser object with {len(self.optimisable_rules.rule_strings)} optimised rules and {len(self.non_optimisable_rules.rule_strings)} unoptimisable rules'
 
-    def fit(self, X: PandasDataFrameType, y=None, sample_weight=None) -> PandasDataFrameType:
+    def fit(self,
+            X: PandasDataFrameType,
+            y=None,
+            sample_weight=None) -> PandasDataFrameType:
         """
         Optimises a set of rules (given in the standard Iguanas lambda expression
         format) using Bayesian Optimisation.
@@ -218,10 +221,14 @@ class BayesianOptimiser(_BaseOptimiser):
         )
         return X_rules
 
-    def _optimise_rules(self, rule_lambdas: Dict[str, Callable[[Dict], str]],
-                        lambda_kwargs: Dict[str, Dict[str, float]], X: PandasDataFrameType,
-                        y: PandasSeriesType, sample_weight: PandasSeriesType,
-                        int_cols: list, all_space_funcs: dict) -> Dict[str, str]:
+    def _optimise_rules(self,
+                        rule_lambdas: Dict[str, Callable[[Dict], str]],
+                        lambda_kwargs: Dict[str, Dict[str, float]],
+                        X: PandasDataFrameType,
+                        y: PandasSeriesType,
+                        sample_weight: PandasSeriesType,
+                        int_cols: list,
+                        all_space_funcs: dict) -> Dict[str, str]:
         """Optimises each rule in the set"""
 
         opt_rule_strings = {}
@@ -323,7 +330,8 @@ class BayesianOptimiser(_BaseOptimiser):
     @staticmethod
     def _optimise_rule_thresholds(rule_lambda: Callable[[Dict], str],
                                   rule_space_funcs: Dict[str, hp.uniform],
-                                  X_: PandasDataFrameType, y: PandasSeriesType,
+                                  X_: PandasDataFrameType,
+                                  y: PandasSeriesType,
                                   sample_weight: PandasSeriesType,
                                   metric: Callable,
                                   algorithm: Callable,

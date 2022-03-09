@@ -31,7 +31,8 @@ class _BaseFilter:
         else:
             self.rules = Rules()
 
-    def transform(self, X_rules: PandasDataFrameType) -> PandasDataFrameType:
+    def transform(self,
+                  X_rules: PandasDataFrameType) -> PandasDataFrameType:
         """
         Applies the filter to the given dataset.
 

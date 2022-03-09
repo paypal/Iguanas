@@ -101,7 +101,8 @@ class RBSPipeline:
         return y_pred
 
     @staticmethod
-    def _get_stage_level_preds(X_rules, config):
+    def _get_stage_level_preds(X_rules,
+                               config):
         """Returns the predictions for each stage in the pipeline"""
 
         stage_level_preds = []
@@ -127,9 +128,9 @@ class RBSPipeline:
             )
         return stage_level_preds
 
-    def _get_pipeline_pred(self, stage_level_preds: PandasDataFrameType,
-                           idx: list
-                           ) -> PandasSeriesType:
+    def _get_pipeline_pred(self,
+                           stage_level_preds: PandasDataFrameType,
+                           idx: list) -> PandasSeriesType:
         """Returns the predictions of the pipeline"""
 
         if stage_level_preds is None:

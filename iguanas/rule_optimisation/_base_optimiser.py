@@ -121,7 +121,8 @@ class _BaseOptimiser(Rules):
         return self.fit(X=X, y=y, sample_weight=sample_weight)
 
     @classmethod
-    def plot_performance_uplift(self, orig_rule_performances: Dict[str, float],
+    def plot_performance_uplift(self,
+                                orig_rule_performances: Dict[str, float],
                                 opt_rule_performances: Dict[str, float],
                                 figsize=(20, 10)) -> sns.scatterplot:
         """

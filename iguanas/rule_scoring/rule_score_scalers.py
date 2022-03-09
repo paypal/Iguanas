@@ -39,10 +39,12 @@ class ConstantScaler:
     dtype: int64
     """
 
-    def __init__(self, limit: int):
+    def __init__(self,
+                 limit: int):
         self.limit = limit
 
-    def fit(self, rule_scores: PandasSeriesType) -> PandasSeriesType:
+    def fit(self,
+            rule_scores: PandasSeriesType) -> PandasSeriesType:
         """
         Scales the rule scores.
 
@@ -103,11 +105,14 @@ class MinMaxScaler:
     dtype: int64
     """
 
-    def __init__(self, min_value: int, max_value: int):
+    def __init__(self,
+                 min_value: int,
+                 max_value: int):
         self.min_value = min_value
         self.max_value = max_value
 
-    def fit(self, rule_scores: PandasSeriesType) -> PandasSeriesType:
+    def fit(self,
+            rule_scores: PandasSeriesType) -> PandasSeriesType:
         """
         Scales the rule scores.
 

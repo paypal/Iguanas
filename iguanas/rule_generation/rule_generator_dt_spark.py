@@ -146,7 +146,9 @@ class RuleGeneratorDTSpark(_BaseGenerator):
         else:
             return f'RuleGeneratorDTSpark(metric={self.metric}, n_total_conditions={self.orig_tree_ensemble.getMaxDepth()}, tree_ensemble={self.orig_tree_ensemble.__repr__().split("_")[0]}, precision_threshold={self.precision_threshold}, target_feat_corr_types={self.target_feat_corr_types})'
 
-    def fit(self, X: KoalasDataFrameType, y: KoalasSeriesType,
+    def fit(self,
+            X: KoalasDataFrameType,
+            y: KoalasSeriesType,
             sample_weight=None) -> KoalasDataFrameType:
         """
         Generates rules by extracting the highest performing branches in a tree
@@ -201,15 +203,14 @@ class RuleGeneratorDTSpark(_BaseGenerator):
         if self.verbose:
             print('--- Extracting rules from tree ensemble ---')
         X_rules = self._extract_rules_from_ensemble(
-            X=X, y=y, sample_weight=sample_weight,
-            tree_ensemble=trained_tree_ensemble, columns_int=columns_int,
+            X=X, tree_ensemble=trained_tree_ensemble, columns_int=columns_int,
             columns_cat=columns_cat,
         )
         self._generate_other_rule_formats()
         return X_rules
 
-    def _extract_rules_from_ensemble(self, X: KoalasDataFrameType, y: KoalasSeriesType,
-                                     sample_weight: KoalasSeriesType,
+    def _extract_rules_from_ensemble(self,
+                                     X: KoalasDataFrameType,
                                      tree_ensemble: RandomForestClassifier,
                                      columns_int: List[str],
                                      columns_cat: List[str]) -> KoalasDataFrameType:
@@ -242,7 +243,8 @@ class RuleGeneratorDTSpark(_BaseGenerator):
         X_rules = self.transform(X=X)
         return X_rules
 
-    def _extract_rules_from_dt(self, columns: List[str],
+    def _extract_rules_from_dt(self,
+                               columns: List[str],
                                decision_tree: DecisionTreeClassificationModel,
                                columns_int: List[str],
                                columns_cat: List[str]) -> Set[str]:
@@ -264,7 +266,8 @@ class RuleGeneratorDTSpark(_BaseGenerator):
             )
 
     @staticmethod
-    def _create_train_spark_df(X: KoalasDataFrameType, y: KoalasSeriesType,
+    def _create_train_spark_df(X: KoalasDataFrameType,
+                               y: KoalasSeriesType,
                                sample_weight: KoalasSeriesType) -> DataFrame:
         """
         Creates a Spark DataFrame from `X`, `y` and `sample_weight` (if 

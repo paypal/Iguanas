@@ -14,11 +14,14 @@ class UniformInteger:
         High limit.
     """
 
-    def __init__(self, low: int, high: int) -> None:
+    def __init__(self,
+                 low: int,
+                 high: int) -> None:
         self.low = low
         self.high = high
 
-    def transform(self, label: str) -> hp.quniform:
+    def transform(self,
+                  label: str) -> hp.quniform:
         """
         Return hp.quniform(`label`, `self.low`, `self.high`, q=1) function.
 
@@ -49,11 +52,14 @@ class UniformFloat:
         High limit.
     """
 
-    def __init__(self, low: int, high: int) -> None:
+    def __init__(self,
+                 low: int,
+                 high: int) -> None:
         self.low = low
         self.high = high
 
-    def transform(self, label: str) -> hp.uniform:
+    def transform(self,
+                  label: str) -> hp.uniform:
         """
         Return hp.uniform(`label`, `self.low`, `self.high`) function.
 
@@ -82,10 +88,12 @@ class Choice:
         List of choices to choose from.
     """
 
-    def __init__(self, options) -> None:
+    def __init__(self,
+                 options) -> None:
         self.options = options
 
-    def transform(self, label: str) -> hp.choice:
+    def transform(self,
+                  label: str) -> hp.choice:
         """
         Return hp.choice(`label`, `self.options`) function.
 

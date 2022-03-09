@@ -106,7 +106,10 @@ class AgglomerativeClusteringReducer:
         else:
             return f'AgglomerativeClusteringReducer(threshold={self.threshold}, strategy={self.strategy}, similarity_function={self.similarity_function}, metric={self.metric}, print_clustermap={self.print_clustermap})'
 
-    def fit(self, X: PandasDataFrameType, y=None, sample_weight=None) -> None:
+    def fit(self,
+            X: PandasDataFrameType,
+            y=None,
+            sample_weight=None) -> None:
         """
         Calculates the similar columns in the dataset X.
 
@@ -167,7 +170,8 @@ class AgglomerativeClusteringReducer:
                 break
         self.columns_to_keep = columns_to_keep
 
-    def transform(self, X: PandasDataFrameType) -> PandasDataFrameType:
+    def transform(self,
+                  X: PandasDataFrameType) -> PandasDataFrameType:
         """
         Removes similar columns from the dataset X.
 
@@ -209,7 +213,9 @@ class AgglomerativeClusteringReducer:
         self.fit(X=X, y=y, sample_weight=sample_weight)
         return self.transform(X=X)
 
-    def _bottom_up(self, clusters: PandasSeriesType, n_clusters: int,
+    def _bottom_up(self,
+                   clusters: PandasSeriesType,
+                   n_clusters: int,
                    similarity_df: PandasDataFrameType,
                    columns_to_keep: List[str]) -> List[str]:
         """
@@ -243,7 +249,9 @@ class AgglomerativeClusteringReducer:
                 columns_to_drop = columns_to_drop + columns
         return columns_to_drop, columns_to_keep
 
-    def _top_down(self, clusters: PandasSeriesType, n_clusters: int,
+    def _top_down(self,
+                  clusters: PandasSeriesType,
+                  n_clusters: int,
                   similarity_df: PandasDataFrameType,
                   columns_to_keep: List[str]) -> List[str]:
         """
@@ -273,7 +281,8 @@ class AgglomerativeClusteringReducer:
                 columns_to_drop = columns_to_drop + columns
         return columns_to_drop, columns_to_keep
 
-    def _set_n_clusters(self, similarity_df: PandasDataFrameType) -> int:
+    def _set_n_clusters(self,
+                        similarity_df: PandasDataFrameType) -> int:
         """Sets the number of clusters to use"""
 
         if self.strategy == 'top_down':

@@ -179,7 +179,8 @@ class FScore:
     [1.  0.8]
     """
 
-    def __init__(self, beta: float):
+    def __init__(self,
+                 beta: float):
         self.beta = beta
 
     def __repr__(self):
@@ -284,7 +285,9 @@ class Revenue:
     [350 310]
     """
 
-    def __init__(self, y_type: str, chargeback_multiplier: int):
+    def __init__(self,
+                 y_type: str,
+                 chargeback_multiplier: int):
 
         if y_type not in ['Fraud', 'NonFraud']:
             raise ValueError('`y_type` must be either "Fraud" or "NonFraud"')

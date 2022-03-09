@@ -31,10 +31,12 @@ class _ConvertRuleDictsToRuleLambdas:
         Only populates when `with_kwargs=False`.        
     """
 
-    def __init__(self, rule_dicts: Dict[str, dict]):
+    def __init__(self,
+                 rule_dicts: Dict[str, dict]):
         self.rule_dicts = rule_dicts
 
-    def convert(self, as_numpy: bool,
+    def convert(self,
+                as_numpy: bool,
                 with_kwargs: bool) -> Dict[str, Callable[[Dict], str]]:
         """
         Converts a set of rules (each being represented in the standard Iguanas 

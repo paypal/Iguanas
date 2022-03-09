@@ -35,7 +35,8 @@ class AlertsPerDay:
     [-1. -0.]
     """
 
-    def __init__(self, n_alerts_expected_per_day: int,
+    def __init__(self,
+                 n_alerts_expected_per_day: int,
                  no_of_days_in_file: int):
 
         self.n_alerts_expected_per_day = n_alerts_expected_per_day
@@ -111,7 +112,8 @@ class PercVolume:
     [-0.     -0.0625]
     """
 
-    def __init__(self, perc_vol_expected: float):
+    def __init__(self,
+                 perc_vol_expected: float):
         self.perc_vol_expected = perc_vol_expected
 
     def __repr__(self):

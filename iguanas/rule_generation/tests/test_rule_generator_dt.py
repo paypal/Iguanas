@@ -300,7 +300,7 @@ def test_extract_rules_from_ensemble(create_data, rg_instantiated):
         rf.max_depth = 4
         rf.fit(X, y, sample_weight=w)
         X_rules = rg._extract_rules_from_ensemble(
-            X, y, rf, params['num_cores'], w, columns_int, columns_cat
+            X, rf, params['num_cores'], columns_int, columns_cat
         )
         pd.testing.assert_series_equal(X_rules.sum(), exp_results[i])
 
@@ -313,7 +313,8 @@ def test_extract_rules_from_ensemble_error(rg_instantiated):
     rf.fit(X, y, None)
     with pytest.raises(NoRulesError, match='No rules could be generated. Try changing the class parameters.'):
         rg._extract_rules_from_ensemble(
-            X, y, rf, params['num_cores'], None, ['A'], ['A'])
+            X, rf, params['num_cores'], ['A'], ['A']
+        )
 
 
 def test_extract_rules_from_dt(create_data, rg_instantiated, fit_decision_tree):

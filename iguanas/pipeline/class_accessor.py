@@ -61,8 +61,7 @@ class ClassAccessor:
         self.class_attribute = class_attribute
 
     def get(self,
-            pipeline_params: Dict[str, dict]
-            ) -> Union[str, float, int, dict, list, tuple]:
+            pipeline_params: Dict[str, dict]) -> Union[str, float, int, dict, list, tuple]:
         """
         Extracts the given class attribute.
 

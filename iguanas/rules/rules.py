@@ -103,8 +103,12 @@ class Rules(RuleApplier):
     {'Rule2': "X['B']==True", 'Rule3': "X['C']>0.5"}
     """
 
-    def __init__(self, rule_dicts=None, rule_strings=None,
-                 rule_lambdas=None, lambda_kwargs=None, lambda_args=None):
+    def __init__(self,
+                 rule_dicts=None,
+                 rule_strings=None,
+                 rule_lambdas=None,
+                 lambda_kwargs=None,
+                 lambda_args=None):
         if rule_lambdas is not None and lambda_kwargs is None and \
                 lambda_args is None:
             raise ValueError(
@@ -120,9 +124,11 @@ class Rules(RuleApplier):
             self, rule_strings=self.rule_strings,
         )
 
-    def __add__(self, other):
+    def __add__(self,
+                other):
 
-        def _exception_if_similar_keys(dict1: dict, dict2: dict,
+        def _exception_if_similar_keys(dict1: dict,
+                                       dict2: dict,
                                        rule_format: str) -> None:
             """
             Raises exception if there are similar keys in `dict1` and `dict2`.
@@ -158,7 +164,8 @@ class Rules(RuleApplier):
             lambda_args=lambda_args
         )
 
-    def __radd__(self, other):
+    def __radd__(self,
+                 other):
         return self
 
     def __repr__(self):
@@ -186,7 +193,8 @@ class Rules(RuleApplier):
             self._rule_strings_to_rule_dicts()
         return self.rule_dicts
 
-    def as_rule_strings(self, as_numpy: bool) -> Dict[str, str]:
+    def as_rule_strings(self,
+                        as_numpy: bool) -> Dict[str, str]:
         """
         Converts rules into the standard Iguanas string format.
 
@@ -211,7 +219,8 @@ class Rules(RuleApplier):
         self._rule_dicts_to_rule_strings(as_numpy=as_numpy)
         return self.rule_strings
 
-    def as_rule_lambdas(self, as_numpy: bool,
+    def as_rule_lambdas(self,
+                        as_numpy: bool,
                         with_kwargs: bool) -> Dict[str, Callable[[dict], str]]:
         """
         Converts rules into the standard Iguanas lambda expression format.
@@ -263,7 +272,9 @@ class Rules(RuleApplier):
         X_rules = RuleApplier.transform(self, X=X)
         return X_rules
 
-    def filter_rules(self, include=None, exclude=None) -> None:
+    def filter_rules(self,
+                     include=None,
+                     exclude=None) -> None:
         """
         Filters the rules by their names.
 
@@ -318,7 +329,8 @@ class Rules(RuleApplier):
         self.rule_feature_set = grf.get()
         return self.rule_feature_set
 
-    def _rule_dicts_to_rule_strings(self, as_numpy: bool) -> None:
+    def _rule_dicts_to_rule_strings(self,
+                                    as_numpy: bool) -> None:
         """
         Converts the rules (each being represented in the standard Iguanas
         dictionary format) into the standard Iguanas string format.
@@ -342,7 +354,8 @@ class Rules(RuleApplier):
             rule_strings=self.rule_strings)
         self.rule_dicts = converter.convert()
 
-    def _rule_dicts_to_rule_lambdas(self, as_numpy: bool,
+    def _rule_dicts_to_rule_lambdas(self,
+                                    as_numpy: bool,
                                     with_kwargs: bool) -> None:
         """
         Converts the rules (each being represented in the standard Iguanas

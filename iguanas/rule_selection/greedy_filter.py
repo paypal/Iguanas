@@ -91,7 +91,9 @@ class GreedyFilter(_BaseFilter):
         else:
             return f'GreedyFilter(metric={self.metric}, sorting_metric={self.sorting_metric})'
 
-    def fit(self, X_rules: PandasDataFrameType, y=PandasSeriesType,
+    def fit(self,
+            X_rules: PandasDataFrameType,
+            y=PandasSeriesType,
             sample_weight=None) -> None:
         """
         Sorts rules by a given metric, calculates the combined performance of
@@ -154,7 +156,8 @@ class GreedyFilter(_BaseFilter):
             figsize=figsize
         )
 
-    def plot_top_n_performance(self, X_rules: PandasDataFrameType,
+    def plot_top_n_performance(self,
+                               X_rules: PandasDataFrameType,
                                y: PandasSeriesType,
                                sample_weight=None,
                                figsize=(10, 5),
@@ -202,7 +205,8 @@ class GreedyFilter(_BaseFilter):
 
     def _sort_rules(self,
                     X_rules: PandasDataFrameType,
-                    y: PandasSeriesType, sample_weight: PandasSeriesType,
+                    y: PandasSeriesType,
+                    sample_weight: PandasSeriesType,
                     sorting_metric: Callable,
                     metric: Callable) -> List[str]:
         """
@@ -264,7 +268,8 @@ class GreedyFilter(_BaseFilter):
         return rules_to_keep, score
 
     @ staticmethod
-    def _plot_performance(data: PandasDataFrameType, title: str,
+    def _plot_performance(data: PandasDataFrameType,
+                          title: str,
                           figsize: Tuple[int, int]) -> sns.lineplot:
         """Creates seaborn lineplot"""
 

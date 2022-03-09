@@ -147,7 +147,9 @@ class RuleGeneratorDT(_BaseGenerator):
         else:
             return f'RuleGeneratorDT(metric={self.metric}, n_total_conditions={self.n_total_conditions}, tree_ensemble={self.tree_ensemble}, precision_threshold={self.precision_threshold}, num_cores={self.num_cores}, target_feat_corr_types={self.target_feat_corr_types})'
 
-    def fit(self, X: PandasDataFrameType, y: PandasSeriesType,
+    def fit(self,
+            X: PandasDataFrameType,
+            y: PandasSeriesType,
             sample_weight=None) -> PandasDataFrameType:
         """
         Generates rules by extracting the highest performing branches in a tree
@@ -201,20 +203,18 @@ class RuleGeneratorDT(_BaseGenerator):
             print('--- Extracting rules from tree ensemble ---')
         X_rules = self._extract_rules_from_ensemble(
             X=X,
-            y=y,
             num_cores=self.num_cores,
             tree_ensemble=trained_tree_ensemble,
             columns_int=columns_int,
-            columns_cat=columns_cat,
-            sample_weight=sample_weight
+            columns_cat=columns_cat
         )
         self._generate_other_rule_formats()
         return X_rules
 
-    def _extract_rules_from_ensemble(self, X: PandasDataFrameType, y: PandasSeriesType,
+    def _extract_rules_from_ensemble(self,
+                                     X: PandasDataFrameType,
                                      tree_ensemble: Union[RandomForestClassifier, ExtraTreesClassifier],
                                      num_cores: int,
-                                     sample_weight: PandasSeriesType,
                                      columns_int: List[str],
                                      columns_cat: List[str]) -> PandasDataFrameType:
         """
@@ -241,9 +241,11 @@ class RuleGeneratorDT(_BaseGenerator):
         X_rules = self.transform(X=X)
         return X_rules
 
-    def _extract_rules_from_dt(self, columns: List[str],
+    def _extract_rules_from_dt(self,
+                               columns: List[str],
                                decision_tree: DecisionTreeClassifier,
-                               columns_int: List[str], columns_cat: List[str]) -> Set[str]:
+                               columns_int: List[str],
+                               columns_cat: List[str]) -> Set[str]:
         """
         Removes low precision DTs and returns the rules from the DT.
         """
@@ -262,7 +264,8 @@ class RuleGeneratorDT(_BaseGenerator):
             )
 
     @staticmethod
-    def _train_ensemble(X: PandasDataFrameType, y: PandasSeriesType,
+    def _train_ensemble(X: PandasDataFrameType,
+                        y: PandasSeriesType,
                         tree_ensemble: Union[RandomForestClassifier,
                                              ExtraTreesClassifier],
                         sample_weight: PandasSeriesType,
@@ -281,8 +284,7 @@ class RuleGeneratorDT(_BaseGenerator):
         return tree_ensemble
 
     @staticmethod
-    def _get_dt_attributes(decision_tree: DecisionTreeClassifier) -> Tuple[
-            np.ndarray]:
+    def _get_dt_attributes(decision_tree: DecisionTreeClassifier) -> Tuple[np.ndarray]:
         """Returns the attributes associated with a given DT"""
 
         left = decision_tree.tree_.children_left

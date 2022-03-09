@@ -189,7 +189,8 @@ class LinearPipeline(_BasePipeline):
         )
         self.rules = final_step.rules
 
-    def predict(self, X: Union[PandasDataFrameType, dict]) -> PandasSeriesType:
+    def predict(self,
+                X: Union[PandasDataFrameType, dict]) -> PandasSeriesType:
         """
         Sequentially runs the `transform` method of each step in the pipeline,
         except for the last step, where the `predict` method is run. Note that

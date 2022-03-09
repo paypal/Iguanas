@@ -76,7 +76,9 @@ class ConvertProcessedConditionsToGeneral:
     {'Rule1': "((X['num']<=1)|(X['num'].isna()))", 'Rule2': "(X['country'].isna())", 'Rule3': "(X['country']=='UK')"}
     """
 
-    def __init__(self, imputed_values=None, ohe_categories=None):
+    def __init__(self,
+                 imputed_values=None,
+                 ohe_categories=None):
         if imputed_values is None and ohe_categories is None:
             raise ValueError(
                 'Either `imputed_values` or `ohe_categories` must be given'
@@ -88,7 +90,9 @@ class ConvertProcessedConditionsToGeneral:
         else:
             self.ohe_columns = []
 
-    def convert(self, rule_strings: Dict[str, str], X=None) -> Dict[str, str]:
+    def convert(self,
+                rule_strings: Dict[str, str],
+                X=None) -> Dict[str, str]:
         """
         Converts the conditions of rules that utilise either imputed or OHE 
         features into conditions that account for this for unprocessed data. This 
@@ -117,7 +121,9 @@ class ConvertProcessedConditionsToGeneral:
         self.rules = Rules(rule_strings=general_rule_strings)
         return general_rule_strings
 
-    def _convert_rule_string(self, rule_string: str, X: PandasDataFrameType) -> str:
+    def _convert_rule_string(self,
+                             rule_string: str,
+                             X: PandasDataFrameType) -> str:
         """
         Adds the general condition for each relevant processed condition to the
         condition_replacement_dict, then replaces the latter with the former.
@@ -146,7 +152,8 @@ class ConvertProcessedConditionsToGeneral:
                 processed_condition, general_condition)
         return rule_string
 
-    def _recurse_create_condition_replacement_dict(self, rule_string: str,
+    def _recurse_create_condition_replacement_dict(self,
+                                                   rule_string: str,
                                                    X: PandasDataFrameType) -> None:
         """
         Recursively converts a rule string with processed conditions to a 
@@ -183,7 +190,8 @@ class ConvertProcessedConditionsToGeneral:
                 self._recurse_create_condition_replacement_dict(
                     rule_string=condition_string, X=X)
 
-    def _add_to_condition_replacement_dict(self, rule_string: str,
+    def _add_to_condition_replacement_dict(self,
+                                           rule_string: str,
                                            X=PandasDataFrameType) -> None:
         """
         Adds the general condition for each relevant processed condition to the
@@ -257,8 +265,10 @@ class ConvertProcessedConditionsToGeneral:
         return clean_condition
 
     @staticmethod
-    def _convert_ohe_condition_to_general(feature: str, operator: str,
-                                          value: str, ohe_categories: Dict[str, str],
+    def _convert_ohe_condition_to_general(feature: str,
+                                          operator: str,
+                                          value: str,
+                                          ohe_categories: Dict[str, str],
                                           imputed_values: None) -> str:
         """
         Takes a single condition rule that uses a OHE column and converts it to
@@ -371,7 +381,8 @@ class ReturnMappings:
         return imputed_values_dict
 
     @staticmethod
-    def return_ohe_categories_mapping(pre_ohe_cols: List[str], post_ohe_cols: List[str],
+    def return_ohe_categories_mapping(pre_ohe_cols: List[str],
+                                      post_ohe_cols: List[str],
                                       pre_ohe_dtypes: Dict[str, str]) -> Dict[str, str]:
         """
         Return a dictionary of the category linked to each One Hot Encoded 

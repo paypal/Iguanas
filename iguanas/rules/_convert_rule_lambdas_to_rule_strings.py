@@ -30,7 +30,8 @@ class _ConvertRuleLambdasToRuleStrings:
         and their names (keys).
     """
 
-    def __init__(self, rule_lambdas: Dict[str, Callable[[Dict], str]],
+    def __init__(self,
+                 rule_lambdas: Dict[str, Callable[[Dict], str]],
                  lambda_kwargs=None, lambda_args=None):
         if lambda_kwargs is None and lambda_args is None:
             raise ValueError(

@@ -171,7 +171,9 @@ class RuleGeneratorOpt(_BaseGenerator):
         else:
             return f'RuleGeneratorOpt(metric={self.metric}, n_total_conditions={self.n_total_conditions}, num_rules_keep={self.num_rules_keep}, n_points={self.n_points}, ratio_window={self.ratio_window}, one_cond_rule_opt_metric={self.one_cond_rule_opt_metric}, remove_corr_rules={self.remove_corr_rules}, target_feat_corr_types={self.target_feat_corr_types})'
 
-    def fit(self, X: PandasDataFrameType, y: PandasSeriesType,
+    def fit(self,
+            X: PandasDataFrameType,
+            y: PandasSeriesType,
             sample_weight=None) -> PandasDataFrameType:
         """
         Generate rules by optimising the thresholds of single features and
@@ -241,7 +243,8 @@ class RuleGeneratorOpt(_BaseGenerator):
         self._generate_other_rule_formats()
         return X_rules
 
-    def _generate_numeric_one_condition_rules(self, X: PandasDataFrameType,
+    def _generate_numeric_one_condition_rules(self,
+                                              X: PandasDataFrameType,
                                               y: PandasSeriesType,
                                               columns_num: List[str],
                                               columns_int: List[str],
@@ -299,9 +302,8 @@ class RuleGeneratorOpt(_BaseGenerator):
                                                   sample_weight: PandasDataFrameType) -> Tuple[PandasDataFrameType, PandasDataFrameType]:
         """Generates one condition rules for OHE categorical columns"""
 
-        def _gen_rules_from_target_feat_corr_types(X: PandasDataFrameType, y: PandasSeriesType,
-                                                   columns_cat: List[str],
-                                                   sample_weight: PandasSeriesType) -> Tuple[PandasDataFrameType, PandasDataFrameType]:
+        def _gen_rules_from_target_feat_corr_types(X: PandasDataFrameType,
+                                                   columns_cat: List[str]) -> Tuple[PandasDataFrameType, PandasDataFrameType]:
             """
             Generates rules using the target-feature correlation types given
             in `target_feat_corr_types`.
@@ -323,7 +325,8 @@ class RuleGeneratorOpt(_BaseGenerator):
             X_rules = ara.transform(X=X)
             return rule_strings, X_rules
 
-        def _gen_rules_best_perf_bool_option(X: PandasDataFrameType, y: PandasSeriesType,
+        def _gen_rules_best_perf_bool_option(X: PandasDataFrameType,
+                                             y: PandasSeriesType,
                                              columns_cat: List[str],
                                              sample_weight: PandasSeriesType) -> Tuple[PandasDataFrameType, PandasDataFrameType]:
             """
@@ -361,7 +364,7 @@ class RuleGeneratorOpt(_BaseGenerator):
         )
         if self.target_feat_corr_types is not None:
             rule_strings, X_rules = _gen_rules_from_target_feat_corr_types(
-                X=X, y=y, columns_cat=columns_cat, sample_weight=sample_weight
+                X=X, columns_cat=columns_cat
             )
         else:
             rule_strings, X_rules = _gen_rules_best_perf_bool_option(
@@ -377,7 +380,8 @@ class RuleGeneratorOpt(_BaseGenerator):
         return rule_strings, X_rules
 
     def _generate_pairwise_rules(self,
-                                 X_rules: PandasDataFrameType, y: PandasSeriesType,
+                                 X_rules: PandasDataFrameType,
+                                 y: PandasSeriesType,
                                  rules_combinations: List[Tuple[Tuple[str, str], Tuple[str, str]]],
                                  sample_weight: PandasSeriesType) -> Tuple[PandasDataFrameType, PandasDataFrameType, Dict[str, list]]:
         """Combines binary columns of rules using AND conditions"""
@@ -595,8 +599,11 @@ class RuleGeneratorOpt(_BaseGenerator):
         return rule_descriptions, X_rules
 
     @staticmethod
-    def _set_iteration_range(X_col: np.array, column: str, operator: str,
-                             n_points: int, ratio_window: int,
+    def _set_iteration_range(X_col: np.array,
+                             column: str,
+                             operator: str,
+                             n_points: int,
+                             ratio_window: int,
                              columns_int: List[str]) -> Tuple[float, float]:
         """Sets the iteration range for a given column"""
 
@@ -614,11 +621,15 @@ class RuleGeneratorOpt(_BaseGenerator):
         return (x_min, x_max)
 
     @staticmethod
-    def _set_iteration_array(column: str, columns_int: List[str], x_min: float,
-                             x_max: float, n_points: int) -> np.array:
+    def _set_iteration_array(column: str,
+                             columns_int: List[str],
+                             x_min: float,
+                             x_max: float,
+                             n_points: int) -> np.array:
         """Returns the iteration array for a given column"""
 
-        def _round_to_n_sf(x: float, n_sf: int) -> float:
+        def _round_to_n_sf(x: float,
+                           n_sf: int) -> float:
             """Method for rounding a float to n significant figures"""
 
             if x == 0:
@@ -637,8 +648,10 @@ class RuleGeneratorOpt(_BaseGenerator):
         return x_iter
 
     @staticmethod
-    def _calculate_opt_metric_across_range(x_iter: np.array, operator: str,
-                                           X_col: np.array, y: np.array,
+    def _calculate_opt_metric_across_range(x_iter: np.array,
+                                           operator: str,
+                                           X_col: np.array,
+                                           y: np.array,
                                            metric: Callable[[PandasSeriesType, PandasSeriesType, PandasSeriesType], PandasSeriesType],
                                            sample_weight: np.array) -> np.array:
         """
@@ -654,7 +667,8 @@ class RuleGeneratorOpt(_BaseGenerator):
         return opt_metric_iter
 
     @staticmethod
-    def _return_x_of_max_opt_metric(opt_metric_iter: np.array, operator: str,
+    def _return_x_of_max_opt_metric(opt_metric_iter: np.array,
+                                    operator: str,
                                     x_iter: np.array) -> float:
         """Returns the threshold value which maximises the FBeta score"""
 
@@ -697,7 +711,8 @@ class RuleGeneratorOpt(_BaseGenerator):
         return rules_combinations
 
     @staticmethod
-    def _generate_pairwise_df(X_rules: PandasDataFrameType, rules_names_1: List[str],
+    def _generate_pairwise_df(X_rules: PandasDataFrameType,
+                              rules_names_1: List[str],
                               rules_names_2: List[str],
                               pairwise_names: List[str]) -> PandasDataFrameType:
         """

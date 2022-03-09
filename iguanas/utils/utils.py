@@ -46,7 +46,8 @@ def concat(objs: List[Union[PandasDataFrameType, PandasSeriesType, KoalasDataFra
             return ks.concat(objs, **kwargs)
 
 
-def create_spark_df(X: KoalasDataFrameType, y: KoalasSeriesType,
+def create_spark_df(X: KoalasDataFrameType,
+                    y: KoalasSeriesType,
                     sample_weight=None) -> PySparkDataFrameType:
     """
     Creates a Spark DataFrame from the features and target given as Koalas 
@@ -81,8 +82,13 @@ def create_spark_df(X: KoalasDataFrameType, y: KoalasSeriesType,
 def calc_tps_fps_tns_fns(y_true: Union[PandasSeriesType, np.ndarray, KoalasSeriesType],
                          y_preds: Union[PandasSeriesType, PandasDataFrameType, np.ndarray,
                                         KoalasSeriesType, KoalasDataFrameType],
-                         sample_weight=None, tps=False, fps=False,
-                         tns=False, fns=False, tps_fps=False, tps_fns=False) -> Tuple[
+                         sample_weight=None,
+                         tps=False,
+                         fps=False,
+                         tns=False,
+                         fns=False,
+                         tps_fps=False,
+                         tps_fns=False) -> Tuple[
         Union[np.ndarray, float],
         Union[np.ndarray, float],
         Union[np.ndarray, float],
@@ -134,8 +140,11 @@ def calc_tps_fps_tns_fns(y_true: Union[PandasSeriesType, np.ndarray, KoalasSerie
                                                    KoalasDataFrameType],
                                     sample_weight: Union[PandasSeriesType,
                                                          np.ndarray],
-                                    tps: bool, fps: bool, tns: bool,
-                                    fns: bool, tps_fps: bool,
+                                    tps: bool,
+                                    fps: bool,
+                                    tns: bool,
+                                    fns: bool,
+                                    tps_fps: bool,
                                     tps_fns: bool) -> Tuple[
             Union[np.ndarray, float],
             Union[np.ndarray, float],
@@ -199,8 +208,12 @@ def calc_tps_fps_tns_fns(y_true: Union[PandasSeriesType, np.ndarray, KoalasSerie
         return tps_sum, fps_sum, tns_sum, fns_sum, tps_fps_sum, tps_fns_sum
 
     def _calc_tps_fps_tns_fns_spark(spark_df: PySparkDataFrameType,
-                                    features: List[str], tps: bool, fps: bool,
-                                    tns: bool, fns: bool, tps_fps: bool,
+                                    features: List[str],
+                                    tps: bool,
+                                    fps: bool,
+                                    tns: bool,
+                                    fns: bool,
+                                    tps_fps: bool,
                                     tps_fns: bool) -> Tuple[
             Union[np.ndarray, float],
             Union[np.ndarray, float],
@@ -496,7 +509,8 @@ def return_conf_matrix(y_true: Union[PandasSeriesType, np.ndarray, KoalasSeriesT
     return conf_matrix
 
 
-def check_allowed_types(x: object, x_name: str,
+def check_allowed_types(x: object,
+                        x_name: str,
                         allowed_types: List[str]) -> None:
     """
     Checks whether the stringified type of `x` is in `allowed_types` - a list
@@ -526,7 +540,8 @@ def check_allowed_types(x: object, x_name: str,
             f'`{x_name}` must be a {allowed_types_str}. Current type is {x_type_str}.')
 
 
-def is_type(x: object, types: List[str]) -> bool:
+def is_type(x: object,
+            types: List[str]) -> bool:
     """
     Returns whether the stringified type of `x` is in `types` - a list of 
     stringified types.

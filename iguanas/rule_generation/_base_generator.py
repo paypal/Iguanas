@@ -88,12 +88,15 @@ class _BaseGenerator(Rules):
         """
         return self.fit(X=X, y=y, sample_weight=sample_weight)
 
-    def _extract_rules_from_tree(self, columns: List[str],
+    def _extract_rules_from_tree(self,
+                                 columns: List[str],
                                  precision_threshold: float,
                                  columns_int: List[str],
                                  columns_cat: List[str],
-                                 left: np.ndarray, right: np.ndarray,
-                                 features: np.ndarray, thresholds: np.ndarray,
+                                 left: np.ndarray,
+                                 right: np.ndarray,
+                                 features: np.ndarray,
+                                 thresholds: np.ndarray,
                                  precisions: np.ndarray) -> Set[str]:
         """
         Method for returning the rules of all the leaves of the decision 
@@ -102,7 +105,9 @@ class _BaseGenerator(Rules):
 
         leaf_nodes = np.argwhere(left == -1)[:, 0]
 
-        def recurse_rule(left: np.ndarray, right: np.ndarray, child: int,
+        def recurse_rule(left: np.ndarray,
+                         right: np.ndarray,
+                         child: int,
                          rule=None) -> Tuple[str, str, float]:
             """
             IDs each leaf node, then iterates through up to the parent, noting 
@@ -182,7 +187,8 @@ class _BaseGenerator(Rules):
             The Iguanas-readable rule name.
         """
 
-        def convert_values_for_columns_int(feature: str, operator: str,
+        def convert_values_for_columns_int(feature: str,
+                                           operator: str,
                                            value: float) -> Tuple[str, str, float]:
             """
             Method for converting a condition containing an integer value from 
@@ -235,7 +241,8 @@ class _BaseGenerator(Rules):
             Cleaned list of conditions.
         """
 
-        def dedupe_conditions(feature: str, operator: str) -> Tuple[str, str, float]:
+        def dedupe_conditions(feature: str,
+                              operator: str) -> Tuple[str, str, float]:
             list_of_values = [
                 val for feat, op, val in list_of_conditions if feat == feature and op == operator]
             if operator in ['<', '<=']:

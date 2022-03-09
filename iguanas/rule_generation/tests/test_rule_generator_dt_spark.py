@@ -206,7 +206,7 @@ def test_extract_rules_from_ensemble(create_data, train_rf, rg_instantiated):
     rg, _ = rg_instantiated
     rg.precision_threshold = -1
     X_rules = rg._extract_rules_from_ensemble(
-        X, y, None, rf_trained, columns_int, columns_cat
+        X, rf_trained, columns_int, columns_cat
     )
     assert X_rules.shape == (100, 6)
     assert all(np.sort(X_rules.sum().to_numpy())
@@ -233,7 +233,7 @@ def test_extract_rules_from_ensemble_error(rg_instantiated, train_rf):
     with pytest.raises(NoRulesError, match='No rules could be generated. Try changing the class parameters.'):
         with pytest.warns(UserWarning, match='Decision Tree 0 has a depth of zero - skipping'):
             X_rules = rg._extract_rules_from_ensemble(
-                X, y, None, rf_trained, ['A', 'B'], ['A', 'B']
+                X, rf_trained, ['A', 'B'], ['A', 'B']
             )
 
 
