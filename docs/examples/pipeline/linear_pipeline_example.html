@@ -790,7 +790,7 @@ div.rendered_html tbody tr:hover {
 <h1>Linear Pipeline Example<a class="headerlink" href="#Linear-Pipeline-Example" title="Permalink to this headline">¶</a></h1>
 <p>A Linear Pipeline is a sequence of steps that are applied sequentially to a dataset. Each step should be an instantiated class with both <code class="docutils literal notranslate"><span class="pre">fit</span></code> and <code class="docutils literal notranslate"><span class="pre">transform</span></code> methods. The final step should be an instantiated class with both <code class="docutils literal notranslate"><span class="pre">fit</span></code> and <code class="docutils literal notranslate"><span class="pre">predict</span></code> methods.</p>
 <p>The below diagram shows the high level structure of a Linear Pipeline:</p>
-<center><p><img alt="9bb7632e68014be887ffcd1e075b6e53" src="../../_images/linear_pipeline_structure.png" /></p>
+<center><p><img alt="1b66b809937b4bd1b409f11c1fb49938" src="../../_images/linear_pipeline_structure.png" /></p>
 </center><p>It is used to carry out multiple processes sequentially, using the output of the last step as the input to the next step. One such use case is when we want to:</p>
 <ol class="arabic simple">
 <li><p>Generate a set of rules.</p></li>
@@ -803,7 +803,7 @@ div.rendered_html tbody tr:hover {
 <li><p>Use the resulting rule set to optimise a decision engine.</p></li>
 </ol>
 <p>An example of this workflow is shown below:</p>
-<center><p><img alt="653b2e97869c4bd8b67598275a5f7d50" src="../../_images/linear_pipeline_example.png" /></p>
+<center><p><img alt="a6ce3619f7ee44bc931141db0d8e59e2" src="../../_images/linear_pipeline_example.png" /></p>
 </center><p>To create this workflow in Iguanas, each step will be added to a Linear Pipeline (whilst maintaining the order shown).</p>
 <p><strong>We’ll see how this workflow can be generated in the following example.</strong></p>
 <hr class="docutils" />
