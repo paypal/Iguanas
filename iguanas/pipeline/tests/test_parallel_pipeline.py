@@ -292,3 +292,8 @@ def test_try_except(_create_data, _instantiate_classes):
     warnings = [w.message.args[0] for w in warnings]
     assert 'No rules present in step `lp` - `transform` method cannot be applied for this step.' in warnings
     assert 'No rules present in step `lp1` - `transform` method cannot be applied for this step.' in warnings
+    # Test exception raised
+    pp = ParallelPipeline(steps=[('f1', f1)])
+    pp.steps_ = pp.steps
+    with pytest.raises(AttributeError, match="'FScore' object has no attribute 'transform'"):
+        pp.transform(X=X)
