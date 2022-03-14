@@ -2,11 +2,12 @@ import pytest
 import numpy as np
 import pandas as pd
 import databricks.koalas as ks
+import random
+from iguanas.exceptions.exceptions import NoRulesError
 from iguanas.rule_generation import RuleGeneratorDTSpark
 from iguanas.metrics.classification import FScore
 from pyspark.ml.classification import RandomForestClassifier as RandomForestClassifierSpark
 from pyspark.ml.feature import VectorAssembler
-import random
 
 
 @pytest.fixture
@@ -87,45 +88,69 @@ def test_fit(create_data, rg_instantiated):
         np.array([3, 5]),
         np.array([6])
     ]
+    exp_rule_strings_no_weight = {
+        'RGDT_Rule_20200204_0': "(X['email_alpharatio']<=0.29912)&(X['email_alpharatio']>0.22241)&(X['num_distinct_txn_per_email_7day']>=4)",
+        'RGDT_Rule_20200204_1': "(X['email_alpharatio']<=0.33992)&(X['email_alpharatio']>0.29912)&(X['num_distinct_txn_per_email_7day']>=4)"
+    }
+    exp_rule_strings_weight = {
+        'RGDT_Rule_20200204_0': "(X['email_alpharatio']<=0.32306)&(X['email_alpharatio']>0.22241)&(X['num_distinct_txn_per_email_1day']>=1)&(X['num_distinct_txn_per_email_7day']>=4)"
+    }
     X, y, _, _, _, weights = create_data
     rg, params = rg_instantiated
     exp_repr = 'RuleGeneratorDTSpark(metric=<bound method FScore.fit of FScore with beta=0.5>, n_total_conditions=4, tree_ensemble=RandomForestClassifier, precision_threshold=0, target_feat_corr_types=None)'
     assert rg.__repr__() == exp_repr
+    # With infer_dtypes = True ---
     # Test without weights
     X_rules = rg.fit(X, y, None)
-    np.testing.assert_array_equal(X_rules.sum().to_numpy(), exp_results[0])
-    assert rg.rule_strings == rg.rules.rule_strings == {
-        'RGDT_Rule_20200204_0': "(X['email_alpharatio']<=0.29912)&(X['email_alpharatio']>0.22241)&(X['num_distinct_txn_per_email_7day']>=4)",
-        'RGDT_Rule_20200204_1': "(X['email_alpharatio']<=0.33992)&(X['email_alpharatio']>0.29912)&(X['num_distinct_txn_per_email_7day']>=4)"
-    }
-    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(rg.rules.rule_lambdas.keys()) == list(
-        rg.lambda_kwargs.keys()) == ['RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1']
-    assert rg.__repr__() == "RuleGeneratorDTSpark object with 2 rules generated"
+    _assert_fits(
+        X_rules, exp_results[0], rg, exp_rule_strings_no_weight,
+        "RuleGeneratorDTSpark object with 2 rules generated"
+    )
     # Test with weights
     X_rules = rg.fit(X, y, weights)
-    np.testing.assert_array_equal(X_rules.sum().to_numpy(), exp_results[1])
-    assert rg.rule_strings == rg.rules.rule_strings == {
-        'RGDT_Rule_20200204_2': "(X['email_alpharatio']<=0.32306)&(X['email_alpharatio']>0.22241)&(X['num_distinct_txn_per_email_1day']>=1)&(X['num_distinct_txn_per_email_7day']>=4)"
-    }
-    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(rg.rules.rule_lambdas.keys()) == list(
-        rg.lambda_kwargs.keys()) == ['RGDT_Rule_20200204_2']
+    _assert_fits(
+        X_rules, exp_results[1], rg, exp_rule_strings_weight,
+        "RuleGeneratorDTSpark object with 1 rules generated"
+    )
     # Test fit_transform without weights
     X_rules = rg.fit_transform(X, y, None)
-    np.testing.assert_array_equal(X_rules.sum().to_numpy(), exp_results[0])
-    assert rg.rule_strings == rg.rules.rule_strings == {
-        'RGDT_Rule_20200204_3': "(X['email_alpharatio']<=0.29912)&(X['email_alpharatio']>0.22241)&(X['num_distinct_txn_per_email_7day']>=4)",
-        'RGDT_Rule_20200204_4': "(X['email_alpharatio']<=0.33992)&(X['email_alpharatio']>0.29912)&(X['num_distinct_txn_per_email_7day']>=4)"
-    }
-    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(rg.rules.rule_lambdas.keys()) == list(
-        rg.lambda_kwargs.keys()) == ['RGDT_Rule_20200204_3', 'RGDT_Rule_20200204_4']
+    _assert_fits(
+        X_rules, exp_results[0], rg, exp_rule_strings_no_weight,
+        "RuleGeneratorDTSpark object with 2 rules generated"
+    )
     # Test fit_transform without weights
     X_rules = rg.fit_transform(X, y, weights)
-    np.testing.assert_array_equal(X_rules.sum().to_numpy(), exp_results[1])
-    assert rg.rule_strings == rg.rules.rule_strings == {
-        'RGDT_Rule_20200204_5': "(X['email_alpharatio']<=0.32306)&(X['email_alpharatio']>0.22241)&(X['num_distinct_txn_per_email_1day']>=1)&(X['num_distinct_txn_per_email_7day']>=4)"
-    }
-    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(rg.rules.rule_lambdas.keys()) == list(
-        rg.lambda_kwargs.keys()) == ['RGDT_Rule_20200204_5']
+    _assert_fits(
+        X_rules, exp_results[1], rg, exp_rule_strings_weight,
+        "RuleGeneratorDTSpark object with 1 rules generated"
+    )
+    # With infer_dtypes = False ---
+    X['ip_country_us'] = X['ip_country_us'].astype(bool)
+    rg.infer_dtypes = False
+    # Test without weights
+    X_rules = rg.fit(X, y, None)
+    _assert_fits(
+        X_rules, exp_results[0], rg, exp_rule_strings_no_weight,
+        "RuleGeneratorDTSpark object with 2 rules generated"
+    )
+    # Test with weights
+    X_rules = rg.fit(X, y, weights)
+    _assert_fits(
+        X_rules, exp_results[1], rg, exp_rule_strings_weight,
+        "RuleGeneratorDTSpark object with 1 rules generated"
+    )
+    # Test fit_transform without weights
+    X_rules = rg.fit_transform(X, y, None)
+    _assert_fits(
+        X_rules, exp_results[0], rg, exp_rule_strings_no_weight,
+        "RuleGeneratorDTSpark object with 2 rules generated"
+    )
+    # Test fit_transform without weights
+    X_rules = rg.fit_transform(X, y, weights)
+    _assert_fits(
+        X_rules, exp_results[1], rg, exp_rule_strings_weight,
+        "RuleGeneratorDTSpark object with 1 rules generated"
+    )
 
 
 def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
@@ -133,62 +158,46 @@ def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated):
         np.array([5, 8, 25, 13]),
         np.array([5, 23, 10, 12])
     ]
+    exp_rule_strings_no_weight = {
+        'RGDT_Rule_20200204_0': "(X['email_alpharatio']<=0.22241)&(X['num_distinct_txn_per_email_7day']>=4)",
+        'RGDT_Rule_20200204_1': "(X['email_alpharatio']<=0.29912)&(X['num_distinct_txn_per_email_7day']>=4)",
+        'RGDT_Rule_20200204_2': "(X['email_alpharatio']<=0.33992)",
+        'RGDT_Rule_20200204_3': "(X['email_alpharatio']<=0.33992)&(X['num_distinct_txn_per_email_7day']>=4)"
+    }
+    exp_rule_strings_weight = {
+        'RGDT_Rule_20200204_0': "(X['email_alpharatio']<=0.22241)&(X['num_distinct_txn_per_email_7day']>=4)",
+        'RGDT_Rule_20200204_1': "(X['email_alpharatio']<=0.32306)",
+        'RGDT_Rule_20200204_2': "(X['email_alpharatio']<=0.32306)&(X['num_distinct_txn_per_email_1day']>=1)&(X['num_distinct_txn_per_email_7day']>=4)",
+        'RGDT_Rule_20200204_3': "(X['email_alpharatio']<=0.32306)&(X['num_distinct_txn_per_email_7day']>=4)"
+    }
     X, y, _, _, _, weights = create_data
     rg, params = rg_instantiated
     rg.precision_threshold = -1
     rg.target_feat_corr_types = 'Infer'
     # Test without weights
     X_rules = rg.fit(X, y, None)
-    np.testing.assert_array_equal(X_rules.sum().to_numpy(), exp_results[0])
-    assert rg.rule_strings == rg.rules.rule_strings == {
-        'RGDT_Rule_20200204_0': "(X['email_alpharatio']<=0.22241)&(X['num_distinct_txn_per_email_7day']>=4)",
-        'RGDT_Rule_20200204_1': "(X['email_alpharatio']<=0.29912)&(X['num_distinct_txn_per_email_7day']>=4)",
-        'RGDT_Rule_20200204_2': "(X['email_alpharatio']<=0.33992)",
-        'RGDT_Rule_20200204_3': "(X['email_alpharatio']<=0.33992)&(X['num_distinct_txn_per_email_7day']>=4)"
-    }
-    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(rg.rules.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == [
-        'RGDT_Rule_20200204_0', 'RGDT_Rule_20200204_1', 'RGDT_Rule_20200204_2',
-        'RGDT_Rule_20200204_3'
-    ]
+    _assert_fits(
+        X_rules, exp_results[0], rg, exp_rule_strings_no_weight,
+        "RuleGeneratorDTSpark object with 4 rules generated"
+    )
     # Test with weights
     X_rules = rg.fit(X, y, weights)
-    np.testing.assert_array_equal(X_rules.sum().to_numpy(), exp_results[1])
-    assert rg.rule_strings == rg.rules.rule_strings == {
-        'RGDT_Rule_20200204_4': "(X['email_alpharatio']<=0.22241)&(X['num_distinct_txn_per_email_7day']>=4)",
-        'RGDT_Rule_20200204_5': "(X['email_alpharatio']<=0.32306)",
-        'RGDT_Rule_20200204_6': "(X['email_alpharatio']<=0.32306)&(X['num_distinct_txn_per_email_1day']>=1)&(X['num_distinct_txn_per_email_7day']>=4)",
-        'RGDT_Rule_20200204_7': "(X['email_alpharatio']<=0.32306)&(X['num_distinct_txn_per_email_7day']>=4)"
-    }
-    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(rg.rules.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == [
-        'RGDT_Rule_20200204_4', 'RGDT_Rule_20200204_5', 'RGDT_Rule_20200204_6',
-        'RGDT_Rule_20200204_7'
-    ]
+    _assert_fits(
+        X_rules, exp_results[1], rg, exp_rule_strings_weight,
+        "RuleGeneratorDTSpark object with 4 rules generated"
+    )
     # Test fit_transform without weights
     X_rules = rg.fit_transform(X, y, None)
-    np.testing.assert_array_equal(X_rules.sum().to_numpy(), exp_results[0])
-    assert rg.rule_strings == rg.rules.rule_strings == {
-        'RGDT_Rule_20200204_8': "(X['email_alpharatio']<=0.22241)&(X['num_distinct_txn_per_email_7day']>=4)",
-        'RGDT_Rule_20200204_9': "(X['email_alpharatio']<=0.29912)&(X['num_distinct_txn_per_email_7day']>=4)",
-        'RGDT_Rule_20200204_10': "(X['email_alpharatio']<=0.33992)",
-        'RGDT_Rule_20200204_11': "(X['email_alpharatio']<=0.33992)&(X['num_distinct_txn_per_email_7day']>=4)"
-    }
-    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(rg.rules.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == [
-        'RGDT_Rule_20200204_8', 'RGDT_Rule_20200204_9', 'RGDT_Rule_20200204_10',
-        'RGDT_Rule_20200204_11'
-    ]
+    _assert_fits(
+        X_rules, exp_results[0], rg, exp_rule_strings_no_weight,
+        "RuleGeneratorDTSpark object with 4 rules generated"
+    )
     # Test fit_transform without weights
     X_rules = rg.fit_transform(X, y, weights)
-    np.testing.assert_array_equal(X_rules.sum().to_numpy(), exp_results[1])
-    assert rg.rule_strings == rg.rules.rule_strings == {
-        'RGDT_Rule_20200204_12': "(X['email_alpharatio']<=0.22241)&(X['num_distinct_txn_per_email_7day']>=4)",
-        'RGDT_Rule_20200204_13': "(X['email_alpharatio']<=0.32306)",
-        'RGDT_Rule_20200204_14': "(X['email_alpharatio']<=0.32306)&(X['num_distinct_txn_per_email_1day']>=1)&(X['num_distinct_txn_per_email_7day']>=4)",
-        'RGDT_Rule_20200204_15': "(X['email_alpharatio']<=0.32306)&(X['num_distinct_txn_per_email_7day']>=4)"
-    }
-    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(rg.rules.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == [
-        'RGDT_Rule_20200204_12', 'RGDT_Rule_20200204_13', 'RGDT_Rule_20200204_14',
-        'RGDT_Rule_20200204_15'
-    ]
+    _assert_fits(
+        X_rules, exp_results[1], rg, exp_rule_strings_weight,
+        "RuleGeneratorDTSpark object with 4 rules generated"
+    )
 
 
 def test_extract_rules_from_ensemble(create_data, train_rf, rg_instantiated):
@@ -197,7 +206,7 @@ def test_extract_rules_from_ensemble(create_data, train_rf, rg_instantiated):
     rg, _ = rg_instantiated
     rg.precision_threshold = -1
     X_rules = rg._extract_rules_from_ensemble(
-        X, y, None, rf_trained, columns_int, columns_cat
+        X, rf_trained, columns_int, columns_cat
     )
     assert X_rules.shape == (100, 6)
     assert all(np.sort(X_rules.sum().to_numpy())
@@ -221,10 +230,10 @@ def test_extract_rules_from_ensemble_error(rg_instantiated, train_rf):
         featuresCol='features', impurity='gini'
     )
     rf_trained = rf.fit(spark_df)
-    with pytest.raises(Exception, match='No rules could be generated. Try changing the class parameters.'):
+    with pytest.raises(NoRulesError, match='No rules could be generated. Try changing the class parameters.'):
         with pytest.warns(UserWarning, match='Decision Tree 0 has a depth of zero - skipping'):
             X_rules = rg._extract_rules_from_ensemble(
-                X, y, None, rf_trained, ['A', 'B'], ['A', 'B']
+                X, rf_trained, ['A', 'B'], ['A', 'B']
             )
 
 
@@ -353,3 +362,69 @@ def test_calc_target_ratio_wrt_features(rg_instantiated):
     rg, _ = rg_instantiated
     target_feat_corr_types = rg._calc_target_ratio_wrt_features(X, y)
     assert target_feat_corr_types == expected_result
+
+
+def test_return_columns_types(rg_instantiated):
+    rg, _ = rg_instantiated
+    X = ks.DataFrame({
+        'bool': [True, False],
+        'ohe': [1, 0],
+        'int': [1, 2],
+        'float': [0.9, 0.8]
+    })
+    # When infer_dtypes=False
+    int_cols, cat_cols, float_cols = rg._return_columns_types(
+        X=X, infer_dtypes=False
+    )
+    assert int_cols == ['ohe', 'int', 'bool']
+    assert cat_cols == ['bool']
+    assert float_cols == ['float']
+    # When infer_dtypes=True
+    int_cols, cat_cols, float_cols = rg._return_columns_types(
+        X=X, infer_dtypes=True
+    )
+    assert int_cols == ['bool', 'ohe', 'int']
+    assert cat_cols == ['bool', 'ohe']
+    assert float_cols == ['float']
+    # Test error
+    with pytest.raises(TypeError, match='`infer_dtypes` must be a bool. Current type is str.'):
+        rg._return_columns_types(X=X, infer_dtypes='ERROR')
+
+
+def test_infer_dtypes_from_X(rg_instantiated):
+    rg, _ = rg_instantiated
+    X = ks.DataFrame({
+        'A': [2.5, 3.5, 1, 1, 2.5],
+        'B': [1, 0, 0, 1, 1],
+        'C': [1, 2, 0, 0, 1]
+    })
+    int_cols, cat_cols, float_cols = rg._infer_dtypes_from_X(X)
+    assert int_cols == ['B', 'C']
+    assert cat_cols == ['B']
+    assert float_cols == ['A']
+    # Test when all ints
+    X = ks.DataFrame({
+        'A': [1, 0, 0, 1, 1],
+        'B': [1, 0, 0, 1, 1],
+    })
+    int_cols, cat_cols, float_cols = rg._infer_dtypes_from_X(X)
+    assert int_cols == ['A', 'B']
+    assert cat_cols == ['A', 'B']
+    assert float_cols == []
+    # Test when all floats
+    X = ks.DataFrame({
+        'A': [1.2, 0, 0, 1.1, 1],
+        'B': [1.5, 0, 0, 1, 1.1],
+    })
+    int_cols, cat_cols, float_cols = rg._infer_dtypes_from_X(X)
+    assert int_cols == []
+    assert cat_cols == []
+    assert float_cols == ['A', 'B']
+
+
+def _assert_fits(X_rules, exp_X_rules, rg, exp_rule_strings, exp_repr):
+    np.testing.assert_array_equal(X_rules.sum().to_numpy(), exp_X_rules)
+    assert rg.rule_strings == rg.rules.rule_strings == exp_rule_strings
+    assert rg.rule_names == list(rg.rule_lambdas.keys()) == list(rg.rules.rule_lambdas.keys()) == list(
+        rg.lambda_kwargs.keys()) == list(exp_rule_strings.keys())
+    assert rg.__repr__() == exp_repr

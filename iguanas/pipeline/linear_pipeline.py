@@ -5,6 +5,7 @@ from iguanas.pipeline._base_pipeline import _BasePipeline
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.utils.types import PandasDataFrame, PandasSeries, Dictionary, ClassList, ClassNoneType
 import iguanas.utils.utils as utils
+from iguanas.rules import Rules
 
 
 class LinearPipeline(_BasePipeline):
@@ -42,6 +43,86 @@ class LinearPipeline(_BasePipeline):
     rules : Rules
         The Rules object containing the rules produced from fitting the 
         pipeline.
+
+    Examples
+    --------
+    >>> from iguanas.pipeline import LinearPipeline, ClassAccessor
+    >>> from iguanas.rbs import RBSOptimiser, RBSPipeline
+    >>> from iguanas.rule_generation import RuleGeneratorDT
+    >>> from iguanas.rule_selection import SimpleFilter
+    >>> from iguanas.metrics import FScore
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> # Pipeline ending with a transformer ---
+    >>> f1 = FScore(beta=1)
+    >>> rg = RuleGeneratorDT(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     tree_ensemble=RandomForestClassifier(random_state=0), 
+    ...     rule_name_prefix='Rule'
+    ... )
+    >>> sf = SimpleFilter(
+    ...     threshold=0.9, 
+    ...     operator='>', 
+    ...     metric=f1.fit,
+    ...     rules=ClassAccessor(
+    ...         class_tag='rg', 
+    ...         class_attribute='rules'
+    ...     )
+    ... )
+    >>> lp = LinearPipeline(
+    ...     steps=[
+    ...         ('rg', rg),
+    ...         ('sf', sf)
+    ...     ]
+    ... )
+    >>> lp.fit(X=X, y=y)
+    >>> print(lp.get_params()['sf']['rules_to_keep'])
+    ['Rule_0', 'Rule_1']
+    >>> X_rules = lp.transform(X=X)
+    >>> print(X_rules)
+       Rule_0  Rule_1
+    0       1       1
+    1       0       0
+    2       1       1
+    3       0       0
+    >>> # Pipeline ending with a predictor ---
+    >>> rbso = RBSOptimiser(
+    ...     pipeline=RBSPipeline(
+    ...         config=[], 
+    ...         final_decision=0
+    ...     ), 
+    ...     metric=f1.fit, 
+    ...     n_iter=10,
+    ...     pos_pred_rules=ClassAccessor(
+    ...         class_tag='sf', 
+    ...         class_attribute='rules_to_keep'
+    ...     )
+    ... )
+    >>> lp = LinearPipeline(
+    ...     steps=[
+    ...         ('rg', rg),
+    ...         ('sf', sf),
+    ...         ('rbso', rbso)
+    ...     ]
+    ... )
+    >>> lp.fit(X=X, y=y)
+    >>> print(lp.get_params()['rbso']['rules_to_keep'])
+    ['Rule_1']
+    >>> y_pred = lp.predict(X=X)
+    >>> print(y_pred)
+    0    1
+    1    0
+    2    1
+    3    0
+    dtype: int64
     """
 
     def __init__(self,
@@ -53,6 +134,7 @@ class LinearPipeline(_BasePipeline):
             use_init_data, 'use_init_data', [ClassList, ClassNoneType]
         )
         self.use_init_data = use_init_data
+        self.rules = Rules()
 
     def fit(self,
             X: Union[PandasDataFrameType, dict],
@@ -107,7 +189,8 @@ class LinearPipeline(_BasePipeline):
         )
         self.rules = final_step.rules
 
-    def predict(self, X: Union[PandasDataFrameType, dict]) -> PandasSeriesType:
+    def predict(self,
+                X: Union[PandasDataFrameType, dict]) -> PandasSeriesType:
         """
         Sequentially runs the `transform` method of each step in the pipeline,
         except for the last step, where the `predict` method is run. Note that

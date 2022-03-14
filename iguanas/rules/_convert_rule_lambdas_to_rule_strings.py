@@ -30,11 +30,13 @@ class _ConvertRuleLambdasToRuleStrings:
         and their names (keys).
     """
 
-    def __init__(self, rule_lambdas: Dict[str, Callable[[Dict], str]],
+    def __init__(self,
+                 rule_lambdas: Dict[str, Callable[[Dict], str]],
                  lambda_kwargs=None, lambda_args=None):
         if lambda_kwargs is None and lambda_args is None:
-            raise Exception(
-                'Either `lambda_kwargs` or `lambda_args` must be provided')
+            raise ValueError(
+                'Either `lambda_kwargs` or `lambda_args` must be provided'
+            )
         self.rule_lambdas = rule_lambdas
         self.lambda_kwargs = {} if lambda_kwargs is None else lambda_kwargs
         self.lambda_args = {} if lambda_args is None else lambda_args

@@ -229,6 +229,13 @@
 <span class="sd">        `PositiveCorr`) and negatively correlated features wrt the target </span>
 <span class="sd">        (under the key `NegativeCorr`), or &#39;Infer&#39; (where each target-feature </span>
 <span class="sd">        correlation type is inferred from the data). Defaults to None.</span>
+<span class="sd">    infer_dtypes : bool, optional</span>
+<span class="sd">        Dictates whether the column datatypes should be inferred from the data.</span>
+<span class="sd">        If True, the integer, float and categorical-type (e.g. one hot encoded)</span>
+<span class="sd">        columns are inferred from the values in the dataset `X`. If False, the</span>
+<span class="sd">        datatypes from the dataset are used (i.e. `X.dtypes`). Note that if </span>
+<span class="sd">        False, any categorical-type columns should be stored as the `bool`</span>
+<span class="sd">        datatype. Defaults to True.</span>
 <span class="sd">    verbose : int, optional </span>
 <span class="sd">        Controls the verbosity - the higher, the more messages. &gt;0 : gives the</span>
 <span class="sd">        progress of the training of the rules. Defaults to 0.</span>
@@ -250,19 +257,64 @@
 <span class="sd">        The Rules object containing the generated rules.</span>
 <span class="sd">    rule_names : List[str]</span>
 <span class="sd">        The names of the generated rules.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rule_generation import RuleGeneratorOpt</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import FScore</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; f1 = FScore(beta=1)</span>
+<span class="sd">    &gt;&gt;&gt; rg = RuleGeneratorOpt(</span>
+<span class="sd">    ...     metric=f1.fit, </span>
+<span class="sd">    ...     n_total_conditions=2, </span>
+<span class="sd">    ...     num_rules_keep=10,</span>
+<span class="sd">    ...     rule_name_prefix=&#39;Rule&#39;</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = rg.fit(X=X, y=y)</span>
+<span class="sd">    &gt;&gt;&gt; print(X_rules)</span>
+<span class="sd">       Rule_0</span>
+<span class="sd">    0       1</span>
+<span class="sd">    1       0</span>
+<span class="sd">    2       1</span>
+<span class="sd">    3       0</span>
+<span class="sd">    &gt;&gt;&gt; print(rg.rule_strings)</span>
+<span class="sd">    {&#39;Rule_0&#39;: &quot;(X[&#39;A&#39;]==True)&quot;}</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = rg.transform(X=X)</span>
+<span class="sd">    &gt;&gt;&gt; print(X_rules)</span>
+<span class="sd">       Rule_0</span>
+<span class="sd">    0       1</span>
+<span class="sd">    1       0</span>
+<span class="sd">    2       1</span>
+<span class="sd">    3       0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
-                 <span class="n">n_total_conditions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_rules_keep</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                 <span class="n">ratio_window</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">one_cond_rule_opt_metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
-                 <span class="n">remove_corr_rules</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">target_feat_corr_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rule_name_prefix</span><span class="o">=</span><span class="s1">&#39;RGO_Rule&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+                 <span class="n">n_total_conditions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">num_rules_keep</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">n_points</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                 <span class="n">ratio_window</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                 <span class="n">one_cond_rule_opt_metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
+                 <span class="n">remove_corr_rules</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">target_feat_corr_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">infer_dtypes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">rule_name_prefix</span><span class="o">=</span><span class="s1">&#39;RGO_Rule&#39;</span><span class="p">):</span>
 
         <span class="n">_BaseGenerator</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
             <span class="n">target_feat_corr_types</span><span class="o">=</span><span class="n">target_feat_corr_types</span><span class="p">,</span>
             <span class="n">rule_name_prefix</span><span class="o">=</span><span class="n">rule_name_prefix</span><span class="p">,</span>
+            <span class="n">infer_dtypes</span><span class="o">=</span><span class="n">infer_dtypes</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_total_conditions</span> <span class="o">=</span> <span class="n">n_total_conditions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_rules_keep</span> <span class="o">=</span> <span class="n">num_rules_keep</span>
@@ -270,7 +322,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ratio_window</span> <span class="o">=</span> <span class="n">ratio_window</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">one_cond_rule_opt_metric</span> <span class="o">=</span> <span class="n">one_cond_rule_opt_metric</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">remove_corr_rules</span> <span class="o">=</span> <span class="n">remove_corr_rules</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_names</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -280,7 +331,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;RuleGeneratorOpt(metric=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="si">}</span><span class="s1">, n_total_conditions=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_total_conditions</span><span class="si">}</span><span class="s1">, num_rules_keep=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_rules_keep</span><span class="si">}</span><span class="s1">, n_points=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s1">, ratio_window=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ratio_window</span><span class="si">}</span><span class="s1">, one_cond_rule_opt_metric=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">one_cond_rule_opt_metric</span><span class="si">}</span><span class="s1">, remove_corr_rules=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">remove_corr_rules</span><span class="si">}</span><span class="s1">, target_feat_corr_types=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target_feat_corr_types</span><span class="si">}</span><span class="s1">)&#39;</span>
 
-<div class="viewcode-block" id="RuleGeneratorOpt.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_generation.RuleGeneratorOpt.html#iguanas.rule_generation.RuleGeneratorOpt.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+<div class="viewcode-block" id="RuleGeneratorOpt.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_generation.RuleGeneratorOpt.html#iguanas.rule_generation.RuleGeneratorOpt.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
             <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate rules by optimising the thresholds of single features and</span>
@@ -316,10 +369,14 @@
             <span class="p">)</span>
         <span class="n">X_rules</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
         <span class="n">rule_strings</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">columns_int</span><span class="p">,</span> <span class="n">columns_cat</span><span class="p">,</span> <span class="n">columns_float</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">return_columns_types</span><span class="p">(</span>
-            <span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;--- Returning column datatypes ---&#39;</span><span class="p">)</span>
+        <span class="n">columns_int</span><span class="p">,</span> <span class="n">columns_cat</span><span class="p">,</span> <span class="n">columns_float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_columns_types</span><span class="p">(</span>
+            <span class="n">infer_dtypes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">infer_dtypes</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span>
+        <span class="p">)</span>
         <span class="n">columns_num</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns_int</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns_cat</span><span class="p">]</span> <span class="o">+</span> <span class="n">columns_float</span>
+            <span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns_int</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">columns_cat</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="n">columns_float</span>
         <span class="k">if</span> <span class="n">columns_num</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
@@ -346,7 +403,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_generate_other_rule_formats</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">X_rules</span></div>
 
-    <span class="k">def</span> <span class="nf">_generate_numeric_one_condition_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_generate_numeric_one_condition_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                              <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
                                               <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
                                               <span class="n">columns_num</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                                               <span class="n">columns_int</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -404,9 +462,8 @@
                                                   <span class="n">sample_weight</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasDataFrameType</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Generates one condition rules for OHE categorical columns&quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">_gen_rules_from_target_feat_corr_types</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
-                                                   <span class="n">columns_cat</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-                                                   <span class="n">sample_weight</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasDataFrameType</span><span class="p">]:</span>
+        <span class="k">def</span> <span class="nf">_gen_rules_from_target_feat_corr_types</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+                                                   <span class="n">columns_cat</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasDataFrameType</span><span class="p">]:</span>
             <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Generates rules using the target-feature correlation types given</span>
 <span class="sd">            in `target_feat_corr_types`.</span>
@@ -428,7 +485,8 @@
             <span class="n">X_rules</span> <span class="o">=</span> <span class="n">ara</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">rule_strings</span><span class="p">,</span> <span class="n">X_rules</span>
 
-        <span class="k">def</span> <span class="nf">_gen_rules_best_perf_bool_option</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+        <span class="k">def</span> <span class="nf">_gen_rules_best_perf_bool_option</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+                                             <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
                                              <span class="n">columns_cat</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                                              <span class="n">sample_weight</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasDataFrameType</span><span class="p">]:</span>
             <span class="sd">&quot;&quot;&quot;</span>
@@ -466,7 +524,7 @@
         <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_feat_corr_types</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">rule_strings</span><span class="p">,</span> <span class="n">X_rules</span> <span class="o">=</span> <span class="n">_gen_rules_from_target_feat_corr_types</span><span class="p">(</span>
-                <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">columns_cat</span><span class="o">=</span><span class="n">columns_cat</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span>
+                <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">columns_cat</span><span class="o">=</span><span class="n">columns_cat</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">rule_strings</span><span class="p">,</span> <span class="n">X_rules</span> <span class="o">=</span> <span class="n">_gen_rules_best_perf_bool_option</span><span class="p">(</span>
@@ -482,7 +540,8 @@
         <span class="k">return</span> <span class="n">rule_strings</span><span class="p">,</span> <span class="n">X_rules</span>
 
     <span class="k">def</span> <span class="nf">_generate_pairwise_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                                 <span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+                                 <span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+                                 <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
                                  <span class="n">rules_combinations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]],</span>
                                  <span class="n">sample_weight</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;Combines binary columns of rules using AND conditions&quot;&quot;&quot;</span>
@@ -700,8 +759,11 @@
         <span class="k">return</span> <span class="n">rule_descriptions</span><span class="p">,</span> <span class="n">X_rules</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_set_iteration_range</span><span class="p">(</span><span class="n">X_col</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                             <span class="n">n_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ratio_window</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_set_iteration_range</span><span class="p">(</span><span class="n">X_col</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                             <span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                             <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                             <span class="n">n_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                             <span class="n">ratio_window</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                              <span class="n">columns_int</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Sets the iteration range for a given column&quot;&quot;&quot;</span>
 
@@ -719,11 +781,15 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_set_iteration_array</span><span class="p">(</span><span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">columns_int</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">x_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                             <span class="n">x_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_set_iteration_array</span><span class="p">(</span><span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                             <span class="n">columns_int</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                             <span class="n">x_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                             <span class="n">x_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                             <span class="n">n_points</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns the iteration array for a given column&quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">_round_to_n_sf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n_sf</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">_round_to_n_sf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                           <span class="n">n_sf</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
             <span class="sd">&quot;&quot;&quot;Method for rounding a float to n significant figures&quot;&quot;&quot;</span>
 
             <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -742,8 +808,10 @@
         <span class="k">return</span> <span class="n">x_iter</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_calculate_opt_metric_across_range</span><span class="p">(</span><span class="n">x_iter</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                                           <span class="n">X_col</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_calculate_opt_metric_across_range</span><span class="p">(</span><span class="n">x_iter</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                                           <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                           <span class="n">X_col</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                                           <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
                                            <span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">PandasSeriesType</span><span class="p">,</span> <span class="n">PandasSeriesType</span><span class="p">,</span> <span class="n">PandasSeriesType</span><span class="p">],</span> <span class="n">PandasSeriesType</span><span class="p">],</span>
                                            <span class="n">sample_weight</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -759,7 +827,8 @@
         <span class="k">return</span> <span class="n">opt_metric_iter</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_return_x_of_max_opt_metric</span><span class="p">(</span><span class="n">opt_metric_iter</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_return_x_of_max_opt_metric</span><span class="p">(</span><span class="n">opt_metric_iter</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                                    <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                                     <span class="n">x_iter</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns the threshold value which maximises the FBeta score&quot;&quot;&quot;</span>
 
@@ -802,7 +871,8 @@
         <span class="k">return</span> <span class="n">rules_combinations</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_generate_pairwise_df</span><span class="p">(</span><span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">rules_names_1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="k">def</span> <span class="nf">_generate_pairwise_df</span><span class="p">(</span><span class="n">X_rules</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+                              <span class="n">rules_names_1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                               <span class="n">rules_names_2</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                               <span class="n">pairwise_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>

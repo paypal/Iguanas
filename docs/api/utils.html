@@ -213,6 +213,16 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="api/iguanas.metrics.classification.Bounds.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.metrics.classification
+      </span>
+     </code>
+     .Bounds
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="api/iguanas.metrics.pairwise.CosineSimilarity.html">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
@@ -697,27 +707,6 @@ Series/DataFrames.</p>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><dl class="simple">
 <dt>Exception</dt><dd><p><cite>objs</cite> must be a list of either Pandas objects or Koalas objects.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="iguanas.utils.utils.return_columns_types">
-<span class="sig-prename descclassname"><span class="pre">iguanas.utils.utils.</span></span><span class="sig-name descname"><span class="pre">return_columns_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/iguanas/utils/utils.html#return_columns_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.utils.utils.return_columns_types" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the integer, float and OHE categorical columns for a given dataset.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">Union[PandasDataFrameType, KoalasDataFrameType])</span></dt><dd><p>Dataset.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>Tuple[List, List, List]</dt><dd><p>List of integer columns, list of float columns, list of OHE categorical 
-columns.</p>
 </dd>
 </dl>
 </dd>

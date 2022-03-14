@@ -61,7 +61,8 @@ class _BasePipeline:
                 pipeline_params.update(step_param_dict)
         return pipeline_params
 
-    def _update_kwargs(self, params: dict) -> None:
+    def _update_kwargs(self,
+                       params: dict) -> None:
         """
         Updates the given parameters of the given steps in the pipeline.
 
@@ -83,7 +84,8 @@ class _BasePipeline:
                 for param in params[step_tag].keys():
                     if param not in step.__dict__.keys() and 'kwargs' not in step.__dict__.keys():
                         raise ValueError(
-                            f'Parameter `{param}` not found in keyword arguments for class in step `{step_tag}`')
+                            f'Parameter `{param}` not found in keyword arguments for class in step `{step_tag}`'
+                        )
                 step.__dict__.update(params[step_tag])
 
     def _pipeline_fit(self,
@@ -258,7 +260,8 @@ class _BasePipeline:
                         iterable[idx] = value.get(pipeline_params)
                     except TypeError:
                         raise TypeError(
-                            '`ClassAccessor` object must be within a mutable iterable.')
+                            '`ClassAccessor` object must be within a mutable iterable.'
+                        )
 
         step_param_dict = step.__dict__
         for param, value in step_param_dict.items():

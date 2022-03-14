@@ -15,15 +15,31 @@ class CosineSimilarity:
     **kwargs : dict
         Any keyword arguments to be used in the sklearn `cosine_similarity`
         function.        
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from iguanas.metrics import CosineSimilarity
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })    
+    >>> cs = CosineSimilarity()
+    >>> print(cs.fit(X=X))
+              A         B
+    A  1.000000  0.816497
+    B  0.816497  1.000000
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self,
+                 **kwargs):
         self.kwargs = kwargs
 
     def __repr__(self):
         return 'CosineSimilarity'
 
-    def fit(self, X: PandasDataFrameType) -> PandasDataFrameType:
+    def fit(self,
+            X: PandasDataFrameType) -> PandasDataFrameType:
         """
         Computes the cosine similarity between columns in X.
 
@@ -52,16 +68,32 @@ class JaccardSimilarity:
     ----------
     **kwargs : dict
         Any keyword arguments to be used in the sklearn `pairwise_distances`
-        function.        
+        function.     
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from iguanas.metrics import JaccardSimilarity
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })    
+    >>> js = JaccardSimilarity()
+    >>> print(js.fit(X=X))   
+              A         B
+    A  1.000000  0.666667
+    B  0.666667  1.000000
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self,
+                 **kwargs):
         self.kwargs = kwargs
 
     def __repr__(self):
         return 'JaccardSimilarity'
 
-    def fit(self, X: PandasDataFrameType) -> PandasDataFrameType:
+    def fit(self,
+            X: PandasDataFrameType) -> PandasDataFrameType:
         """
         Computes the Jaccard similarity between columns in X.
 

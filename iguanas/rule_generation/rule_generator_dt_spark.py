@@ -3,15 +3,16 @@ Generates rules using decision trees (applied to Koalas/Spark
 dataframes).
 """
 import numpy as np
-import iguanas.utils as utils
-from iguanas.rule_generation._base_generator import _BaseGenerator
-from iguanas.utils.types import KoalasDataFrame, KoalasSeries
-from iguanas.utils.typing import KoalasDataFrameType, KoalasSeriesType
 from typing import Callable, List, Set, Tuple
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.classification import RandomForestClassifier, DecisionTreeClassificationModel
 from pyspark.sql import DataFrame
 import warnings
+from iguanas.exceptions.exceptions import NoRulesError
+import iguanas.utils as utils
+from iguanas.rule_generation._base_generator import _BaseGenerator
+from iguanas.utils.types import KoalasDataFrame, KoalasSeries
+from iguanas.utils.typing import KoalasDataFrameType, KoalasSeriesType
 
 
 class RuleGeneratorDTSpark(_BaseGenerator):
@@ -45,6 +46,13 @@ class RuleGeneratorDTSpark(_BaseGenerator):
         correlated features wrt the target (under the key `NegativeCorr`),
         or 'Infer' (where each target-feature correlation type is inferred 
         from the data). Defaults to None.
+    infer_dtypes : bool, optional
+        Dictates whether the column datatypes should be inferred from the data.
+        If True, the integer, float and categorical-type (e.g. one hot encoded)
+        columns are inferred from the values in the dataset `X`. If False, the
+        datatypes from the dataset are used (i.e. `X.dtypes`). Note that if 
+        False, any categorical-type columns should be stored as the `bool`
+        datatype. Defaults to True.
     verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : gives
         the overall progress of the training of the ensemble model and the
@@ -67,27 +75,68 @@ class RuleGeneratorDTSpark(_BaseGenerator):
         The Rules object containing the generated rules.
     rule_names : List[str]
         The names of the generated rules.
+
+    Examples
+    --------
+    >>> from iguanas.rule_generation import RuleGeneratorDTSpark
+    >>> from iguanas.metrics import FScore
+    >>> from pyspark.ml.classification import RandomForestClassifier
+    >>> import databricks.koalas as ks
+    >>> X = ks.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = ks.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> f1 = FScore(beta=1)
+    >>> rg = RuleGeneratorDTSpark(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     tree_ensemble=RandomForestClassifier(numTrees=100, seed=0), 
+    ...     rule_name_prefix='Rule'
+    ... )
+    >>> X_rules = rg.fit(X=X, y=y)
+    >>> print(X_rules)
+       Rule_0
+    0       1
+    1       0
+    2       1
+    3       0
+    >>> print(rg.rule_strings)
+    {'Rule_0': "(X['A']==True)"}
+    >>> X_rules = rg.transform(X=X)
+    >>> print(X_rules)
+       Rule_0
+    0       1
+    1       0
+    2       1
+    3       0
     """
 
-    def __init__(self, metric: Callable,
+    def __init__(self,
+                 metric: Callable,
                  n_total_conditions: int,
                  tree_ensemble: RandomForestClassifier,
                  precision_threshold=0,
                  target_feat_corr_types=None,
-                 verbose=0, rule_name_prefix='RGDT_Rule'):
+                 infer_dtypes=True,
+                 verbose=0,
+                 rule_name_prefix='RGDT_Rule'):
 
         _BaseGenerator.__init__(
             self,
             metric=metric,
             target_feat_corr_types=target_feat_corr_types,
             rule_name_prefix=rule_name_prefix,
+            infer_dtypes=infer_dtypes,
+            verbose=verbose
         )
         self.orig_tree_ensemble = tree_ensemble
         self.orig_tree_ensemble.setMaxDepth(n_total_conditions)
         self.orig_tree_ensemble.setSeed(0)
         self.orig_tree_ensemble.setLabelCol('label_')
         self.precision_threshold = precision_threshold
-        self.verbose = verbose
         self.rule_strings = {}
         self.rule_names = []
 
@@ -97,7 +146,9 @@ class RuleGeneratorDTSpark(_BaseGenerator):
         else:
             return f'RuleGeneratorDTSpark(metric={self.metric}, n_total_conditions={self.orig_tree_ensemble.getMaxDepth()}, tree_ensemble={self.orig_tree_ensemble.__repr__().split("_")[0]}, precision_threshold={self.precision_threshold}, target_feat_corr_types={self.target_feat_corr_types})'
 
-    def fit(self, X: KoalasDataFrameType, y: KoalasSeriesType,
+    def fit(self,
+            X: KoalasDataFrameType,
+            y: KoalasSeriesType,
             sample_weight=None) -> KoalasDataFrameType:
         """
         Generates rules by extracting the highest performing branches in a tree
@@ -123,6 +174,8 @@ class RuleGeneratorDTSpark(_BaseGenerator):
         if sample_weight is not None:
             utils.check_allowed_types(
                 sample_weight, 'sample_weight', [KoalasSeries])
+        # Ensures rule names are the same when fit run without reinstantiating
+        self._rule_name_counter = 0
         # Copy spark tree ensemble - ensures repeatable results when class
         # not instantiated but fit method run for different inputs
         self.tree_ensemble = self.orig_tree_ensemble.copy()
@@ -135,7 +188,9 @@ class RuleGeneratorDTSpark(_BaseGenerator):
             )
         if self.verbose:
             print('--- Returning column datatypes ---')
-        columns_int, columns_cat, _ = utils.return_columns_types(X)
+        columns_int, columns_cat, _ = self._return_columns_types(
+            infer_dtypes=self.infer_dtypes, X=X
+        )
         if self.verbose:
             print('--- Creating Spark DataFrame for training ---')
         spark_df = self._create_train_spark_df(
@@ -148,15 +203,14 @@ class RuleGeneratorDTSpark(_BaseGenerator):
         if self.verbose:
             print('--- Extracting rules from tree ensemble ---')
         X_rules = self._extract_rules_from_ensemble(
-            X=X, y=y, sample_weight=sample_weight,
-            tree_ensemble=trained_tree_ensemble, columns_int=columns_int,
+            X=X, tree_ensemble=trained_tree_ensemble, columns_int=columns_int,
             columns_cat=columns_cat,
         )
         self._generate_other_rule_formats()
         return X_rules
 
-    def _extract_rules_from_ensemble(self, X: KoalasDataFrameType, y: KoalasSeriesType,
-                                     sample_weight: KoalasSeriesType,
+    def _extract_rules_from_ensemble(self,
+                                     X: KoalasDataFrameType,
                                      tree_ensemble: RandomForestClassifier,
                                      columns_int: List[str],
                                      columns_cat: List[str]) -> KoalasDataFrameType:
@@ -169,7 +223,8 @@ class RuleGeneratorDTSpark(_BaseGenerator):
         for i, decision_tree in enumerate(tree_ensemble.trees):
             if decision_tree.depth == 0:
                 warnings.warn(
-                    f'Decision Tree {i} has a depth of zero - skipping')
+                    f'Decision Tree {i} has a depth of zero - skipping'
+                )
                 continue
             dt_rule_strings_set = self._extract_rules_from_dt(
                 columns=X.columns.tolist(), decision_tree=decision_tree,
@@ -182,12 +237,14 @@ class RuleGeneratorDTSpark(_BaseGenerator):
             for rule_string in rule_strings_set
         )
         if not self.rule_strings:
-            raise Exception(
-                'No rules could be generated. Try changing the class parameters.')
+            raise NoRulesError(
+                'No rules could be generated. Try changing the class parameters.'
+            )
         X_rules = self.transform(X=X)
         return X_rules
 
-    def _extract_rules_from_dt(self, columns: List[str],
+    def _extract_rules_from_dt(self,
+                               columns: List[str],
                                decision_tree: DecisionTreeClassificationModel,
                                columns_int: List[str],
                                columns_cat: List[str]) -> Set[str]:
@@ -209,7 +266,8 @@ class RuleGeneratorDTSpark(_BaseGenerator):
             )
 
     @staticmethod
-    def _create_train_spark_df(X: KoalasDataFrameType, y: KoalasSeriesType,
+    def _create_train_spark_df(X: KoalasDataFrameType,
+                               y: KoalasSeriesType,
                                sample_weight: KoalasSeriesType) -> DataFrame:
         """
         Creates a Spark DataFrame from `X`, `y` and `sample_weight` (if 

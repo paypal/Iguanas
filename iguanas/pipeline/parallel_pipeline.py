@@ -1,12 +1,15 @@
 """Class for creating a Parallel Pipeline."""
-from copy import deepcopy
-from typing import List, Tuple, Union
+from iguanas.exceptions.exceptions import DataFrameSizeError, NoRulesError
 from iguanas.pipeline._base_pipeline import _BasePipeline
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.utils.types import PandasDataFrame, PandasSeries, Dictionary
 import iguanas.utils.utils as utils
 from iguanas.rules import Rules
+from iguanas.warnings import NoRulesWarning
+from copy import deepcopy
+from typing import List, Tuple, Union
 import pandas as pd
+import warnings
 
 
 class ParallelPipeline(_BasePipeline):
@@ -37,12 +40,62 @@ class ParallelPipeline(_BasePipeline):
     rules : Rules
         The Rules object containing the rules produced from fitting the 
         pipeline.
+
+    Examples
+    --------
+    >>> from iguanas.pipeline import ParallelPipeline
+    >>> from iguanas.rbs import RBSOptimiser, RBSPipeline
+    >>> from iguanas.rule_generation import RuleGeneratorDT, RuleGeneratorOpt
+    >>> from iguanas.metrics import FScore
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> f1 = FScore(beta=1)
+    >>> rg_dt = RuleGeneratorDT(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     tree_ensemble=RandomForestClassifier(random_state=0), 
+    ...     rule_name_prefix='RuleGenDT'
+    ... )
+    >>> rg_opt = RuleGeneratorOpt(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     num_rules_keep=10,
+    ...     rule_name_prefix='RuleGenOpt'
+    ... )
+    >>> pp = ParallelPipeline(
+    ...     steps=[
+    ...         ('rg_dt', rg_dt), 
+    ...         ('rg_opt', rg_opt)
+    ...     ]
+    ... )
+    >>> X_rules = pp.fit_transform(X=X, y=y)
+    >>> print(X_rules)
+       RuleGenDT_0  RuleGenDT_1  RuleGenDT_2  RuleGenOpt_0
+    0            1            1            1             1
+    1            0            0            1             0
+    2            1            1            1             1
+    3            0            0            0             0
+    >>> X_rules = pp.transform(X=X)
+    >>> print(X_rules)
+       RuleGenDT_0  RuleGenDT_1  RuleGenDT_2  RuleGenOpt_0
+    0            1            1            1             1
+    1            0            0            1             0
+    2            1            1            1             1
+    3            0            0            0             0
     """
 
     def __init__(self,
                  steps: List[Tuple[str, object]],
                  verbose=0) -> None:
         _BasePipeline.__init__(self, steps=steps, verbose=verbose)
+        self.rules = Rules()
 
     def fit_transform(self,
                       X: Union[PandasDataFrameType, dict],
@@ -85,14 +138,24 @@ class ParallelPipeline(_BasePipeline):
                 print(
                     f'--- Applying `fit_transform` method for step `{step_tag}` ---'
                 )
-            X_rules_list.append(
-                self._pipeline_fit_transform(
-                    step_tag, step, X, y, sample_weight
+            # Try applying fit_transform for `step`
+            try:
+                X_rules_list.append(
+                    self._pipeline_fit_transform(
+                        step_tag, step, X, y, sample_weight
+                    )
                 )
-            )
-            rules_list.append(step.rules)
+                rules_list.append(step.rules)
+            # If no rules generated/remain, raise warning and skip `step`
+            except (DataFrameSizeError, NoRulesError) as e:
+                warnings.warn(
+                    message=f'No rules remain in step `{step_tag}` as it raised the following error: "{e}"',
+                    category=NoRulesWarning
+                )
+                X_rules_list.append(pd.DataFrame())
+                rules_list.append(Rules())
         X_rules = pd.concat(X_rules_list, axis=1)
-        self.rules = self._concat_rules(rules_list)
+        self.rules = sum(rules_list)
         self.rule_names = X_rules.columns.tolist()
         return X_rules
 
@@ -123,33 +186,24 @@ class ParallelPipeline(_BasePipeline):
         utils.check_allowed_types(X, 'X', [PandasDataFrame, Dictionary])
         X_rules_list = []
         for step_tag, step in self.steps_:
-            X_rules_list.append(
-                self._pipeline_transform(
-                    step_tag, step, X
+            # Try applying transform for `step`
+            try:
+                X_rules_list.append(
+                    self._pipeline_transform(
+                        step_tag, step, X
+                    )
                 )
-            )
+            # If no rules present, raise warning and skip `step`; else raise
+            # exception
+            except Exception as e:
+                if str(e) == '`rule_dicts` must be given' or str(e) == '`X` has been reduced to zero columns after the `sf` step in the pipeline.':
+                    warnings.warn(
+                        message=f'No rules present in step `{step_tag}` - `transform` method cannot be applied for this step.',
+                        category=NoRulesWarning
+                    )
+                    X_rules_list.append(pd.DataFrame())
+                else:
+                    raise e
         X_rules = pd.concat(X_rules_list, axis=1)
         self.rule_names = X_rules.columns.tolist()
         return X_rules
-
-    @staticmethod
-    def _concat_rules(rules_list: List[Rules]) -> Rules:
-        """
-        Returns the combined rule set given a list of individual rule sets. If
-        `rules_list` is all None, returns None. If elements in `rules_list` are
-        None, raises an exception.
-        """
-
-        if all([rule is None for rule in rules_list]):
-            return None
-        elif None in rules_list:
-            raise TypeError(
-                """
-                One or more of the classes in the pipeline has `None` assigned to 
-                the `rules` parameter, whereas other classes in the pipeline have 
-                the `rules` parameter populated. Either set all to `None` or 
-                provide the `rules` parameter for all classes.
-                """
-            )
-        else:
-            return sum(rules_list)

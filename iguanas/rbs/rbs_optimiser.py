@@ -7,6 +7,7 @@ from iguanas.rbs import RBSPipeline
 import iguanas.utils as utils
 from iguanas.utils.types import PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
+from iguanas.rules import Rules
 
 
 class RBSOptimiser(RBSPipeline):
@@ -62,6 +63,49 @@ class RBSOptimiser(RBSPipeline):
         The rules used in the optimised pipeline.    
     rules : Rules
         The Rules object containing the rules remaining after optimisation.
+
+    Examples
+    --------
+    >>> from iguanas.rbs import RBSPipeline, RBSOptimiser
+    >>> from iguanas.rule_generation import RuleGeneratorDT
+    >>> from iguanas.metrics import FScore
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> f1 = FScore(beta=1)
+    >>> rg = RuleGeneratorDT(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     tree_ensemble=RandomForestClassifier(random_state=0), 
+    ...     rule_name_prefix='Rule'
+    ... )
+    >>> X_rules = rg.fit(X=X, y=y)
+    >>> rbso = RBSOptimiser(
+    ...     pipeline = RBSPipeline(
+    ...         config=[
+    ...             (1, rg.rule_names)
+    ...         ], 
+    ...         final_decision=0
+    ...     ),
+    ...     metric=f1.fit,
+    ...     n_iter=10
+    ... )
+    >>> rbso.fit(X_rules=X_rules, y=y)
+    >>> print(rbso.rules_to_keep)
+    ['Rule_1']
+    >>> y_pred = rbso.predict(X_rules=X_rules)
+    >>> print(y_pred)
+    0    1
+    1    0
+    2    1
+    3    0
+    dtype: int64
     """
 
     def __init__(self,
@@ -84,16 +128,22 @@ class RBSOptimiser(RBSPipeline):
         self.algorithm = algorithm
         self.pos_pred_rules = [] if pos_pred_rules is None else pos_pred_rules
         self.neg_pred_rules = [] if neg_pred_rules is None else neg_pred_rules
-        self.rules = deepcopy(rules)
+        if rules is not None:
+            self.rules = deepcopy(rules)
+        else:
+            self.rules = Rules()
         self.verbose = verbose
         self.kwargs = kwargs
         self.orig_config = deepcopy(pipeline.config)
         self.config_given = self.orig_config != []
         if not self.config_given and self.pos_pred_rules == [] and self.neg_pred_rules == []:
             raise ValueError(
-                'If `config` not provided in `pipeline`, then one or both of `pos_pred_rules` and `neg_pred_rules` must be given.')
+                'If `config` not provided in `pipeline`, then one or both of `pos_pred_rules` and `neg_pred_rules` must be given.'
+            )
 
-    def fit(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
+    def fit(self,
+            X_rules: PandasDataFrameType,
+            y: PandasSeriesType,
             sample_weight=None) -> None:
         """
         Optimises the pipeline for the given dataset.
@@ -127,11 +177,12 @@ class RBSOptimiser(RBSPipeline):
         self.rules_to_keep = [
             rule for stage in self.config for rule in stage[1]
         ]
-        # If `rules` given, filter it
-        if self.rules is not None:
-            self.rules.filter_rules(include=self.rules_to_keep)
+        # Filter `rules`
+        self.rules.filter_rules(include=self.rules_to_keep)
 
-    def fit_predict(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
+    def fit_predict(self,
+                    X_rules: PandasDataFrameType,
+                    y: PandasSeriesType,
                     sample_weight=None) -> PandasSeriesType:
         """
         Optimises the pipeline for the given dataset and applies the pipeline 
@@ -156,7 +207,8 @@ class RBSOptimiser(RBSPipeline):
         self.fit(X_rules, y, sample_weight)
         return self.predict(X_rules)
 
-    def _get_space_funcs(self, X_rules: PandasDataFrameType) -> dict:
+    def _get_space_funcs(self,
+                         X_rules: PandasDataFrameType) -> dict:
         """Returns the space functions for each rule."""
 
         if self.config_given:
@@ -214,7 +266,8 @@ class RBSOptimiser(RBSPipeline):
         )
         return opt_thresholds
 
-    def _generate_config(self, opt_thresholds: dict) -> None:
+    def _generate_config(self,
+                         opt_thresholds: dict) -> None:
         """Generates final pipeline config based on optimisation"""
 
         if self.config_given:
@@ -223,7 +276,8 @@ class RBSOptimiser(RBSPipeline):
             opt_thresholds = self._convert_opt_thr(opt_thresholds)
             self.config = self._create_config(opt_thresholds)
 
-    def _create_config(self, space_funcs: dict) -> dict:
+    def _create_config(self,
+                       space_funcs: dict) -> dict:
         """Creates pipeline config from space functions"""
 
         config = []

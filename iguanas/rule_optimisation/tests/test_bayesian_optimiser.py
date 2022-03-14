@@ -1,7 +1,9 @@
-import pytest
 from iguanas.rule_optimisation import BayesianOptimiser
 from iguanas.metrics import FScore, AlertsPerDay
 from iguanas.rules import Rules
+from iguanas.warnings import RulesNotOptimisedWarning
+from iguanas.exceptions import RulesNotOptimisedError
+import pytest
 import numpy as np
 import pandas as pd
 from hyperopt import hp, tpe
@@ -254,7 +256,7 @@ def test_fit_and_fit_transform(_create_data, _instantiate, _expected_results, _e
     exp_X_rules, _, _ = _expected_X_rules_mean
     ro = _instantiate
     assert ro.__repr__() == 'BayesianOptimiser object with 14 rules to optimise'
-    with pytest.warns(UserWarning):
+    with pytest.warns(RulesNotOptimisedWarning) as warnings:
         for method in ['fit', 'fit_transform']:
             if method == 'fit':
                 X_rules = ro.fit(X=X, y=y)
@@ -271,6 +273,11 @@ def test_fit_and_fit_transform(_create_data, _instantiate, _expected_results, _e
             assert ro.rule_names_missing_features == ['missing_col']
             assert ro.rule_names_no_opt_conditions == ['categoric', 'boolean']
             assert ro.rule_names_zero_var_features == ['all_na', 'zero_var']
+    # Assert warnings
+    warnings = [w.message.args[0] for w in warnings]
+    assert 'Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules' in warnings
+    assert 'Rules `categoric`, `boolean` have no optimisable conditions - unable to optimise these rules' in warnings
+    assert 'Rules `all_na`, `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules' in warnings
 
 
 def test_fit_weighted(_create_data, _instantiate, _expected_results,
@@ -279,7 +286,7 @@ def test_fit_weighted(_create_data, _instantiate, _expected_results,
     _, exp_opt_rule_strings, _, exp_orig_rule_performances, _, exp_opt_rule_performances = _expected_results
     _, exp_X_rules, _ = _expected_X_rules_mean
     ro = _instantiate
-    with pytest.warns(UserWarning):
+    with pytest.warns(RulesNotOptimisedWarning) as warnings:
         X_rules = ro.fit(X=X, y=y, sample_weight=sample_weight)
         pd.testing.assert_series_equal(
             X_rules.mean().sort_index(), exp_X_rules.sort_index())
@@ -291,6 +298,11 @@ def test_fit_weighted(_create_data, _instantiate, _expected_results,
         assert ro.rule_names_no_opt_conditions == [
             'categoric', 'boolean']
         assert ro.rule_names_zero_var_features == ['all_na', 'zero_var']
+        # Assert warnings
+        warnings = [w.message.args[0] for w in warnings]
+        assert 'Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules' in warnings
+        assert 'Rules `categoric`, `boolean` have no optimisable conditions - unable to optimise these rules' in warnings
+        assert 'Rules `all_na`, `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules' in warnings
 
 
 def test_fit_unlabelled(_create_data, _instantiate,
@@ -301,7 +313,7 @@ def test_fit_unlabelled(_create_data, _instantiate,
     apd = AlertsPerDay(n_alerts_expected_per_day=10, no_of_days_in_file=10)
     ro = _instantiate
     ro.metric = apd.fit
-    with pytest.warns(UserWarning):
+    with pytest.warns(RulesNotOptimisedWarning) as warnings:
         X_rules = ro.fit(X=X)
         pd.testing.assert_series_equal(
             X_rules.mean().sort_index(), exp_X_rules.sort_index())
@@ -312,6 +324,11 @@ def test_fit_unlabelled(_create_data, _instantiate,
         assert ro.rule_names_missing_features == ['missing_col']
         assert ro.rule_names_no_opt_conditions == ['categoric', 'boolean']
         assert ro.rule_names_zero_var_features == ['all_na', 'zero_var']
+        # Assert warnings
+        warnings = [w.message.args[0] for w in warnings]
+        assert 'Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules' in warnings
+        assert 'Rules `categoric`, `boolean` have no optimisable conditions - unable to optimise these rules' in warnings
+        assert 'Rules `all_na`, `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules' in warnings
 
 
 def test_transform(_instantiate):
@@ -378,7 +395,7 @@ def test_optimise_single_rule(_create_inputs, _instantiate, _create_data, _expec
             rule_name=rule_name, rule_lambda=rule_lambdas[rule_name],
             lambda_kwargs=lambda_kwargs, X=X, y=y, sample_weight=None,
             int_cols=int_cols, all_space_funcs=all_space_funcs)
-        assert exp_opt_rule_strings[rule_name] == opt_rule_string
+        assert rule_name, exp_opt_rule_strings[rule_name] == opt_rule_string
 
 
 def test_return_int_cols(_instantiate):
@@ -518,6 +535,6 @@ def test_errors(_create_data, _instantiate):
         ro.fit(X=X, y=y, sample_weight=[])
     X = pd.DataFrame({'ZeroVar': [0, 0, 0]})
     y = pd.Series([0, 1, 0])
-    with pytest.warns(UserWarning, match="Rules `integer`, `float`, `categoric`, `boolean`, `is_na`, `mixed`, `missing_col`, `all_na`, `already_optimal`, `float_with_zero_var`, `float_with_all_na_greater`, `float_with_all_na_is_na`, `multi_zero_var` use features that are missing from `X` - unable to optimise or apply these rules"):
-        with pytest.raises(Exception, match='There are no optimisable rules in the set'):
+    with pytest.warns(RulesNotOptimisedWarning, match="Rules `integer`, `float`, `categoric`, `boolean`, `is_na`, `mixed`, `missing_col`, `all_na`, `already_optimal`, `float_with_zero_var`, `float_with_all_na_greater`, `float_with_all_na_is_na`, `multi_zero_var` use features that are missing from `X` - unable to optimise or apply these rules"):
+        with pytest.raises(RulesNotOptimisedError, match='There are no optimisable rules in the set'):
             ro.fit(X=X, y=y)

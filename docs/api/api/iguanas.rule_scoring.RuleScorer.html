@@ -213,6 +213,16 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.metrics.classification.Bounds.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.metrics.classification
+      </span>
+     </code>
+     .Bounds
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="iguanas.metrics.pairwise.CosineSimilarity.html">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
@@ -692,8 +702,40 @@ available in the <cite>rule_score_scalers</cite> module. Defaults to None.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Attributes</dt>
-<dd class="field-even"><dl class="simple">
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">iguanas.rule_scoring</span> <span class="kn">import</span> <span class="n">RuleScorer</span><span class="p">,</span> <span class="n">PerformanceScorer</span><span class="p">,</span> <span class="n">ConstantScaler</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">iguanas.metrics</span> <span class="kn">import</span> <span class="n">FScore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X_rules</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span>
+<span class="gp">... </span>    <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span>
+<span class="gp">... </span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f1</span> <span class="o">=</span> <span class="n">FScore</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span> <span class="o">=</span> <span class="n">RuleScorer</span><span class="p">(</span>
+<span class="gp">... </span><span class="n">scoring_class</span><span class="o">=</span><span class="n">PerformanceScorer</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">),</span>
+<span class="gp">... </span><span class="n">scaling_class</span><span class="o">=</span><span class="n">ConstantScaler</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rs</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_rules</span><span class="o">=</span><span class="n">X_rules</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">rs</span><span class="o">.</span><span class="n">rule_scores</span><span class="p">)</span>
+<span class="go">A    100</span>
+<span class="go">B     80</span>
+<span class="go">dtype: int64</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X_scores</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_rules</span><span class="o">=</span><span class="n">X_rules</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">X_scores</span><span class="p">)</span>
+<span class="go">     A   B</span>
+<span class="go">0  100  80</span>
+<span class="go">1    0  80</span>
+<span class="go">2  100  80</span>
+<span class="go">3    0   0</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl class="simple">
 <dt><strong>rule_scores</strong><span class="classifier">Dict[str, int]</span></dt><dd><p>Contains the generated score (values) for each rule (keys).</p>
 </dd>
 </dl>

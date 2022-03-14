@@ -34,12 +34,55 @@ class ConvertProcessedConditionsToGeneral:
     rules : Rules
         Class containing the rule stored in the standard Iguanas string format.
         See the `rules` module for more information.
+
+    Examples
+    --------
+    >>> from iguanas.rules import ConvertProcessedConditionsToGeneral, ReturnMappings
+    >>> import pandas as pd
+    >>> import numpy as np
+    >>> X = pd.DataFrame({
+    ...     'num': [1, 2, np.nan, 1],
+    ...     'country': [np.nan, 'UK', np.nan, np.nan],
+    ... })
+    >>> X_processed = pd.DataFrame({
+    ...     'num': [1, 2, -1, 1],
+    ...     'country_missing': [1, 0, 1, 1],
+    ...     'country_UK': [0, 1, 0, 0]
+    ... })
+    >>> rule_strings = {
+    ...     'Rule1': "(X['num']<=1)",
+    ...     'Rule2': "(X['country_missing']==True)",
+    ...     'Rule3': "(X['country_UK']==True)"
+    ... }        
+    >>> rm = ReturnMappings()
+    >>> imputed_mappings = rm.return_imputed_values_mapping(
+    ...     [['num'], -1], 
+    ...     [['country'], 'missing']
+    ... )
+    >>> ohe_categories = rm.return_ohe_categories_mapping(
+    ...     pre_ohe_cols=X.columns, 
+    ...     post_ohe_cols=X_processed.columns, 
+    ...     pre_ohe_dtypes=X.dtypes
+    ... )
+    >>> cpcg = ConvertProcessedConditionsToGeneral(
+    ...     imputed_values=imputed_mappings, 
+    ...     ohe_categories=ohe_categories
+    ... )
+    >>> rule_strings = cpcg.convert(
+    ...     rule_strings=rule_strings, 
+    ...     X=X_processed
+    ... )
+    >>> print(rule_strings)
+    {'Rule1': "((X['num']<=1)|(X['num'].isna()))", 'Rule2': "(X['country'].isna())", 'Rule3': "(X['country']=='UK')"}
     """
 
-    def __init__(self, imputed_values=None, ohe_categories=None):
+    def __init__(self,
+                 imputed_values=None,
+                 ohe_categories=None):
         if imputed_values is None and ohe_categories is None:
             raise ValueError(
-                'Either `imputed_values` or `ohe_categories` must be given')
+                'Either `imputed_values` or `ohe_categories` must be given'
+            )
         self.imputed_values = imputed_values
         self.ohe_categories = ohe_categories
         if ohe_categories is not None:
@@ -47,7 +90,9 @@ class ConvertProcessedConditionsToGeneral:
         else:
             self.ohe_columns = []
 
-    def convert(self, rule_strings: Dict[str, str], X=None) -> Dict[str, str]:
+    def convert(self,
+                rule_strings: Dict[str, str],
+                X=None) -> Dict[str, str]:
         """
         Converts the conditions of rules that utilise either imputed or OHE 
         features into conditions that account for this for unprocessed data. This 
@@ -76,7 +121,9 @@ class ConvertProcessedConditionsToGeneral:
         self.rules = Rules(rule_strings=general_rule_strings)
         return general_rule_strings
 
-    def _convert_rule_string(self, rule_string: str, X: PandasDataFrameType) -> str:
+    def _convert_rule_string(self,
+                             rule_string: str,
+                             X: PandasDataFrameType) -> str:
         """
         Adds the general condition for each relevant processed condition to the
         condition_replacement_dict, then replaces the latter with the former.
@@ -105,7 +152,8 @@ class ConvertProcessedConditionsToGeneral:
                 processed_condition, general_condition)
         return rule_string
 
-    def _recurse_create_condition_replacement_dict(self, rule_string: str,
+    def _recurse_create_condition_replacement_dict(self,
+                                                   rule_string: str,
                                                    X: PandasDataFrameType) -> None:
         """
         Recursively converts a rule string with processed conditions to a 
@@ -142,7 +190,8 @@ class ConvertProcessedConditionsToGeneral:
                 self._recurse_create_condition_replacement_dict(
                     rule_string=condition_string, X=X)
 
-    def _add_to_condition_replacement_dict(self, rule_string: str,
+    def _add_to_condition_replacement_dict(self,
+                                           rule_string: str,
                                            X=PandasDataFrameType) -> None:
         """
         Adds the general condition for each relevant processed condition to the
@@ -179,7 +228,8 @@ class ConvertProcessedConditionsToGeneral:
                 value = condition_string.split(operator)[1]
                 return feature, operator, value
         raise Exception(
-            'Operator not currently supported in Iguanas. Rule cannot be parsed.')
+            'Operator not currently supported in Iguanas. Rule cannot be parsed.'
+        )
 
     @staticmethod
     def _add_null_condition_to_imputed_numeric_rule(feature: str,
@@ -215,8 +265,10 @@ class ConvertProcessedConditionsToGeneral:
         return clean_condition
 
     @staticmethod
-    def _convert_ohe_condition_to_general(feature: str, operator: str,
-                                          value: str, ohe_categories: Dict[str, str],
+    def _convert_ohe_condition_to_general(feature: str,
+                                          operator: str,
+                                          value: str,
+                                          ohe_categories: Dict[str, str],
                                           imputed_values: None) -> str:
         """
         Takes a single condition rule that uses a OHE column and converts it to
@@ -272,6 +324,35 @@ class ReturnMappings:
     """
     Generates mapping dictionaries (for imputed values and OHE values) which 
     are required in the `ConvertProcessedConditionsToGeneral` class.
+
+    Examples
+    --------
+    >>> from iguanas.rules import ReturnMappings
+    >>> import pandas as pd
+    >>> import numpy as np
+    >>> X = pd.DataFrame({
+    ...     'num': [1, 2, np.nan, 1],
+    ...     'country': [np.nan, 'UK', np.nan, np.nan],
+    ... })
+    >>> X_processed = pd.DataFrame({
+    ...     'num': [1, 2, -1, 1],
+    ...     'country_missing': [1, 0, 1, 1],
+    ...     'country_UK': [0, 1, 0, 0]
+    ... })
+    >>> rm = ReturnMappings()
+    >>> imputed_mappings = rm.return_imputed_values_mapping(
+    ...     [['num'], -1], 
+    ...     [['country'], 'missing']
+    ... )
+    >>> print(imputed_mappings)
+    {'num': -1, 'country': 'missing'}
+    >>> ohe_categories = rm.return_ohe_categories_mapping(
+    ...     pre_ohe_cols=X.columns, 
+    ...     post_ohe_cols=X_processed.columns, 
+    ...     pre_ohe_dtypes=X.dtypes
+    ... )
+    >>> print(ohe_categories)
+    {'country_missing': 'missing', 'country_UK': 'UK'}
     """
 
     @staticmethod
@@ -300,7 +381,8 @@ class ReturnMappings:
         return imputed_values_dict
 
     @staticmethod
-    def return_ohe_categories_mapping(pre_ohe_cols: List[str], post_ohe_cols: List[str],
+    def return_ohe_categories_mapping(pre_ohe_cols: List[str],
+                                      post_ohe_cols: List[str],
                                       pre_ohe_dtypes: Dict[str, str]) -> Dict[str, str]:
         """
         Return a dictionary of the category linked to each One Hot Encoded 

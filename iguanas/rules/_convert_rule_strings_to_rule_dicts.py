@@ -20,7 +20,8 @@ class _ConvertRuleStringsToRuleDicts:
         (values) and their names (keys).
     """
 
-    def __init__(self, rule_strings: Dict[str, str]):
+    def __init__(self,
+                 rule_strings: Dict[str, str]):
         self.rule_strings = rule_strings
         self.rule_dicts = {}
         self.condition_lookup = {
@@ -141,7 +142,8 @@ class _ConvertRuleStringsToRuleDicts:
                 rule_string=rule_string)
         return self.rule_dicts
 
-    def _convert_rule(self, rule_string: str) -> dict:
+    def _convert_rule(self,
+                      rule_string: str) -> dict:
         """
         Converts a rule stored in the standard Iguanas string format into the 
         standard Iguanas dictionary format.
@@ -162,7 +164,8 @@ class _ConvertRuleStringsToRuleDicts:
                 rule_string=rule_string, parent_dict=parent_dict)
         return rule_dict
 
-    def _recurse_convert_rule_string_conditions(self, rule_string: str,
+    def _recurse_convert_rule_string_conditions(self,
+                                                rule_string: str,
                                                 parent_dict: dict) -> dict:
         """Recursively converts a rule string to rule dictionary"""
 
@@ -185,7 +188,8 @@ class _ConvertRuleStringsToRuleDicts:
                 conditions_string_list, parent_dict)
         return rule_dict
 
-    def _convert_rule_string_conditions(self, conditions_string_list: List[str],
+    def _convert_rule_string_conditions(self,
+                                        conditions_string_list: List[str],
                                         parent_dict: dict) -> dict:
         """
         Loops through list of string conditions - if it is a single condition, 
@@ -208,7 +212,8 @@ class _ConvertRuleStringsToRuleDicts:
                 parent_dict['rules'].append(condition_dict)
         return parent_dict
 
-    def _create_condition_dict(self, rule_string: str) -> dict:
+    def _create_condition_dict(self,
+                               rule_string: str) -> dict:
         """Converts a single condition string to the dictionary format"""
 
         if rule_string.startswith('(') and rule_string.endswith(')'):
@@ -242,7 +247,8 @@ class _ConvertRuleStringsToRuleDicts:
                         condition_string=condition_string, operator=str_operator)
                 return feature, dict_operator, value
         raise Exception(
-            'Operator not currently supported in Iguanas. Rule cannot be parsed.')
+            'Operator not currently supported in Iguanas. Rule cannot be parsed.'
+        )
 
     @staticmethod
     def _find_top_level_parentheses_idx(rule_string: str) -> Dict[int, int]:
@@ -323,7 +329,8 @@ class _ConvertRuleStringsToRuleDicts:
         return connecting_dict_condition
 
     @staticmethod
-    def _create_rule_condition_dict(field: str, operator: str,
+    def _create_rule_condition_dict(field: str,
+                                    operator: str,
                                     value: str) -> Dict[str, Union[str, float]]:
         """
         Creates the dictionary representation of a condition given the field, 

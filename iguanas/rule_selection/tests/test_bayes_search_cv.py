@@ -5,6 +5,7 @@ import numpy as np
 from hyperopt import hp
 from sklearn.ensemble import RandomForestClassifier
 from copy import deepcopy
+from iguanas.exceptions.exceptions import NoRulesError
 from iguanas.rule_generation import RuleGeneratorDT, RuleGeneratorOpt
 from iguanas.rule_optimisation import BayesianOptimiser
 from iguanas.rules import Rules
@@ -15,6 +16,7 @@ from iguanas.rbs import RBSOptimiser, RBSPipeline
 from iguanas.pipeline import LinearPipeline, ParallelPipeline, ClassAccessor
 from iguanas.rule_generation import RuleGeneratorDT
 from iguanas.space import UniformFloat, UniformInteger, Choice
+from iguanas.warnings import NoRulesWarning
 
 f1 = FScore(1)
 js = JaccardSimilarity()
@@ -208,7 +210,7 @@ def test_fit_predict_rule_gen_dt(_create_data, _instantiate_classes):
         error_score=0,
         verbose=1
     )
-    with pytest.warns(UserWarning):
+    with pytest.warns(NoRulesWarning):
         # Test fit/predict/fit_predict, no sample_weight
         bs.fit(X, y)
         assert bs.best_score == 0.22857142857142856
@@ -319,9 +321,9 @@ def test_fit_predict_rule_gen_opt(_create_data, _instantiate_classes):
         cv=3,
         n_iter=5,
         error_score=0,
-        verbose=1
+        verbose=2  #  Set verbose=2 to ensure it works
     )
-    with pytest.warns(UserWarning):
+    with pytest.warns(NoRulesWarning):
         # Test fit/predict/fit_predict, no sample_weight
         bs.fit(X, y)
         assert bs.best_score == 0.08333333333333333
@@ -443,7 +445,7 @@ def test_fit_predict_rule_opt(_create_data, _instantiate_classes):
         error_score=0,
         verbose=0
     )
-    with pytest.warns(UserWarning):
+    with pytest.warns(NoRulesWarning):
         # Test fit/predict/fit_predict, no sample_weight
         bs.fit(X, y)
         assert bs.best_score == 0.09042145593869733
@@ -1016,7 +1018,8 @@ def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,
         pipeline=lp,
         params_iter=params_iter,
         fold_idx=0,
-        sample_weight_in_val=False
+        sample_weight_in_val=False,
+        verbose=2
     )
     assert fold_score == 0.16666666666666666
     # With sample_weight_in_val=True
@@ -1027,12 +1030,13 @@ def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,
         pipeline=lp,
         params_iter=params_iter,
         fold_idx=0,
-        sample_weight_in_val=True
+        sample_weight_in_val=True,
+        verbose=2
     )
     assert fold_score == 0.25806451612903225
     # Force errors by setting sf filter threshold to 1
     sf.threshold = 1
-    with pytest.raises(Exception, match="No rules remaining for: Pipeline parameter set = {'rg_dt': {'n_total_conditions': 2, 'target_feat_corr_types': None}, 'rbs': {'n_iter': 10}}; Fold index = 0."):
+    with pytest.raises(NoRulesError, match="No rules remaining for: Pipeline parameter set = {'rg_dt': {'n_total_conditions': 2, 'target_feat_corr_types': None}, 'rbs': {'n_iter': 10}}; Fold index = 0."):
         bs._fit_predict_on_fold(
             metric=f1.fit,
             error_score='raise',
@@ -1040,9 +1044,10 @@ def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,
             pipeline=lp,
             params_iter=params_iter,
             fold_idx=0,
-            sample_weight_in_val=True
+            sample_weight_in_val=True,
+            verbose=2
         )
-    with pytest.warns(UserWarning, match="No rules remaining for: Pipeline parameter set = {'rg_dt': {'n_total_conditions': 2, 'target_feat_corr_types': None}, 'rbs': {'n_iter': 10}}; Fold index = 0. The metric score for this parameter set & fold will be set to 0"):
+    with pytest.warns(NoRulesWarning, match="No rules remaining for: Pipeline parameter set = {'rg_dt': {'n_total_conditions': 2, 'target_feat_corr_types': None}, 'rbs': {'n_iter': 10}}; Fold index = 0. The metric score for this parameter set & fold will be set to 0"):
         fold_score = bs._fit_predict_on_fold(
             metric=f1.fit,
             error_score=0,
@@ -1050,7 +1055,8 @@ def test_fit_predict_on_fold(_instantiate_lp_and_bs, _cv_datasets,
             pipeline=lp,
             params_iter=params_iter,
             fold_idx=0,
-            sample_weight_in_val=True
+            sample_weight_in_val=True,
+            verbose=2
         )
         assert fold_score == 0
 
@@ -1219,5 +1225,5 @@ def test_error(_create_data, _instantiate_classes):
         error_score='raise',
         verbose=0
     )
-    with pytest.raises(Exception, match=re.escape("No rules remaining for: Pipeline parameter set = {'cf': {'correlation_reduction_class': AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=<bound method JaccardSimilarity.fit of JaccardSimilarity>, metric=<bound method FScore.fit of FScore with beta=1>, print_clustermap=False)}, 'gf': {'metric': <bound method Precision.fit of Precision>}, 'rbs': {'n_iter': 12.0}, 'ro': {'metric': <bound method Precision.fit of Precision>}, 'sf': {'threshold': 0.4860473230215504}}; Fold index = 0.")):
+    with pytest.raises(NoRulesError, match=re.escape("No rules remaining for: Pipeline parameter set = {'cf': {'correlation_reduction_class': AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=<bound method JaccardSimilarity.fit of JaccardSimilarity>, metric=<bound method FScore.fit of FScore with beta=1>, print_clustermap=False)}, 'gf': {'metric': <bound method Precision.fit of Precision>}, 'rbs': {'n_iter': 12.0}, 'ro': {'metric': <bound method Precision.fit of Precision>}, 'sf': {'threshold': 0.4860473230215504}}; Fold index = 0.")):
         bs.fit(X, y)

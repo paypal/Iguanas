@@ -26,9 +26,13 @@ class _BaseFilter:
                  rules: Rules) -> None:
 
         self.rules_to_keep = rules_to_keep
-        self.rules = deepcopy(rules)
+        if rules is not None:
+            self.rules = deepcopy(rules)
+        else:
+            self.rules = Rules()
 
-    def transform(self, X_rules: PandasDataFrameType) -> PandasDataFrameType:
+    def transform(self,
+                  X_rules: PandasDataFrameType) -> PandasDataFrameType:
         """
         Applies the filter to the given dataset.
 
@@ -44,12 +48,11 @@ class _BaseFilter:
         """
 
         X_rules = X_rules[self.rules_to_keep]
-        if self.rules is not None:
-            self.rules.filter_rules(include=self.rules_to_keep)
-            self.rule_strings = self.rules.rule_strings
-            self.rule_dicts = self.rules.rule_dicts
-            self.rule_lambdas = self.rules.rule_lambdas
-            self.lambda_kwargs = self.rules.lambda_kwargs
+        self.rules.filter_rules(include=self.rules_to_keep)
+        self.rule_strings = self.rules.rule_strings
+        self.rule_dicts = self.rules.rule_dicts
+        self.rule_lambdas = self.rules.rule_lambdas
+        self.lambda_kwargs = self.rules.lambda_kwargs
         return X_rules
 
     def fit_transform(self,

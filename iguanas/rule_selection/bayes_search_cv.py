@@ -13,6 +13,7 @@ from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.utils.types import PandasDataFrame, PandasSeries, Dictionary
 import iguanas.utils as utils
 from iguanas.space import Choice
+from iguanas.warnings import NoRulesWarning
 
 
 class BayesSearchCV:
@@ -70,7 +71,10 @@ class BayesSearchCV:
         set to <= `cv`. Defaults to 1.    
     verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : shows the
-        overall progress of the optimisation process. Defaults to 0.
+        overall progress of the optimisation process; >1 : shows the progress
+        of the fitting of each parameter set to each fold. Note that setting
+        `verbose` > 1 only shows the fold-level progress when `num_cores` = 1.
+        Defaults to 0.
 
     Attributes
     ----------
@@ -85,6 +89,97 @@ class BayesSearchCV:
         The parameter set that produced the best mean score.
     pipeline_ : LinearPipeline
         The optimised LinearPipeline.
+
+    Examples
+    --------
+    >>> from iguanas.rule_generation import RuleGeneratorDT
+    >>> from iguanas.rbs import RBSOptimiser, RBSPipeline
+    >>> from iguanas.rule_selection import SimpleFilter, BayesSearchCV
+    >>> from iguanas.pipeline import LinearPipeline, ClassAccessor
+    >>> from iguanas.metrics import FScore, Precision
+    >>> from iguanas.space import UniformFloat, UniformInteger, Choice
+    >>> from sklearn.datasets import make_classification
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> import pandas as pd
+    >>> X, y = make_classification(
+    ...     n_samples=1000, 
+    ...     n_features=4,
+    ...     n_informative=2, 
+    ...     n_redundant=0,
+    ...     random_state=0, 
+    ...     shuffle=False
+    ... )
+    >>> X, y = pd.DataFrame(X, columns=['A', 'B', 'C', 'D']), pd.Series(y)
+    >>> f1 = FScore(beta=1)
+    >>> p = Precision()
+    >>> # Set up pipeline ---
+    >>> rg = RuleGeneratorDT(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     tree_ensemble=RandomForestClassifier(n_estimators=10, random_state=0), 
+    ...     rule_name_prefix='Rule'
+    ... )
+    >>> sf = SimpleFilter(
+    ...     threshold=0.1, 
+    ...     operator='>',
+    ...     metric=f1.fit
+    ... )
+    >>> rbso = RBSOptimiser(
+    ...     pipeline = RBSPipeline(
+    ...         config=[
+    ...             [1, ClassAccessor(class_tag='sf', class_attribute='rules_to_keep')]
+    ...         ], 
+    ...         final_decision=0
+    ...     ),
+    ...     metric=f1.fit,
+    ...     n_iter=10,
+    ...     rules = ClassAccessor(class_tag='rg', class_attribute='rules')
+    ... )
+    >>> lp = LinearPipeline(
+    ...     steps=[
+    ...         ('rg', rg),
+    ...         ('sf', sf),
+    ...         ('rbso', rbso)
+    ...     ]
+    ... )
+    >>> # Provide search spaces ---
+    >>> search_spaces = {
+    ...     'rg': {
+    ...         'n_total_conditions': UniformInteger(1, 10)
+    ...     },
+    ...     'sf': {
+    ...         'threshold': UniformFloat(0, 1),        
+    ...         'metric': Choice([f1.fit, p.fit])
+    ...     }
+    ... }
+    >>> # Apply BayesSearchCV ---
+    >>> bs = BayesSearchCV(
+    ...     pipeline=lp, 
+    ...     search_spaces=search_spaces, 
+    ...     metric=f1.fit, 
+    ...     cv=3, 
+    ...     n_iter=10, 
+    ...     num_cores=3, 
+    ...     error_score=0
+    ... )
+    >>> bs.fit(X=X, y=y)
+    >>> final_rules = bs.pipeline_.get_params()['rbso']['rules']
+    >>> print(bs.best_score)
+    0.9290788317962232
+    >>> print(bs.best_params)
+    {'rg': {'n_total_conditions': 1.0}, 'sf': {'metric': <bound method Precision.fit of Precision>, 'threshold': 0.5286917420754508}}
+    >>> print(bs.best_index)
+    3
+    >>> print(final_rules.rule_strings)
+    {'Rule_6': "(X['A']>1.53757)", 'Rule_13': "(X['B']>-0.06546)", 'Rule_17': "(X['B']>-0.26593)"}
+    >>> y_pred = bs.predict(X=X)
+    >>> print(y_pred.head())
+    0    0
+    1    0
+    2    0
+    3    0
+    4    0
+    dtype: int64
     """
 
     def __init__(self,
@@ -174,7 +269,8 @@ class BayesSearchCV:
             self.pipeline_._update_kwargs(params=self.best_params)
             self.pipeline_.fit(X, y, sample_weight)
 
-    def predict(self, X: Union[PandasDataFrameType, dict]) -> PandasSeriesType:
+    def predict(self,
+                X: Union[PandasDataFrameType, dict]) -> PandasSeriesType:
         """
         Predict using the optimised pipeline.
 
@@ -233,7 +329,7 @@ class BayesSearchCV:
             space=objective_inputs,
             algo=self.algorithm,
             max_evals=self.n_iter,
-            verbose=self.verbose,
+            verbose=self.verbose == 1,
             rstate=np.random.RandomState(0),
             **self.kwargs
         )
@@ -247,12 +343,17 @@ class BayesSearchCV:
         """
 
         params_iter, pipeline, cv_datasets = objective_inputs
+        if self.verbose > 1:
+            print(
+                f'---- Trialling the following parameter set: {params_iter} ----'
+            )
         pipeline._update_kwargs(params=params_iter)
         # Fit/predict/score on each fold
         with Parallel(n_jobs=self.num_cores) as parallel:
             scores_over_folds = parallel(delayed(self._fit_predict_on_fold)(
                 self.metric, self.error_score, datasets, pipeline, params_iter,
-                fold_idx, self.sample_weight_in_val) for fold_idx, datasets in cv_datasets.items()
+                fold_idx, self.sample_weight_in_val, self.verbose
+            ) for fold_idx, datasets in cv_datasets.items()
             )
         scores_over_folds = np.array(scores_over_folds)
         mean_score = scores_over_folds.mean()
@@ -329,7 +430,8 @@ class BayesSearchCV:
         sets.
         """
 
-        def _splitter(df, idxs):
+        def _splitter(df: Union[PandasSeriesType, PandasDataFrameType, dict],
+                      idxs: np.ndarray) -> Union[PandasSeriesType, PandasDataFrameType, dict]:
             # If the data is a Pandas data object, return the filtered object
             if isinstance(df, (pd.Series, pd.DataFrame)):
                 return df.iloc[idxs]
@@ -345,7 +447,8 @@ class BayesSearchCV:
                 return df_dict
             else:
                 raise TypeError(
-                    '`df` must be a Pandas Series/DataFrame or a dict')
+                    '`df` must be a Pandas Series/DataFrame or a dict'
+                )
         df_train, df_val = (
             _splitter(df, idxs) for idxs in [train_idxs, val_idxs]
         )
@@ -373,7 +476,8 @@ class BayesSearchCV:
                              pipeline: LinearPipeline,
                              params_iter: dict,
                              fold_idx: int,
-                             sample_weight_in_val: bool) -> float:
+                             sample_weight_in_val: bool,
+                             verbose: int) -> float:
         """
         Tries to to fit the pipeline (using a given parameter set) on the
         training set, then apply it to the validation set. If no rules remain
@@ -382,6 +486,10 @@ class BayesSearchCV:
         validation set is set to `self.error_score`.
         """
 
+        if verbose > 1:
+            print(
+                f'---- Fitting on fold index {fold_idx} ----'
+            )
         try:
             X_train, X_val, y_train, y_val, sample_weight_train, sample_weight_val = datasets
             pipeline.fit(X_train, y_train, sample_weight_train)
@@ -403,20 +511,24 @@ class BayesSearchCV:
                 fold_score = metric(y_pred_val, y_val)
         except (DataFrameSizeError, NoRulesError):
             if error_score == 'raise':
-                raise Exception(
-                    f"""No rules remaining for: Pipeline parameter set = {params_iter}; Fold index = {fold_idx}."""
+                raise NoRulesError(
+                    f"No rules remaining for: Pipeline parameter set = {params_iter}; Fold index = {fold_idx}."
                 )
             else:
                 warnings.warn(
-                    f"""No rules remaining for: Pipeline parameter set = {params_iter}; Fold index = {fold_idx}. The metric score for this parameter set & fold will be set to {error_score}"""
+                    message=f"No rules remaining for: Pipeline parameter set = {params_iter}; Fold index = {fold_idx}. The metric score for this parameter set & fold will be set to {error_score}",
+                    category=NoRulesWarning
                 )
                 fold_score = error_score
         return fold_score
 
     @ staticmethod
-    def _update_cv_results(cv_results: dict, params_iter: dict,
-                           fold_idxs: List[int], scores_over_folds: np.ndarray,
-                           mean_score: float, std_dev_score: float) -> dict:
+    def _update_cv_results(cv_results: dict,
+                           params_iter: dict,
+                           fold_idxs: List[int],
+                           scores_over_folds: np.ndarray,
+                           mean_score: float,
+                           std_dev_score: float) -> dict:
         """
         Updates the cv_results dictionary with the results for the given
         parameter set.
@@ -437,7 +549,8 @@ class BayesSearchCV:
         return cv_results
 
     @ staticmethod
-    def _reformat_best_params(best_params: dict, search_spaces: dict) -> dict:
+    def _reformat_best_params(best_params: dict,
+                              search_spaces: dict) -> dict:
         """
         Reformats the output of hyperopt's fmin function into the same
         dictionary format that is used to define the search_spaces. This allows

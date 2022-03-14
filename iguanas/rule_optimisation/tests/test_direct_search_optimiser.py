@@ -1,7 +1,9 @@
-import pytest
 from iguanas.rule_optimisation import DirectSearchOptimiser
 from iguanas.metrics import FScore, AlertsPerDay
 from iguanas.rules import Rules
+from iguanas.warnings import RulesNotOptimisedWarning
+from iguanas.exceptions import RulesNotOptimisedError
+import pytest
 import numpy as np
 import pandas as pd
 
@@ -1954,14 +1956,7 @@ def _instantiate(_create_data, _create_inputs):
     X, _, _ = _create_data
     rule_lambdas, lambda_kwargs = _create_inputs
     f1 = FScore(beta=1)
-    with pytest.warns(
-            UserWarning, match="Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `x0` for these rules") and \
-        pytest.warns(
-            UserWarning, match="Rules `missing_col` use features that are missing from `X` - unable to calculate `x0` for these rules") and\
-        pytest.warns(
-            UserWarning, match="Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `bounds` for these rules") and \
-        pytest.warns(
-            UserWarning, match="Rules `missing_col` use features that are missing from `X` - unable to calculate `bounds` for these rules"):
+    with pytest.warns(UserWarning) as warnings:
         ro = DirectSearchOptimiser(
             rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs,
             method='Nelder-mead',
@@ -1969,6 +1964,11 @@ def _instantiate(_create_data, _create_inputs):
             bounds=DirectSearchOptimiser.create_bounds(X, lambda_kwargs),
             metric=f1.fit
         )
+        warnings = [w.message.args[0] for w in warnings]
+        assert "Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `x0` for these rules" in warnings
+        assert "Rules `missing_col` use features that are missing from `X` - unable to calculate `x0` for these rules" in warnings
+        assert "Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `bounds` for these rules" in warnings
+        assert "Rules `missing_col` use features that are missing from `X` - unable to calculate `bounds` for these rules" in warnings
     return ro
 
 
@@ -1977,14 +1977,7 @@ def _instantiate_unlabelled(_create_data, _create_inputs):
     X, _, _ = _create_data
     rule_lambdas, lambda_kwargs = _create_inputs
     apd = AlertsPerDay(10, 10)
-    with pytest.warns(
-            UserWarning, match="Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `x0` for these rules") and \
-        pytest.warns(
-            UserWarning, match="Rules `missing_col` use features that are missing from `X` - unable to calculate `x0` for these rules") and\
-        pytest.warns(
-            UserWarning, match="Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `bounds` for these rules") and \
-        pytest.warns(
-            UserWarning, match="Rules `missing_col` use features that are missing from `X` - unable to calculate `bounds` for these rules"):
+    with pytest.warns(UserWarning) as warnings:
         ro = DirectSearchOptimiser(
             rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs,
             method='Nelder-mead',
@@ -1992,6 +1985,11 @@ def _instantiate_unlabelled(_create_data, _create_inputs):
             bounds=DirectSearchOptimiser.create_bounds(X, lambda_kwargs),
             metric=apd.fit
         )
+        warnings = [w.message.args[0] for w in warnings]
+        assert "Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `x0` for these rules" in warnings
+        assert "Rules `missing_col` use features that are missing from `X` - unable to calculate `x0` for these rules" in warnings
+        assert "Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `bounds` for these rules" in warnings
+        assert "Rules `missing_col` use features that are missing from `X` - unable to calculate `bounds` for these rules" in warnings
     return ro
 
 
@@ -2160,12 +2158,12 @@ def test_create_bounds(_create_data, _create_inputs):
     }
     X, _, _ = _create_data
     _, lambda_kwargs = _create_inputs
-    with pytest.warns(
-            UserWarning, match="Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `bounds` for these rules") and \
-        pytest.warns(
-            UserWarning, match="Rules `missing_col` use features that are missing from `X` - unable to calculate `bounds` for these rules"):
+    with pytest.warns(UserWarning) as warnings:
         bounds = DirectSearchOptimiser.create_bounds(X, lambda_kwargs)
         assert bounds == exp_bounds
+        warnings = [w.message.args[0] for w in warnings]
+        assert "Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `bounds` for these rules" in warnings
+        assert "Rules `missing_col` use features that are missing from `X` - unable to calculate `bounds` for these rules" in warnings
 
 
 def test_create_x0(_create_data, _create_inputs):
@@ -2184,14 +2182,15 @@ def test_create_x0(_create_data, _create_inputs):
     }
     X, _, _ = _create_data
     _, lambda_kwargs = _create_inputs
-    with pytest.warns(
-            UserWarning, match="Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `x0` for these rules") and \
-        pytest.warns(
-            UserWarning, match="Rules `missing_col` use features that are missing from `X` - unable to calculate `x0` for these rules"):
+    with pytest.warns(UserWarning) as warnings:
         x0 = DirectSearchOptimiser.create_x0(X, lambda_kwargs)
         for rule_name in x0.keys():
             np.testing.assert_array_almost_equal(
-                x0[rule_name], exp_x0[rule_name])
+                x0[rule_name], exp_x0[rule_name]
+            )
+        warnings = [w.message.args[0] for w in warnings]
+        assert "Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `x0` for these rules" in warnings
+        assert "Rules `missing_col` use features that are missing from `X` - unable to calculate `x0` for these rules" in warnings
 
 
 def test_create_initial_simplexes(_create_data, _create_inputs):
@@ -2312,22 +2311,24 @@ def test_create_initial_simplexes(_create_data, _create_inputs):
     X, _, _ = _create_data
     _, lambda_kwargs = _create_inputs
     for shape in ['Origin-based', 'Minimum-based', 'Random-based']:
-        with pytest.warns(
-                UserWarning, match="Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `initial_simplex` for these rules") and \
-            pytest.warns(
-                UserWarning, match="Rules `missing_col` use features that are missing from `X` - unable to calculate `initial_simplex` for these rules"):
+        with pytest.warns(UserWarning) as warnings:
             initial_simplex = DirectSearchOptimiser.create_initial_simplexes(
-                X, lambda_kwargs, shape)
+                X, lambda_kwargs, shape
+            )
             for rule_name in initial_simplex.keys():
                 np.testing.assert_array_almost_equal(
                     initial_simplex[rule_name]['initial_simplex'],
                     exp_simplexes[shape][rule_name]['initial_simplex']
                 )
+            warnings = [w.message.args[0] for w in warnings]
+            assert "Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `initial_simplex` for these rules" in warnings
+            assert "Rules `missing_col` use features that are missing from `X` - unable to calculate `initial_simplex` for these rules" in warnings
     with pytest.raises(
             ValueError,
             match='`shape` must be either "Origin-based", "Minimum-based" or "Random-based"'):
         DirectSearchOptimiser.create_initial_simplexes(
-            X, lambda_kwargs, 'ERROR')
+            X, lambda_kwargs, 'ERROR'
+        )
 
 
 def test_optimise_rules(_instantiate, _create_inputs, _create_data):
@@ -2398,8 +2399,8 @@ def test_optimise_rules_unlabelled(_instantiate_unlabelled, _create_inputs, _cre
         'float_with_zero_var': "(X['C']>0.999968022582126)&(X['ZeroVar']>=1.0)",
         'float_with_all_na_greater': "(X['C']>0.5001660795697812)&(X['AllNa']>0.0)",
         'float_with_all_na_is_na': "(X['C']>0.9999680225821261)&(X['AllNa'].isna())",
-        'multi_zero_var': "((X['C']>0.9999680225821261)&(X['ZeroVar']>=1.0))|((X['A']>4.70320544242861)&(X['ZeroVar']>=1.0))"}
-
+        'multi_zero_var': "((X['C']>0.9999680225821261)&(X['ZeroVar']>=1.0))|((X['A']>4.70320544242861)&(X['ZeroVar']>=1.0))"
+    }
     ro = _instantiate_unlabelled
     rule_lambdas, lambda_kwargs = _create_inputs
     rules_to_drop = [
@@ -2432,6 +2433,19 @@ def test_optimise_rules_numpy(_instantiate, _create_data):
         rule_lambdas, lambda_kwargs, X, y, None
     )
     assert opt_rule_strings == exp_rule_strings
+
+
+def test_optimise_single_rule(_create_inputs, _instantiate, _create_data):
+    rule_lambdas, lambda_kwargs = _create_inputs
+    X, y, _ = _create_data
+    exp_result = 'integer', "(X['A']>4.5)"
+    ro = _instantiate
+    rule_name = 'integer'
+    result = ro._optimise_single_rule(
+        rule_name=rule_name, rule_lambda=rule_lambdas[rule_name],
+        lambda_kwargs=lambda_kwargs, X=X, y=y, sample_weight=None
+    )
+    assert result == exp_result
 
 
 def test_return_kwargs_for_minimize(_instantiate):
@@ -2505,13 +2519,13 @@ def test_param_base_calc(_instantiate, _create_data, _create_inputs):
     ro = _instantiate
     X, _, _ = _create_data
     _, lambda_kwargs = _create_inputs
-    with pytest.warns(
-            UserWarning, match="Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `bounds` for these rules") and \
-        pytest.warns(
-            UserWarning, match="Rules `missing_col` use features that are missing from `X` - unable to calculate `bounds` for these rules"):
+    with pytest.warns(UserWarning) as warnings:
         bounds = ro._param_base_calc(
             X, lambda_kwargs, 'bounds', _bounds_func
         )
+        warnings = [w.message.args[0] for w in warnings]
+        assert "Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `bounds` for these rules" in warnings
+        assert "Rules `missing_col` use features that are missing from `X` - unable to calculate `bounds` for these rules" in warnings
     assert bounds == exp_bounds
 
 
@@ -2526,8 +2540,8 @@ def test_errors(_create_data, _instantiate):
         ro.fit(X=X, y=y, sample_weight=[])
     X = pd.DataFrame({'ZeroVar': [0, 0, 0]})
     y = pd.Series([0, 1, 0])
-    with pytest.raises(Exception, match='There are no optimisable rules in the set'):
-        with pytest.warns(UserWarning, match='Rules `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules'):
+    with pytest.raises(RulesNotOptimisedError, match='There are no optimisable rules in the set'):
+        with pytest.warns(RulesNotOptimisedWarning, match='Rules `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules'):
             ro.fit(X=X, y=y)
 
 
@@ -2546,30 +2560,26 @@ def _fit(rule_lambdas, lambda_kwargs, X, y, sample_weight, metric, exp_rule_stri
         'trust-constr'
     ]
     if x0:
-        with pytest.warns(
-                UserWarning, match="Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `x0` for these rules") and \
-            pytest.warns(
-                UserWarning, match="Rules `missing_col` use features that are missing from `X` - unable to calculate `x0` for these rules"):
+        with pytest.warns(UserWarning) as warnings:
             x0 = DirectSearchOptimiser.create_x0(X, lambda_kwargs)
+            warnings = [w.message.args[0] for w in warnings]
+            assert "Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `x0` for these rules" in warnings
+            assert "Rules `missing_col` use features that are missing from `X` - unable to calculate `x0` for these rules" in warnings
     if bounds:
-        with pytest.warns(
-                UserWarning, match="Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `bounds` for these rules") and \
-            pytest.warns(
-                UserWarning, match="Rules `missing_col` use features that are missing from `X` - unable to calculate `bounds` for these rules"):
+        with pytest.warns(UserWarning) as warnings:
             bounds = DirectSearchOptimiser.create_bounds(X, lambda_kwargs)
+            warnings = [w.message.args[0] for w in warnings]
+            assert "Rules `categoric`, `boolean` have no optimisable conditions - unable to calculate `bounds` for these rules" in warnings
+            assert "Rules `missing_col` use features that are missing from `X` - unable to calculate `bounds` for these rules" in warnings
     for method in methods:
-        with pytest.warns(UserWarning,
-                          match="Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules") and \
-                pytest.warns(UserWarning,
-                             match="Rules `categoric`, `boolean`, `all_na` have no optimisable conditions - unable to optimise these rules") and \
-                pytest.warns(UserWarning,
-                             match="Rules `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules"):
+        with pytest.warns(RulesNotOptimisedWarning) as warnings:
             ro = DirectSearchOptimiser(
                 rule_lambdas=rule_lambdas,
                 lambda_kwargs=lambda_kwargs,
                 metric=metric,
                 x0=x0,
                 bounds=bounds,
+                num_cores=2,
                 verbose=1,
                 method=method,
             )
@@ -2588,3 +2598,8 @@ def _fit(rule_lambdas, lambda_kwargs, X, y, sample_weight, metric, exp_rule_stri
             assert ro.rule_names_missing_features == ['missing_col']
             assert ro.rule_names_no_opt_conditions == ['categoric', 'boolean']
             assert ro.rule_names_zero_var_features == ['all_na', 'zero_var']
+            # Assert warnings
+            warnings = [w.message.args[0] for w in warnings]
+            assert "Rules `missing_col` use features that are missing from `X` - unable to optimise or apply these rules" in warnings
+            assert "Rules `categoric`, `boolean` have no optimisable conditions - unable to optimise these rules" in warnings
+            assert "Rules `all_na`, `zero_var` have all zero variance features based on the dataset `X` - unable to optimise these rules" in warnings

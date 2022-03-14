@@ -5,6 +5,8 @@ from iguanas.rules import Rules
 import iguanas.utils as utils
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.utils.types import NumpyArray, PandasDataFrame, PandasSeries
+from iguanas.warnings import RulesNotOptimisedWarning
+from iguanas.exceptions import RulesNotOptimisedError
 from typing import Callable, Dict, List, Set, Tuple
 import pandas as pd
 import numpy as np
@@ -30,6 +32,11 @@ class _BaseOptimiser(Rules):
     metric : Callable
         The optimisation function used to calculate the metric which the rules
         are optimised for (e.g. F1 score).
+    num_cores : int, optional
+        The number of cores to use when optimising the rule thresholds.
+        Defaults to 1.
+    verbose : int, optional
+        Controls the verbosity - the higher, the more messages.
 
     Attributes
     ----------
@@ -72,13 +79,19 @@ class _BaseOptimiser(Rules):
         variance features. 
     """
 
-    def __init__(self, rule_lambdas: Dict[str, Callable[[Dict], str]],
+    def __init__(self,
+                 rule_lambdas: Dict[str, Callable[[Dict], str]],
                  lambda_kwargs: Dict[str, Dict[str, float]],
-                 metric: Callable):
-        Rules.__init__(self, rule_strings={})
+                 metric: Callable,
+                 num_cores: int,
+                 verbose: int):
+        Rules.__init__(self)
         self.orig_rule_lambdas = rule_lambdas
         self.orig_lambda_kwargs = lambda_kwargs
         self.metric = metric
+        self.num_cores = num_cores
+        self.verbose = verbose
+        self.rules = Rules()
 
     def fit_transform(self,
                       X: PandasDataFrameType,
@@ -108,7 +121,8 @@ class _BaseOptimiser(Rules):
         return self.fit(X=X, y=y, sample_weight=sample_weight)
 
     @classmethod
-    def plot_performance_uplift(self, orig_rule_performances: Dict[str, float],
+    def plot_performance_uplift(self,
+                                orig_rule_performances: Dict[str, float],
                                 opt_rule_performances: Dict[str, float],
                                 figsize=(20, 10)) -> sns.scatterplot:
         """
@@ -271,7 +285,9 @@ class _BaseOptimiser(Rules):
             rule_names_zero_var_features=self.rule_names_zero_var_features
         )
         if not self.optimisable_rules.rule_lambdas:
-            raise Exception('There are no optimisable rules in the set')
+            raise RulesNotOptimisedError(
+                'There are no optimisable rules in the set'
+            )
         # Get performance of original, optimisable rules
         orig_X_rules = self.optimisable_rules.transform(X=X)
         self.orig_rule_performances = dict(
@@ -381,7 +397,9 @@ class _BaseOptimiser(Rules):
                 rule_names_missing_features.append(rule_name)
         if rule_names_missing_features:
             warnings.warn(
-                f'Rules `{"`, `".join(rule_names_missing_features)}` use features that are missing from `X` - unable to optimise or apply these rules')
+                message=f'Rules `{"`, `".join(rule_names_missing_features)}` use features that are missing from `X` - unable to optimise or apply these rules',
+                category=RulesNotOptimisedWarning
+            )
         return rule_names_missing_features, rule_features_set
 
     @staticmethod
@@ -400,7 +418,8 @@ class _BaseOptimiser(Rules):
                 rule_names_no_opt_conditions.append(rule_name)
         if rule_names_no_opt_conditions:
             warnings.warn(
-                f'Rules `{"`, `".join(rule_names_no_opt_conditions)}` have no optimisable conditions - unable to optimise these rules'
+                message=f'Rules `{"`, `".join(rule_names_no_opt_conditions)}` have no optimisable conditions - unable to optimise these rules',
+                category=RulesNotOptimisedWarning
             )
         return rule_names_no_opt_conditions
 
@@ -437,7 +456,9 @@ class _BaseOptimiser(Rules):
                 rule_names_all_zero_var.append(rule_name)
         if rule_names_all_zero_var:
             warnings.warn(
-                f'Rules `{"`, `".join(rule_names_all_zero_var)}` have all zero variance features based on the dataset `X` - unable to optimise these rules')
+                message=f'Rules `{"`, `".join(rule_names_all_zero_var)}` have all zero variance features based on the dataset `X` - unable to optimise these rules',
+                category=RulesNotOptimisedWarning
+            )
         return rule_names_all_zero_var
 
     @staticmethod

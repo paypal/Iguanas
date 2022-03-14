@@ -19,13 +19,32 @@ class ConstantScaler:
     Parameters
     ----------
     limit : int
-        The limit to apply when scaling the scores.            
+        The limit to apply when scaling the scores.      
+
+    Examples
+    --------
+    >>> from iguanas.rule_scoring import ConstantScaler
+    >>> import pandas as pd
+    >>> rule_scores = pd.Series({
+    ...     'Rule1Score': 0.9,
+    ...     'Rule2Score': 0.01,
+    ...     'Rule3Score': 0.3,
+    ... })
+    >>> cs = ConstantScaler(limit=100)
+    >>> scaled_scores = cs.fit(rule_scores=rule_scores)
+    >>> print(scaled_scores)     
+    Rule1Score    100
+    Rule2Score      1
+    Rule3Score     33
+    dtype: int64
     """
 
-    def __init__(self, limit: int):
+    def __init__(self,
+                 limit: int):
         self.limit = limit
 
-    def fit(self, rule_scores: PandasSeriesType) -> PandasSeriesType:
+    def fit(self,
+            rule_scores: PandasSeriesType) -> PandasSeriesType:
         """
         Scales the rule scores.
 
@@ -48,7 +67,8 @@ class ConstantScaler:
             rule_scores_scaled = rule_scores * multiplier
         else:
             raise ValueError(
-                'rule_scores must contain only negative scores or only positive scores, not a mixture')
+                'rule_scores must contain only negative scores or only positive scores, not a mixture'
+            )
         return round(rule_scores_scaled).astype(int)
 
 
@@ -65,14 +85,34 @@ class MinMaxScaler:
     min_value : int 
         The minimum value of the scaled rule score range.
     max_value : int 
-        The maximum value of the scaled rule score range.        
+        The maximum value of the scaled rule score range.   
+
+    Examples
+    --------
+    >>> from iguanas.rule_scoring import MinMaxScaler
+    >>> import pandas as pd
+    >>> rule_scores = pd.Series({
+    ...     'Rule1Score': 0.9,
+    ...     'Rule2Score': 0.01,
+    ...     'Rule3Score': 0.3,
+    ... })
+    >>> mms = MinMaxScaler(min_value=-100, max_value=0)
+    >>> scaled_scores = mms.fit(rule_scores=rule_scores)
+    >>> print(scaled_scores)
+    Rule1Score   -100
+    Rule2Score      0
+    Rule3Score    -33
+    dtype: int64
     """
 
-    def __init__(self, min_value: int, max_value: int):
+    def __init__(self,
+                 min_value: int,
+                 max_value: int):
         self.min_value = min_value
         self.max_value = max_value
 
-    def fit(self, rule_scores: PandasSeriesType) -> PandasSeriesType:
+    def fit(self,
+            rule_scores: PandasSeriesType) -> PandasSeriesType:
         """
         Scales the rule scores.
 
@@ -88,7 +128,8 @@ class MinMaxScaler:
         """
         if not (all(rule_scores <= 0) or all(rule_scores >= 0)):
             raise ValueError(
-                'rule_scores must contain only negative scores or only positive scores, not a mixture')
+                'rule_scores must contain only negative scores or only positive scores, not a mixture'
+            )
         if self.min_value < 0 and all(rule_scores >= 0):
             rule_scores = -rule_scores
         rule_scores_scaled_arr = minmax_scale(rule_scores, feature_range=(

@@ -18,7 +18,8 @@ class _GetRuleFeatures:
         Set of unique features (values) in each rule (keys).
     """
 
-    def __init__(self, rule_dicts: Dict[str, dict]):
+    def __init__(self,
+                 rule_dicts: Dict[str, dict]):
         self.rule_dicts = rule_dicts
         self.rule_features = {}
 
@@ -38,7 +39,8 @@ class _GetRuleFeatures:
             self.rule_features[rule_name] = feature_set
         return self.rule_features
 
-    def _get_rule_features(self, rule_dict: dict) -> set:
+    def _get_rule_features(self,
+                           rule_dict: dict) -> set:
         """Gets the unique set of features in the rule"""
 
         feature_set = set()
@@ -46,7 +48,8 @@ class _GetRuleFeatures:
             rules_list=rule_dict['rules'], feature_set=feature_set)
         return feature_set
 
-    def _recurse_add_rule_features(self, rules_list: List[str],
+    def _recurse_add_rule_features(self,
+                                   rules_list: List[str],
                                    feature_set: set) -> set:
         """
         Loops through list of dictionary conditions - if it is a single

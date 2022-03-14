@@ -1,13 +1,14 @@
 """Optimises a set of rules using Direct Search algorithms."""
-from iguanas.rules import Rules
 from iguanas.rule_optimisation._base_optimiser import _BaseOptimiser
 import iguanas.utils as utils
 from iguanas.utils.types import NumpyArray, PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
+from iguanas.warnings import RulesNotOptimisedWarning
 import pandas as pd
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Union, Tuple
 import numpy as np
 from scipy.optimize import minimize
+from joblib import Parallel, delayed
 import warnings
 
 
@@ -68,6 +69,9 @@ class DirectSearchOptimiser(_BaseOptimiser):
         Dictionary of the solver options (values) for each rule (keys). See
         scipy.optimize.minimize() documentation for more information.
         Defaults to None.
+    num_cores : int, optional
+        The number of cores to use when optimising the rule thresholds.
+        Defaults to 1.
     verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : shows
         the overall progress of the optimisation process. Defaults to 0.
@@ -79,14 +83,14 @@ class DirectSearchOptimiser(_BaseOptimiser):
         standard Iguanas string format (values) and their names (keys).
     rule_lambdas : Dict[str, object]
         The optimised rules + unoptimisable (but applicable), defined using the
-        standard Iguanas lambda expression format (values) and their names 
+        standard Iguanas lambda expression format (values) and their names
         (keys).
     lambda_kwargs : Dict[str, object]
-        The keyword arguments for the optimised + unoptimisable (but 
-        applicable) rules defined using the standard Iguanas lambda expression 
+        The keyword arguments for the optimised + unoptimisable (but
+        applicable) rules defined using the standard Iguanas lambda expression
         format.
     rules : Rules
-        The Rules object containing the optimised + unoptimisable (but 
+        The Rules object containing the optimised + unoptimisable (but
         applicable) rules.
     rule_names : List[str]
         The names of the optimised + unoptimisable (but applicable) rules.
@@ -106,11 +110,62 @@ class DirectSearchOptimiser(_BaseOptimiser):
         The optimisation metric (values) calculated for each original rule
         (keys).
     non_optimisable_rules : Rules
-        A `Rules` object containing the rules which contained exclusively 
+        A `Rules` object containing the rules which contained exclusively
         non-optimisable conditions.
     zero_varaince_rules : Rules
         A `Rules` object containing the rules which contained exclusively zero
         variance features.
+
+    Examples
+    --------
+    >>> from iguanas.rule_optimisation import DirectSearchOptimiser
+    >>> from iguanas.rules import Rules
+    >>> from iguanas.metrics import FScore
+    >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [0.9, 0.2, 0.1, 0.3],
+    ...     'B': [0.01, 0.2, 0.5, 0.1]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> f1 = FScore(beta=1)
+    >>> rule_strings = {
+    ...     'Rule1': "X['A']>0",
+    ...     'Rule2': "X['B']>1",
+    ...     'Rule3': "(X['A']>0)|(X['B']>0)"
+    ... }
+    >>> rules = Rules(rule_strings=rule_strings)
+    >>> rule_lambdas = rules.as_rule_lambdas(
+    ...     as_numpy=False, 
+    ...     with_kwargs=True
+    ... )
+    >>> ds = DirectSearchOptimiser(
+    ...     rule_lambdas=rule_lambdas, 
+    ...     lambda_kwargs=rules.lambda_kwargs, 
+    ...     metric=f1.fit, 
+    ...     method='Nelder-Mead'
+    ... )
+    >>> x0 = ds.create_x0(X=X, lambda_kwargs=rules.lambda_kwargs)
+    >>> ds.x0 = x0
+    >>> X_rules = ds.fit(X=X, y=y)
+    >>> print(X_rules)
+       Rule1  Rule2  Rule3
+    0      1      0      1
+    1      1      0      0
+    2      1      1      1
+    3      1      0      0
+    >>> print(ds.rule_strings)
+    {'Rule1': "(X['A']>0)", 'Rule2': "(X['B']>0.255)", 'Rule3': "(X['A']>0.5)|(X['B']>0.255)"}
+    >>> print(ds.opt_rule_performances)
+    {'Rule1': 0.6666666666666666, 'Rule2': 0.6666666666666666, 'Rule3': 1.0}
+    >>> X_rules = ds.transform(X=X)
+    >>> print(X_rules)
+       Rule1  Rule2  Rule3
+    0      1      0      1
+    1      1      0      0
+    2      1      1      1
+    3      1      0      0
     """
 
     def __init__(self,
@@ -127,11 +182,12 @@ class DirectSearchOptimiser(_BaseOptimiser):
                  tol=None,
                  callback=None,
                  options=None,
+                 num_cores=1,
                  verbose=0):
 
         _BaseOptimiser.__init__(
             self, rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs,
-            metric=metric
+            metric=metric, num_cores=num_cores, verbose=verbose
         )
         self.x0 = x0
         self.method = method
@@ -143,7 +199,6 @@ class DirectSearchOptimiser(_BaseOptimiser):
         self.tol = tol
         self.callback = callback
         self.options = options
-        self.verbose = verbose
         self.rule_strings = {}
         self.rule_names = []
 
@@ -153,7 +208,10 @@ class DirectSearchOptimiser(_BaseOptimiser):
         else:
             return f'DirectSearchOptimiser object with {len(self.optimisable_rules.rule_strings)} optimised rules and {len(self.non_optimisable_rules.rule_strings)} unoptimisable rules'
 
-    def fit(self, X: PandasDataFrameType, y=None, sample_weight=None) -> PandasDataFrameType:
+    def fit(self,
+            X: PandasDataFrameType,
+            y=None,
+            sample_weight=None) -> PandasDataFrameType:
         """
         Optimises a set of rules (given in the standard Iguanas lambda expression
         format) using Direct Search-type algorithms.
@@ -171,7 +229,7 @@ class DirectSearchOptimiser(_BaseOptimiser):
         Returns
         -------
         PandasDataFrameType
-            The binary columns of the optimised + unoptimisable (but 
+            The binary columns of the optimised + unoptimisable (but
             applicable) rules on the fitted dataset.
         """
 
@@ -197,7 +255,8 @@ class DirectSearchOptimiser(_BaseOptimiser):
         return X_rules
 
     @classmethod
-    def create_bounds(cls, X: PandasDataFrameType,
+    def create_bounds(cls,
+                      X: PandasDataFrameType,
                       lambda_kwargs: Dict[str, float]) -> Dict[str, np.ndarray]:
         """
         Creates the `bounds` parameter using the min and max of each feature in
@@ -224,7 +283,8 @@ class DirectSearchOptimiser(_BaseOptimiser):
         return bounds
 
     @classmethod
-    def create_x0(cls, X: PandasDataFrameType,
+    def create_x0(cls,
+                  X: PandasDataFrameType,
                   lambda_kwargs: Dict[str, dict]) -> Dict[str, np.ndarray]:
         """
         Creates the `x0` parameter using the mid-range value of each feature in
@@ -251,7 +311,8 @@ class DirectSearchOptimiser(_BaseOptimiser):
         return x0
 
     @ classmethod
-    def create_initial_simplexes(cls, X: PandasDataFrameType,
+    def create_initial_simplexes(cls,
+                                 X: PandasDataFrameType,
                                  lambda_kwargs: Dict[str, dict],
                                  shape: str) -> Dict[str, np.ndarray]:
         """
@@ -315,7 +376,8 @@ class DirectSearchOptimiser(_BaseOptimiser):
 
         if shape not in ["Origin-based", "Minimum-based", "Random-based"]:
             raise ValueError(
-                '`shape` must be either "Origin-based", "Minimum-based" or "Random-based"')
+                '`shape` must be either "Origin-based", "Minimum-based" or "Random-based"'
+            )
         if shape == 'Origin-based':
             initial_simplexes = cls._param_base_calc(
                 X=X, lambda_kwargs=lambda_kwargs, param='initial_simplex',
@@ -345,6 +407,26 @@ class DirectSearchOptimiser(_BaseOptimiser):
                         sample_weight: PandasSeriesType) -> Dict[dict, dict]:
         """Optimise each rule in the set"""
 
+        rule_lambdas_items = utils.return_progress_ready_range(
+            verbose=self.verbose == 1, range=rule_lambdas.items()
+        )
+        with Parallel(n_jobs=self.num_cores) as parallel:
+            opt_rule_strings_list = parallel(delayed(self._optimise_single_rule)(
+                rule_name, rule_lambda, lambda_kwargs, X, y, sample_weight
+            ) for rule_name, rule_lambda in rule_lambdas_items
+            )
+        opt_rule_strings = dict(opt_rule_strings_list)
+        return opt_rule_strings
+
+    def _optimise_single_rule(self,
+                              rule_name: str,
+                              rule_lambda: object,
+                              lambda_kwargs: Dict[str, Dict[str, float]],
+                              X: PandasDataFrameType,
+                              y: PandasSeriesType,
+                              sample_weight: PandasSeriesType) -> Tuple[str, str]:
+        """Optimises a single rule"""
+
         def _objective(rule_vals: List,
                        rule_lambda: dict,
                        rule_features: List,
@@ -372,22 +454,15 @@ class DirectSearchOptimiser(_BaseOptimiser):
                 result = self.metric(y_preds=y_pred)
             return -result
 
-        opt_rule_strings = {}
-        rule_lambdas_items = utils.return_progress_ready_range(
-            verbose=self.verbose == 1, range=rule_lambdas.items()
+        minimize_kwargs = self._return_kwargs_for_minimize(rule_name=rule_name)
+        rule_features = list(lambda_kwargs[rule_name].keys())
+        opt_val = minimize(
+            fun=_objective,
+            args=(rule_lambda, rule_features, X, y, sample_weight),
+            method=self.method, **minimize_kwargs
         )
-        for rule_name, rule_lambda in rule_lambdas_items:
-            minimize_kwargs = self._return_kwargs_for_minimize(
-                rule_name=rule_name)
-            rule_features = list(lambda_kwargs[rule_name].keys())
-            opt_val = minimize(
-                fun=_objective,
-                args=(rule_lambda, rule_features, X, y, sample_weight),
-                method=self.method, **minimize_kwargs
-            )
-            lambda_kwargs_opt = dict(zip(rule_features, opt_val.x))
-            opt_rule_strings[rule_name] = rule_lambda(**lambda_kwargs_opt)
-        return opt_rule_strings
+        lambda_kwargs_opt = dict(zip(rule_features, opt_val.x))
+        return rule_name, rule_lambda(**lambda_kwargs_opt)
 
     def _return_kwargs_for_minimize(self, rule_name: str) -> dict:
         """
@@ -414,7 +489,9 @@ class DirectSearchOptimiser(_BaseOptimiser):
             )
         return minimize_kwargs
 
-    def _return_opt_param_for_rule(self, param_name: str, param_dict: dict,
+    def _return_opt_param_for_rule(self,
+                                   param_name: str,
+                                   param_dict: dict,
                                    rule_name: str) -> Union[str, float, dict]:
         """Returns the keyword-argument for the given parameter and rule."""
 
@@ -428,12 +505,14 @@ class DirectSearchOptimiser(_BaseOptimiser):
             return param_dict[rule_name]
         else:
             raise TypeError(
-                f'`{param_name}` must be a dictionary with each element aligning with a rule.')
+                f'`{param_name}` must be a dictionary with each element aligning with a rule.'
+            )
 
     @staticmethod
     def _param_base_calc(X: PandasDataFrameType,
                          lambda_kwargs: Dict[str, Dict[str, float]],
-                         param: str, func: Callable) -> np.ndarray:
+                         param: str,
+                         func: Callable) -> np.ndarray:
         """Base calculator for input parameters"""
 
         results = {}
@@ -467,8 +546,10 @@ class DirectSearchOptimiser(_BaseOptimiser):
             )
         if non_opt_rules:
             warnings.warn(
-                f'Rules `{"`, `".join(non_opt_rules)}` have no optimisable conditions - unable to calculate `{param}` for these rules')
+                f'Rules `{"`, `".join(non_opt_rules)}` have no optimisable conditions - unable to calculate `{param}` for these rules'
+            )
         if missing_feat_rules:
             warnings.warn(
-                f'Rules `{"`, `".join(missing_feat_rules)}` use features that are missing from `X` - unable to calculate `{param}` for these rules')
+                f'Rules `{"`, `".join(missing_feat_rules)}` use features that are missing from `X` - unable to calculate `{param}` for these rules',
+            )
         return results

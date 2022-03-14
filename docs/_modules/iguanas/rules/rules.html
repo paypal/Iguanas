@@ -184,23 +184,23 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    rule_dicts : Dict[str, dict]</span>
+<span class="sd">    rule_dicts : Dict[str, dict], optional</span>
 <span class="sd">        Set of rules defined using thestandard Iguanas dictionary format</span>
 <span class="sd">        (values) and their names (keys). Defaults to `None`.</span>
-<span class="sd">    rule_strings : Dict[str, str] </span>
+<span class="sd">    rule_strings : Dict[str, str], optional</span>
 <span class="sd">        Set of rules defined using the standard Iguanas string format </span>
 <span class="sd">        (values) and their names (keys). Defaults to `None`.</span>
-<span class="sd">    rule_lambdas : Dict[str, Callable[[dict], str]] </span>
+<span class="sd">    rule_lambdas : Dict[str, Callable[[dict], str]], optional</span>
 <span class="sd">        Set of rules defined using the standard Iguanas lambda expression </span>
 <span class="sd">        format (values) and their names (keys). Must be given in </span>
 <span class="sd">        conjunction with either `lambda_kwargs` or `lambda_args`. Defaults </span>
 <span class="sd">        to `None`.</span>
-<span class="sd">    lambda_kwargs : Dict[str, dict] </span>
+<span class="sd">    lambda_kwargs : Dict[str, dict], optional </span>
 <span class="sd">        For each rule (keys), a dictionary containing the features used in</span>
 <span class="sd">        the rule (keys) and the current values (values). Only populates </span>
 <span class="sd">        when `.as_lambda()` is used with the keyword argument </span>
 <span class="sd">        `with_kwargs=True`. Defaults to `None`.</span>
-<span class="sd">    lambda_args : Dict[str, list] </span>
+<span class="sd">    lambda_args : Dict[str, list], optional</span>
 <span class="sd">        For each rule (keys), a list containing the current values used in</span>
 <span class="sd">        the rule. Only populates when `.as_lambda()` is used with the </span>
 <span class="sd">        keyword argument `with_kwargs=False`. Defaults to `None`.    </span>
@@ -224,18 +224,56 @@
 <span class="sd">        rule.</span>
 <span class="sd">    rule_features : Dict[str, set]</span>
 <span class="sd">        For each rule (keys), a set containing the features used in the rule</span>
-<span class="sd">        (only populates when the `.get_rules_features()` method is used).    </span>
+<span class="sd">        (only populates when the `.get_rules_features()` method is used).   </span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rules import Rules</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [1, 0, 1, 0],</span>
+<span class="sd">    ...     &#39;B&#39;: [1, 1, 1, 0],</span>
+<span class="sd">    ...     &#39;C&#39;: [0.9, 0.2, 0.3, 0.4]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; rule_strings = {</span>
+<span class="sd">    ... &#39;Rule1&#39;: &quot;X[&#39;A&#39;]==True&quot;,</span>
+<span class="sd">    ... &#39;Rule2&#39;: &quot;X[&#39;B&#39;]==True&quot;,</span>
+<span class="sd">    ... &#39;Rule3&#39;: &quot;X[&#39;C&#39;]&gt;0.5&quot;</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; rules = Rules(rule_strings=rule_strings)</span>
+<span class="sd">    &gt;&gt;&gt; # Covert to lambda format (used for rule optimisation) ---</span>
+<span class="sd">    &gt;&gt;&gt; rule_lambdas = rules.as_rule_lambdas(as_numpy=False, with_kwargs=True)</span>
+<span class="sd">    &gt;&gt;&gt; print(rules.lambda_kwargs)</span>
+<span class="sd">    {&#39;Rule1&#39;: {}, &#39;Rule2&#39;: {}, &#39;Rule3&#39;: {&#39;C&#39;: 0.5}}</span>
+<span class="sd">    &gt;&gt;&gt; # Apply rules to dataset ---</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = rules.transform(X=X)</span>
+<span class="sd">    &gt;&gt;&gt; print(X_rules)</span>
+<span class="sd">       Rule1  Rule2  Rule3</span>
+<span class="sd">    0      1      1      1</span>
+<span class="sd">    1      0      1      0</span>
+<span class="sd">    2      1      1      0</span>
+<span class="sd">    3      0      0      0</span>
+<span class="sd">    &gt;&gt;&gt; # Get features used in each rule ---</span>
+<span class="sd">    &gt;&gt;&gt; rule_features = rules.get_rule_features()</span>
+<span class="sd">    &gt;&gt;&gt; print(rule_features)</span>
+<span class="sd">    {&#39;Rule1&#39;: {&#39;A&#39;}, &#39;Rule2&#39;: {&#39;B&#39;}, &#39;Rule3&#39;: {&#39;C&#39;}}</span>
+<span class="sd">    &gt;&gt;&gt; # Filter rule set by name ---</span>
+<span class="sd">    &gt;&gt;&gt; rules.filter_rules(exclude=&#39;Rule1&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(rules.rule_strings) </span>
+<span class="sd">    {&#39;Rule2&#39;: &quot;X[&#39;B&#39;]==True&quot;, &#39;Rule3&#39;: &quot;X[&#39;C&#39;]&gt;0.5&quot;}</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rule_dicts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rule_strings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">rule_lambdas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lambda_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lambda_args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">rule_dicts</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">rule_strings</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">rule_lambdas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;`rule_dicts`, `rule_strings` or `rule_lambdas` must be given&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">rule_dicts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rule_strings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rule_lambdas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">lambda_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">lambda_args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">rule_lambdas</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lambda_kwargs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> \
                 <span class="n">lambda_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;`lambda_kwargs` or `lambda_args` must be given when `rule_lambdas` is provided&#39;</span><span class="p">)</span>
+                <span class="s1">&#39;`lambda_kwargs` or `lambda_args` must be given when `rule_lambdas` is provided&#39;</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_dicts</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">rule_dicts</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">rule_dicts</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">rule_strings</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">rule_strings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_lambdas</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">rule_lambdas</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">rule_lambdas</span>
@@ -246,9 +284,11 @@
             <span class="bp">self</span><span class="p">,</span> <span class="n">rule_strings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">other</span><span class="p">):</span>
 
-        <span class="k">def</span> <span class="nf">_exception_if_similar_keys</span><span class="p">(</span><span class="n">dict1</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">dict2</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="k">def</span> <span class="nf">_exception_if_similar_keys</span><span class="p">(</span><span class="n">dict1</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                                       <span class="n">dict2</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
                                        <span class="n">rule_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
             <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Raises exception if there are similar keys in `dict1` and `dict2`.</span>
@@ -258,7 +298,8 @@
             <span class="n">sim_keys</span> <span class="o">=</span> <span class="n">dict1_keys</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">dict2_keys</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">sim_keys</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Attempting to add rule sets with similar keys in `</span><span class="si">{</span><span class="n">rule_format</span><span class="si">}</span><span class="s2">`. Similar keys are &#39;</span><span class="si">{</span><span class="s2">&quot;&#39;, &#39;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sim_keys</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;.&quot;&quot;&quot;</span><span class="p">)</span>
+                    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Attempting to add rule sets with similar keys in `</span><span class="si">{</span><span class="n">rule_format</span><span class="si">}</span><span class="s2">`. Similar keys are &#39;</span><span class="si">{</span><span class="s2">&quot;&#39;, &#39;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sim_keys</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;.&quot;&quot;&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># Raise exception if there are similar keys in any of the rule formats</span>
         <span class="n">check_list</span> <span class="o">=</span> <span class="p">[</span>
@@ -283,7 +324,8 @@
             <span class="n">lambda_args</span><span class="o">=</span><span class="n">lambda_args</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -311,7 +353,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_rule_strings_to_rule_dicts</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_dicts</span></div>
 
-<div class="viewcode-block" id="Rules.as_rule_strings"><a class="viewcode-back" href="../../../api/api/iguanas.rules.Rules.html#iguanas.rules.Rules.as_rule_strings">[docs]</a>    <span class="k">def</span> <span class="nf">as_rule_strings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_numpy</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="Rules.as_rule_strings"><a class="viewcode-back" href="../../../api/api/iguanas.rules.Rules.html#iguanas.rules.Rules.as_rule_strings">[docs]</a>    <span class="k">def</span> <span class="nf">as_rule_strings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                        <span class="n">as_numpy</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts rules into the standard Iguanas string format.</span>
 
@@ -336,7 +379,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_rule_dicts_to_rule_strings</span><span class="p">(</span><span class="n">as_numpy</span><span class="o">=</span><span class="n">as_numpy</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span></div>
 
-<div class="viewcode-block" id="Rules.as_rule_lambdas"><a class="viewcode-back" href="../../../api/api/iguanas.rules.Rules.html#iguanas.rules.Rules.as_rule_lambdas">[docs]</a>    <span class="k">def</span> <span class="nf">as_rule_lambdas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_numpy</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<div class="viewcode-block" id="Rules.as_rule_lambdas"><a class="viewcode-back" href="../../../api/api/iguanas.rules.Rules.html#iguanas.rules.Rules.as_rule_lambdas">[docs]</a>    <span class="k">def</span> <span class="nf">as_rule_lambdas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                        <span class="n">as_numpy</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
                         <span class="n">with_kwargs</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts rules into the standard Iguanas lambda expression format.</span>
@@ -388,7 +432,9 @@
         <span class="n">X_rules</span> <span class="o">=</span> <span class="n">RuleApplier</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">X_rules</span></div>
 
-<div class="viewcode-block" id="Rules.filter_rules"><a class="viewcode-back" href="../../../api/api/iguanas.rules.Rules.html#iguanas.rules.Rules.filter_rules">[docs]</a>    <span class="k">def</span> <span class="nf">filter_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Rules.filter_rules"><a class="viewcode-back" href="../../../api/api/iguanas.rules.Rules.html#iguanas.rules.Rules.filter_rules">[docs]</a>    <span class="k">def</span> <span class="nf">filter_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                     <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters the rules by their names.</span>
 
@@ -408,12 +454,15 @@
         <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">intersected</span> <span class="o">=</span> <span class="nb">set</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">include</span><span class="p">),</span> <span class="nb">set</span><span class="p">(</span><span class="n">exclude</span><span class="p">))</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">intersected</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="s1">&#39;`include` and `exclude` contain similar values&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;`include` and `exclude` contain similar values&#39;</span>
+                <span class="p">)</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_dicts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_lambdas</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="p">{}:</span>
                 <span class="n">rule_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
                 <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rule_names</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">rule_name</span> <span class="ow">in</span> <span class="n">rule_names</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">rule_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">include</span><span class="p">)</span> <span class="ow">or</span> \
                     <span class="p">(</span><span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">rule_name</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">):</span>
@@ -440,7 +489,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_feature_set</span> <span class="o">=</span> <span class="n">grf</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_feature_set</span></div>
 
-    <span class="k">def</span> <span class="nf">_rule_dicts_to_rule_strings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_numpy</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_rule_dicts_to_rule_strings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                    <span class="n">as_numpy</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts the rules (each being represented in the standard Iguanas</span>
 <span class="sd">        dictionary format) into the standard Iguanas string format.</span>
@@ -464,7 +514,8 @@
             <span class="n">rule_strings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_dicts</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_rule_dicts_to_rule_lambdas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_numpy</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_rule_dicts_to_rule_lambdas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                    <span class="n">as_numpy</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
                                     <span class="n">with_kwargs</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Converts the rules (each being represented in the standard Iguanas</span>

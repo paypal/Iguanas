@@ -1,11 +1,12 @@
 import pytest
 import numpy as np
 import pandas as pd
-from iguanas.rule_generation import RuleGeneratorDT
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
-from iguanas.metrics.classification import FScore
 import random
+from iguanas.rule_generation import RuleGeneratorDT
+from iguanas.metrics.classification import FScore
+from iguanas.exceptions import NoRulesError
 
 
 @pytest.fixture
@@ -115,6 +116,15 @@ def test_fit(create_data, rg_instantiated):
     ]
     X, y, _, _, _, weights = create_data
     rg, _ = rg_instantiated
+    for i, w in enumerate([None, weights]):
+        X_rules = rg.fit(X, y, sample_weight=w)
+        pd.testing.assert_series_equal(X_rules.sum(), exp_results[i])
+        assert rg.rule_names == exp_results[i].index.tolist() == list(
+            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == list(
+                rg.rules.rule_strings.keys())
+    # With infer_dtypes = False
+    X['ip_country_us'] = X['ip_country_us'].astype(bool)
+    rg.infer_dtypes = False
     for i, w in enumerate([None, weights]):
         X_rules = rg.fit(X, y, sample_weight=w)
         pd.testing.assert_series_equal(X_rules.sum(), exp_results[i])
@@ -290,7 +300,7 @@ def test_extract_rules_from_ensemble(create_data, rg_instantiated):
         rf.max_depth = 4
         rf.fit(X, y, sample_weight=w)
         X_rules = rg._extract_rules_from_ensemble(
-            X, y, rf, params['num_cores'], w, columns_int, columns_cat
+            X, rf, params['num_cores'], columns_int, columns_cat
         )
         pd.testing.assert_series_equal(X_rules.sum(), exp_results[i])
 
@@ -301,9 +311,10 @@ def test_extract_rules_from_ensemble_error(rg_instantiated):
     rg, params = rg_instantiated
     rf = params['tree_ensemble']
     rf.fit(X, y, None)
-    with pytest.raises(Exception, match='No rules could be generated. Try changing the class parameters.'):
+    with pytest.raises(NoRulesError, match='No rules could be generated. Try changing the class parameters.'):
         rg._extract_rules_from_ensemble(
-            X, y, rf, params['num_cores'], None, ['A'], ['A'])
+            X, rf, params['num_cores'], ['A'], ['A']
+        )
 
 
 def test_extract_rules_from_dt(create_data, rg_instantiated, fit_decision_tree):
@@ -472,3 +483,61 @@ def test_calc_target_ratio_wrt_features(rg_instantiated):
     rg, _ = rg_instantiated
     target_feat_corr_types = rg._calc_target_ratio_wrt_features(X, y)
     assert target_feat_corr_types == expected_result
+
+
+def test_return_columns_types(rg_instantiated):
+    rg, _ = rg_instantiated
+    X = pd.DataFrame({
+        'bool': [True, False],
+        'ohe': [1, 0],
+        'int': [1, 2],
+        'float': [0.9, 0.8]
+    })
+    # When infer_dtypes=False
+    int_cols, cat_cols, float_cols = rg._return_columns_types(
+        X=X, infer_dtypes=False
+    )
+    assert int_cols == ['ohe', 'int', 'bool']
+    assert cat_cols == ['bool']
+    assert float_cols == ['float']
+    # When infer_dtypes=True
+    int_cols, cat_cols, float_cols = rg._return_columns_types(
+        X=X, infer_dtypes=True
+    )
+    assert int_cols == ['bool', 'ohe', 'int']
+    assert cat_cols == ['bool', 'ohe']
+    assert float_cols == ['float']
+    # Test error
+    with pytest.raises(TypeError, match='`infer_dtypes` must be a bool. Current type is str.'):
+        rg._return_columns_types(X=X, infer_dtypes='ERROR')
+
+
+def test_infer_dtypes_from_X(rg_instantiated):
+    rg, _ = rg_instantiated
+    X = pd.DataFrame({
+        'A': [2.5, 3.5, 1, 1, 2.5],
+        'B': [1, 0, 0, 1, 1],
+        'C': [1, 2, 0, 0, 1]
+    })
+    int_cols, cat_cols, float_cols = rg._infer_dtypes_from_X(X)
+    assert int_cols == ['B', 'C']
+    assert cat_cols == ['B']
+    assert float_cols == ['A']
+    # Test when all ints
+    X = pd.DataFrame({
+        'A': [1, 0, 0, 1, 1],
+        'B': [1, 0, 0, 1, 1],
+    })
+    int_cols, cat_cols, float_cols = rg._infer_dtypes_from_X(X)
+    assert int_cols == ['A', 'B']
+    assert cat_cols == ['A', 'B']
+    assert float_cols == []
+    # Test when all floats
+    X = pd.DataFrame({
+        'A': [1.2, 0, 0, 1.1, 1],
+        'B': [1.5, 0, 0, 1, 1.1],
+    })
+    int_cols, cat_cols, float_cols = rg._infer_dtypes_from_X(X)
+    assert int_cols == []
+    assert cat_cols == []
+    assert float_cols == ['A', 'B']

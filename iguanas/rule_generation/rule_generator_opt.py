@@ -69,6 +69,13 @@ class RuleGeneratorOpt(_BaseGenerator):
         `PositiveCorr`) and negatively correlated features wrt the target 
         (under the key `NegativeCorr`), or 'Infer' (where each target-feature 
         correlation type is inferred from the data). Defaults to None.
+    infer_dtypes : bool, optional
+        Dictates whether the column datatypes should be inferred from the data.
+        If True, the integer, float and categorical-type (e.g. one hot encoded)
+        columns are inferred from the values in the dataset `X`. If False, the
+        datatypes from the dataset are used (i.e. `X.dtypes`). Note that if 
+        False, any categorical-type columns should be stored as the `bool`
+        datatype. Defaults to True.
     verbose : int, optional 
         Controls the verbosity - the higher, the more messages. >0 : gives the
         progress of the training of the rules. Defaults to 0.
@@ -90,19 +97,64 @@ class RuleGeneratorOpt(_BaseGenerator):
         The Rules object containing the generated rules.
     rule_names : List[str]
         The names of the generated rules.
+
+    Examples
+    --------
+    >>> from iguanas.rule_generation import RuleGeneratorOpt
+    >>> from iguanas.metrics import FScore
+    >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> f1 = FScore(beta=1)
+    >>> rg = RuleGeneratorOpt(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     num_rules_keep=10,
+    ...     rule_name_prefix='Rule'
+    ... )
+    >>> X_rules = rg.fit(X=X, y=y)
+    >>> print(X_rules)
+       Rule_0
+    0       1
+    1       0
+    2       1
+    3       0
+    >>> print(rg.rule_strings)
+    {'Rule_0': "(X['A']==True)"}
+    >>> X_rules = rg.transform(X=X)
+    >>> print(X_rules)
+       Rule_0
+    0       1
+    1       0
+    2       1
+    3       0
     """
 
-    def __init__(self, metric: Callable,
-                 n_total_conditions: int, num_rules_keep: int, n_points=10,
-                 ratio_window=2, one_cond_rule_opt_metric=f1.fit,
-                 remove_corr_rules=True, target_feat_corr_types=None,
-                 verbose=0, rule_name_prefix='RGO_Rule'):
+    def __init__(self,
+                 metric: Callable,
+                 n_total_conditions: int,
+                 num_rules_keep: int,
+                 n_points=10,
+                 ratio_window=2,
+                 one_cond_rule_opt_metric=f1.fit,
+                 remove_corr_rules=True,
+                 target_feat_corr_types=None,
+                 infer_dtypes=True,
+                 verbose=0,
+                 rule_name_prefix='RGO_Rule'):
 
         _BaseGenerator.__init__(
             self,
             metric=metric,
             target_feat_corr_types=target_feat_corr_types,
             rule_name_prefix=rule_name_prefix,
+            infer_dtypes=infer_dtypes,
+            verbose=verbose,
         )
         self.n_total_conditions = n_total_conditions
         self.num_rules_keep = num_rules_keep
@@ -110,7 +162,6 @@ class RuleGeneratorOpt(_BaseGenerator):
         self.ratio_window = ratio_window
         self.one_cond_rule_opt_metric = one_cond_rule_opt_metric
         self.remove_corr_rules = remove_corr_rules
-        self.verbose = verbose
         self.rule_strings = {}
         self.rule_names = []
 
@@ -120,7 +171,9 @@ class RuleGeneratorOpt(_BaseGenerator):
         else:
             return f'RuleGeneratorOpt(metric={self.metric}, n_total_conditions={self.n_total_conditions}, num_rules_keep={self.num_rules_keep}, n_points={self.n_points}, ratio_window={self.ratio_window}, one_cond_rule_opt_metric={self.one_cond_rule_opt_metric}, remove_corr_rules={self.remove_corr_rules}, target_feat_corr_types={self.target_feat_corr_types})'
 
-    def fit(self, X: PandasDataFrameType, y: PandasSeriesType,
+    def fit(self,
+            X: PandasDataFrameType,
+            y: PandasSeriesType,
             sample_weight=None) -> PandasDataFrameType:
         """
         Generate rules by optimising the thresholds of single features and
@@ -156,10 +209,14 @@ class RuleGeneratorOpt(_BaseGenerator):
             )
         X_rules = pd.DataFrame()
         rule_strings = {}
-        columns_int, columns_cat, columns_float = utils.return_columns_types(
-            X)
+        if self.verbose > 0:
+            print('--- Returning column datatypes ---')
+        columns_int, columns_cat, columns_float = self._return_columns_types(
+            infer_dtypes=self.infer_dtypes, X=X
+        )
         columns_num = [
-            col for col in columns_int if col not in columns_cat] + columns_float
+            col for col in columns_int if col not in columns_cat
+        ] + columns_float
         if columns_num:
             if self.verbose > 0:
                 print(
@@ -186,7 +243,8 @@ class RuleGeneratorOpt(_BaseGenerator):
         self._generate_other_rule_formats()
         return X_rules
 
-    def _generate_numeric_one_condition_rules(self, X: PandasDataFrameType,
+    def _generate_numeric_one_condition_rules(self,
+                                              X: PandasDataFrameType,
                                               y: PandasSeriesType,
                                               columns_num: List[str],
                                               columns_int: List[str],
@@ -244,9 +302,8 @@ class RuleGeneratorOpt(_BaseGenerator):
                                                   sample_weight: PandasDataFrameType) -> Tuple[PandasDataFrameType, PandasDataFrameType]:
         """Generates one condition rules for OHE categorical columns"""
 
-        def _gen_rules_from_target_feat_corr_types(X: PandasDataFrameType, y: PandasSeriesType,
-                                                   columns_cat: List[str],
-                                                   sample_weight: PandasSeriesType) -> Tuple[PandasDataFrameType, PandasDataFrameType]:
+        def _gen_rules_from_target_feat_corr_types(X: PandasDataFrameType,
+                                                   columns_cat: List[str]) -> Tuple[PandasDataFrameType, PandasDataFrameType]:
             """
             Generates rules using the target-feature correlation types given
             in `target_feat_corr_types`.
@@ -268,7 +325,8 @@ class RuleGeneratorOpt(_BaseGenerator):
             X_rules = ara.transform(X=X)
             return rule_strings, X_rules
 
-        def _gen_rules_best_perf_bool_option(X: PandasDataFrameType, y: PandasSeriesType,
+        def _gen_rules_best_perf_bool_option(X: PandasDataFrameType,
+                                             y: PandasSeriesType,
                                              columns_cat: List[str],
                                              sample_weight: PandasSeriesType) -> Tuple[PandasDataFrameType, PandasDataFrameType]:
             """
@@ -306,7 +364,7 @@ class RuleGeneratorOpt(_BaseGenerator):
         )
         if self.target_feat_corr_types is not None:
             rule_strings, X_rules = _gen_rules_from_target_feat_corr_types(
-                X=X, y=y, columns_cat=columns_cat, sample_weight=sample_weight
+                X=X, columns_cat=columns_cat
             )
         else:
             rule_strings, X_rules = _gen_rules_best_perf_bool_option(
@@ -322,7 +380,8 @@ class RuleGeneratorOpt(_BaseGenerator):
         return rule_strings, X_rules
 
     def _generate_pairwise_rules(self,
-                                 X_rules: PandasDataFrameType, y: PandasSeriesType,
+                                 X_rules: PandasDataFrameType,
+                                 y: PandasSeriesType,
                                  rules_combinations: List[Tuple[Tuple[str, str], Tuple[str, str]]],
                                  sample_weight: PandasSeriesType) -> Tuple[PandasDataFrameType, PandasDataFrameType, Dict[str, list]]:
         """Combines binary columns of rules using AND conditions"""
@@ -540,8 +599,11 @@ class RuleGeneratorOpt(_BaseGenerator):
         return rule_descriptions, X_rules
 
     @staticmethod
-    def _set_iteration_range(X_col: np.array, column: str, operator: str,
-                             n_points: int, ratio_window: int,
+    def _set_iteration_range(X_col: np.array,
+                             column: str,
+                             operator: str,
+                             n_points: int,
+                             ratio_window: int,
                              columns_int: List[str]) -> Tuple[float, float]:
         """Sets the iteration range for a given column"""
 
@@ -559,11 +621,15 @@ class RuleGeneratorOpt(_BaseGenerator):
         return (x_min, x_max)
 
     @staticmethod
-    def _set_iteration_array(column: str, columns_int: List[str], x_min: float,
-                             x_max: float, n_points: int) -> np.array:
+    def _set_iteration_array(column: str,
+                             columns_int: List[str],
+                             x_min: float,
+                             x_max: float,
+                             n_points: int) -> np.array:
         """Returns the iteration array for a given column"""
 
-        def _round_to_n_sf(x: float, n_sf: int) -> float:
+        def _round_to_n_sf(x: float,
+                           n_sf: int) -> float:
             """Method for rounding a float to n significant figures"""
 
             if x == 0:
@@ -582,8 +648,10 @@ class RuleGeneratorOpt(_BaseGenerator):
         return x_iter
 
     @staticmethod
-    def _calculate_opt_metric_across_range(x_iter: np.array, operator: str,
-                                           X_col: np.array, y: np.array,
+    def _calculate_opt_metric_across_range(x_iter: np.array,
+                                           operator: str,
+                                           X_col: np.array,
+                                           y: np.array,
                                            metric: Callable[[PandasSeriesType, PandasSeriesType, PandasSeriesType], PandasSeriesType],
                                            sample_weight: np.array) -> np.array:
         """
@@ -599,7 +667,8 @@ class RuleGeneratorOpt(_BaseGenerator):
         return opt_metric_iter
 
     @staticmethod
-    def _return_x_of_max_opt_metric(opt_metric_iter: np.array, operator: str,
+    def _return_x_of_max_opt_metric(opt_metric_iter: np.array,
+                                    operator: str,
                                     x_iter: np.array) -> float:
         """Returns the threshold value which maximises the FBeta score"""
 
@@ -642,7 +711,8 @@ class RuleGeneratorOpt(_BaseGenerator):
         return rules_combinations
 
     @staticmethod
-    def _generate_pairwise_df(X_rules: PandasDataFrameType, rules_names_1: List[str],
+    def _generate_pairwise_df(X_rules: PandasDataFrameType,
+                              rules_names_1: List[str],
                               rules_names_2: List[str],
                               pairwise_names: List[str]) -> PandasDataFrameType:
         """

@@ -319,7 +319,7 @@ class TestConvertProcessedConditionsToGeneral:
 
     def test_error(self, _instantiate_class):
         c = _instantiate_class
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match='Operator not currently supported in Iguanas. Rule cannot be parsed.'):
             c._extract_components_from_condition_string(
                 "X['A'].str.contains('abc')")
         with pytest.raises(ValueError, match='Either `imputed_values` or `ohe_categories` must be given'):

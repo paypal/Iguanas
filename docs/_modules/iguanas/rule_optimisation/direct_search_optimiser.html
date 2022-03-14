@@ -159,15 +159,16 @@
                 
   <h1>Source code for iguanas.rule_optimisation.direct_search_optimiser</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Optimises a set of rules using Direct Search algorithms.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">iguanas.rules</span> <span class="kn">import</span> <span class="n">Rules</span>
 <span class="kn">from</span> <span class="nn">iguanas.rule_optimisation._base_optimiser</span> <span class="kn">import</span> <span class="n">_BaseOptimiser</span>
 <span class="kn">import</span> <span class="nn">iguanas.utils</span> <span class="k">as</span> <span class="nn">utils</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.types</span> <span class="kn">import</span> <span class="n">NumpyArray</span><span class="p">,</span> <span class="n">PandasDataFrame</span><span class="p">,</span> <span class="n">PandasSeries</span>
 <span class="kn">from</span> <span class="nn">iguanas.utils.typing</span> <span class="kn">import</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">PandasSeriesType</span>
+<span class="kn">from</span> <span class="nn">iguanas.warnings</span> <span class="kn">import</span> <span class="n">RulesNotOptimisedWarning</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
 
@@ -228,6 +229,9 @@
 <span class="sd">        Dictionary of the solver options (values) for each rule (keys). See</span>
 <span class="sd">        scipy.optimize.minimize() documentation for more information.</span>
 <span class="sd">        Defaults to None.</span>
+<span class="sd">    num_cores : int, optional</span>
+<span class="sd">        The number of cores to use when optimising the rule thresholds.</span>
+<span class="sd">        Defaults to 1.</span>
 <span class="sd">    verbose : int, optional</span>
 <span class="sd">        Controls the verbosity - the higher, the more messages. &gt;0 : shows</span>
 <span class="sd">        the overall progress of the optimisation process. Defaults to 0.</span>
@@ -239,14 +243,14 @@
 <span class="sd">        standard Iguanas string format (values) and their names (keys).</span>
 <span class="sd">    rule_lambdas : Dict[str, object]</span>
 <span class="sd">        The optimised rules + unoptimisable (but applicable), defined using the</span>
-<span class="sd">        standard Iguanas lambda expression format (values) and their names </span>
+<span class="sd">        standard Iguanas lambda expression format (values) and their names</span>
 <span class="sd">        (keys).</span>
 <span class="sd">    lambda_kwargs : Dict[str, object]</span>
-<span class="sd">        The keyword arguments for the optimised + unoptimisable (but </span>
-<span class="sd">        applicable) rules defined using the standard Iguanas lambda expression </span>
+<span class="sd">        The keyword arguments for the optimised + unoptimisable (but</span>
+<span class="sd">        applicable) rules defined using the standard Iguanas lambda expression</span>
 <span class="sd">        format.</span>
 <span class="sd">    rules : Rules</span>
-<span class="sd">        The Rules object containing the optimised + unoptimisable (but </span>
+<span class="sd">        The Rules object containing the optimised + unoptimisable (but</span>
 <span class="sd">        applicable) rules.</span>
 <span class="sd">    rule_names : List[str]</span>
 <span class="sd">        The names of the optimised + unoptimisable (but applicable) rules.</span>
@@ -266,11 +270,62 @@
 <span class="sd">        The optimisation metric (values) calculated for each original rule</span>
 <span class="sd">        (keys).</span>
 <span class="sd">    non_optimisable_rules : Rules</span>
-<span class="sd">        A `Rules` object containing the rules which contained exclusively </span>
+<span class="sd">        A `Rules` object containing the rules which contained exclusively</span>
 <span class="sd">        non-optimisable conditions.</span>
 <span class="sd">    zero_varaince_rules : Rules</span>
 <span class="sd">        A `Rules` object containing the rules which contained exclusively zero</span>
 <span class="sd">        variance features.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rule_optimisation import DirectSearchOptimiser</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.rules import Rules</span>
+<span class="sd">    &gt;&gt;&gt; from iguanas.metrics import FScore</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; X = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;A&#39;: [0.9, 0.2, 0.1, 0.3],</span>
+<span class="sd">    ...     &#39;B&#39;: [0.01, 0.2, 0.5, 0.1]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; y = pd.Series([</span>
+<span class="sd">    ...     1, 0, 1, 0</span>
+<span class="sd">    ... ])</span>
+<span class="sd">    &gt;&gt;&gt; f1 = FScore(beta=1)</span>
+<span class="sd">    &gt;&gt;&gt; rule_strings = {</span>
+<span class="sd">    ...     &#39;Rule1&#39;: &quot;X[&#39;A&#39;]&gt;0&quot;,</span>
+<span class="sd">    ...     &#39;Rule2&#39;: &quot;X[&#39;B&#39;]&gt;1&quot;,</span>
+<span class="sd">    ...     &#39;Rule3&#39;: &quot;(X[&#39;A&#39;]&gt;0)|(X[&#39;B&#39;]&gt;0)&quot;</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; rules = Rules(rule_strings=rule_strings)</span>
+<span class="sd">    &gt;&gt;&gt; rule_lambdas = rules.as_rule_lambdas(</span>
+<span class="sd">    ...     as_numpy=False, </span>
+<span class="sd">    ...     with_kwargs=True</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; ds = DirectSearchOptimiser(</span>
+<span class="sd">    ...     rule_lambdas=rule_lambdas, </span>
+<span class="sd">    ...     lambda_kwargs=rules.lambda_kwargs, </span>
+<span class="sd">    ...     metric=f1.fit, </span>
+<span class="sd">    ...     method=&#39;Nelder-Mead&#39;</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; x0 = ds.create_x0(X=X, lambda_kwargs=rules.lambda_kwargs)</span>
+<span class="sd">    &gt;&gt;&gt; ds.x0 = x0</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = ds.fit(X=X, y=y)</span>
+<span class="sd">    &gt;&gt;&gt; print(X_rules)</span>
+<span class="sd">       Rule1  Rule2  Rule3</span>
+<span class="sd">    0      1      0      1</span>
+<span class="sd">    1      1      0      0</span>
+<span class="sd">    2      1      1      1</span>
+<span class="sd">    3      1      0      0</span>
+<span class="sd">    &gt;&gt;&gt; print(ds.rule_strings)</span>
+<span class="sd">    {&#39;Rule1&#39;: &quot;(X[&#39;A&#39;]&gt;0)&quot;, &#39;Rule2&#39;: &quot;(X[&#39;B&#39;]&gt;0.255)&quot;, &#39;Rule3&#39;: &quot;(X[&#39;A&#39;]&gt;0.5)|(X[&#39;B&#39;]&gt;0.255)&quot;}</span>
+<span class="sd">    &gt;&gt;&gt; print(ds.opt_rule_performances)</span>
+<span class="sd">    {&#39;Rule1&#39;: 0.6666666666666666, &#39;Rule2&#39;: 0.6666666666666666, &#39;Rule3&#39;: 1.0}</span>
+<span class="sd">    &gt;&gt;&gt; X_rules = ds.transform(X=X)</span>
+<span class="sd">    &gt;&gt;&gt; print(X_rules)</span>
+<span class="sd">       Rule1  Rule2  Rule3</span>
+<span class="sd">    0      1      0      1</span>
+<span class="sd">    1      1      0      0</span>
+<span class="sd">    2      1      1      1</span>
+<span class="sd">    3      1      0      0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -287,11 +342,12 @@
                  <span class="n">tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">num_cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 
         <span class="n">_BaseOptimiser</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">rule_lambdas</span><span class="o">=</span><span class="n">rule_lambdas</span><span class="p">,</span> <span class="n">lambda_kwargs</span><span class="o">=</span><span class="n">lambda_kwargs</span><span class="p">,</span>
-            <span class="n">metric</span><span class="o">=</span><span class="n">metric</span>
+            <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">num_cores</span><span class="o">=</span><span class="n">num_cores</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
@@ -303,7 +359,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">tol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">callback</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_strings</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rule_names</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -313,7 +368,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;DirectSearchOptimiser object with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimisable_rules</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">)</span><span class="si">}</span><span class="s1"> optimised rules and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">non_optimisable_rules</span><span class="o">.</span><span class="n">rule_strings</span><span class="p">)</span><span class="si">}</span><span class="s1"> unoptimisable rules&#39;</span>
 
-<div class="viewcode-block" id="DirectSearchOptimiser.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_optimisation.DirectSearchOptimiser.html#iguanas.rule_optimisation.DirectSearchOptimiser.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
+<div class="viewcode-block" id="DirectSearchOptimiser.fit"><a class="viewcode-back" href="../../../api/api/iguanas.rule_optimisation.DirectSearchOptimiser.html#iguanas.rule_optimisation.DirectSearchOptimiser.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PandasDataFrameType</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Optimises a set of rules (given in the standard Iguanas lambda expression</span>
 <span class="sd">        format) using Direct Search-type algorithms.</span>
@@ -331,7 +389,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        PandasDataFrameType</span>
-<span class="sd">            The binary columns of the optimised + unoptimisable (but </span>
+<span class="sd">            The binary columns of the optimised + unoptimisable (but</span>
 <span class="sd">            applicable) rules on the fitted dataset.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -357,7 +415,8 @@
         <span class="k">return</span> <span class="n">X_rules</span></div>
 
 <div class="viewcode-block" id="DirectSearchOptimiser.create_bounds"><a class="viewcode-back" href="../../../api/api/iguanas.rule_optimisation.DirectSearchOptimiser.html#iguanas.rule_optimisation.DirectSearchOptimiser.create_bounds">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">create_bounds</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">create_bounds</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                      <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
                       <span class="n">lambda_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the `bounds` parameter using the min and max of each feature in</span>
@@ -384,7 +443,8 @@
         <span class="k">return</span> <span class="n">bounds</span></div>
 
 <div class="viewcode-block" id="DirectSearchOptimiser.create_x0"><a class="viewcode-back" href="../../../api/api/iguanas.rule_optimisation.DirectSearchOptimiser.html#iguanas.rule_optimisation.DirectSearchOptimiser.create_x0">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">create_x0</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">create_x0</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                  <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
                   <span class="n">lambda_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the `x0` parameter using the mid-range value of each feature in</span>
@@ -411,7 +471,8 @@
         <span class="k">return</span> <span class="n">x0</span></div>
 
 <div class="viewcode-block" id="DirectSearchOptimiser.create_initial_simplexes"><a class="viewcode-back" href="../../../api/api/iguanas.rule_optimisation.DirectSearchOptimiser.html#iguanas.rule_optimisation.DirectSearchOptimiser.create_initial_simplexes">[docs]</a>    <span class="o">@</span> <span class="nb">classmethod</span>
-    <span class="k">def</span> <span class="nf">create_initial_simplexes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">create_initial_simplexes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                                 <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
                                  <span class="n">lambda_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
                                  <span class="n">shape</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -465,19 +526,18 @@
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_features</span><span class="p">):</span>
                 <span class="n">feature_min</span> <span class="o">=</span> <span class="n">X_min</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
                 <span class="n">feature_max</span> <span class="o">=</span> <span class="n">X_max</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">feature_min</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">feature_max</span><span class="p">):</span>
-                    <span class="n">feature_vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                        <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_features</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">feature_vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
-                        <span class="n">feature_min</span><span class="p">,</span> <span class="n">feature_max</span><span class="o">+</span><span class="p">((</span><span class="n">feature_max</span><span class="o">-</span><span class="n">feature_min</span><span class="p">)</span><span class="o">/</span><span class="mi">1000</span><span class="p">),</span> <span class="n">num_features</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">feature_vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
+                    <span class="n">feature_min</span><span class="p">,</span> <span class="n">feature_max</span> <span class="o">+</span>
+                    <span class="p">((</span><span class="n">feature_max</span><span class="o">-</span><span class="n">feature_min</span><span class="p">)</span><span class="o">/</span><span class="mi">1000</span><span class="p">),</span> <span class="n">num_features</span><span class="o">+</span><span class="mi">1</span>
+                <span class="p">)</span>
                 <span class="n">initial_simplex</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_vertices</span>
             <span class="n">initial_simplex</span> <span class="o">=</span> <span class="n">initial_simplex</span><span class="o">.</span><span class="n">T</span>
             <span class="k">return</span> <span class="n">initial_simplex</span>
 
         <span class="k">if</span> <span class="n">shape</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Origin-based&quot;</span><span class="p">,</span> <span class="s2">&quot;Minimum-based&quot;</span><span class="p">,</span> <span class="s2">&quot;Random-based&quot;</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;`shape` must be either &quot;Origin-based&quot;, &quot;Minimum-based&quot; or &quot;Random-based&quot;&#39;</span><span class="p">)</span>
+                <span class="s1">&#39;`shape` must be either &quot;Origin-based&quot;, &quot;Minimum-based&quot; or &quot;Random-based&quot;&#39;</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="n">shape</span> <span class="o">==</span> <span class="s1">&#39;Origin-based&#39;</span><span class="p">:</span>
             <span class="n">initial_simplexes</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_param_base_calc</span><span class="p">(</span>
                 <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">lambda_kwargs</span><span class="o">=</span><span class="n">lambda_kwargs</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="s1">&#39;initial_simplex&#39;</span><span class="p">,</span>
@@ -507,6 +567,26 @@
                         <span class="n">sample_weight</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Optimise each rule in the set&quot;&quot;&quot;</span>
 
+        <span class="n">rule_lambdas_items</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">return_progress_ready_range</span><span class="p">(</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">rule_lambdas</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">with</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cores</span><span class="p">)</span> <span class="k">as</span> <span class="n">parallel</span><span class="p">:</span>
+            <span class="n">opt_rule_strings_list</span> <span class="o">=</span> <span class="n">parallel</span><span class="p">(</span><span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_optimise_single_rule</span><span class="p">)(</span>
+                <span class="n">rule_name</span><span class="p">,</span> <span class="n">rule_lambda</span><span class="p">,</span> <span class="n">lambda_kwargs</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">rule_name</span><span class="p">,</span> <span class="n">rule_lambda</span> <span class="ow">in</span> <span class="n">rule_lambdas_items</span>
+            <span class="p">)</span>
+        <span class="n">opt_rule_strings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">opt_rule_strings_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">opt_rule_strings</span>
+
+    <span class="k">def</span> <span class="nf">_optimise_single_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">rule_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                              <span class="n">rule_lambda</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
+                              <span class="n">lambda_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+                              <span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
+                              <span class="n">y</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">,</span>
+                              <span class="n">sample_weight</span><span class="p">:</span> <span class="n">PandasSeriesType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Optimises a single rule&quot;&quot;&quot;</span>
+
         <span class="k">def</span> <span class="nf">_objective</span><span class="p">(</span><span class="n">rule_vals</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
                        <span class="n">rule_lambda</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
                        <span class="n">rule_features</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
@@ -534,22 +614,15 @@
                 <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">(</span><span class="n">y_preds</span><span class="o">=</span><span class="n">y_pred</span><span class="p">)</span>
             <span class="k">return</span> <span class="o">-</span><span class="n">result</span>
 
-        <span class="n">opt_rule_strings</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">rule_lambdas_items</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">return_progress_ready_range</span><span class="p">(</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">rule_lambdas</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">minimize_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_kwargs_for_minimize</span><span class="p">(</span><span class="n">rule_name</span><span class="o">=</span><span class="n">rule_name</span><span class="p">)</span>
+        <span class="n">rule_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lambda_kwargs</span><span class="p">[</span><span class="n">rule_name</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">opt_val</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+            <span class="n">fun</span><span class="o">=</span><span class="n">_objective</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">rule_lambda</span><span class="p">,</span> <span class="n">rule_features</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="p">),</span>
+            <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">minimize_kwargs</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">rule_name</span><span class="p">,</span> <span class="n">rule_lambda</span> <span class="ow">in</span> <span class="n">rule_lambdas_items</span><span class="p">:</span>
-            <span class="n">minimize_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_kwargs_for_minimize</span><span class="p">(</span>
-                <span class="n">rule_name</span><span class="o">=</span><span class="n">rule_name</span><span class="p">)</span>
-            <span class="n">rule_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lambda_kwargs</span><span class="p">[</span><span class="n">rule_name</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-            <span class="n">opt_val</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
-                <span class="n">fun</span><span class="o">=</span><span class="n">_objective</span><span class="p">,</span>
-                <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">rule_lambda</span><span class="p">,</span> <span class="n">rule_features</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="p">),</span>
-                <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">minimize_kwargs</span>
-            <span class="p">)</span>
-            <span class="n">lambda_kwargs_opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">rule_features</span><span class="p">,</span> <span class="n">opt_val</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
-            <span class="n">opt_rule_strings</span><span class="p">[</span><span class="n">rule_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">rule_lambda</span><span class="p">(</span><span class="o">**</span><span class="n">lambda_kwargs_opt</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">opt_rule_strings</span>
+        <span class="n">lambda_kwargs_opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">rule_features</span><span class="p">,</span> <span class="n">opt_val</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">rule_name</span><span class="p">,</span> <span class="n">rule_lambda</span><span class="p">(</span><span class="o">**</span><span class="n">lambda_kwargs_opt</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_return_kwargs_for_minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rule_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -576,7 +649,9 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">minimize_kwargs</span>
 
-    <span class="k">def</span> <span class="nf">_return_opt_param_for_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">param_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_return_opt_param_for_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                   <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                   <span class="n">param_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
                                    <span class="n">rule_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Returns the keyword-argument for the given parameter and rule.&quot;&quot;&quot;</span>
 
@@ -590,12 +665,14 @@
             <span class="k">return</span> <span class="n">param_dict</span><span class="p">[</span><span class="n">rule_name</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;`</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1">` must be a dictionary with each element aligning with a rule.&#39;</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s1">&#39;`</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s1">` must be a dictionary with each element aligning with a rule.&#39;</span>
+            <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_param_base_calc</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">PandasDataFrameType</span><span class="p">,</span>
                          <span class="n">lambda_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
-                         <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+                         <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                         <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Base calculator for input parameters&quot;&quot;&quot;</span>
 
         <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
@@ -629,10 +706,12 @@
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">non_opt_rules</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Rules `</span><span class="si">{</span><span class="s2">&quot;`, `&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">non_opt_rules</span><span class="p">)</span><span class="si">}</span><span class="s1">` have no optimisable conditions - unable to calculate `</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">` for these rules&#39;</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s1">&#39;Rules `</span><span class="si">{</span><span class="s2">&quot;`, `&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">non_opt_rules</span><span class="p">)</span><span class="si">}</span><span class="s1">` have no optimisable conditions - unable to calculate `</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">` for these rules&#39;</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="n">missing_feat_rules</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Rules `</span><span class="si">{</span><span class="s2">&quot;`, `&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing_feat_rules</span><span class="p">)</span><span class="si">}</span><span class="s1">` use features that are missing from `X` - unable to calculate `</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">` for these rules&#39;</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s1">&#39;Rules `</span><span class="si">{</span><span class="s2">&quot;`, `&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing_feat_rules</span><span class="p">)</span><span class="si">}</span><span class="s1">` use features that are missing from `X` - unable to calculate `</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">` for these rules&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">results</span></div>
 </pre></div>
 

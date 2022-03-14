@@ -89,7 +89,21 @@ def _rule_dicts():
         'Rule7': {'condition': 'AND',
                   'rules': [{'field': 'kb_distance',
                              'operator': 'greater',
-                             'value': 1e-05}]}
+                             'value': 1e-05}]},
+        'Rule8': {'condition': 'OR',
+                  'rules': [{'field': 'payer_id_sum_approved_txn_amt_per_paypalid_1day',
+                             'operator': 'less_or_equal_field',
+                             'value': 'payer_id_sum_approved_txn_amt_per_paypalid_7day'},
+                            {'field': 'payer_id_sum_approved_txn_amt_per_paypalid_1day',
+                             'operator': 'less_field',
+                             'value': 'payer_id_sum_approved_txn_amt_per_paypalid_7day'}]},
+        'Rule9': {'condition': 'OR',
+                  'rules': [{'field': 'payer_id_sum_approved_txn_amt_per_paypalid_1day',
+                             'operator': 'greater_or_equal_field',
+                             'value': 'payer_id_sum_approved_txn_amt_per_paypalid_7day'},
+                            {'field': 'payer_id_sum_approved_txn_amt_per_paypalid_1day',
+                             'operator': 'greater_field',
+                             'value': 'payer_id_sum_approved_txn_amt_per_paypalid_7day'}]}
     }
     return rule_dicts
 
@@ -103,7 +117,10 @@ def _rule_strings_pandas():
         'Rule4': "(X['forwarder_address']==True)&(X['is_shipping_billing_address_same']==False)",
         'Rule5': "(~X['ad_price_type'].isin(['FREE', 'NEGOTIATION']))&(X['ad_price_type'].isin(['FOO', 'BAR']))",
         'Rule6': "(X['ip_country_iso_code']==X['billing_country'])&(X['country_id']!=X['ip_country_iso_code'])",
-        'Rule7': "(X['kb_distance']>1e-05)"
+        'Rule7': "(X['kb_distance']>1e-05)",
+        'Rule8': "(X['payer_id_sum_approved_txn_amt_per_paypalid_1day']<=X['payer_id_sum_approved_txn_amt_per_paypalid_7day'])|(X['payer_id_sum_approved_txn_amt_per_paypalid_1day']<X['payer_id_sum_approved_txn_amt_per_paypalid_7day'])",
+        'Rule9': "(X['payer_id_sum_approved_txn_amt_per_paypalid_1day']>=X['payer_id_sum_approved_txn_amt_per_paypalid_7day'])|(X['payer_id_sum_approved_txn_amt_per_paypalid_1day']>X['payer_id_sum_approved_txn_amt_per_paypalid_7day'])"
+
     }
     return rule_strings
 
@@ -117,7 +134,9 @@ def _rule_strings_numpy():
         'Rule4': "(X['forwarder_address'].to_numpy(na_value=np.nan)==True)&(X['is_shipping_billing_address_same'].to_numpy(na_value=np.nan)==False)",
         'Rule5': "(~X['ad_price_type'].isin(['FREE', 'NEGOTIATION']))&(X['ad_price_type'].isin(['FOO', 'BAR']))",
         'Rule6': "(X['ip_country_iso_code'].to_numpy(na_value=np.nan)==X['billing_country'].to_numpy(na_value=np.nan))&(X['country_id'].to_numpy(na_value=np.nan)!=X['ip_country_iso_code'].to_numpy(na_value=np.nan))",
-        'Rule7': "(X['kb_distance'].to_numpy(na_value=np.nan)>1e-05)"
+        'Rule7': "(X['kb_distance'].to_numpy(na_value=np.nan)>1e-05)",
+        'Rule8': "(X['payer_id_sum_approved_txn_amt_per_paypalid_1day'].to_numpy(na_value=np.nan)<=X['payer_id_sum_approved_txn_amt_per_paypalid_7day'].to_numpy(na_value=np.nan))|(X['payer_id_sum_approved_txn_amt_per_paypalid_1day'].to_numpy(na_value=np.nan)<X['payer_id_sum_approved_txn_amt_per_paypalid_7day'].to_numpy(na_value=np.nan))",
+        'Rule9': "(X['payer_id_sum_approved_txn_amt_per_paypalid_1day'].to_numpy(na_value=np.nan)>=X['payer_id_sum_approved_txn_amt_per_paypalid_7day'].to_numpy(na_value=np.nan))|(X['payer_id_sum_approved_txn_amt_per_paypalid_1day'].to_numpy(na_value=np.nan)>X['payer_id_sum_approved_txn_amt_per_paypalid_7day'].to_numpy(na_value=np.nan))"
     }
     return rule_strings
 
@@ -131,7 +150,9 @@ def _rule_lambdas_with_kwargs():
         'Rule4': lambda **kwargs: "(X['forwarder_address']==True)&(X['is_shipping_billing_address_same']==False)".format(**kwargs),
         'Rule5': lambda **kwargs: "(~X['ad_price_type'].isin(['FREE', 'NEGOTIATION']))&(X['ad_price_type'].isin(['FOO', 'BAR']))".format(**kwargs),
         'Rule6': lambda **kwargs: "(X['ip_country_iso_code']==X['billing_country'])&(X['country_id']!=X['ip_country_iso_code'])".format(**kwargs),
-        'Rule7': lambda **kwargs: "(X['kb_distance']>{kb_distance}".format(**kwargs)
+        'Rule7': lambda **kwargs: "(X['kb_distance']>{kb_distance}".format(**kwargs),
+        'Rule8': lambda **kwargs: "(X['payer_id_sum_approved_txn_amt_per_paypalid_1day']<=X['payer_id_sum_approved_txn_amt_per_paypalid_7day'])|(X['payer_id_sum_approved_txn_amt_per_paypalid_1day']<X['payer_id_sum_approved_txn_amt_per_paypalid_7day'])".format(**kwargs),
+        'Rule9': lambda **kwargs: "(X['payer_id_sum_approved_txn_amt_per_paypalid_1day']>=X['payer_id_sum_approved_txn_amt_per_paypalid_7day'])|(X['payer_id_sum_approved_txn_amt_per_paypalid_1day']>X['payer_id_sum_approved_txn_amt_per_paypalid_7day'])".format(**kwargs)
     }
     lambda_kwargs = {
         'Rule1': {'payer_id_sum_approved_txn_amt_per_paypalid_1day': 60.0, 'payer_id_sum_approved_txn_amt_per_paypalid_7day': 120.0, 'payer_id_sum_approved_txn_amt_per_paypalid_30day': 500, 'num_items': 1.0},
@@ -140,7 +161,9 @@ def _rule_lambdas_with_kwargs():
         'Rule4': {},
         'Rule5': {},
         'Rule6': {},
-        'Rule7': {'kb_distance': 1e-05}
+        'Rule7': {'kb_distance': 1e-05},
+        'Rule8': {},
+        'Rule9': {}
     }
     return rule_lambdas, lambda_kwargs
 
@@ -154,7 +177,9 @@ def _rule_lambdas_with_args():
         'Rule4': lambda *args: "(X['forwarder_address']==True)&(X['is_shipping_billing_address_same']==False)".format(*args),
         'Rule5': lambda *args: "(~X['ad_price_type'].isin(['FREE', 'NEGOTIATION']))&(X['ad_price_type'].isin(['FOO', 'BAR']))".format(*args),
         'Rule6': lambda *args: "(X['ip_country_iso_code']==X['billing_country'])&(X['country_id']!=X['ip_country_iso_code'])".format(*args),
-        'Rule7': lambda *args: "(X['kb_distance']>{}".format(*args)
+        'Rule7': lambda *args: "(X['kb_distance']>{}".format(*args),
+        'Rule8': lambda *args: "(X['payer_id_sum_approved_txn_amt_per_paypalid_1day']<=X['payer_id_sum_approved_txn_amt_per_paypalid_7day'])|(X['payer_id_sum_approved_txn_amt_per_paypalid_1day']<X['payer_id_sum_approved_txn_amt_per_paypalid_7day'])".format(*args),
+        'Rule9': lambda *args: "(X['payer_id_sum_approved_txn_amt_per_paypalid_1day']>=X['payer_id_sum_approved_txn_amt_per_paypalid_7day'])|(X['payer_id_sum_approved_txn_amt_per_paypalid_1day']>X['payer_id_sum_approved_txn_amt_per_paypalid_7day'])".format(*args)
     }
     lambda_args = {
         'Rule1': [60.0, 120.0, 500, 1.0],
@@ -163,7 +188,9 @@ def _rule_lambdas_with_args():
         'Rule4': [],
         'Rule5': [],
         'Rule6': [],
-        'Rule7': [1e-05]
+        'Rule7': [1e-05],
+        'Rule8': [],
+        'Rule9': []
     }
     return rule_lambdas, lambda_args
 
@@ -237,7 +264,7 @@ def test_add_and_radd():
 def test_repr(_rule_strings_pandas):
     rule_strings_pandas = _rule_strings_pandas
     r = Rules(rule_strings=rule_strings_pandas)
-    assert r.__repr__() == 'Rules object containing 7 rules'
+    assert r.__repr__() == 'Rules object containing 9 rules'
 
 
 def test_as_rule_dicts_starting_with_rule_strings(_rule_strings_pandas, _rule_strings_numpy, _rule_dicts):
@@ -461,7 +488,7 @@ def test_as_rule_lambdas_starting_with_rule_lambdas_with_kwargs_False(_rule_lamb
 def test_transform(_data, _rule_dicts):
     X, y_ = _data
     rule_dicts = _rule_dicts
-    exp_X_rules_sum = np.array([10, 285, 128,  98, 413, 179, 488])
+    exp_X_rules_sum = np.array([10, 285, 128,  98, 413, 179, 488, 939, 61])
     r = Rules(rule_dicts=rule_dicts)
     X_rules = r.transform(X)
     np.testing.assert_array_equal(X_rules.sum().values, exp_X_rules_sum)
@@ -536,6 +563,14 @@ def test_get_rule_features(_rule_dicts):
         },
         'Rule7': {
             'kb_distance'
+        },
+        'Rule8': {
+            'payer_id_sum_approved_txn_amt_per_paypalid_1day',
+            'payer_id_sum_approved_txn_amt_per_paypalid_7day'
+        },
+        'Rule9': {
+            'payer_id_sum_approved_txn_amt_per_paypalid_1day',
+            'payer_id_sum_approved_txn_amt_per_paypalid_7day'
         }
     }
     rule_dicts = _rule_dicts
@@ -545,24 +580,22 @@ def test_get_rule_features(_rule_dicts):
 
 
 def test_errors():
-    with pytest.raises(ValueError):
-        r = Rules()
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='`rule_dicts` must be given'):
         r = Rules(rule_strings="X['A']>2")
         r._rule_dicts_to_rule_strings(as_numpy=False)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='`rule_strings` must be given'):
         r = Rules(rule_dicts={'ABC': {}})
         r._rule_strings_to_rule_dicts()
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='`rule_dicts` must be given'):
         r = Rules(rule_strings={'ABC': {}})
         r._rule_dicts_to_rule_lambdas(as_numpy=True, with_kwargs=True)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError, match='`include` and `exclude` contain similar values'):
         r = Rules(rule_strings={'Rule1': {}})
         r.filter_rules(include=['Rule1'], exclude=['Rule1'])
     with pytest.raises(ValueError, match='`lambda_kwargs` or `lambda_args` must be given when `rule_lambdas` is provided'):
         Rules(rule_lambdas={'Rule1': lambda x: None})
     with pytest.raises(ValueError, match='`rule_lambdas` must be given'):
-        r = Rules(rule_strings={})
+        r = Rules()
         r._rule_lambdas_to_rule_strings()
     with pytest.raises(ValueError, match='`lambda_kwargs` or `lambda_args` must be given'):
         r = Rules(rule_lambdas={'Rule1': lambda x: None}, lambda_kwargs={})

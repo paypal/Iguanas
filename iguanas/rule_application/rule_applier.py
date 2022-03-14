@@ -16,7 +16,29 @@ class RuleApplier:
     ----------
     rule_strings : Dict[str, str]
         Set of rules defined using the standard Iguanas string format 
-        (values) and their names (keys).        
+        (values) and their names (keys).   
+
+    Examples
+    --------
+    >>> from iguanas.rule_application import RuleApplier
+    >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })    
+    >>> rule_strings = {
+    ...     'Rule1': "X['A']==1",
+    ...     'Rule2': "X['B']==1",
+    ...     'Rule3': "(X['A']==1)&(X['B']==1)"
+    ... }
+    >>> ra = RuleApplier(rule_strings=rule_strings)
+    >>> X_rules = ra.transform(X=X)
+    >>> print(X_rules)     
+       Rule1  Rule2  Rule3
+    0      1      1      1
+    1      0      1      0
+    2      1      1      1
+    3      0      0      0
     """
 
     def __init__(self,
@@ -24,7 +46,8 @@ class RuleApplier:
         self.rule_strings = rule_strings
 
     def transform(self,
-                  X: Union[PandasDataFrameType, KoalasDataFrameType]) -> Union[PandasDataFrameType, KoalasDataFrameType]:
+                  X: Union[PandasDataFrameType, KoalasDataFrameType]) -> Union[
+                      PandasDataFrameType, KoalasDataFrameType]:
         """
         Applies the set of rules to a dataset, `X`.
 
@@ -44,7 +67,8 @@ class RuleApplier:
         X_rules = self._get_X_rules(X)
         return X_rules
 
-    def _get_X_rules(self, X: Union[PandasDataFrameType, KoalasDataFrameType]) -> Union[
+    def _get_X_rules(self,
+                     X: Union[PandasDataFrameType, KoalasDataFrameType]) -> Union[
             PandasDataFrameType, KoalasDataFrameType]:
         """
         Returns the binary columns of the list of rules applied to the 
@@ -57,7 +81,8 @@ class RuleApplier:
                 X_rule = eval(rule_string)
             except KeyError as e:
                 raise KeyError(
-                    f'Feature {e} in rule `{rule_name}` not found in `X`')
+                    f'Feature {e} in rule `{rule_name}` not found in `X`'
+                )
             if utils.is_type(X_rule, (PandasSeries, KoalasSeries)):
                 X_rule = X_rule.fillna(False).astype(int)
                 X_rule.name = rule_name

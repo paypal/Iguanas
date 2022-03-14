@@ -46,54 +46,8 @@ def concat(objs: List[Union[PandasDataFrameType, PandasSeriesType, KoalasDataFra
             return ks.concat(objs, **kwargs)
 
 
-def return_columns_types(X: Union[PandasDataFrameType, KoalasDataFrameType]) -> Tuple[List, List, List]:
-    """
-    Returns the integer, float and OHE categorical columns for a given dataset.
-
-    Parameters
-    ----------
-    X : Union[PandasDataFrameType, KoalasDataFrameType])
-        Dataset.
-
-    Returns
-    -------
-    Tuple[List, List, List]
-        List of integer columns, list of float columns, list of OHE categorical 
-        columns.
-    """
-
-    num_cols = X.shape[1]
-    int64_cols = list(
-        X.dtypes.index[(X.dtypes == 'Int64') | (X.dtypes == 'int64')]
-    )
-    if len(int64_cols) == num_cols:
-        int_cols = int64_cols
-        float_cols = []
-    elif int64_cols:
-        X_no_int64 = X.drop(int64_cols, axis=1)
-    else:
-        X_no_int64 = X
-    if is_type(X, [PandasDataFrame]) and len(int64_cols) < num_cols:
-        int_mask = np.sum(X_no_int64.to_numpy() -
-                          X_no_int64.to_numpy().round(), axis=0) == 0
-    elif is_type(X, [KoalasDataFrame]) and len(int64_cols) < num_cols:
-        int_mask = ((X_no_int64 - X_no_int64.round()).sum() == 0).to_numpy()
-    if len(int64_cols) < num_cols:
-        int_cols = int64_cols + list(X_no_int64.columns[int_mask])
-        float_cols = list(X_no_int64.columns[~int_mask])
-    if int_cols:
-        poss_ohe_cols_mask = (X[int_cols].nunique() == 2)
-        poss_ohe_cols = poss_ohe_cols_mask[poss_ohe_cols_mask].index.tolist()
-        min_zero_mask = (X[poss_ohe_cols].min() == 0)
-        max_one_mask = (X[poss_ohe_cols].max() == 1)
-        ohe_mask = min_zero_mask.to_numpy() * max_one_mask.to_numpy()
-        ohe_cat_cols = [poss_ohe_cols[i] for i, m in enumerate(ohe_mask) if m]
-    else:
-        ohe_cat_cols = []
-    return int_cols, ohe_cat_cols, float_cols
-
-
-def create_spark_df(X: KoalasDataFrameType, y: KoalasSeriesType,
+def create_spark_df(X: KoalasDataFrameType,
+                    y: KoalasSeriesType,
                     sample_weight=None) -> PySparkDataFrameType:
     """
     Creates a Spark DataFrame from the features and target given as Koalas 
@@ -128,8 +82,13 @@ def create_spark_df(X: KoalasDataFrameType, y: KoalasSeriesType,
 def calc_tps_fps_tns_fns(y_true: Union[PandasSeriesType, np.ndarray, KoalasSeriesType],
                          y_preds: Union[PandasSeriesType, PandasDataFrameType, np.ndarray,
                                         KoalasSeriesType, KoalasDataFrameType],
-                         sample_weight=None, tps=False, fps=False,
-                         tns=False, fns=False, tps_fps=False, tps_fns=False) -> Tuple[
+                         sample_weight=None,
+                         tps=False,
+                         fps=False,
+                         tns=False,
+                         fns=False,
+                         tps_fps=False,
+                         tps_fns=False) -> Tuple[
         Union[np.ndarray, float],
         Union[np.ndarray, float],
         Union[np.ndarray, float],
@@ -181,8 +140,11 @@ def calc_tps_fps_tns_fns(y_true: Union[PandasSeriesType, np.ndarray, KoalasSerie
                                                    KoalasDataFrameType],
                                     sample_weight: Union[PandasSeriesType,
                                                          np.ndarray],
-                                    tps: bool, fps: bool, tns: bool,
-                                    fns: bool, tps_fps: bool,
+                                    tps: bool,
+                                    fps: bool,
+                                    tns: bool,
+                                    fns: bool,
+                                    tps_fps: bool,
                                     tps_fns: bool) -> Tuple[
             Union[np.ndarray, float],
             Union[np.ndarray, float],
@@ -246,8 +208,12 @@ def calc_tps_fps_tns_fns(y_true: Union[PandasSeriesType, np.ndarray, KoalasSerie
         return tps_sum, fps_sum, tns_sum, fns_sum, tps_fps_sum, tps_fns_sum
 
     def _calc_tps_fps_tns_fns_spark(spark_df: PySparkDataFrameType,
-                                    features: List[str], tps: bool, fps: bool,
-                                    tns: bool, fns: bool, tps_fps: bool,
+                                    features: List[str],
+                                    tps: bool,
+                                    fps: bool,
+                                    tns: bool,
+                                    fns: bool,
+                                    tps_fps: bool,
                                     tps_fns: bool) -> Tuple[
             Union[np.ndarray, float],
             Union[np.ndarray, float],
@@ -323,7 +289,8 @@ def calc_tps_fps_tns_fns(y_true: Union[PandasSeriesType, np.ndarray, KoalasSerie
 
     if tps == False and fps == False and tns == False and fns == False and tps_fps == False and tps_fns == False:
         raise ValueError(
-            'One of the parameters `tps`, `fps`, `tns`, `fns`, `tps_fps` or `tps_fns` must be True')
+            'One of the parameters `tps`, `fps`, `tns`, `fns`, `tps_fps` or `tps_fns` must be True'
+        )
     if is_type(y_true, [KoalasSeries, KoalasDataFrame]) and is_type(y_preds, [KoalasSeries, KoalasDataFrame]):
         spark_df = create_spark_df(
             X=y_preds, y=y_true, sample_weight=sample_weight)
@@ -542,7 +509,8 @@ def return_conf_matrix(y_true: Union[PandasSeriesType, np.ndarray, KoalasSeriesT
     return conf_matrix
 
 
-def check_allowed_types(x: object, x_name: str,
+def check_allowed_types(x: object,
+                        x_name: str,
                         allowed_types: List[str]) -> None:
     """
     Checks whether the stringified type of `x` is in `allowed_types` - a list
@@ -572,7 +540,8 @@ def check_allowed_types(x: object, x_name: str,
             f'`{x_name}` must be a {allowed_types_str}. Current type is {x_type_str}.')
 
 
-def is_type(x: object, types: List[str]) -> bool:
+def is_type(x: object,
+            types: List[str]) -> bool:
     """
     Returns whether the stringified type of `x` is in `types` - a list of 
     stringified types.
@@ -639,5 +608,6 @@ def check_duplicate_cols(X: Union[PandasDataFrameType, KoalasDataFrameType],
     X_cols_dups_mask = X.columns.duplicated()
     if X_cols_dups_mask.sum() > 0:
         X_cols_dups = list(set(X.columns[X_cols_dups_mask]))
-        raise Exception(
-            f"""`{X_name}` contains duplicate column names - these are: '{"', '".join(X_cols_dups)}'""")
+        raise ValueError(
+            f"""`{X_name}` contains duplicate column names - these are: '{"', '".join(X_cols_dups)}'"""
+        )

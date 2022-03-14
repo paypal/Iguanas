@@ -1,11 +1,10 @@
 """Optimises a set of rules using Bayesian Optimisation."""
-from iguanas.rules import Rules
 import iguanas.utils as utils
 from iguanas.utils.types import NumpyArray, PandasDataFrame, PandasSeries
 from iguanas.utils.typing import PandasDataFrameType, PandasSeriesType
 from iguanas.rule_optimisation._base_optimiser import _BaseOptimiser
 import pandas as pd
-from typing import Callable, Dict, List, Set
+from typing import Callable, Dict, List, Set, Tuple
 from hyperopt import hp, tpe, fmin
 from hyperopt.pyll import scope
 import numpy as np
@@ -20,10 +19,10 @@ class BayesianOptimiser(_BaseOptimiser):
     Parameters
     ----------
     rule_lambdas : Dict[str, Callable[[Dict], str]]
-        Set of rules defined using the standard Iguanas lambda expression 
+        Set of rules defined using the standard Iguanas lambda expression
         format (values) and their names (keys).
     lambda_kwargs : Dict[str, Dict[str, float]]
-        For each rule (keys), a dictionary containing the features used in the 
+        For each rule (keys), a dictionary containing the features used in the
         rule (keys) and the current values (values).
     metric : Callable
         The optimisation function used to calculate the metric which the rules
@@ -31,20 +30,20 @@ class BayesianOptimiser(_BaseOptimiser):
     n_iter : int
         The number of iterations that the optimiser should perform.
     algorithm : Callable, optional
-        The algorithm leveraged by hyperopt's `fmin` function, which 
-        optimises the rules. Defaults to tpe.suggest, which corresponds to 
+        The algorithm leveraged by hyperopt's `fmin` function, which
+        optimises the rules. Defaults to tpe.suggest, which corresponds to
         Tree-of-Parzen-Estimator.
     num_cores : int, optional
-        The number of cores to use when optimising the rule thresholds. 
+        The number of cores to use when optimising the rule thresholds.
         Defaults to 1.
-    verbose : int, optional 
-        Controls the verbosity - the higher, the more messages. >0 : shows 
-        the overall progress of the optimisation process; >1 : shows the 
-        progress of the optimisation of each rule, as well as the overall 
-        optimisation process. Note that setting `verbose` > 1 only works 
+    verbose : int, optional
+        Controls the verbosity - the higher, the more messages. >0 : shows
+        the overall progress of the optimisation process; >1 : shows the
+        progress of the optimisation of each rule, as well as the overall
+        optimisation process. Note that setting `verbose` > 1 only works
         when `num_cores` = 1. Defaults to 0.
     **kwargs : tuple , optional
-        Any additional keyword arguments to pass to hyperopt's `fmin` 
+        Any additional keyword arguments to pass to hyperopt's `fmin`
         function.
 
     Attributes
@@ -54,14 +53,14 @@ class BayesianOptimiser(_BaseOptimiser):
         standard Iguanas string format (values) and their names (keys).
     rule_lambdas : Dict[str, object]
         The optimised rules + unoptimisable (but applicable), defined using the
-        standard Iguanas lambda expression format (values) and their names 
+        standard Iguanas lambda expression format (values) and their names
         (keys).
     lambda_kwargs : Dict[str, object]
-        The keyword arguments for the optimised + unoptimisable (but 
-        applicable) rules defined using the standard Iguanas lambda expression 
+        The keyword arguments for the optimised + unoptimisable (but
+        applicable) rules defined using the standard Iguanas lambda expression
         format.
     rules : Rules
-        The Rules object containing the optimised + unoptimisable (but 
+        The Rules object containing the optimised + unoptimisable (but
         applicable) rules.
     rule_names : List[str]
         The names of the optimised + unoptimisable (but applicable) rules.
@@ -81,26 +80,77 @@ class BayesianOptimiser(_BaseOptimiser):
         The optimisation metric (values) calculated for each original rule
         (keys).
     non_optimisable_rules : Rules
-        A `Rules` object containing the rules which contained exclusively 
+        A `Rules` object containing the rules which contained exclusively
         non-optimisable conditions.
     zero_varaince_rules : Rules
         A `Rules` object containing the rules which contained exclusively zero
-        variance features. 
+        variance features.
+
+    Examples
+    --------
+    >>> from iguanas.rule_optimisation import BayesianOptimiser
+    >>> from iguanas.rules import Rules
+    >>> from iguanas.metrics import FScore
+    >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [0.9, 0.2, 0.1, 0.3],
+    ...     'B': [0.01, 0.2, 0.5, 0.1]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> f1 = FScore(beta=1)
+    >>> rule_strings = {
+    ...     'Rule1': "X['A']>0",
+    ...     'Rule2': "X['B']>1",
+    ...     'Rule3': "(X['A']>0)|(X['B']>0)"
+    ... }
+    >>> rules = Rules(rule_strings=rule_strings)
+    >>> rule_lambdas = rules.as_rule_lambdas(
+    ...     as_numpy=False, 
+    ...     with_kwargs=True
+    ... )
+    >>> bo = BayesianOptimiser(
+    ...     rule_lambdas=rule_lambdas, 
+    ...     lambda_kwargs=rules.lambda_kwargs, 
+    ...     metric=f1.fit, 
+    ...     n_iter=10
+    ... )
+    >>> X_rules = bo.fit(X=X, y=y)
+    >>> print(X_rules)
+       Rule1  Rule2  Rule3
+    0      1      0      1
+    1      1      0      0
+    2      1      1      1
+    3      1      0      0
+    >>> print(bo.rule_strings)
+    {'Rule1': "(X['A']>0)", 'Rule2': "(X['B']>0.2481631882805597)", 'Rule3': "(X['A']>0.648569854008818)|(X['B']>0.2481631882805597)"}
+    >>> print(bo.opt_rule_performances)
+    {'Rule1': 0.6666666666666666, 'Rule2': 0.6666666666666666, 'Rule3': 1.0}
+    >>> X_rules = bo.transform(X=X)
+    >>> print(X_rules)
+       Rule1  Rule2  Rule3
+    0      1      0      1
+    1      1      0      0
+    2      1      1      1
+    3      1      0      0
     """
 
-    def __init__(self, rule_lambdas: Dict[str, Callable],
+    def __init__(self,
+                 rule_lambdas: Dict[str, Callable],
                  lambda_kwargs: Dict[str, Dict[str, float]],
                  metric: Callable,
-                 n_iter: int, algorithm=tpe.suggest, num_cores=1, verbose=0,
+                 n_iter: int,
+                 algorithm=tpe.suggest,
+                 num_cores=1,
+                 verbose=0,
                  **kwargs):
         _BaseOptimiser.__init__(
             self, rule_lambdas=rule_lambdas, lambda_kwargs=lambda_kwargs,
-            metric=metric
+            metric=metric, num_cores=num_cores, verbose=verbose
         )
         self.n_iter = n_iter
         self.algorithm = algorithm
-        self.verbose = verbose
-        self.num_cores = num_cores
         self.kwargs = kwargs
         self.rule_strings = {}
         self.rule_names = []
@@ -111,7 +161,10 @@ class BayesianOptimiser(_BaseOptimiser):
         else:
             return f'BayesianOptimiser object with {len(self.optimisable_rules.rule_strings)} optimised rules and {len(self.non_optimisable_rules.rule_strings)} unoptimisable rules'
 
-    def fit(self, X: PandasDataFrameType, y=None, sample_weight=None) -> PandasDataFrameType:
+    def fit(self,
+            X: PandasDataFrameType,
+            y=None,
+            sample_weight=None) -> PandasDataFrameType:
         """
         Optimises a set of rules (given in the standard Iguanas lambda expression
         format) using Bayesian Optimisation.
@@ -121,7 +174,7 @@ class BayesianOptimiser(_BaseOptimiser):
         X : PandasDataFrameType
             The feature set.
         y : PandasSeriesType, optional
-            The binary target column. Not required if optimising rules on 
+            The binary target column. Not required if optimising rules on
             unlabelled data. Defaults to None.
         sample_weight : PandasSeriesType, optional
             Record-wise weights to apply. Defaults to None.
@@ -129,7 +182,7 @@ class BayesianOptimiser(_BaseOptimiser):
         Returns
         -------
         PandasDataFrameType
-            The binary columns of the optimised + unoptimisable (but 
+            The binary columns of the optimised + unoptimisable (but
             applicable) rules on the fitted dataset.
         """
 
@@ -168,30 +221,38 @@ class BayesianOptimiser(_BaseOptimiser):
         )
         return X_rules
 
-    def _optimise_rules(self, rule_lambdas: Dict[str, Callable[[Dict], str]],
-                        lambda_kwargs: Dict[str, Dict[str, float]], X: PandasDataFrameType,
-                        y: PandasSeriesType, sample_weight: PandasSeriesType,
-                        int_cols: list, all_space_funcs: dict) -> Dict[str, str]:
+    def _optimise_rules(self,
+                        rule_lambdas: Dict[str, Callable[[Dict], str]],
+                        lambda_kwargs: Dict[str, Dict[str, float]],
+                        X: PandasDataFrameType,
+                        y: PandasSeriesType,
+                        sample_weight: PandasSeriesType,
+                        int_cols: list,
+                        all_space_funcs: dict) -> Dict[str, str]:
         """Optimises each rule in the set"""
 
         opt_rule_strings = {}
-        if self.verbose == 1:
-            rule_lambdas_items = utils.return_progress_ready_range(
-                verbose=self.verbose, range=rule_lambdas.items())
-        else:
-            rule_lambdas_items = rule_lambdas.items()
+        rule_lambdas_items = utils.return_progress_ready_range(
+            verbose=self.verbose, range=rule_lambdas.items()
+        )
         with Parallel(n_jobs=self.num_cores) as parallel:
             opt_rule_strings_list = parallel(delayed(self._optimise_single_rule)(
                 rule_name, rule_lambda, lambda_kwargs, X, y, sample_weight,
                 int_cols, all_space_funcs
             ) for rule_name, rule_lambda in rule_lambdas_items
             )
-        opt_rule_strings = dict(
-            zip(rule_lambdas.keys(), opt_rule_strings_list))
+        opt_rule_strings = dict(opt_rule_strings_list)
         return opt_rule_strings
 
-    def _optimise_single_rule(self, rule_name, rule_lambda, lambda_kwargs, X, y,
-                              sample_weight, int_cols, all_space_funcs):
+    def _optimise_single_rule(self,
+                              rule_name: str,
+                              rule_lambda: object,
+                              lambda_kwargs: Dict[str, Dict[str, float]],
+                              X: PandasDataFrameType,
+                              y: PandasSeriesType,
+                              sample_weight: PandasSeriesType,
+                              int_cols: List[str],
+                              all_space_funcs: dict) -> Tuple[str, str]:
         """Optimises a single rule"""
 
         if self.verbose > 1:
@@ -206,7 +267,7 @@ class BayesianOptimiser(_BaseOptimiser):
             algorithm=self.algorithm, verbose=self.verbose, kwargs=self.kwargs)
         opt_thresholds = self._convert_opt_int_values(
             opt_thresholds=opt_thresholds, int_cols=int_cols)
-        return rule_lambda(**opt_thresholds)
+        return rule_name, rule_lambda(**opt_thresholds)
 
     @staticmethod
     def _return_int_cols(X: PandasDataFrameType) -> List[str]:
@@ -269,7 +330,8 @@ class BayesianOptimiser(_BaseOptimiser):
     @staticmethod
     def _optimise_rule_thresholds(rule_lambda: Callable[[Dict], str],
                                   rule_space_funcs: Dict[str, hp.uniform],
-                                  X_: PandasDataFrameType, y: PandasSeriesType,
+                                  X_: PandasDataFrameType,
+                                  y: PandasSeriesType,
                                   sample_weight: PandasSeriesType,
                                   metric: Callable,
                                   algorithm: Callable,

@@ -29,16 +29,50 @@ class RuleScorer:
     ----------
     rule_scores : Dict[str, int]
         Contains the generated score (values) for each rule (keys).
+
+    Examples
+    --------
+    >>> from iguanas.rule_scoring import RuleScorer, PerformanceScorer, ConstantScaler
+    >>> import pandas as pd
+    >>> from iguanas.metrics import FScore
+    >>> X_rules = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> f1 = FScore(beta=1)
+    >>> rs = RuleScorer(
+    ... scoring_class=PerformanceScorer(metric=f1.fit),
+    ... scaling_class=ConstantScaler(limit=100)
+    ... )
+    >>> rs.fit(X_rules=X_rules, y=y)
+    >>> print(rs.rule_scores)
+    A    100
+    B     80
+    dtype: int64
+    >>> X_scores = rs.transform(X_rules=X_rules)
+    >>> print(X_scores)
+         A   B
+    0  100  80
+    1    0  80
+    2  100  80
+    3    0   0
     """
 
-    def __init__(self, scoring_class: Union[PerformanceScorer, LogRegScorer,
-                                            RandomForestScorer],
+    def __init__(self,
+                 scoring_class: Union[
+                     PerformanceScorer, LogRegScorer, RandomForestScorer
+                 ],
                  scaling_class=None):
 
         self.scoring_class = scoring_class
         self.scaling_class = scaling_class
 
-    def fit(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
+    def fit(self,
+            X_rules: PandasDataFrameType,
+            y: PandasSeriesType,
             sample_weight=None) -> None:
         """
         Generates rule scores using the rule binary columns and the binary 
@@ -61,7 +95,8 @@ class RuleScorer:
             self.rule_scores = self.scaling_class.fit(
                 rule_scores=self.rule_scores)
 
-    def transform(self, X_rules: PandasDataFrameType) -> PandasDataFrameType:
+    def transform(self,
+                  X_rules: PandasDataFrameType) -> PandasDataFrameType:
         """
         Transforms the rule binary columns to show the generated scores applied
         to the dataset (i.e. replaces the 1 in `X_rules` with the generated 
@@ -81,7 +116,9 @@ class RuleScorer:
         X_scores = self.rule_scores * X_rules
         return X_scores
 
-    def fit_transform(self, X_rules: PandasDataFrameType, y: PandasSeriesType,
+    def fit_transform(self,
+                      X_rules: PandasDataFrameType,
+                      y: PandasSeriesType,
                       sample_weight=None) -> PandasDataFrameType:
         """
         Generates rule scores using the rule binary columns and the binary 

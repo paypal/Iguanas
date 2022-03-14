@@ -44,5 +44,5 @@ def test_convert_with_lambda_args(_expected_results):
 
 
 def test_error():
-    with pytest.raises(Exception, match='Either `lambda_kwargs` or `lambda_args` must be provided'):
+    with pytest.raises(ValueError, match='Either `lambda_kwargs` or `lambda_args` must be provided'):
         c = _ConvertRuleLambdasToRuleStrings(rule_lambdas={})

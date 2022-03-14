@@ -26,36 +26,6 @@ def test_concat(create_data):
             [y_preds, y_true], axis=1).to_pandas())
 
 
-def test_return_columns_types():
-    X = ks.DataFrame({
-        'A': [2.5, 3.5, 1, 1, 2.5],
-        'B': [1, 0, 0, 1, 1],
-        'C': [1, 2, 0, 0, 1]
-    })
-    int_cols, cat_cols, float_cols = utils.return_columns_types(X)
-    assert int_cols == ['B', 'C']
-    assert cat_cols == ['B']
-    assert float_cols == ['A']
-    # Test when all ints
-    X = ks.DataFrame({
-        'A': [1, 0, 0, 1, 1],
-        'B': [1, 0, 0, 1, 1],
-    })
-    int_cols, cat_cols, float_cols = utils.return_columns_types(X)
-    assert int_cols == ['A', 'B']
-    assert cat_cols == ['A', 'B']
-    assert float_cols == []
-    # Test when all floats
-    X = ks.DataFrame({
-        'A': [1.2, 0, 0, 1.1, 1],
-        'B': [1.5, 0, 0, 1, 1.1],
-    })
-    int_cols, cat_cols, float_cols = utils.return_columns_types(X)
-    assert int_cols == []
-    assert cat_cols == []
-    assert float_cols == ['A', 'B']
-
-
 def test_create_spark_df(create_data):
     y_true, y_preds, sample_weight = create_data
     spark_df = utils.create_spark_df(y_preds, y_true)

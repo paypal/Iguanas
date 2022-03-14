@@ -768,7 +768,7 @@ div.rendered_html tbody tr:hover {
 <li><p>Return the parameter set which generated the highest mean overall score across the validation datasets.</p></li>
 </ul>
 <p>In this example, we’ll consider the following workflow:</p>
-<center><p><img alt="999bececba534a6d9a6bfa043594696b" src="../../_images/workflow_example.png" /></p>
+<center><p><img alt="ebd4b803016446a6a85cbaea4fa487ee" src="../../_images/workflow_example.png" /></p>
 </center><p>We’ll use the <code class="docutils literal notranslate"><span class="pre">BayesSearchCV</span></code> class to optimise the hyperparameters of the steps in this workflow, <strong>ensuring that we acquire the maximum F1 score for our decision engine.</strong></p>
 <hr class="docutils" />
 <section id="Import-packages">
@@ -962,7 +962,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 <h2>Define the search space<a class="headerlink" href="#Define-the-search-space" title="Permalink to this headline">¶</a></h2>
 <p>Now we need to define the search space for each of the relevant parameters of our pipeline. To do this, we create a dictionary, where each key corresponds to the tag used for the relevant pipeline step. Each value should be a dictionary of the parameters (keys) and their search spaces (values). Search spaces should be defined using the classes in the <code class="docutils literal notranslate"><span class="pre">iguanas.space</span></code> module:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1021,7 +1021,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 <h2>Optimise the pipeline hyperparameters<a class="headerlink" href="#Optimise-the-pipeline-hyperparameters" title="Permalink to this headline">¶</a></h2>
 <p>Now that we have our pipeline and search spaces defined, we can instantiate the <code class="docutils literal notranslate"><span class="pre">BayesSearchCV</span></code> class. We’ll split our data into 3 cross-validation datasets and try 20 different parameter sets:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1040,7 +1040,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </div>
 <p>Finally, we can run the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method to optimise the hyperparameters of the pipeline:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1054,7 +1054,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 --- Optimising pipeline parameters ---
-100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 20/20 [00:24&lt;00:00,  1.22s/trial, best loss: -0.6965755602560381]
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 20/20 [00:23&lt;00:00,  1.16s/trial, best loss: -0.6965755602560381]
 --- Refitting on entire dataset with best pipeline ---
 </pre></div></div>
 </div>
@@ -1062,7 +1062,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 <h3>Outputs<a class="headerlink" href="#Outputs" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">fit</span></code> method doesn’t return anything. See the <code class="docutils literal notranslate"><span class="pre">Attributes</span></code> section in the class docstring for a description of each attribute generated:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1071,7 +1071,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1080,7 +1080,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1089,7 +1089,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1100,7 +1100,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1109,7 +1109,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1118,7 +1118,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1127,7 +1127,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1227,7 +1227,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </div>
 <p>To see the final optimised decision engine configuration and rule set, we first return the parameters of the trained pipeline (stored in the attribute <code class="docutils literal notranslate"><span class="pre">pipeline_</span></code>):</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1237,7 +1237,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </div>
 <p>Then, to see the final optimised decision engine configuration, we filter to the <code class="docutils literal notranslate"><span class="pre">config</span></code> parameter of the <code class="docutils literal notranslate"><span class="pre">rbs_optimiser</span></code> step:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1247,18 +1247,18 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[(1, [&#39;RGDT_Rule_20220210_18&#39;])]
+[(1, [&#39;RGDT_Rule_20220301_18&#39;])]
 </pre></div></div>
 </div>
 <p>This shows us which rules should be used for the rejection step (decision <code class="docutils literal notranslate"><span class="pre">1</span></code>).</p>
 <p>To see the logic of our final set of rules, we filter to the <code class="docutils literal notranslate"><span class="pre">rules</span></code> parameter of the <code class="docutils literal notranslate"><span class="pre">rbs_optimiser</span></code> step:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1268,7 +1268,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </div>
 <p>Then extract the <code class="docutils literal notranslate"><span class="pre">rule_strings</span></code> attribute:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1277,12 +1277,12 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;RGDT_Rule_20220210_18&#39;: &#34;(X[&#39;Sex_male&#39;]==False)&#34;}
+{&#39;RGDT_Rule_20220301_18&#39;: &#34;(X[&#39;Sex_male&#39;]==False)&#34;}
 </pre></div></div>
 </div>
 </section>
@@ -1291,7 +1291,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 <h2>Apply the optimised pipeline<a class="headerlink" href="#Apply-the-optimised-pipeline" title="Permalink to this headline">¶</a></h2>
 <p>We can apply our optimised pipeline to a new data set and make a prediction using the <code class="docutils literal notranslate"><span class="pre">predict</span></code> method:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1303,7 +1303,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 <h3>Outputs<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">predict</span></code> method returns the prediction generated by class in the final step of the pipeline - in this case, the <code class="docutils literal notranslate"><span class="pre">RBSOptimiser</span></code>:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1312,7 +1312,7 @@ what case, using the <code class="docutils literal notranslate"><span class="pre
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1334,7 +1334,7 @@ Length: 295, dtype: int64
 </div>
 <p>We can now calculate the F1 score of our optimised pipeline using the test data:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1344,7 +1344,7 @@ Length: 295, dtype: int64
 </div>
 <p>Comparing this to our original, unoptimised pipeline:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1354,7 +1354,7 @@ Length: 295, dtype: int64
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1363,7 +1363,7 @@ Length: 295, dtype: int64
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>

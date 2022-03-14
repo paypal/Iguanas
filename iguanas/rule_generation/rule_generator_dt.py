@@ -47,6 +47,13 @@ class RuleGeneratorDT(_BaseGenerator):
         correlated features wrt the target (under the key `NegativeCorr`),
         or 'Infer' (where each target-feature correlation type is inferred
         from the data). Defaults to None.
+    infer_dtypes : bool, optional
+        Dictates whether the column datatypes should be inferred from the data.
+        If True, the integer, float and categorical-type (e.g. one hot encoded)
+        columns are inferred from the values in the dataset `X`. If False, the
+        datatypes from the dataset are used (i.e. `X.dtypes`). Note that if 
+        False, any categorical-type columns should be stored as the `bool`
+        datatype. Defaults to True.
     verbose : int, optional
         Controls the verbosity - the higher, the more messages. >0 : gives
         the overall progress of the training of the ensemble model and the
@@ -69,14 +76,53 @@ class RuleGeneratorDT(_BaseGenerator):
         The Rules object containing the generated rules.
     rule_names : List[str]
         The names of the generated rules.
+
+    Examples
+    --------
+    >>> from iguanas.rule_generation import RuleGeneratorDT
+    >>> from iguanas.metrics import FScore
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> import pandas as pd
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> f1 = FScore(beta=1)
+    >>> rg = RuleGeneratorDT(
+    ...     metric=f1.fit, 
+    ...     n_total_conditions=2, 
+    ...     tree_ensemble=RandomForestClassifier(random_state=0), 
+    ...     rule_name_prefix='Rule'
+    ... )
+    >>> X_rules = rg.fit(X=X, y=y)
+    >>> print(X_rules)
+       Rule_0  Rule_1  Rule_2
+    0       1       1       1
+    1       0       0       1
+    2       1       1       1
+    3       0       0       0
+    >>> print(rg.rule_strings)
+    {'Rule_0': "(X['A']==True)", 'Rule_1': "(X['A']==True)&(X['B']==True)", 'Rule_2': "(X['B']==True)"}
+    >>> X_rules = rg.transform(X=X)
+    >>> print(X_rules)
+       Rule_0  Rule_1  Rule_2
+    0       1       1       1
+    1       0       0       1
+    2       1       1       1
+    3       0       0       0
     """
 
-    def __init__(self, metric: Callable,
+    def __init__(self,
+                 metric: Callable,
                  n_total_conditions: int,
                  tree_ensemble: Union[RandomForestClassifier, ExtraTreesClassifier],
                  precision_threshold=0,
                  num_cores=1,
                  target_feat_corr_types=None,
+                 infer_dtypes=True,
                  verbose=0,
                  rule_name_prefix='RGDT_Rule'):
 
@@ -85,12 +131,13 @@ class RuleGeneratorDT(_BaseGenerator):
             metric=metric,
             target_feat_corr_types=target_feat_corr_types,
             rule_name_prefix=rule_name_prefix,
+            infer_dtypes=infer_dtypes,
+            verbose=verbose
         )
         self.tree_ensemble = tree_ensemble
         self.n_total_conditions = n_total_conditions
         self.precision_threshold = precision_threshold
         self.num_cores = num_cores
-        self.verbose = verbose
         self.rule_strings = {}
         self.rule_names = []
 
@@ -100,7 +147,9 @@ class RuleGeneratorDT(_BaseGenerator):
         else:
             return f'RuleGeneratorDT(metric={self.metric}, n_total_conditions={self.n_total_conditions}, tree_ensemble={self.tree_ensemble}, precision_threshold={self.precision_threshold}, num_cores={self.num_cores}, target_feat_corr_types={self.target_feat_corr_types})'
 
-    def fit(self, X: PandasDataFrameType, y: PandasSeriesType,
+    def fit(self,
+            X: PandasDataFrameType,
+            y: PandasSeriesType,
             sample_weight=None) -> PandasDataFrameType:
         """
         Generates rules by extracting the highest performing branches in a tree
@@ -142,7 +191,9 @@ class RuleGeneratorDT(_BaseGenerator):
             )
         if self.verbose:
             print('--- Returning column datatypes ---')
-        columns_int, columns_cat, _ = utils.return_columns_types(X)
+        columns_int, columns_cat, _ = self._return_columns_types(
+            infer_dtypes=self.infer_dtypes, X=X
+        )
         if self.verbose:
             print('--- Training tree ensemble ---')
         trained_tree_ensemble = self._train_ensemble(
@@ -152,20 +203,18 @@ class RuleGeneratorDT(_BaseGenerator):
             print('--- Extracting rules from tree ensemble ---')
         X_rules = self._extract_rules_from_ensemble(
             X=X,
-            y=y,
             num_cores=self.num_cores,
             tree_ensemble=trained_tree_ensemble,
             columns_int=columns_int,
-            columns_cat=columns_cat,
-            sample_weight=sample_weight
+            columns_cat=columns_cat
         )
         self._generate_other_rule_formats()
         return X_rules
 
-    def _extract_rules_from_ensemble(self, X: PandasDataFrameType, y: PandasSeriesType,
+    def _extract_rules_from_ensemble(self,
+                                     X: PandasDataFrameType,
                                      tree_ensemble: Union[RandomForestClassifier, ExtraTreesClassifier],
                                      num_cores: int,
-                                     sample_weight: PandasSeriesType,
                                      columns_int: List[str],
                                      columns_cat: List[str]) -> PandasDataFrameType:
         """
@@ -187,13 +236,16 @@ class RuleGeneratorDT(_BaseGenerator):
         )
         if not self.rule_strings:
             raise NoRulesError(
-                'No rules could be generated. Try changing the class parameters.')
+                'No rules could be generated. Try changing the class parameters.'
+            )
         X_rules = self.transform(X=X)
         return X_rules
 
-    def _extract_rules_from_dt(self, columns: List[str],
+    def _extract_rules_from_dt(self,
+                               columns: List[str],
                                decision_tree: DecisionTreeClassifier,
-                               columns_int: List[str], columns_cat: List[str]) -> Set[str]:
+                               columns_int: List[str],
+                               columns_cat: List[str]) -> Set[str]:
         """
         Removes low precision DTs and returns the rules from the DT.
         """
@@ -212,7 +264,8 @@ class RuleGeneratorDT(_BaseGenerator):
             )
 
     @staticmethod
-    def _train_ensemble(X: PandasDataFrameType, y: PandasSeriesType,
+    def _train_ensemble(X: PandasDataFrameType,
+                        y: PandasSeriesType,
                         tree_ensemble: Union[RandomForestClassifier,
                                              ExtraTreesClassifier],
                         sample_weight: PandasSeriesType,
@@ -231,8 +284,7 @@ class RuleGeneratorDT(_BaseGenerator):
         return tree_ensemble
 
     @staticmethod
-    def _get_dt_attributes(decision_tree: DecisionTreeClassifier) -> Tuple[
-            np.ndarray]:
+    def _get_dt_attributes(decision_tree: DecisionTreeClassifier) -> Tuple[np.ndarray]:
         """Returns the attributes associated with a given DT"""
 
         left = decision_tree.tree_.children_left

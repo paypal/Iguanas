@@ -68,35 +68,22 @@ python -m ipykernel install --user --name iguanas_dev
 
 ## Testing
 
-You can run all unit and notebook tests for the Spark and non-Spark modules using the commands:
+You can run all unit, docstring and notebook tests for the **Spark and non-Spark modules** using the command:
 
 ```bash
-pytest --nbmake --nbmake-kernel=iguanas_dev <path-to-Iguanas-repo>/iguanas
-pytest --nbmake --nbmake-kernel=iguanas_dev <path-to-Iguanas-repo>/examples
+sh <path-to-Iguanas-repo>/run_all_tests.sh iguanas_dev
 ```
 
-To run only the unit tests of the non-Spark modules, use the command:
+You can run the tests for the **non-Spark modules only** using the command:
 
 ```bash
-sh <path-to-Iguanas-repo>/run_unit_tests.sh
+sh <path-to-Iguanas-repo>/run_tests_non_spark.sh iguanas_dev
 ```
 
-To run only the unit tests of the Spark modules, use the command:
+You can run the tests for the **Spark modules only** using the command:
 
 ```bash
-sh <path-to-Iguanas-repo>/run_unit_tests_spark.sh
-```
-
-To run only the notebook tests of the non-Spark modules, use the command:
-
-```bash
-sh <path-to-Iguanas-repo>/run_nb_makes.sh iguanas_dev
-```
-
-To run only the notebook tests of the Spark modules, use the command:
-
-```bash
-sh <path-to-Iguanas-repo>/run_nb_makes_spark.sh
+sh <path-to-Iguanas-repo>/run_tests_spark.sh iguanas_dev
 ```
 
 ## Submitting a change

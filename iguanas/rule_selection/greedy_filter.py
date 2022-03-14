@@ -43,6 +43,35 @@ class GreedyFilter(_BaseFilter):
     score : float
         The combined performance (i.e. the value of `metric`) of the rules
         which give the best combined performance.
+
+    Examples
+    --------
+    >>> from iguanas.metrics import Precision, FScore
+    >>> from iguanas.rule_selection import GreedyFilter
+    >>> import pandas as pd
+    >>> X_rules = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> p = Precision()
+    >>> f1 = FScore(beta=1)
+    >>> gf = GreedyFilter(
+    ...     metric=f1.fit,
+    ...     sorting_metric=p.fit
+    ... )
+    >>> gf.fit(X_rules=X_rules, y=y)
+    >>> print(gf.rules_to_keep)
+    ['A']
+    >>> X_rules = gf.transform(X_rules=X_rules)
+    >>> print(X_rules)
+       A
+    0  1
+    1  0
+    2  1
+    3  0
     """
 
     def __init__(self,
@@ -62,7 +91,9 @@ class GreedyFilter(_BaseFilter):
         else:
             return f'GreedyFilter(metric={self.metric}, sorting_metric={self.sorting_metric})'
 
-    def fit(self, X_rules: PandasDataFrameType, y=PandasSeriesType,
+    def fit(self,
+            X_rules: PandasDataFrameType,
+            y=PandasSeriesType,
             sample_weight=None) -> None:
         """
         Sorts rules by a given metric, calculates the combined performance of
@@ -125,7 +156,8 @@ class GreedyFilter(_BaseFilter):
             figsize=figsize
         )
 
-    def plot_top_n_performance(self, X_rules: PandasDataFrameType,
+    def plot_top_n_performance(self,
+                               X_rules: PandasDataFrameType,
                                y: PandasSeriesType,
                                sample_weight=None,
                                figsize=(10, 5),
@@ -173,7 +205,8 @@ class GreedyFilter(_BaseFilter):
 
     def _sort_rules(self,
                     X_rules: PandasDataFrameType,
-                    y: PandasSeriesType, sample_weight: PandasSeriesType,
+                    y: PandasSeriesType,
+                    sample_weight: PandasSeriesType,
                     sorting_metric: Callable,
                     metric: Callable) -> List[str]:
         """
@@ -235,7 +268,8 @@ class GreedyFilter(_BaseFilter):
         return rules_to_keep, score
 
     @ staticmethod
-    def _plot_performance(data: PandasDataFrameType, title: str,
+    def _plot_performance(data: PandasDataFrameType,
+                          title: str,
                           figsize: Tuple[int, int]) -> sns.lineplot:
         """Creates seaborn lineplot"""
 

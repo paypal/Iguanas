@@ -7,6 +7,13 @@ class DataFrameSizeError(Exception):
 
 class NoRulesError(Exception):
     """
-    Custom exception for no rules can be generated.
+    Custom exception for when rules cannot be generated.
+    """
+    pass
+
+
+class RulesNotOptimisedError(Exception):
+    """
+    Custom exception for when rules cannot be optimised.
     """
     pass

@@ -462,16 +462,16 @@
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#Fraud-LinearPipeline">
-     Fraud
+    <a class="reference internal nav-link" href="#Reject-LinearPipeline">
+     Reject
      <em>
       LinearPipeline
      </em>
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#Good-LinearPipeline">
-     Good
+    <a class="reference internal nav-link" href="#Approve-LinearPipeline">
+     Approve
      <em>
       LinearPipeline
      </em>
@@ -799,9 +799,9 @@ div.rendered_html tbody tr:hover {
 <li><p>Return the parameter set which generated the highest mean overall score across the validation datasets.</p></li>
 </ul>
 <p>In this example, we’ll consider the following more advanced workflow (compared to the standard <code class="docutils literal notranslate"><span class="pre">bayes_search_cv_example</span></code> notebook), which considers the generation of a Rules-Based System for a credit card fraud transaction use case:</p>
-<center><p><img alt="338831aafee445e48a29e008cbebfd2e" src="../../_images/complex_example.png" /></p>
-</center><p>Here, we have a fraud detection use case, and we’re aiming to create two distinct rule sets - one for flagging fraudulent behaviour; one for flagging good behaviour. Each of these rule sets will be comprised of a generated rule set and an existing rule set. We’ll optimise and filter these two rule sets separately, then combine and feed them into the decision engine optimiser. <strong>Note:</strong> we optimise the generated rules as they’ll be created using the <code class="docutils literal notranslate"><span class="pre">RuleGeneratorDT</span></code> class, which generates
-rules from the branches of decision trees - these split based on gini or entropy - so we can further optimise them for a specific metric.</p>
+<center><p><img alt="a566bc40d2fe480a86b23c8d364b8377" src="../../_images/complex_example.png" /></p>
+</center><p>Here, we have a fraud detection use case, and we’re aiming to create two distinct rule sets - one for flagging fraudulent behaviour (which we’ll refer to as our <strong>Reject</strong> rule set); one for flagging good behaviour (which we’ll refer to as our <strong>Approve</strong> rule set). Each of these rule sets will be comprised of a generated rule set and an existing rule set. We’ll optimise and filter these two rule sets separately, then combine and feed them into the decision engine optimiser. <strong>Note:</strong> we
+optimise the generated rules as they’ll be created using the <code class="docutils literal notranslate"><span class="pre">RuleGeneratorDT</span></code> class, which generates rules from the branches of decision trees - these split based on gini or entropy - so we can further optimise them for a specific metric.</p>
 <p><strong>The decision engine will have the following constraint:</strong> for a given transaction, if any approve rules fire it will be approved; else, if any reject rules fire it will be rejected; else, it will be approved.</p>
 <p>We’ll use the <code class="docutils literal notranslate"><span class="pre">BayesSearchCV</span></code> class to optimise the hyperparameters of the steps in this workflow, <strong>ensuring that we maximise the revenue for our decision engine.</strong></p>
 <hr class="docutils" />
@@ -930,11 +930,11 @@ rules from the branches of decision trees - these split based on gini or entropy
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">fraud_rule_strings</span> <span class="o">=</span> <span class="p">{</span>
+<span></span><span class="n">reject_rule_strings</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;ExistingReject1&quot;</span><span class="p">:</span> <span class="s2">&quot;((X[&#39;V1&#39;]&lt;0)|(X[&#39;V1&#39;].isna()))&amp;(X[&#39;V3&#39;]&lt;1)&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ExistingReject2&quot;</span><span class="p">:</span> <span class="s2">&quot;(X[&#39;V2&#39;]&gt;3)&quot;</span><span class="p">,</span>
 <span class="p">}</span>
-<span class="n">good_rule_strings</span> <span class="o">=</span> <span class="p">{</span>
+<span class="n">approve_rule_strings</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;ExistingApprove1&quot;</span><span class="p">:</span> <span class="s2">&quot;(X[&#39;V1&#39;]&gt;0)&amp;(X[&#39;V3&#39;]&gt;1)&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ExistingApprove2&quot;</span><span class="p">:</span> <span class="s2">&quot;(X[&#39;V2&#39;]&lt;3)&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ExistingApprove3&quot;</span><span class="p">:</span> <span class="s2">&quot;(X[&#39;V4&#39;]&lt;3)&quot;</span>
@@ -948,8 +948,8 @@ rules from the branches of decision trees - these split based on gini or entropy
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">fraud_rules</span> <span class="o">=</span> <span class="n">Rules</span><span class="p">(</span><span class="n">rule_strings</span><span class="o">=</span><span class="n">fraud_rule_strings</span><span class="p">)</span>
-<span class="n">good_rules</span> <span class="o">=</span> <span class="n">Rules</span><span class="p">(</span><span class="n">rule_strings</span><span class="o">=</span><span class="n">good_rule_strings</span><span class="p">)</span>
+<span></span><span class="n">reject_rules</span> <span class="o">=</span> <span class="n">Rules</span><span class="p">(</span><span class="n">rule_strings</span><span class="o">=</span><span class="n">reject_rule_strings</span><span class="p">)</span>
+<span class="n">approve_rules</span> <span class="o">=</span> <span class="n">Rules</span><span class="p">(</span><span class="n">rule_strings</span><span class="o">=</span><span class="n">approve_rule_strings</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -959,11 +959,11 @@ rules from the branches of decision trees - these split based on gini or entropy
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">fraud_rule_lambdas</span> <span class="o">=</span> <span class="n">fraud_rules</span><span class="o">.</span><span class="n">as_rule_lambdas</span><span class="p">(</span>
+<span></span><span class="n">reject_rule_lambdas</span> <span class="o">=</span> <span class="n">reject_rules</span><span class="o">.</span><span class="n">as_rule_lambdas</span><span class="p">(</span>
     <span class="n">as_numpy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">with_kwargs</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span>
-<span class="n">good_rule_lambdas</span> <span class="o">=</span> <span class="n">good_rules</span><span class="o">.</span><span class="n">as_rule_lambdas</span><span class="p">(</span>
+<span class="n">approve_rule_lambdas</span> <span class="o">=</span> <span class="n">approve_rules</span><span class="o">.</span><span class="n">as_rule_lambdas</span><span class="p">(</span>
     <span class="n">as_numpy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">with_kwargs</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span>
@@ -977,9 +977,9 @@ rules from the branches of decision trees - these split based on gini or entropy
 <h2>Set up pipeline<a class="headerlink" href="#Set-up-pipeline" title="Permalink to this headline">¶</a></h2>
 <p>Before we can apply the <code class="docutils literal notranslate"><span class="pre">BayesSearchCV</span></code> class, we need to set up our pipeline. To create the workflow shown at the beginning of the notebook, we must use a combination of <code class="docutils literal notranslate"><span class="pre">LinearPipeline</span></code> and <code class="docutils literal notranslate"><span class="pre">ParallelPipeline</span></code> classes as shown below:</p>
 <img alt="title" src="../../_images/complex_example_setup.png" />
-<p>Let’s begin building the <strong>Fraud LinearPipeline</strong>.</p>
-<section id="Fraud-LinearPipeline">
-<h3>Fraud <em>LinearPipeline</em><a class="headerlink" href="#Fraud-LinearPipeline" title="Permalink to this headline">¶</a></h3>
+<p>Let’s begin building the <strong>Reject LinearPipeline</strong>.</p>
+<section id="Reject-LinearPipeline">
+<h3>Reject <em>LinearPipeline</em><a class="headerlink" href="#Reject-LinearPipeline" title="Permalink to this headline">¶</a></h3>
 <p>Let’s first instantiate the classes that we’ll use in the pipeline:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -992,7 +992,7 @@ rules from the branches of decision trees - these split based on gini or entropy
 <span class="n">p</span> <span class="o">=</span> <span class="n">Precision</span><span class="p">()</span>
 
 <span class="c1"># Rule generation</span>
-<span class="n">fraud_gen</span> <span class="o">=</span> <span class="n">RuleGeneratorDT</span><span class="p">(</span>
+<span class="n">reject_gen</span> <span class="o">=</span> <span class="n">RuleGeneratorDT</span><span class="p">(</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
     <span class="n">n_total_conditions</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
     <span class="n">tree_ensemble</span><span class="o">=</span><span class="n">RandomForestClassifier</span><span class="p">(</span>
@@ -1004,13 +1004,13 @@ rules from the branches of decision trees - these split based on gini or entropy
 <span class="p">)</span>
 
 <span class="c1"># Rule optimisation (for generated rules)</span>
-<span class="n">fraud_gen_opt</span> <span class="o">=</span> <span class="n">BayesianOptimiser</span><span class="p">(</span>
+<span class="n">reject_gen_opt</span> <span class="o">=</span> <span class="n">BayesianOptimiser</span><span class="p">(</span>
     <span class="n">rule_lambdas</span><span class="o">=</span><span class="n">ClassAccessor</span><span class="p">(</span>
-        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;fraud_gen&#39;</span><span class="p">,</span>
+        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;reject_gen&#39;</span><span class="p">,</span>
         <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rule_lambdas&#39;</span>
     <span class="p">),</span>
     <span class="n">lambda_kwargs</span><span class="o">=</span><span class="n">ClassAccessor</span><span class="p">(</span>
-        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;fraud_gen&#39;</span><span class="p">,</span>
+        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;reject_gen&#39;</span><span class="p">,</span>
         <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;lambda_kwargs&#39;</span>
     <span class="p">),</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
@@ -1018,15 +1018,15 @@ rules from the branches of decision trees - these split based on gini or entropy
 <span class="p">)</span>
 
 <span class="c1"># Rule optimisation (for existing rules)</span>
-<span class="n">fraud_opt</span> <span class="o">=</span> <span class="n">BayesianOptimiser</span><span class="p">(</span>
-    <span class="n">rule_lambdas</span><span class="o">=</span><span class="n">fraud_rule_lambdas</span><span class="p">,</span>
-    <span class="n">lambda_kwargs</span><span class="o">=</span><span class="n">fraud_rules</span><span class="o">.</span><span class="n">lambda_kwargs</span><span class="p">,</span>
+<span class="n">reject_opt</span> <span class="o">=</span> <span class="n">BayesianOptimiser</span><span class="p">(</span>
+    <span class="n">rule_lambdas</span><span class="o">=</span><span class="n">reject_rule_lambdas</span><span class="p">,</span>
+    <span class="n">lambda_kwargs</span><span class="o">=</span><span class="n">reject_rules</span><span class="o">.</span><span class="n">lambda_kwargs</span><span class="p">,</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
     <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span>
 <span class="p">)</span>
 
 <span class="c1"># Rule filter (performance-based)</span>
-<span class="n">fraud_sf</span> <span class="o">=</span> <span class="n">SimpleFilter</span><span class="p">(</span>
+<span class="n">reject_sf</span> <span class="o">=</span> <span class="n">SimpleFilter</span><span class="p">(</span>
     <span class="n">threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
     <span class="n">operator</span><span class="o">=</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span>
@@ -1034,7 +1034,7 @@ rules from the branches of decision trees - these split based on gini or entropy
 
 <span class="c1"># Rule filter (correlation-based)</span>
 <span class="n">js</span> <span class="o">=</span> <span class="n">JaccardSimilarity</span><span class="p">()</span>
-<span class="n">fraud_cf</span> <span class="o">=</span> <span class="n">CorrelatedFilter</span><span class="p">(</span>
+<span class="n">reject_cf</span> <span class="o">=</span> <span class="n">CorrelatedFilter</span><span class="p">(</span>
     <span class="n">correlation_reduction_class</span><span class="o">=</span><span class="n">AgglomerativeClusteringReducer</span><span class="p">(</span>
         <span class="n">threshold</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
         <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;top_down&#39;</span><span class="p">,</span>
@@ -1042,64 +1042,64 @@ rules from the branches of decision trees - these split based on gini or entropy
         <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span>
     <span class="p">),</span>
     <span class="n">rules</span><span class="o">=</span><span class="n">ClassAccessor</span><span class="p">(</span>
-        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;fraud_gen&#39;</span><span class="p">,</span>
+        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;reject_gen&#39;</span><span class="p">,</span>
         <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rules&#39;</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p>Now we can create our <strong>Fraud Rule Generation LinearPipeline</strong>. Note that we pass the tag for the optimisation of the generated rules to the <code class="docutils literal notranslate"><span class="pre">use_init_data</span></code> parameter, so that the feature set is passed to the <code class="docutils literal notranslate"><span class="pre">BayesianOptimiser</span></code> class, rather than the output from the <code class="docutils literal notranslate"><span class="pre">RuleGeneratorDT</span></code>:</p>
+<p>Now we can create our <strong>Reject Rule Generation LinearPipeline</strong>. Note that we pass the tag for the optimisation of the generated rules to the <code class="docutils literal notranslate"><span class="pre">use_init_data</span></code> parameter, so that the feature set is passed to the <code class="docutils literal notranslate"><span class="pre">BayesianOptimiser</span></code> class, rather than the output from the <code class="docutils literal notranslate"><span class="pre">RuleGeneratorDT</span></code>:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">fraud_gen_lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span>
+<span></span><span class="n">reject_gen_lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span>
     <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s1">&#39;fraud_gen&#39;</span><span class="p">,</span> <span class="n">fraud_gen</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;fraud_gen_opt&#39;</span><span class="p">,</span> <span class="n">fraud_gen_opt</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;reject_gen&#39;</span><span class="p">,</span> <span class="n">reject_gen</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;reject_gen_opt&#39;</span><span class="p">,</span> <span class="n">reject_gen_opt</span><span class="p">),</span>
     <span class="p">],</span>
-    <span class="n">use_init_data</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;fraud_gen_opt&#39;</span><span class="p">]</span>
+    <span class="n">use_init_data</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;reject_gen_opt&#39;</span><span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p>And then our <strong>Fraud ParallelPipeline</strong> (noting that one of the steps in this pipeline is the <strong>Fraud Rule Generation LinearPipeline</strong> created above):</p>
+<p>And then our <strong>Reject ParallelPipeline</strong> (noting that one of the steps in this pipeline is the <strong>Reject Rule Generation LinearPipeline</strong> created above):</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">fraud_gen_lp</span> <span class="o">=</span> <span class="n">ParallelPipeline</span><span class="p">(</span>
+<span></span><span class="n">reject_pp</span> <span class="o">=</span> <span class="n">ParallelPipeline</span><span class="p">(</span>
     <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s1">&#39;fraud_gen_lp&#39;</span><span class="p">,</span> <span class="n">fraud_gen_lp</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;fraud_opt&#39;</span><span class="p">,</span> <span class="n">fraud_opt</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;reject_gen_lp&#39;</span><span class="p">,</span> <span class="n">reject_gen_lp</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;reject_opt&#39;</span><span class="p">,</span> <span class="n">reject_opt</span><span class="p">),</span>
     <span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p>And then finally, our <strong>Fraud LinearPipeline</strong>:</p>
+<p>And then finally, our <strong>Reject LinearPipeline</strong>:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">fraud_lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span>
+<span></span><span class="n">reject_lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span>
     <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s1">&#39;fraud_gen_lp&#39;</span><span class="p">,</span> <span class="n">fraud_gen_lp</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;fraud_sf&#39;</span><span class="p">,</span> <span class="n">fraud_sf</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;fraud_cf&#39;</span><span class="p">,</span> <span class="n">fraud_cf</span><span class="p">)</span>
+        <span class="p">(</span><span class="s1">&#39;reject_pp&#39;</span><span class="p">,</span> <span class="n">reject_pp</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;reject_sf&#39;</span><span class="p">,</span> <span class="n">reject_sf</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;reject_cf&#39;</span><span class="p">,</span> <span class="n">reject_cf</span><span class="p">)</span>
     <span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p>Now we can do the same for the <strong>Good LinearPipeline</strong>:</p>
+<p>Now we can do the same for the <strong>Approve LinearPipeline</strong>:</p>
 </section>
-<section id="Good-LinearPipeline">
-<h3>Good <em>LinearPipeline</em><a class="headerlink" href="#Good-LinearPipeline" title="Permalink to this headline">¶</a></h3>
+<section id="Approve-LinearPipeline">
+<h3>Approve <em>LinearPipeline</em><a class="headerlink" href="#Approve-LinearPipeline" title="Permalink to this headline">¶</a></h3>
 <p>Let’s first instantiate the classes that we’ll use in the pipeline:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
@@ -1107,7 +1107,7 @@ rules from the branches of decision trees - these split based on gini or entropy
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># Rule generation</span>
-<span class="n">good_gen</span> <span class="o">=</span> <span class="n">RuleGeneratorDT</span><span class="p">(</span>
+<span class="n">approve_gen</span> <span class="o">=</span> <span class="n">RuleGeneratorDT</span><span class="p">(</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
     <span class="n">n_total_conditions</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
     <span class="n">tree_ensemble</span><span class="o">=</span><span class="n">RandomForestClassifier</span><span class="p">(</span>
@@ -1119,13 +1119,13 @@ rules from the branches of decision trees - these split based on gini or entropy
 <span class="p">)</span>
 
 <span class="c1"># Rule optimisation (for generated rules)</span>
-<span class="n">good_gen_opt</span> <span class="o">=</span> <span class="n">BayesianOptimiser</span><span class="p">(</span>
+<span class="n">approve_gen_opt</span> <span class="o">=</span> <span class="n">BayesianOptimiser</span><span class="p">(</span>
     <span class="n">rule_lambdas</span><span class="o">=</span><span class="n">ClassAccessor</span><span class="p">(</span>
-        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;good_gen&#39;</span><span class="p">,</span>
+        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;approve_gen&#39;</span><span class="p">,</span>
         <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rule_lambdas&#39;</span>
     <span class="p">),</span>
     <span class="n">lambda_kwargs</span><span class="o">=</span><span class="n">ClassAccessor</span><span class="p">(</span>
-        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;good_gen&#39;</span><span class="p">,</span>
+        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;approve_gen&#39;</span><span class="p">,</span>
         <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;lambda_kwargs&#39;</span>
     <span class="p">),</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
@@ -1133,15 +1133,15 @@ rules from the branches of decision trees - these split based on gini or entropy
 <span class="p">)</span>
 
 <span class="c1"># Rule optimisation (for existing rules)</span>
-<span class="n">good_opt</span> <span class="o">=</span> <span class="n">BayesianOptimiser</span><span class="p">(</span>
-    <span class="n">rule_lambdas</span><span class="o">=</span><span class="n">good_rule_lambdas</span><span class="p">,</span>
-    <span class="n">lambda_kwargs</span><span class="o">=</span><span class="n">good_rules</span><span class="o">.</span><span class="n">lambda_kwargs</span><span class="p">,</span>
+<span class="n">approve_opt</span> <span class="o">=</span> <span class="n">BayesianOptimiser</span><span class="p">(</span>
+    <span class="n">rule_lambdas</span><span class="o">=</span><span class="n">approve_rule_lambdas</span><span class="p">,</span>
+    <span class="n">lambda_kwargs</span><span class="o">=</span><span class="n">approve_rules</span><span class="o">.</span><span class="n">lambda_kwargs</span><span class="p">,</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span>
     <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span>
 <span class="p">)</span>
 
 <span class="c1"># Rule filter (performance-based)</span>
-<span class="n">good_sf</span> <span class="o">=</span> <span class="n">SimpleFilter</span><span class="p">(</span>
+<span class="n">approve_sf</span> <span class="o">=</span> <span class="n">SimpleFilter</span><span class="p">(</span>
     <span class="n">threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
     <span class="n">operator</span><span class="o">=</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span>
     <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span>
@@ -1149,7 +1149,7 @@ rules from the branches of decision trees - these split based on gini or entropy
 
 <span class="c1"># Rule filter (correlation-based)</span>
 <span class="n">js</span> <span class="o">=</span> <span class="n">JaccardSimilarity</span><span class="p">()</span>
-<span class="n">good_cf</span> <span class="o">=</span> <span class="n">CorrelatedFilter</span><span class="p">(</span>
+<span class="n">approve_cf</span> <span class="o">=</span> <span class="n">CorrelatedFilter</span><span class="p">(</span>
     <span class="n">correlation_reduction_class</span><span class="o">=</span><span class="n">AgglomerativeClusteringReducer</span><span class="p">(</span>
         <span class="n">threshold</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
         <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;top_down&#39;</span><span class="p">,</span>
@@ -1157,55 +1157,55 @@ rules from the branches of decision trees - these split based on gini or entropy
         <span class="n">metric</span><span class="o">=</span><span class="n">f1</span><span class="o">.</span><span class="n">fit</span>
     <span class="p">),</span>
     <span class="n">rules</span><span class="o">=</span><span class="n">ClassAccessor</span><span class="p">(</span>
-        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;good_gen&#39;</span><span class="p">,</span>
+        <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;approve_gen&#39;</span><span class="p">,</span>
         <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rules&#39;</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p>Now we can create our <strong>Good Rule Generation LinearPipeline</strong>. Note that we pass the tag for the optimisation of the generated rules to the <code class="docutils literal notranslate"><span class="pre">use_init_data</span></code> parameter, so that the feature set is passed to the <code class="docutils literal notranslate"><span class="pre">BayesianOptimiser</span></code> class, rather than the output from the <code class="docutils literal notranslate"><span class="pre">RuleGeneratorDT</span></code>:</p>
+<p>Now we can create our <strong>Approve Rule Generation LinearPipeline</strong>. Note that we pass the tag for the optimisation of the generated rules to the <code class="docutils literal notranslate"><span class="pre">use_init_data</span></code> parameter, so that the feature set is passed to the <code class="docutils literal notranslate"><span class="pre">BayesianOptimiser</span></code> class, rather than the output from the <code class="docutils literal notranslate"><span class="pre">RuleGeneratorDT</span></code>:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">good_gen_lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span>
+<span></span><span class="n">approve_gen_lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span>
     <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s1">&#39;good_gen&#39;</span><span class="p">,</span> <span class="n">good_gen</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;good_gen_opt&#39;</span><span class="p">,</span> <span class="n">good_gen_opt</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;approve_gen&#39;</span><span class="p">,</span> <span class="n">approve_gen</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;approve_gen_opt&#39;</span><span class="p">,</span> <span class="n">approve_gen_opt</span><span class="p">),</span>
     <span class="p">],</span>
-    <span class="n">use_init_data</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;good_gen_opt&#39;</span><span class="p">]</span>
+    <span class="n">use_init_data</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;approve_gen_opt&#39;</span><span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p>And then our <strong>Good ParallelPipeline</strong> (noting that one of the steps in this pipeline is the <strong>Good Rule Generation LinearPipeline</strong> created above):</p>
+<p>And then our <strong>Approve ParallelPipeline</strong> (noting that one of the steps in this pipeline is the <strong>Approve Rule Generation LinearPipeline</strong> created above):</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">good_gen_lp</span> <span class="o">=</span> <span class="n">ParallelPipeline</span><span class="p">(</span>
+<span></span><span class="n">approve_pp</span> <span class="o">=</span> <span class="n">ParallelPipeline</span><span class="p">(</span>
     <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s1">&#39;good_gen_lp&#39;</span><span class="p">,</span> <span class="n">good_gen_lp</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;good_opt&#39;</span><span class="p">,</span> <span class="n">good_opt</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;approve_gen_lp&#39;</span><span class="p">,</span> <span class="n">approve_gen_lp</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;approve_opt&#39;</span><span class="p">,</span> <span class="n">approve_opt</span><span class="p">),</span>
     <span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p>And then finally, our <strong>Good LinearPipeline</strong>:</p>
+<p>And then finally, our <strong>Approve LinearPipeline</strong>:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">good_lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span>
+<span></span><span class="n">approve_lp</span> <span class="o">=</span> <span class="n">LinearPipeline</span><span class="p">(</span>
     <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s1">&#39;good_gen_lp&#39;</span><span class="p">,</span> <span class="n">good_gen_lp</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;good_sf&#39;</span><span class="p">,</span> <span class="n">good_sf</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;good_cf&#39;</span><span class="p">,</span> <span class="n">good_cf</span><span class="p">)</span>
+        <span class="p">(</span><span class="s1">&#39;approve_pp&#39;</span><span class="p">,</span> <span class="n">approve_pp</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;approve_sf&#39;</span><span class="p">,</span> <span class="n">approve_sf</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;approve_cf&#39;</span><span class="p">,</span> <span class="n">approve_cf</span><span class="p">)</span>
     <span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
@@ -1215,7 +1215,7 @@ rules from the branches of decision trees - these split based on gini or entropy
 </section>
 <section id="Overall-Pipelines">
 <h3>Overall Pipelines<a class="headerlink" href="#Overall-Pipelines" title="Permalink to this headline">¶</a></h3>
-<p>First, we’ll construct our <strong>Overall ParallelPipeline</strong> using the <strong>Fraud LinearPipeline</strong> and <strong>Good LinearPipeline</strong>:</p>
+<p>First, we’ll construct our <strong>Overall ParallelPipeline</strong> using the <strong>Reject LinearPipeline</strong> and <strong>Approve LinearPipeline</strong>:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
@@ -1223,8 +1223,8 @@ rules from the branches of decision trees - these split based on gini or entropy
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">overall_pp</span> <span class="o">=</span> <span class="n">ParallelPipeline</span><span class="p">(</span>
     <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s1">&#39;fraud_lp&#39;</span><span class="p">,</span> <span class="n">fraud_lp</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;good_lp&#39;</span><span class="p">,</span> <span class="n">good_lp</span><span class="p">)</span>
+        <span class="p">(</span><span class="s1">&#39;reject_lp&#39;</span><span class="p">,</span> <span class="n">reject_lp</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;approve_lp&#39;</span><span class="p">,</span> <span class="n">approve_lp</span><span class="p">)</span>
     <span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
@@ -1247,13 +1247,13 @@ rules from the branches of decision trees - these split based on gini or entropy
     <span class="n">config</span><span class="o">=</span><span class="p">[</span>
         <span class="p">[</span>
             <span class="mi">0</span><span class="p">,</span> <span class="n">ClassAccessor</span><span class="p">(</span> <span class="c1"># If any approve rules fire, approve</span>
-                <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;good_cf&#39;</span><span class="p">,</span>
+                <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;approve_cf&#39;</span><span class="p">,</span>
                 <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rules_to_keep&#39;</span>
             <span class="p">),</span>
         <span class="p">],</span>
         <span class="p">[</span>
             <span class="mi">1</span><span class="p">,</span> <span class="n">ClassAccessor</span><span class="p">(</span> <span class="c1"># Else if any reject rules fire, reject</span>
-                <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;fraud_cf&#39;</span><span class="p">,</span>
+                <span class="n">class_tag</span><span class="o">=</span><span class="s1">&#39;reject_cf&#39;</span><span class="p">,</span>
                 <span class="n">class_attribute</span><span class="o">=</span><span class="s1">&#39;rules_to_keep&#39;</span>
             <span class="p">)</span>
         <span class="p">],</span>
@@ -1312,16 +1312,16 @@ rules from the branches of decision trees - these split based on gini or entropy
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">search_spaces</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;fraud_gen&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;reject_gen&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;n_total_conditions&#39;</span><span class="p">:</span> <span class="n">UniformInteger</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
     <span class="p">},</span>
-    <span class="s1">&#39;fraud_gen_opt&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;reject_gen_opt&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">Choice</span><span class="p">([</span><span class="n">f0dot25</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span> <span class="n">f0dot5</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span> <span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">]),</span>
     <span class="p">},</span>
-    <span class="s1">&#39;fraud_sf&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;reject_sf&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;threshold&#39;</span><span class="p">:</span> <span class="n">UniformFloat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">},</span>
-    <span class="s1">&#39;fraud_cf&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;reject_cf&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;correlation_reduction_class&#39;</span><span class="p">:</span> <span class="n">Choice</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="n">AgglomerativeClusteringReducer</span><span class="p">(</span>
@@ -1339,16 +1339,16 @@ rules from the branches of decision trees - these split based on gini or entropy
             <span class="p">]</span>
         <span class="p">)</span>
     <span class="p">},</span>
-    <span class="s1">&#39;good_gen&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;approve_gen&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;n_total_conditions&#39;</span><span class="p">:</span> <span class="n">UniformInteger</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
     <span class="p">},</span>
-    <span class="s1">&#39;good_gen_opt&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;approve_gen_opt&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">Choice</span><span class="p">([</span><span class="n">f0dot25</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span> <span class="n">f0dot5</span><span class="o">.</span><span class="n">fit</span><span class="p">,</span> <span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">]),</span>
     <span class="p">},</span>
-    <span class="s1">&#39;good_sf&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;approve_sf&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;threshold&#39;</span><span class="p">:</span> <span class="n">UniformFloat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">},</span>
-    <span class="s1">&#39;good_cf&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;approve_cf&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;correlation_reduction_class&#39;</span><span class="p">:</span> <span class="n">Choice</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="n">AgglomerativeClusteringReducer</span><span class="p">(</span>
@@ -1408,19 +1408,19 @@ rules from the branches of decision trees - these split based on gini or entropy
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">bs</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
     <span class="n">X</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;fraud_gen_lp&#39;</span><span class="p">:</span> <span class="n">X_train</span><span class="p">,</span> <span class="c1"># Use processed features for rule generation</span>
-        <span class="s1">&#39;fraud_opt&#39;</span><span class="p">:</span> <span class="n">X_train_raw</span><span class="p">,</span> <span class="c1"># Use raw features for optimising existing rules</span>
-        <span class="s1">&#39;good_gen_lp&#39;</span><span class="p">:</span> <span class="n">X_train</span><span class="p">,</span> <span class="c1"># Use processed features for rule generation</span>
-        <span class="s1">&#39;good_opt&#39;</span><span class="p">:</span> <span class="n">X_train_raw</span> <span class="c1"># Use raw features for optimising existing rules</span>
+        <span class="s1">&#39;reject_lp&#39;</span><span class="p">:</span> <span class="n">X_train</span><span class="p">,</span> <span class="c1"># Use processed features for rule generation</span>
+        <span class="s1">&#39;reject_opt&#39;</span><span class="p">:</span> <span class="n">X_train_raw</span><span class="p">,</span> <span class="c1"># Use raw features for optimising existing rules</span>
+        <span class="s1">&#39;approve_lp&#39;</span><span class="p">:</span> <span class="n">X_train</span><span class="p">,</span> <span class="c1"># Use processed features for rule generation</span>
+        <span class="s1">&#39;approve_opt&#39;</span><span class="p">:</span> <span class="n">X_train_raw</span> <span class="c1"># Use raw features for optimising existing rules</span>
     <span class="p">},</span>
     <span class="n">y</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;fraud_lp&#39;</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span> <span class="c1"># Use target for Fraud LinearPipeline</span>
-        <span class="s1">&#39;good_lp&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="o">-</span><span class="n">y_train</span><span class="p">,</span> <span class="c1"># Flip target for Good LinearPipeline</span>
+        <span class="s1">&#39;reject_lp&#39;</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span> <span class="c1"># Use target for Reject LinearPipeline</span>
+        <span class="s1">&#39;approve_lp&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="o">-</span><span class="n">y_train</span><span class="p">,</span> <span class="c1"># Flip target for Approve LinearPipeline</span>
         <span class="s1">&#39;rbs_optimiser&#39;</span><span class="p">:</span> <span class="n">y_train</span> <span class="c1"># Use target for RBSOptimiser</span>
     <span class="p">},</span>
     <span class="n">sample_weight</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;fraud_lp&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># No sample_weight for Fraud LinearPipeline</span>
-        <span class="s1">&#39;good_lp&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># No sample_weight for Good LinearPipeline</span>
+        <span class="s1">&#39;reject_lp&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># No sample_weight for Reject LinearPipeline</span>
+        <span class="s1">&#39;approve_lp&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="c1"># No sample_weight for Approve LinearPipeline</span>
         <span class="s1">&#39;rbs_optimiser&#39;</span><span class="p">:</span> <span class="n">amts_train</span> <span class="c1"># sample_weight for RBSOptimiser</span>
     <span class="p">}</span>
 <span class="p">)</span>
@@ -1433,7 +1433,7 @@ rules from the branches of decision trees - these split based on gini or entropy
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 --- Optimising pipeline parameters ---
-100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10/10 [01:04&lt;00:00,  6.43s/trial, best loss: -560248.5233333333]
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10/10 [01:13&lt;00:00,  7.37s/trial, best loss: -555025.6433333332]
 --- Refitting on entire dataset with best pipeline ---
 </pre></div></div>
 </div>
@@ -1455,7 +1455,7 @@ rules from the branches of decision trees - these split based on gini or entropy
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-560248.5233333333
+555025.6433333332
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1473,14 +1473,14 @@ rules from the branches of decision trees - these split based on gini or entropy
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;fraud_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)},
- &#39;fraud_gen&#39;: {&#39;n_total_conditions&#39;: 7.0},
- &#39;fraud_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=0.5&gt;},
- &#39;fraud_sf&#39;: {&#39;threshold&#39;: 0.43381170823234194},
- &#39;good_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.95, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)},
- &#39;good_gen&#39;: {&#39;n_total_conditions&#39;: 5.0},
- &#39;good_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=0.25&gt;},
- &#39;good_sf&#39;: {&#39;threshold&#39;: 0.5309641649521473}}
+{&#39;approve_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)},
+ &#39;approve_gen&#39;: {&#39;n_total_conditions&#39;: 7.0},
+ &#39;approve_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=0.5&gt;},
+ &#39;approve_sf&#39;: {&#39;threshold&#39;: 0.43381170823234194},
+ &#39;reject_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.95, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)},
+ &#39;reject_gen&#39;: {&#39;n_total_conditions&#39;: 5.0},
+ &#39;reject_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=0.25&gt;},
+ &#39;reject_sf&#39;: {&#39;threshold&#39;: 0.5309641649521473}}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1534,14 +1534,14 @@ rules from the branches of decision trees - these split based on gini or entropy
     <tr style="text-align: right;">
       <th></th>
       <th>Params</th>
-      <th>fraud_cf__correlation_reduction_class</th>
-      <th>fraud_gen__n_total_conditions</th>
-      <th>fraud_gen_opt__metric</th>
-      <th>fraud_sf__threshold</th>
-      <th>good_cf__correlation_reduction_class</th>
-      <th>good_gen__n_total_conditions</th>
-      <th>good_gen_opt__metric</th>
-      <th>good_sf__threshold</th>
+      <th>approve_cf__correlation_reduction_class</th>
+      <th>approve_gen__n_total_conditions</th>
+      <th>approve_gen_opt__metric</th>
+      <th>approve_sf__threshold</th>
+      <th>reject_cf__correlation_reduction_class</th>
+      <th>reject_gen__n_total_conditions</th>
+      <th>reject_gen_opt__metric</th>
+      <th>reject_sf__threshold</th>
       <th>FoldIdx</th>
       <th>Scores</th>
       <th>MeanScore</th>
@@ -1551,7 +1551,7 @@ rules from the branches of decision trees - these split based on gini or entropy
   <tbody>
     <tr>
       <th>1</th>
-      <td>{'fraud_cf': {'correlation_reduction_class': A...</td>
+      <td>{'approve_cf': {'correlation_reduction_class':...</td>
       <td>AgglomerativeClusteringReducer(threshold=0.9, ...</td>
       <td>7.0</td>
       <td>&lt;bound method FScore.fit of FScore with beta=0.5&gt;</td>
@@ -1561,29 +1561,45 @@ rules from the branches of decision trees - these split based on gini or entropy
       <td>&lt;bound method FScore.fit of FScore with beta=0...</td>
       <td>0.530964</td>
       <td>[0, 1, 2]</td>
-      <td>[572899.38, 572468.7999999999, 535377.39]</td>
-      <td>560248.523333</td>
-      <td>17587.425522</td>
+      <td>[572829.7, 569910.5599999999, 522336.67000000004]</td>
+      <td>555025.643333</td>
+      <td>23145.295818</td>
     </tr>
     <tr>
-      <th>4</th>
-      <td>{'fraud_cf': {'correlation_reduction_class': A...</td>
+      <th>3</th>
+      <td>{'approve_cf': {'correlation_reduction_class':...</td>
       <td>AgglomerativeClusteringReducer(threshold=0.95,...</td>
-      <td>3.0</td>
-      <td>&lt;bound method FScore.fit of FScore with beta=1&gt;</td>
-      <td>0.455055</td>
+      <td>2.0</td>
+      <td>&lt;bound method FScore.fit of FScore with beta=0...</td>
+      <td>0.457207</td>
+      <td>AgglomerativeClusteringReducer(threshold=0.9, ...</td>
+      <td>4.0</td>
+      <td>&lt;bound method FScore.fit of FScore with beta=0...</td>
+      <td>0.528692</td>
+      <td>[0, 1, 2]</td>
+      <td>[573229.7, 555044.7199999999, 535382.05]</td>
+      <td>554552.156667</td>
+      <td>15455.163465</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>{'approve_cf': {'correlation_reduction_class':...</td>
       <td>AgglomerativeClusteringReducer(threshold=0.95,...</td>
       <td>3.0</td>
       <td>&lt;bound method FScore.fit of FScore with beta=0.5&gt;</td>
-      <td>0.147420</td>
+      <td>0.195596</td>
+      <td>AgglomerativeClusteringReducer(threshold=0.9, ...</td>
+      <td>4.0</td>
+      <td>&lt;bound method FScore.fit of FScore with beta=1&gt;</td>
+      <td>0.486047</td>
       <td>[0, 1, 2]</td>
-      <td>[571558.6399999999, 573567.72, 535370.05]</td>
-      <td>560165.470000</td>
-      <td>17552.183916</td>
+      <td>[572817.9400000001, 555595.08, 524511.97]</td>
+      <td>550974.996667</td>
+      <td>19989.589989</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>{'fraud_cf': {'correlation_reduction_class': A...</td>
+      <td>{'approve_cf': {'correlation_reduction_class':...</td>
       <td>AgglomerativeClusteringReducer(threshold=0.95,...</td>
       <td>7.0</td>
       <td>&lt;bound method FScore.fit of FScore with beta=0...</td>
@@ -1593,41 +1609,25 @@ rules from the branches of decision trees - these split based on gini or entropy
       <td>&lt;bound method FScore.fit of FScore with beta=1&gt;</td>
       <td>0.510489</td>
       <td>[0, 1, 2]</td>
-      <td>[573019.7, 570521.4199999999, 535370.05]</td>
-      <td>559637.056667</td>
-      <td>17189.649214</td>
+      <td>[572121.0199999999, 538455.7999999999, 535382.05]</td>
+      <td>548652.956667</td>
+      <td>16641.804434</td>
     </tr>
     <tr>
-      <th>7</th>
-      <td>{'fraud_cf': {'correlation_reduction_class': A...</td>
-      <td>AgglomerativeClusteringReducer(threshold=0.9, ...</td>
+      <th>9</th>
+      <td>{'approve_cf': {'correlation_reduction_class':...</td>
+      <td>AgglomerativeClusteringReducer(threshold=0.95,...</td>
       <td>6.0</td>
       <td>&lt;bound method FScore.fit of FScore with beta=0...</td>
-      <td>0.184279</td>
-      <td>AgglomerativeClusteringReducer(threshold=0.9, ...</td>
-      <td>3.0</td>
-      <td>&lt;bound method FScore.fit of FScore with beta=0.5&gt;</td>
-      <td>0.967131</td>
-      <td>[0, 1, 2]</td>
-      <td>[572826.1399999999, 573582.58, 519611.77]</td>
-      <td>555340.163333</td>
-      <td>25265.676559</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>{'fraud_cf': {'correlation_reduction_class': A...</td>
+      <td>0.933435</td>
       <td>AgglomerativeClusteringReducer(threshold=0.95,...</td>
-      <td>3.0</td>
-      <td>&lt;bound method FScore.fit of FScore with beta=0.5&gt;</td>
-      <td>0.599342</td>
-      <td>AgglomerativeClusteringReducer(threshold=0.9, ...</td>
-      <td>7.0</td>
+      <td>5.0</td>
       <td>&lt;bound method FScore.fit of FScore with beta=1&gt;</td>
-      <td>0.258372</td>
+      <td>0.092054</td>
       <td>[0, 1, 2]</td>
-      <td>[573231.7, 570532.0399999999, 521590.14999999997]</td>
-      <td>555117.963333</td>
-      <td>23733.348425</td>
+      <td>[573019.7, 541266.7200000001, 528778.51]</td>
+      <td>547688.310000</td>
+      <td>18623.432135</td>
     </tr>
   </tbody>
 </table>
@@ -1660,19 +1660,16 @@ rules from the branches of decision trees - these split based on gini or entropy
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[[0, [&#39;Approve_30&#39;, &#39;Approve_41&#39;]],
+[[0, [&#39;Approve_44&#39;, &#39;Approve_73&#39;, &#39;Approve_40&#39;]],
  [1,
-  [&#39;Reject_31&#39;,
-   &#39;Reject_54&#39;,
-   &#39;Reject_39&#39;,
-   &#39;Reject_25&#39;,
-   &#39;Reject_40&#39;,
-   &#39;Reject_47&#39;,
-   &#39;Reject_16&#39;,
-   &#39;Reject_27&#39;,
-   &#39;Reject_37&#39;,
-   &#39;Reject_34&#39;,
-   &#39;Reject_13&#39;]]]
+  [&#39;Reject_15&#39;,
+   &#39;Reject_18&#39;,
+   &#39;Reject_4&#39;,
+   &#39;Reject_17&#39;,
+   &#39;Reject_21&#39;,
+   &#39;Reject_2&#39;,
+   &#39;Reject_29&#39;,
+   &#39;Reject_19&#39;]]]
 </pre></div></div>
 </div>
 <p>This shows us which rules should be used for the approval step (decision <code class="docutils literal notranslate"><span class="pre">0</span></code>) and which rules should be used for the rejection step (decision <code class="docutils literal notranslate"><span class="pre">1</span></code>).</p>
@@ -1702,19 +1699,17 @@ rules from the branches of decision trees - these split based on gini or entropy
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;Reject_13&#39;: &#34;(X[&#39;V10&#39;]&lt;=-5.57875)&amp;(X[&#39;V19&#39;]&gt;-3.52538)&#34;,
- &#39;Reject_16&#39;: &#34;(X[&#39;V11&#39;]&gt;2.35088)&amp;(X[&#39;V17&#39;]&lt;=-3.60923)&amp;(X[&#39;V19&#39;]&gt;-3.50737)&#34;,
- &#39;Reject_25&#39;: &#34;(X[&#39;V12&#39;]&lt;=-3.67614)&amp;(X[&#39;V16&#39;]&lt;=-2.1745)&amp;(X[&#39;V2&#39;]&gt;-7.3523)&#34;,
- &#39;Reject_27&#39;: &#34;(X[&#39;V12&#39;]&lt;=-3.74057)&amp;(X[&#39;V2&#39;]&gt;1.27989)&#34;,
- &#39;Reject_31&#39;: &#34;(X[&#39;V12&#39;]&lt;=-4.43715)&#34;,
- &#39;Reject_34&#39;: &#34;(X[&#39;V12&#39;]&lt;=-5.63079)&#34;,
- &#39;Reject_37&#39;: &#34;(X[&#39;V14&#39;]&lt;=-11.33548)&amp;(X[&#39;V17&#39;]&lt;=-2.69333)&amp;(X[&#39;V27&#39;]&gt;1.1957)&#34;,
- &#39;Reject_39&#39;: &#34;(X[&#39;V14&#39;]&lt;=-4.64098)&#34;,
- &#39;Reject_40&#39;: &#34;(X[&#39;V14&#39;]&lt;=-4.72102)&#34;,
- &#39;Reject_47&#39;: &#34;(X[&#39;V17&#39;]&lt;=-2.18248)&amp;(X[&#39;V27&#39;]&gt;-4.29354)&#34;,
- &#39;Reject_54&#39;: &#34;(X[&#39;V17&#39;]&lt;=6.28023)&amp;(X[&#39;V19&#39;]&gt;1.78579)&#34;,
- &#39;Approve_30&#39;: &#34;(X[&#39;V12&#39;]&gt;-4.43659)&amp;(X[&#39;V16&#39;]&gt;-4.28659)&amp;(X[&#39;V18&#39;]&gt;-4.172)&amp;(X[&#39;V9&#39;]&gt;-3.86694)&#34;,
- &#39;Approve_41&#39;: &#34;(X[&#39;V17&#39;]&gt;-2.18248)&amp;(X[&#39;V19&#39;]&lt;=-3.52538)&#34;}
+{&#39;Reject_2&#39;: &#34;(X[&#39;V1&#39;]&lt;=1.57711)&amp;(X[&#39;V14&#39;]&lt;=-5.9433)&amp;(X[&#39;V26&#39;]&gt;-0.27216)&#34;,
+ &#39;Reject_4&#39;: &#34;(X[&#39;V10&#39;]&lt;=-2.70569)&amp;(X[&#39;V11&#39;]&gt;3.26894)&amp;(X[&#39;V19&#39;]&gt;-3.50737)&#34;,
+ &#39;Reject_15&#39;: &#34;(X[&#39;V12&#39;]&lt;=-2.1202)&amp;(X[&#39;V14&#39;]&lt;=-4.64098)&#34;,
+ &#39;Reject_17&#39;: &#34;(X[&#39;V12&#39;]&lt;=-4.43659)&#34;,
+ &#39;Reject_18&#39;: &#34;(X[&#39;V12&#39;]&lt;=-4.43715)&#34;,
+ &#39;Reject_19&#39;: &#34;(X[&#39;V12&#39;]&lt;=-4.59928)&#34;,
+ &#39;Reject_21&#39;: &#34;(X[&#39;V14&#39;]&lt;=-11.33548)&amp;(X[&#39;V17&#39;]&lt;=-2.69333)&amp;(X[&#39;V27&#39;]&gt;1.1957)&#34;,
+ &#39;Reject_29&#39;: &#34;(X[&#39;V17&#39;]&lt;=-2.18248)&amp;(X[&#39;V27&#39;]&gt;-4.29354)&#34;,
+ &#39;Approve_40&#39;: &#34;(X[&#39;V11&#39;]&lt;=3.35091)&amp;(X[&#39;V12&#39;]&gt;-3.67614)&amp;(X[&#39;V13&#39;]&gt;0.43179)&amp;(X[&#39;V17&#39;]&gt;-2.69333)&#34;,
+ &#39;Approve_44&#39;: &#34;(X[&#39;V11&#39;]&lt;=3.35091)&amp;(X[&#39;V12&#39;]&gt;-4.59928)&amp;(X[&#39;V16&#39;]&gt;-2.1745)&amp;(X[&#39;V17&#39;]&gt;-2.69333)&amp;(X[&#39;V19&#39;]&lt;=-1.48536)&#34;,
+ &#39;Approve_73&#39;: &#34;(X[&#39;V17&#39;]&gt;-2.18248)&amp;(X[&#39;V19&#39;]&lt;=-3.52538)&#34;}
 </pre></div></div>
 </div>
 </section>
@@ -1785,19 +1780,19 @@ Length: 9399, dtype: int64
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">overall_lp</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
     <span class="n">X</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;fraud_gen_lp&#39;</span><span class="p">:</span> <span class="n">X_train</span><span class="p">,</span>
-        <span class="s1">&#39;fraud_opt&#39;</span><span class="p">:</span> <span class="n">X_train_raw</span><span class="p">,</span>
-        <span class="s1">&#39;good_gen_lp&#39;</span><span class="p">:</span> <span class="n">X_train</span><span class="p">,</span>
-        <span class="s1">&#39;good_opt&#39;</span><span class="p">:</span> <span class="n">X_train_raw</span>
+        <span class="s1">&#39;reject_gen_lp&#39;</span><span class="p">:</span> <span class="n">X_train</span><span class="p">,</span>
+        <span class="s1">&#39;reject_opt&#39;</span><span class="p">:</span> <span class="n">X_train_raw</span><span class="p">,</span>
+        <span class="s1">&#39;approve_gen_lp&#39;</span><span class="p">:</span> <span class="n">X_train</span><span class="p">,</span>
+        <span class="s1">&#39;approve_opt&#39;</span><span class="p">:</span> <span class="n">X_train_raw</span>
     <span class="p">},</span>
     <span class="n">y</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;fraud_lp&#39;</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span>
-        <span class="s1">&#39;good_lp&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="o">-</span><span class="n">y_train</span><span class="p">,</span>
+        <span class="s1">&#39;reject_lp&#39;</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span>
+        <span class="s1">&#39;approve_lp&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="o">-</span><span class="n">y_train</span><span class="p">,</span>
         <span class="s1">&#39;rbs_optimiser&#39;</span><span class="p">:</span> <span class="n">y_train</span>
     <span class="p">},</span>
     <span class="n">sample_weight</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;fraud_lp&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s1">&#39;good_lp&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;reject_lp&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;approve_lp&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="s1">&#39;rbs_optimiser&#39;</span><span class="p">:</span> <span class="n">y_train</span>
     <span class="p">}</span>
 <span class="p">)</span>
@@ -1844,9 +1839,9 @@ Length: 9399, dtype: int64
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Revenue of original, unoptimised pipeline: $775698
-Revenue of optimised pipeline: $857669
-Absolute improvement in Revenue: $81972
-Percentage improvement in Revenue: 10.57%
+Revenue of optimised pipeline: $856076
+Absolute improvement in Revenue: $80379
+Percentage improvement in Revenue: 10.36%
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1854,11 +1849,25 @@ Percentage improvement in Revenue: 10.57%
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/jlaidler/Documents/Iguanas/iguanas/rule_selection/bayes_search_cv.py:410: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;fraud_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.95, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;fraud_gen&#39;: {&#39;n_total_conditions&#39;: 6.0}, &#39;fraud_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=0.25&gt;}, &#39;fraud_sf&#39;: {&#39;threshold&#39;: 0.933434993006217}, &#39;good_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.95, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;good_gen&#39;: {&#39;n_total_conditions&#39;: 5.0}, &#39;good_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=1&gt;}, &#39;good_sf&#39;: {&#39;threshold&#39;: 0.09205449690521583}}; Fold index = 0. The metric score for this parameter set &amp; fold will be set to 0
+/Users/jlaidler/Documents/Iguanas/iguanas/pipeline/parallel_pipeline.py:151: NoRulesWarning: No rules remain in step `reject_lp` as it raised the following error: &#34;`X` has been reduced to zero columns after the `reject_sf` step in the pipeline.&#34;
   warnings.warn(
-/Users/jlaidler/Documents/Iguanas/iguanas/rule_selection/bayes_search_cv.py:410: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;fraud_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.95, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;fraud_gen&#39;: {&#39;n_total_conditions&#39;: 6.0}, &#39;fraud_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=0.25&gt;}, &#39;fraud_sf&#39;: {&#39;threshold&#39;: 0.933434993006217}, &#39;good_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.95, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;good_gen&#39;: {&#39;n_total_conditions&#39;: 5.0}, &#39;good_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=1&gt;}, &#39;good_sf&#39;: {&#39;threshold&#39;: 0.09205449690521583}}; Fold index = 1. The metric score for this parameter set &amp; fold will be set to 0
+/Users/jlaidler/Documents/Iguanas/iguanas/rule_selection/bayes_search_cv.py:518: NoRulesWarning: No rules remaining for: Pipeline parameter set = {&#39;approve_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;approve_gen&#39;: {&#39;n_total_conditions&#39;: 3.0}, &#39;approve_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=1&gt;}, &#39;approve_sf&#39;: {&#39;threshold&#39;: 0.48617287843841694}, &#39;reject_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.95, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;reject_gen&#39;: {&#39;n_total_conditions&#39;: 4.0}, &#39;reject_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=1&gt;}, &#39;reject_sf&#39;: {&#39;threshold&#39;: 0.8381663825532006}}; Fold index = 2. The metric score for this parameter set &amp; fold will be set to 0
   warnings.warn(
-/Users/jlaidler/Documents/Iguanas/iguanas/rule_selection/bayes_search_cv.py:410: UserWarning: No rules remaining for: Pipeline parameter set = {&#39;fraud_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.95, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;fraud_gen&#39;: {&#39;n_total_conditions&#39;: 6.0}, &#39;fraud_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=0.25&gt;}, &#39;fraud_sf&#39;: {&#39;threshold&#39;: 0.933434993006217}, &#39;good_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.95, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;good_gen&#39;: {&#39;n_total_conditions&#39;: 5.0}, &#39;good_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=1&gt;}, &#39;good_sf&#39;: {&#39;threshold&#39;: 0.09205449690521583}}; Fold index = 2. The metric score for this parameter set &amp; fold will be set to 0
+/Users/jlaidler/Documents/Iguanas/iguanas/pipeline/parallel_pipeline.py:151: NoRulesWarning: No rules remain in step `reject_lp` as it raised the following error: &#34;`X` has been reduced to zero columns after the `reject_sf` step in the pipeline.&#34;
+  warnings.warn(
+/Users/jlaidler/Documents/Iguanas/iguanas/rule_selection/bayes_search_cv.py:518: NoRulesWarning: No rules remaining for: Pipeline parameter set = {&#39;approve_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;approve_gen&#39;: {&#39;n_total_conditions&#39;: 6.0}, &#39;approve_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=0.25&gt;}, &#39;approve_sf&#39;: {&#39;threshold&#39;: 0.18427923771610466}, &#39;reject_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;reject_gen&#39;: {&#39;n_total_conditions&#39;: 3.0}, &#39;reject_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=0.5&gt;}, &#39;reject_sf&#39;: {&#39;threshold&#39;: 0.9671312248842996}}; Fold index = 1. The metric score for this parameter set &amp; fold will be set to 0
+  warnings.warn(
+/Users/jlaidler/Documents/Iguanas/iguanas/pipeline/parallel_pipeline.py:151: NoRulesWarning: No rules remain in step `reject_lp` as it raised the following error: &#34;`X` has been reduced to zero columns after the `reject_cf` step in the pipeline.&#34;
+  warnings.warn(
+/Users/jlaidler/Documents/Iguanas/iguanas/rule_selection/bayes_search_cv.py:518: NoRulesWarning: No rules remaining for: Pipeline parameter set = {&#39;approve_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;approve_gen&#39;: {&#39;n_total_conditions&#39;: 3.0}, &#39;approve_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=1&gt;}, &#39;approve_sf&#39;: {&#39;threshold&#39;: 0.48617287843841694}, &#39;reject_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.95, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;reject_gen&#39;: {&#39;n_total_conditions&#39;: 4.0}, &#39;reject_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=1&gt;}, &#39;reject_sf&#39;: {&#39;threshold&#39;: 0.8381663825532006}}; Fold index = 1. The metric score for this parameter set &amp; fold will be set to 0
+  warnings.warn(
+/Users/jlaidler/Documents/Iguanas/iguanas/pipeline/parallel_pipeline.py:151: NoRulesWarning: No rules remain in step `reject_lp` as it raised the following error: &#34;`X` has been reduced to zero columns after the `reject_sf` step in the pipeline.&#34;
+  warnings.warn(
+/Users/jlaidler/Documents/Iguanas/iguanas/rule_selection/bayes_search_cv.py:518: NoRulesWarning: No rules remaining for: Pipeline parameter set = {&#39;approve_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;approve_gen&#39;: {&#39;n_total_conditions&#39;: 6.0}, &#39;approve_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=0.25&gt;}, &#39;approve_sf&#39;: {&#39;threshold&#39;: 0.18427923771610466}, &#39;reject_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;reject_gen&#39;: {&#39;n_total_conditions&#39;: 3.0}, &#39;reject_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=0.5&gt;}, &#39;reject_sf&#39;: {&#39;threshold&#39;: 0.9671312248842996}}; Fold index = 0. The metric score for this parameter set &amp; fold will be set to 0
+  warnings.warn(
+/Users/jlaidler/Documents/Iguanas/iguanas/pipeline/parallel_pipeline.py:151: NoRulesWarning: No rules remain in step `reject_lp` as it raised the following error: &#34;`X` has been reduced to zero columns after the `reject_sf` step in the pipeline.&#34;
+  warnings.warn(
+/Users/jlaidler/Documents/Iguanas/iguanas/rule_selection/bayes_search_cv.py:518: NoRulesWarning: No rules remaining for: Pipeline parameter set = {&#39;approve_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;approve_gen&#39;: {&#39;n_total_conditions&#39;: 6.0}, &#39;approve_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=0.25&gt;}, &#39;approve_sf&#39;: {&#39;threshold&#39;: 0.18427923771610466}, &#39;reject_cf&#39;: {&#39;correlation_reduction_class&#39;: AgglomerativeClusteringReducer(threshold=0.9, strategy=top_down, similarity_function=&lt;bound method JaccardSimilarity.fit of JaccardSimilarity&gt;, metric=&lt;bound method FScore.fit of FScore with beta=1&gt;, print_clustermap=False)}, &#39;reject_gen&#39;: {&#39;n_total_conditions&#39;: 3.0}, &#39;reject_gen_opt&#39;: {&#39;metric&#39;: &lt;bound method FScore.fit of FScore with beta=0.5&gt;}, &#39;reject_sf&#39;: {&#39;threshold&#39;: 0.9671312248842996}}; Fold index = 2. The metric score for this parameter set &amp; fold will be set to 0
   warnings.warn(
 </pre></div></div>
 </div>

@@ -49,6 +49,36 @@ class AgglomerativeClusteringReducer:
     ----------
     columns_to_keep : List[str]
         The final list of columns with the correlated columns removed.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from iguanas.correlation_reduction import AgglomerativeClusteringReducer
+    >>> from iguanas.metrics import JaccardSimilarity, Precision
+    >>> js = JaccardSimilarity()
+    >>> p = Precision()
+    >>> X = pd.DataFrame({
+    ...     'A': [1, 0, 1, 0],
+    ...     'B': [1, 1, 1, 0]
+    ... })
+    >>> y = pd.Series([
+    ...     1, 0, 1, 0
+    ... ])
+    >>> acr = AgglomerativeClusteringReducer(
+    ...     threshold=0.5,
+    ...     strategy='bottom_up', 
+    ...     similarity_function=js.fit,
+    ...     metric=p.fit
+    ... )
+    >>> acr.fit(X=X, y=y)
+    >>> print(acr.columns_to_keep)
+    ['A']
+    >>> print(acr.transform(X=X))
+       A
+    0  1
+    1  0
+    2  1
+    3  0
     """
 
     def __init__(self,
@@ -61,7 +91,8 @@ class AgglomerativeClusteringReducer:
         self.threshold = threshold
         if strategy not in ['top_down', 'bottom_up']:
             raise ValueError(
-                "`strategy` must be either 'top_down' or 'bottom_up'")
+                "`strategy` must be either 'top_down' or 'bottom_up'"
+            )
         self.strategy = strategy
         self.similarity_function = similarity_function
         self.metric = metric
@@ -75,7 +106,10 @@ class AgglomerativeClusteringReducer:
         else:
             return f'AgglomerativeClusteringReducer(threshold={self.threshold}, strategy={self.strategy}, similarity_function={self.similarity_function}, metric={self.metric}, print_clustermap={self.print_clustermap})'
 
-    def fit(self, X: PandasDataFrameType, y=None, sample_weight=None) -> None:
+    def fit(self,
+            X: PandasDataFrameType,
+            y=None,
+            sample_weight=None) -> None:
         """
         Calculates the similar columns in the dataset X.
 
@@ -95,8 +129,9 @@ class AgglomerativeClusteringReducer:
         utils.check_duplicate_cols(X, 'X')
         zero_var_cols = X.columns[X.values.var(axis=0) == 0.0].tolist()
         if zero_var_cols:
-            raise Exception(
-                f'Columns {", ".join(zero_var_cols)} have zero variance, which will result in NaN values for the similarity matrix')
+            raise ValueError(
+                f'Columns {", ".join(zero_var_cols)} have zero variance, which will result in NaN values for the similarity matrix'
+            )
         if self.metric is not None:
             self.columns_performance = pd.Series(
                 data=self.metric(X, y, sample_weight),
@@ -135,7 +170,8 @@ class AgglomerativeClusteringReducer:
                 break
         self.columns_to_keep = columns_to_keep
 
-    def transform(self, X: PandasDataFrameType) -> PandasDataFrameType:
+    def transform(self,
+                  X: PandasDataFrameType) -> PandasDataFrameType:
         """
         Removes similar columns from the dataset X.
 
@@ -177,7 +213,9 @@ class AgglomerativeClusteringReducer:
         self.fit(X=X, y=y, sample_weight=sample_weight)
         return self.transform(X=X)
 
-    def _bottom_up(self, clusters: PandasSeriesType, n_clusters: int,
+    def _bottom_up(self,
+                   clusters: PandasSeriesType,
+                   n_clusters: int,
                    similarity_df: PandasDataFrameType,
                    columns_to_keep: List[str]) -> List[str]:
         """
@@ -211,7 +249,9 @@ class AgglomerativeClusteringReducer:
                 columns_to_drop = columns_to_drop + columns
         return columns_to_drop, columns_to_keep
 
-    def _top_down(self, clusters: PandasSeriesType, n_clusters: int,
+    def _top_down(self,
+                  clusters: PandasSeriesType,
+                  n_clusters: int,
                   similarity_df: PandasDataFrameType,
                   columns_to_keep: List[str]) -> List[str]:
         """
@@ -241,7 +281,8 @@ class AgglomerativeClusteringReducer:
                 columns_to_drop = columns_to_drop + columns
         return columns_to_drop, columns_to_keep
 
-    def _set_n_clusters(self, similarity_df: PandasDataFrameType) -> int:
+    def _set_n_clusters(self,
+                        similarity_df: PandasDataFrameType) -> int:
         """Sets the number of clusters to use"""
 
         if self.strategy == 'top_down':

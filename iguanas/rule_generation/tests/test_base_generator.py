@@ -23,6 +23,25 @@ def rg_instantiated():
     return [rg, params]
 
 
+def test_generate_rule_name(rg_instantiated):
+    # Test with default Rule Gen DT prefix
+    rg, _ = rg_instantiated
+    rule_name = rg._generate_rule_name()
+    assert rule_name == 'RGDT_Rule_20200204_0'
+    # Test with default Rule Gen Opt prefix
+    f1 = FScore(1)
+    rgo = RuleGeneratorOpt(
+        metric=f1.fit, n_total_conditions=4, num_rules_keep=10
+    )
+    rgo._today = '20200204'
+    rule_name = rgo._generate_rule_name()
+    assert rule_name == 'RGO_Rule_20200204_0'
+    # Test with default Rule Gen DT prefix
+    rg.rule_name_prefix = 'TEST'
+    rule_name = rg._generate_rule_name()
+    assert rule_name == 'TEST_1'
+
+
 def test_convert_conditions_to_string(rg_instantiated):
     list_of_conditions = [
         ('A', '>=', 1),
@@ -64,25 +83,6 @@ def test_clean_dup_features_from_conditions(rg_instantiated):
     rg, _ = rg_instantiated
     result = rg._clean_dup_features_from_conditions(list_of_conditions)
     assert result == expected_result
-
-
-def test_generate_rule_name(rg_instantiated):
-    # Test with default Rule Gen DT prefix
-    rg, _ = rg_instantiated
-    rule_name = rg._generate_rule_name()
-    assert rule_name == 'RGDT_Rule_20200204_0'
-    # Test with default Rule Gen Opt prefix
-    f1 = FScore(1)
-    rgo = RuleGeneratorOpt(
-        metric=f1.fit, n_total_conditions=4, num_rules_keep=10
-    )
-    rgo._today = '20200204'
-    rule_name = rgo._generate_rule_name()
-    assert rule_name == 'RGO_Rule_20200204_0'
-    # Test with default Rule Gen DT prefix
-    rg.rule_name_prefix = 'TEST'
-    rule_name = rg._generate_rule_name()
-    assert rule_name == 'TEST_1'
 
 
 def test_remove_misaligned_conditions(rg_instantiated):

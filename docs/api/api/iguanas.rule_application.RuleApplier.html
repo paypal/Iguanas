@@ -213,6 +213,16 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="iguanas.metrics.classification.Bounds.html">
+     <code class="xref py py-mod docutils literal notranslate">
+      <span class="pre">
+       iguanas.metrics.classification
+      </span>
+     </code>
+     .Bounds
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="iguanas.metrics.pairwise.CosineSimilarity.html">
      <code class="xref py py-mod docutils literal notranslate">
       <span class="pre">
@@ -688,6 +698,28 @@
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">iguanas.rule_application</span> <span class="kn">import</span> <span class="n">RuleApplier</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>    
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rule_strings</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s1">&#39;Rule1&#39;</span><span class="p">:</span> <span class="s2">&quot;X[&#39;A&#39;]==1&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;Rule2&#39;</span><span class="p">:</span> <span class="s2">&quot;X[&#39;B&#39;]==1&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;Rule3&#39;</span><span class="p">:</span> <span class="s2">&quot;(X[&#39;A&#39;]==1)&amp;(X[&#39;B&#39;]==1)&quot;</span>
+<span class="gp">... </span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ra</span> <span class="o">=</span> <span class="n">RuleApplier</span><span class="p">(</span><span class="n">rule_strings</span><span class="o">=</span><span class="n">rule_strings</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X_rules</span> <span class="o">=</span> <span class="n">ra</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">X_rules</span><span class="p">)</span>     
+<span class="go">   Rule1  Rule2  Rule3</span>
+<span class="go">0      1      1      1</span>
+<span class="go">1      0      1      0</span>
+<span class="go">2      1      1      1</span>
+<span class="go">3      0      0      0</span>
+</pre></div>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.rule_application.RuleApplier.transform">
 <span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">databricks.koalas.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/iguanas/rule_application/rule_applier.html#RuleApplier.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_application.RuleApplier.transform" title="Permalink to this definition">¶</a></dt>

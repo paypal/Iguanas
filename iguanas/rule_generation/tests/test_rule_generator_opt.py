@@ -266,6 +266,16 @@ def test_fit(create_data, rg_instantiated):
         assert rg.rule_names == X_rules.columns.tolist() == list(
             rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == list(
                 rg.rules.rule_strings.keys())
+    # With infer_dtypes = False
+    X['ip_country_us'] = X['ip_country_us'].astype(bool)
+    rg.infer_dtypes = False
+    for i, w in enumerate([None, weights]):
+        X_rules = rg.fit(X, y, sample_weight=w)
+        assert X_rules.shape == exp_results[i][0]
+        assert X_rules.sum().sum() == exp_results[i][1]
+        assert rg.rule_names == X_rules.columns.tolist() == list(
+            rg.rule_lambdas.keys()) == list(rg.lambda_kwargs.keys()) == list(
+                rg.rules.rule_strings.keys())
 
 
 def test_fit_target_feat_corr_types_infer(create_data, rg_instantiated, fs_instantiated):
