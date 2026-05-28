@@ -12,7 +12,7 @@
 Build
 ###################
 build/
-dist/
+# dist/
 docs/
 htmlcov/
 
