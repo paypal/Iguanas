@@ -13,7 +13,7 @@ Iguanas is a fast, flexible and modular Python package for:
 * Combining rule sets and removing/filtering those which are unnecessary.
 * Generating rule scores based on their performance.
 
-It aims to help streamline the process for developing a deployment-ready Rules-Based System (RBS) for **binary classification use cases**.
+It aims to help streamline the process for developing a deployment-ready Rules-Based System (RBS).
 
 # Getting started
 

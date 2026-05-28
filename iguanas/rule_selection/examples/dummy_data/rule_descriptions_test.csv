@@ -1,6 +1,0 @@
-Rule,Precision,Recall,PercDataFlagged,OptMetric
-Rule1,1.0,0.3,0.006,
-Rule2,1.0,0.3,0.006,
-Rule3,1.0,0.3,0.006,
-Rule4,0.018036072144288578,0.9,0.998,
-Rule5,0.07537688442211055,0.75,0.199,

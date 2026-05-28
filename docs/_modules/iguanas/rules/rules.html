@@ -184,45 +184,45 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    rule_dicts : Dict[str, dict], optional</span>
+<span class="sd">    rule_dicts : dict[str, dict], optional</span>
 <span class="sd">        Set of rules defined using thestandard Iguanas dictionary format</span>
 <span class="sd">        (values) and their names (keys). Defaults to `None`.</span>
-<span class="sd">    rule_strings : Dict[str, str], optional</span>
+<span class="sd">    rule_strings : dict[str, str], optional</span>
 <span class="sd">        Set of rules defined using the standard Iguanas string format </span>
 <span class="sd">        (values) and their names (keys). Defaults to `None`.</span>
-<span class="sd">    rule_lambdas : Dict[str, Callable[[dict], str]], optional</span>
+<span class="sd">    rule_lambdas : dict[str, Callable[[dict], str]], optional</span>
 <span class="sd">        Set of rules defined using the standard Iguanas lambda expression </span>
 <span class="sd">        format (values) and their names (keys). Must be given in </span>
 <span class="sd">        conjunction with either `lambda_kwargs` or `lambda_args`. Defaults </span>
 <span class="sd">        to `None`.</span>
-<span class="sd">    lambda_kwargs : Dict[str, dict], optional </span>
+<span class="sd">    lambda_kwargs : dict[str, dict], optional </span>
 <span class="sd">        For each rule (keys), a dictionary containing the features used in</span>
 <span class="sd">        the rule (keys) and the current values (values). Only populates </span>
 <span class="sd">        when `.as_lambda()` is used with the keyword argument </span>
 <span class="sd">        `with_kwargs=True`. Defaults to `None`.</span>
-<span class="sd">    lambda_args : Dict[str, list], optional</span>
+<span class="sd">    lambda_args : dict[str, list], optional</span>
 <span class="sd">        For each rule (keys), a list containing the current values used in</span>
 <span class="sd">        the rule. Only populates when `.as_lambda()` is used with the </span>
 <span class="sd">        keyword argument `with_kwargs=False`. Defaults to `None`.    </span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    rule_dicts : Dict[str, dict]</span>
+<span class="sd">    rule_dicts : dict[str, dict]</span>
 <span class="sd">        Set of rules defined using the standard Iguanas dictionary format </span>
 <span class="sd">        (values) and their names (keys).</span>
-<span class="sd">    rule_strings : Dict[str, str]</span>
+<span class="sd">    rule_strings : dict[str, str]</span>
 <span class="sd">        Set of rules defined using the standard Iguanas string format (values)</span>
 <span class="sd">        and their names (keys).</span>
-<span class="sd">    rule_lambdas : Dict[str, Callable[[dict], str]]</span>
+<span class="sd">    rule_lambdas : dict[str, Callable[[dict], str]]</span>
 <span class="sd">        Set of rules defined using the standard Iguanas lambda expression </span>
 <span class="sd">        format (values) and their names (keys).</span>
-<span class="sd">    lambda_kwargs : Dict[str, dict]</span>
+<span class="sd">    lambda_kwargs : dict[str, dict]</span>
 <span class="sd">        For each rule (keys), a dictionary containing the features used in the</span>
 <span class="sd">        rule (keys) and the current values (values).</span>
-<span class="sd">    lambda_args : Dict[str, list]</span>
+<span class="sd">    lambda_args : dict[str, list]</span>
 <span class="sd">        For each rule (keys), a list containing the current values used in the</span>
 <span class="sd">        rule.</span>
-<span class="sd">    rule_features : Dict[str, set]</span>
+<span class="sd">    rule_features : dict[str, set]</span>
 <span class="sd">        For each rule (keys), a set containing the features used in the rule</span>
 <span class="sd">        (only populates when the `.get_rules_features()` method is used).   </span>
 
@@ -342,7 +342,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Dict[str, dict]</span>
+<span class="sd">        dict[str, dict]</span>
 <span class="sd">            Rules in the standard Iguanas dictionary format.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -367,7 +367,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Dict[str, str]</span>
+<span class="sd">        dict[str, str]</span>
 <span class="sd">            Rules in the standard Iguanas string format.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -398,7 +398,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Dict[str, Callable[[dict], str]]</span>
+<span class="sd">        dict[str, Callable[[dict], str]]</span>
 <span class="sd">            Rules in the standard Iguanas lambda expression format.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -440,9 +440,9 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        include : List[str], optional</span>
+<span class="sd">        include : list[str], optional</span>
 <span class="sd">            The list of rule names to keep. Defaults to `None`.</span>
-<span class="sd">        exclude : List[str], optional</span>
+<span class="sd">        exclude : list[str], optional</span>
 <span class="sd">            The list of rule names to drop. Defaults to `None`.</span>
 
 <span class="sd">        Raises</span>
@@ -479,7 +479,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Dict[str, set]</span>
+<span class="sd">        dict[str, set]</span>
 <span class="sd">            Set of unique features (values) in each rule (keys).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
