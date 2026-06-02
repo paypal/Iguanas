@@ -75,12 +75,13 @@ def infer_monotone_constraints_from_stumps(
     results = []
     for col in X.columns:
         stump.fit(X.select(col), y)
-        # Get predictions at min and max values
+        # Get predictions at min and max values in a single call
         min_val = X.select(pl.col(col).min()).item()
         max_val = X.select(pl.col(col).max()).item()
 
-        pred_at_min = stump.predict_proba([[min_val]])[0][1]
-        pred_at_max = stump.predict_proba([[max_val]])[0][1]
+        preds = stump.predict_proba([[min_val], [max_val]])
+        pred_at_min = preds[0][1]
+        pred_at_max = preds[1][1]
 
         # Determine constraint based on prediction direction
         if pred_at_max > pred_at_min:

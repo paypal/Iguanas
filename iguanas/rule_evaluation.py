@@ -1,5 +1,5 @@
-from typing import Any
 from functools import reduce
+from typing import Any
 
 import polars as pl
 

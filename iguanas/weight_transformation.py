@@ -1,7 +1,6 @@
 import numpy as np
 import polars as pl
 
-
 EPS = 1e-6
 _DEFAULT_POWERS = np.array([0.25, 0.5, 1.0, 2.0, 4.0])
 
@@ -41,7 +40,7 @@ def _decreasing_exprs(
     exprs = []
     for p in powers:
         label = "1/(1+x)" if p == 1.0 else f"1/(1+x)^{_power_label(p)}"
-        exprs.append((inv ** p).alias(f"{label}__{col_name}"))
+        exprs.append((inv**p).alias(f"{label}__{col_name}"))
     exprs.append((1.0 / (pl.col(col_name) + 1 + EPS).log()).alias(f"1/log(1+x)__{col_name}"))
     if quantile_val is not None:
         assert quantile_value is not None
@@ -90,8 +89,23 @@ def generate_increasing_weight(
     -------
     pl.DataFrame
         Each column is a different weight transformation (baseline, powers, log).
+
+    Examples
+    --------
+    >>> import polars as pl
+    >>> s = pl.Series("amount", [0.0, 10.0, 50.0, 100.0])
+    >>> df = generate_increasing_weight(s)
+    >>> df.columns  # 'Baseline', '(1+x)^0.25__amount', ..., 'log(1+x)__amount'
+    >>> # DataFrame input: each column processed independently
+    >>> X = pl.DataFrame({"a": [1.0, 2.0, 3.0], "b": [4.0, 5.0, 6.0]})
+    >>> generate_increasing_weight(X).shape
+    (3, ...)  # 1 Baseline + 5 power cols + 1 log col per feature, minus duplicate Baselines
     """
-    if (out := _dispatch(generate_increasing_weight, X, powers=powers, quantile_value=quantile_value)) is not None:
+    if (
+        out := _dispatch(
+            generate_increasing_weight, X, powers=powers, quantile_value=quantile_value
+        )
+    ) is not None:
         return out
     df, col_name, powers = _resolve(X, powers)
     qval: float | None = float(X.quantile(quantile_value)) if quantile_value is not None else None  # type: ignore[arg-type]
@@ -119,8 +133,19 @@ def generate_decreasing_weight(
     -------
     pl.DataFrame
         Each column is a different inverse weight transformation.
+
+    Examples
+    --------
+    >>> import polars as pl
+    >>> s = pl.Series("amount", [0.0, 10.0, 50.0, 100.0])
+    >>> df = generate_decreasing_weight(s)
+    >>> df.columns  # '1/(1+x)__amount', '1/(1+x)^0.25__amount', ..., '1/log(1+x)__amount'
     """
-    if (out := _dispatch(generate_decreasing_weight, X, powers=powers, quantile_value=quantile_value)) is not None:
+    if (
+        out := _dispatch(
+            generate_decreasing_weight, X, powers=powers, quantile_value=quantile_value
+        )
+    ) is not None:
         return out
     df, col_name, powers = _resolve(X, powers)
     qval: float | None = float(X.quantile(quantile_value)) if quantile_value is not None else None  # type: ignore[arg-type]
@@ -150,12 +175,20 @@ def generate_all_weight(
     -------
     pl.DataFrame
         Combined increasing and decreasing weight transformations in one DataFrame.
+
+    Examples
+    --------
+    >>> import polars as pl
+    >>> s = pl.Series("amount", [0.0, 10.0, 50.0, 100.0])
+    >>> df = generate_all_weight(s)
+    >>> # Columns include both (1+x)^p and 1/(1+x)^p families plus log variants
     """
-    if (out := _dispatch(generate_all_weight, X, powers=powers, quantile_value=quantile_value)) is not None:
+    if (
+        out := _dispatch(generate_all_weight, X, powers=powers, quantile_value=quantile_value)
+    ) is not None:
         return out
     df, col_name, powers = _resolve(X, powers)
     qval: float | None = float(X.quantile(quantile_value)) if quantile_value is not None else None  # type: ignore[arg-type]
     exprs = _increasing_exprs(col_name, powers, qval, quantile_value)
     exprs += _decreasing_exprs(col_name, powers, qval, quantile_value)
     return df.with_columns(exprs).drop(col_name)
-

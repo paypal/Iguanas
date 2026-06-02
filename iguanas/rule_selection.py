@@ -5,6 +5,9 @@ import numpy as np
 import polars as pl
 from pydantic import PositiveInt
 
+# Pre-compiled pattern for extracting column names from X["col"] patterns.
+_FEATURE_PATTERN = re.compile(r'X\["([^"]+)"\]')
+
 
 def extract_feature_names_from_rule(rule: str) -> list[str]:
     """Extract column names from a rule string with X["column_name"] patterns.
@@ -25,11 +28,8 @@ def extract_feature_names_from_rule(rule: str) -> list[str]:
     >>> extract_feature_names_from_rule(rule)
     ['a', 'b']
     """
-    # Pattern to match X["column_name"] where column_name is between double quotes
-    pattern = r'X\["([^"]+)"\]'
-
     # Find all matches and return unique column names preserving order
-    matches = re.findall(pattern, rule)
+    matches = _FEATURE_PATTERN.findall(rule)
 
     # Remove duplicates while preserving order
     seen = set()
@@ -185,7 +185,7 @@ def filter_correlated_rules(
     ...     "rule_C": [False, True, False, True],
     ... })
     >>> importance = {"rule_A": 0.8, "rule_B": 0.6, "rule_C": 0.9}
-    >>> filter_correlated_rules(R, importance, max_corr=0.9).columns
+    >>> filter_correlated_rules(R, importance, max_corr=0.9)
     ['rule_A', 'rule_C']
     """
     if len(R.columns) != len(importance):
@@ -240,8 +240,7 @@ def filter_correlated_rules(
 
 
 def select_best_rule_per_column_combination(
-    metrics: pl.DataFrame,
-    sort_by: str = "precision"
+    metrics: pl.DataFrame, sort_by: str = "precision"
 ) -> list[str]:
     """
     Select the rule with the highest metric score for each unique column combination.
@@ -274,31 +273,24 @@ def select_best_rule_per_column_combination(
     if sort_by not in metrics.columns:
         raise ValueError(f"sort_by metric '{sort_by}' not found in metrics columns")
 
-    # Extract rules and get column combinations
+    # Extract rules and build rule → column-combination mapping
     rules = metrics["rule"].to_list()
-    # column_combinations = count_column_combinations(rules)
-
-    # Create a mapping from rule to its column combination
-    pattern = r'X\["([^"]+)"\]'
-    rule_to_columns = {}
+    rule_to_columns: dict[str, tuple[str, ...]] = {}
     for rule in rules:
-        columns = re.findall(pattern, rule)
-        if columns:
-            column_tuple = tuple(sorted(set(columns)))
-            rule_to_columns[rule] = column_tuple
+        cols = _FEATURE_PATTERN.findall(rule)
+        if cols:
+            rule_to_columns[rule] = tuple(sorted(set(cols)))
 
-    # Add column combination as a new column to metrics
-    metrics_with_combo = metrics.with_columns(
-        pl.col("rule").map_elements(
-            lambda r: str(rule_to_columns.get(r, ())),
-            return_dtype=pl.String
-        ).alias("column_combination")
+    # Build column_combination series via list comprehension (faster than map_elements)
+    combo_series = pl.Series(
+        "column_combination",
+        [str(rule_to_columns.get(r, ())) for r in rules],
     )
+    metrics_with_combo = metrics.with_columns(combo_series)
 
     # Group by column combination and select the row with max sort_by value
     best_rules = (
-        metrics_with_combo
-        .sort(sort_by, descending=True)
+        metrics_with_combo.sort(sort_by, descending=True)
         .group_by("column_combination", maintain_order=True)
         .first()
         .drop("column_combination")

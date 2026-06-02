@@ -1,6 +1,12 @@
 import math
 import re
 
+# Pre-compiled regex patterns used across multiple formatting functions.
+# Avoids recompiling on every call.
+_COND_PATTERN = re.compile(r'\(X\["([^"]+)"\]\s*([><=!]+)\s*([^\)]+)\)')
+_COND_PATTERN_Q = re.compile(r'\(X\[(["\'])([^"\']+)\1\]\s*([><=!]+)\s*([^\)]+)\)')
+_BOOL_PATTERN_Q = re.compile(r'\(X\[(["\'])([^"\']+)\1\]\s*(==|!=)\s*([^\)]+)\)')
+
 
 def simplify_rule(rule: str) -> str:
     """Simplify a rule by removing redundant conditions on the same column.
@@ -32,11 +38,8 @@ def simplify_rule(rule: str) -> str:
     >>> simplify_rule('(X["a"] >= 50) & (X["b"] < 10) & (X["a"] > 100)')
     '(X["a"] > 100) & (X["b"] < 10)'
     """
-    # Pattern to match full conditions including parentheses
-    pattern = r'\(X\["([^"]+)"\]\s*([><=!]+)\s*([^\)]+)\)'
-
     # Find all conditions with their full match
-    matches = [(m.group(0), m.group(1), m.group(2), m.group(3)) for m in re.finditer(pattern, rule)]
+    matches = [(m.group(0), m.group(1), m.group(2), m.group(3)) for m in _COND_PATTERN.finditer(rule)]
 
     if not matches:
         return rule
@@ -154,9 +157,6 @@ def format_floats_as_integers(rule: str, int_columns: list[str]) -> str:
     if not int_columns:
         return rule
 
-    # Pattern to match full conditions including parentheses
-    pattern = r'\(X\["([^"]+)"\]\s*([><=!]+)\s*([^\)]+)\)'
-
     def replace_condition(match):
         col = match.group(1)
         op = match.group(2)
@@ -192,7 +192,7 @@ def format_floats_as_integers(rule: str, int_columns: list[str]) -> str:
         # Format the new value as integer
         return f'(X["{col}"] {op} {new_val})'
 
-    result = re.sub(pattern, replace_condition, rule)
+    result = _COND_PATTERN.sub(replace_condition, rule)
     return result
 
 
@@ -223,9 +223,6 @@ def add_missing_value_conditions(rule: str, nan_mapping: dict[str, int | float])
     """
     if not nan_mapping:
         return rule
-
-    # Pattern to match full conditions including parentheses
-    pattern = r'\(X\[(["\'])([^"\']+)\1\]\s*([><=!]+)\s*([^\)]+)\)'
 
     def check_and_add_null(match):
         col = match.group(2)
@@ -267,38 +264,60 @@ def add_missing_value_conditions(rule: str, nan_mapping: dict[str, int | float])
         else:
             return match.group(0)
 
-    result = re.sub(pattern, check_and_add_null, rule)
+    result = _COND_PATTERN_Q.sub(check_and_add_null, rule)
     return result
 
 
 def decode_scaled_feature_names(rule: str) -> str:
-    """_summary_
+    """Decode scaled feature names in a rule string back to their original names.
 
-    Args:
-        rule (str): _description_
+    Parameters
+    ----------
+    rule : str
+        Rule string potentially containing scaled feature names.
 
-    Returns:
-        str: _description_
+    Returns
+    -------
+    str
+        Rule string with scaled feature names replaced by original names.
+
+    Notes
+    -----
+    This is a placeholder implementation. Decoding logic must be provided
+    by subclassing or extending this function once a naming convention for
+    scaled features is established.
     """
     return rule
 
 
 def decode_math_features(rule: str) -> str:
-    """
-    Convert conditions on mathematical features back to their original form.
+    """Decode conditions on mathematical feature combinations back to their original form.
 
-    For each condition on a mathematical feature, finds which original features satisfy the condition and
-    replaces it with an appropriate condition.
+    For each condition on a mathematically-derived feature column, this function
+    would find the equivalent condition on the original underlying features and
+    replace it accordingly.
 
     Parameters
     ----------
     rule : str
-        Rule string with conditions like (X["col"] >= val) where val is the encoded value for mathematical features.
+        Rule string with conditions on derived mathematical features,
+        e.g. ``(X["a_plus_b"] >= val)``.
 
     Returns
     -------
     str
-        Rule string with conditions on mathematical features converted to their original form.
+        Rule string with derived-feature conditions replaced by equivalent
+        conditions on the original features.
+
+    Notes
+    -----
+    This is a placeholder implementation. Decoding logic must be provided
+    once the mathematical feature encoding convention is established.
+
+    Examples
+    --------
+    >>> decode_math_features('(X["a_plus_b"] >= 5)')
+    '(X["a_plus_b"] >= 5)'  # unchanged until decoding is implemented
     """
 
     return rule
@@ -332,9 +351,6 @@ def decode_rare_category_encodings(rule: str, rare_mapping: dict[str, list[str]]
     if not rare_mapping:
         return rule
 
-    # Pattern to match full conditions including parentheses
-    pattern = r'\(X\[(["\'])([^"\']+)\1\]\s*([><=!]+)\s*([^\)]+)\)'
-
     def decode_condition(match):
         quote_char = match.group(1)
         col = match.group(2)
@@ -359,13 +375,11 @@ def decode_rare_category_encodings(rule: str, rare_mapping: dict[str, list[str]]
             categories_str = ", ".join(f'"{cat}"' for cat in categories)
             return f'(X["{col}"].is_in([{categories_str}]))'
 
-    result = re.sub(pattern, decode_condition, rule)
+    result = _COND_PATTERN_Q.sub(decode_condition, rule)
     return result
 
 
-def decode_numeric_encodings(
-    rule: str, encoding_mapping: dict[str, dict[str, int | float]]
-) -> str:
+def decode_numeric_encodings(rule: str, encoding_mapping: dict[str, dict[str, int | float]]) -> str:
     """
     Convert numerical conditions on encoded categorical columns to categorical conditions.
 
@@ -398,9 +412,6 @@ def decode_numeric_encodings(
     """
     if not encoding_mapping:
         return rule
-
-    # Pattern to match full conditions including parentheses
-    pattern = r'\(X\[(["\'])([^"\']+)\1\]\s*([><=!]+)\s*([^\)]+)\)'
 
     def decode_condition(match):
         col = match.group(2)
@@ -455,7 +466,7 @@ def decode_numeric_encodings(
             categories_str = ", ".join(f'"{cat}"' for cat in matching_categories)
             return f'(X["{col}"].is_in([{categories_str}]))'
 
-    result = re.sub(pattern, decode_condition, rule)
+    result = _COND_PATTERN_Q.sub(decode_condition, rule)
     return result
 
 
@@ -499,9 +510,6 @@ def format_as_boolean_conditions(rule: str, bool_columns: list[str]) -> str:
     if not bool_columns:
         return rule
 
-    # Pattern to match conditions with == or != operators
-    pattern = r'\(X\[(["\'])([^"\']+)\1\]\s*(==|!=)\s*([^\)]+)\)'
-
     def convert_condition(match):
         quote_char = match.group(1)
         col = match.group(2)
@@ -532,5 +540,5 @@ def format_as_boolean_conditions(rule: str, bool_columns: list[str]) -> str:
         # Always use == operator with the converted boolean value
         return f'(X["{col}"] == {bool_value})'
 
-    result = re.sub(pattern, convert_condition, rule)
+    result = _BOOL_PATTERN_Q.sub(convert_condition, rule)
     return result

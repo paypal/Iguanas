@@ -4,6 +4,8 @@
 
 [![PyPI version](https://badge.fury.io/py/iguanas.svg)](https://badge.fury.io/py/iguanas) [![codecov](https://codecov.io/gh/paypal/Iguanas/branch/pylint_workflow/graph/badge.svg?token=GgQNjHzHeM)](https://codecov.io/gh/paypal/Iguanas) ![Build](https://github.com/paypal/iguanas/actions/workflows/build.yml/badge.svg) ![Publish to PyPi](https://github.com/paypal/iguanas/actions/workflows/publish-to-pypi.yml/badge.svg)
 
+# Wheel file in dist/
+
 # What is Iguanas?
 
 Iguanas is a fast, flexible and modular Python package for:

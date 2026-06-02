@@ -343,7 +343,9 @@ class TestRuleGridSearchParallelWeights:
         estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
         scale_pos_weight_vec = np.array([1.0, 2.0])
 
-        result = rule_grid_search_parallel_weights(estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1)
+        result = rule_grid_search_parallel_weights(
+            estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1
+        )
 
         # Check result is a Polars DataFrame
         assert isinstance(result, pl.DataFrame)
@@ -406,7 +408,9 @@ class TestRuleGridSearchParallelWeights:
         estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
         scale_pos_weight_vec = np.array([1.0])
 
-        result = rule_grid_search_parallel_weights(estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1)
+        result = rule_grid_search_parallel_weights(
+            estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1
+        )
 
         assert isinstance(result, pl.DataFrame)
         assert len(result) > 0
@@ -447,7 +451,9 @@ class TestRuleGridSearchParallelWeights:
         )
         scale_pos_weight_vec = np.array([1.0])
 
-        result = rule_grid_search_parallel_weights(estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1)
+        result = rule_grid_search_parallel_weights(
+            estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1
+        )
 
         assert isinstance(result, pl.DataFrame)
         assert len(result) > 0
@@ -470,7 +476,9 @@ class TestRuleGridSearchParallelScales:
         estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
         scale_pos_weight_vec = np.array([1.0, 2.0])
 
-        result = rule_grid_search_parallel_scales(estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1)
+        result = rule_grid_search_parallel_scales(
+            estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1
+        )
 
         assert isinstance(result, pl.DataFrame)
         assert "rule" in result.columns
@@ -526,7 +534,9 @@ class TestRuleGridSearchParallelScales:
         estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
         scale_pos_weight_vec = np.array([1.0, 2.0])
 
-        result = rule_grid_search_parallel_scales(estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1)
+        result = rule_grid_search_parallel_scales(
+            estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1
+        )
 
         assert isinstance(result, pl.DataFrame)
         assert len(result) > 0
@@ -566,7 +576,9 @@ class TestRuleGridSearchParallelScales:
         )
         scale_pos_weight_vec = np.array([1.0, 2.0])
 
-        result = rule_grid_search_parallel_scales(estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1)
+        result = rule_grid_search_parallel_scales(
+            estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1
+        )
 
         assert isinstance(result, pl.DataFrame)
         assert len(result) > 0
@@ -1252,6 +1264,40 @@ class TestFitExceptionSequential:
 
         # Should succeed with second scale_pos_weight
         assert isinstance(result, pl.DataFrame)
+
+
+class TestNonNumericInputRaises:
+    """Test that all three grid search functions reject object-dtype X_train."""
+
+    @pytest.fixture()
+    def estimator(self):
+        return XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
+
+    @pytest.fixture()
+    def y_train(self):
+        return pd.Series([0, 1, 0, 1, 0])
+
+    @pytest.fixture()
+    def X_train_object(self):
+        return pd.DataFrame({"a": ["cat", "dog", "cat", "dog", "cat"], "b": [1, 2, 3, 4, 5]})
+
+    def test_sequential_raises_on_object_dtype(self, estimator, X_train_object, y_train):
+        with pytest.raises(ValueError, match="non-numeric data"):
+            rule_grid_search_sequential(
+                estimator, X_train_object, y_train, scale_pos_weight_vec=[1.0]
+            )
+
+    def test_parallel_weights_raises_on_object_dtype(self, estimator, X_train_object, y_train):
+        with pytest.raises(ValueError, match="non-numeric data"):
+            rule_grid_search_parallel_weights(
+                estimator, X_train_object, y_train, scale_pos_weight_vec=[1.0]
+            )
+
+    def test_parallel_scales_raises_on_object_dtype(self, estimator, X_train_object, y_train):
+        with pytest.raises(ValueError, match="non-numeric data"):
+            rule_grid_search_parallel_scales(
+                estimator, X_train_object, y_train, scale_pos_weight_vec=[1.0]
+            )
 
 
 if __name__ == "__main__":

@@ -242,11 +242,13 @@ class TestFilterCorrelatedRules:
 
     def test_no_correlation_keeps_all(self):
         """Test that uncorrelated features are all kept."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, 0.1, 0.05],
-            "rule_B": [0.1, 1.0, 0.15],
-            "rule_C": [0.05, 0.15, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, 0.1, 0.05],
+                "rule_B": [0.1, 1.0, 0.15],
+                "rule_C": [0.05, 0.15, 1.0],
+            }
+        )
         importance = {"rule_A": 0.8, "rule_B": 0.6, "rule_C": 0.9}
 
         result = filter_correlated_rules(C, importance, max_corr=0.95)
@@ -256,11 +258,13 @@ class TestFilterCorrelatedRules:
 
     def test_high_correlation_filters_less_important(self):
         """Test that highly correlated pairs keep only the most important."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, 0.98, 0.1],
-            "rule_B": [0.98, 1.0, 0.2],
-            "rule_C": [0.1, 0.2, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, 0.98, 0.1],
+                "rule_B": [0.98, 1.0, 0.2],
+                "rule_C": [0.1, 0.2, 1.0],
+            }
+        )
         importance = {"rule_A": 0.8, "rule_B": 0.6, "rule_C": 0.9}
 
         result = filter_correlated_rules(C, importance, max_corr=0.95)
@@ -272,11 +276,13 @@ class TestFilterCorrelatedRules:
 
     def test_negative_correlation_above_threshold(self):
         """Test that absolute correlation is used (negative correlations)."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, -0.97, 0.1],
-            "rule_B": [-0.97, 1.0, 0.2],
-            "rule_C": [0.1, 0.2, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, -0.97, 0.1],
+                "rule_B": [-0.97, 1.0, 0.2],
+                "rule_C": [0.1, 0.2, 1.0],
+            }
+        )
         importance = {"rule_A": 0.8, "rule_B": 0.6, "rule_C": 0.9}
 
         result = filter_correlated_rules(C, importance, max_corr=0.95)
@@ -286,11 +292,13 @@ class TestFilterCorrelatedRules:
 
     def test_max_corr_threshold(self):
         """Test max_corr parameter controls filtering."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, 0.92, 0.1],
-            "rule_B": [0.92, 1.0, 0.2],
-            "rule_C": [0.1, 0.2, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, 0.92, 0.1],
+                "rule_B": [0.92, 1.0, 0.2],
+                "rule_C": [0.1, 0.2, 1.0],
+            }
+        )
         importance = {"rule_A": 0.8, "rule_B": 0.6, "rule_C": 0.9}
 
         # With max_corr=0.95, 0.92 is not above threshold, keep all
@@ -303,10 +311,12 @@ class TestFilterCorrelatedRules:
 
     def test_importance_dict_mismatch_raises_error(self):
         """Test that ValueError is raised when importance dict length doesn't match."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, 0.5],
-            "rule_B": [0.5, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, 0.5],
+                "rule_B": [0.5, 1.0],
+            }
+        )
         # Only one importance value provided
         importance = {"rule_A": 0.8}
 
@@ -315,11 +325,13 @@ class TestFilterCorrelatedRules:
 
     def test_nan_correlation_is_ignored(self):
         """Test that NaN correlations are handled gracefully."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, float('nan'), 0.1],
-            "rule_B": [float('nan'), 1.0, 0.2],
-            "rule_C": [0.1, 0.2, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, float("nan"), 0.1],
+                "rule_B": [float("nan"), 1.0, 0.2],
+                "rule_C": [0.1, 0.2, 1.0],
+            }
+        )
         importance = {"rule_A": 0.8, "rule_B": 0.6, "rule_C": 0.9}
 
         result = filter_correlated_rules(C, importance, max_corr=0.95)
@@ -329,12 +341,14 @@ class TestFilterCorrelatedRules:
 
     def test_multiple_correlations_greedy_selection(self):
         """Test greedy algorithm with multiple correlated pairs."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, 0.97, 0.1, 0.05],
-            "rule_B": [0.97, 1.0, 0.96, 0.1],
-            "rule_C": [0.1, 0.96, 1.0, 0.15],
-            "rule_D": [0.05, 0.1, 0.15, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, 0.97, 0.1, 0.05],
+                "rule_B": [0.97, 1.0, 0.96, 0.1],
+                "rule_C": [0.1, 0.96, 1.0, 0.15],
+                "rule_D": [0.05, 0.1, 0.15, 1.0],
+            }
+        )
         importance = {"rule_A": 0.9, "rule_B": 0.5, "rule_C": 0.7, "rule_D": 0.8}
 
         result = filter_correlated_rules(C, importance, max_corr=0.95)
@@ -346,10 +360,12 @@ class TestFilterCorrelatedRules:
 
     def test_equal_importance_keeps_first(self):
         """Test that when importance is equal, first column is kept."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, 0.98],
-            "rule_B": [0.98, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, 0.98],
+                "rule_B": [0.98, 1.0],
+            }
+        )
         importance = {"rule_A": 0.8, "rule_B": 0.8}
 
         result = filter_correlated_rules(C, importance, max_corr=0.95)
@@ -359,11 +375,13 @@ class TestFilterCorrelatedRules:
 
     def test_preserves_column_order(self):
         """Test that returned column order matches input order."""
-        C = pl.DataFrame({
-            "rule_Z": [1.0, 0.1, 0.05],
-            "rule_A": [0.1, 1.0, 0.15],
-            "rule_M": [0.05, 0.15, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_Z": [1.0, 0.1, 0.05],
+                "rule_A": [0.1, 1.0, 0.15],
+                "rule_M": [0.05, 0.15, 1.0],
+            }
+        )
         importance = {"rule_Z": 0.8, "rule_A": 0.6, "rule_M": 0.9}
 
         result = filter_correlated_rules(C, importance, max_corr=0.95)
@@ -373,11 +391,13 @@ class TestFilterCorrelatedRules:
 
     def test_chain_correlation_removal(self):
         """Test handling of chain correlations (A~B, B removed, C~B)."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, 0.97, 0.97],
-            "rule_B": [0.97, 1.0, 0.97],
-            "rule_C": [0.97, 0.97, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, 0.97, 0.97],
+                "rule_B": [0.97, 1.0, 0.97],
+                "rule_C": [0.97, 0.97, 1.0],
+            }
+        )
         importance = {"rule_A": 0.9, "rule_B": 0.5, "rule_C": 0.8}
 
         result = filter_correlated_rules(C, importance, max_corr=0.95)
@@ -390,11 +410,13 @@ class TestFilterCorrelatedRules:
 
     def test_use_abs_true_filters_negative_correlation(self):
         """use_abs=True (default): strong negative correlation triggers filtering."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, -0.97, 0.1],
-            "rule_B": [-0.97, 1.0, 0.2],
-            "rule_C": [0.1, 0.2, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, -0.97, 0.1],
+                "rule_B": [-0.97, 1.0, 0.2],
+                "rule_C": [0.1, 0.2, 1.0],
+            }
+        )
         importance = {"rule_A": 0.8, "rule_B": 0.6, "rule_C": 0.9}
 
         result = filter_correlated_rules(C, importance, max_corr=0.95, use_abs=True)
@@ -404,11 +426,13 @@ class TestFilterCorrelatedRules:
 
     def test_use_abs_false_ignores_negative_correlation(self):
         """use_abs=False: strong negative correlation does NOT trigger filtering."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, -0.97, 0.1],
-            "rule_B": [-0.97, 1.0, 0.2],
-            "rule_C": [0.1, 0.2, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, -0.97, 0.1],
+                "rule_B": [-0.97, 1.0, 0.2],
+                "rule_C": [0.1, 0.2, 1.0],
+            }
+        )
         importance = {"rule_A": 0.8, "rule_B": 0.6, "rule_C": 0.9}
 
         result = filter_correlated_rules(C, importance, max_corr=0.95, use_abs=False)
@@ -418,11 +442,13 @@ class TestFilterCorrelatedRules:
 
     def test_use_abs_false_still_filters_positive_correlation(self):
         """use_abs=False: strong positive correlation still triggers filtering."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, 0.97, 0.1],
-            "rule_B": [0.97, 1.0, 0.2],
-            "rule_C": [0.1, 0.2, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, 0.97, 0.1],
+                "rule_B": [0.97, 1.0, 0.2],
+                "rule_C": [0.1, 0.2, 1.0],
+            }
+        )
         importance = {"rule_A": 0.8, "rule_B": 0.6, "rule_C": 0.9}
 
         result = filter_correlated_rules(C, importance, max_corr=0.95, use_abs=False)
@@ -432,10 +458,12 @@ class TestFilterCorrelatedRules:
 
     def test_use_abs_default_is_true(self):
         """Verify default use_abs=True behaviour matches explicit use_abs=True."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, -0.97],
-            "rule_B": [-0.97, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, -0.97],
+                "rule_B": [-0.97, 1.0],
+            }
+        )
         importance = {"rule_A": 0.8, "rule_B": 0.6}
 
         result_default = filter_correlated_rules(C, importance, max_corr=0.95)
@@ -445,10 +473,12 @@ class TestFilterCorrelatedRules:
 
     def test_use_abs_false_boundary_exactly_at_threshold(self):
         """use_abs=False: correlation exactly at max_corr is NOT filtered (strict >)."""
-        C = pl.DataFrame({
-            "rule_A": [1.0, 0.95],
-            "rule_B": [0.95, 1.0],
-        })
+        C = pl.DataFrame(
+            {
+                "rule_A": [1.0, 0.95],
+                "rule_B": [0.95, 1.0],
+            }
+        )
         importance = {"rule_A": 0.8, "rule_B": 0.6}
 
         result = filter_correlated_rules(C, importance, max_corr=0.95, use_abs=False)
@@ -459,4 +489,3 @@ class TestFilterCorrelatedRules:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
-

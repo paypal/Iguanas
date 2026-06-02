@@ -61,7 +61,9 @@ class TestApplyAndFilterByPerformance:
         rules = ['(X["age"] >= 35)', '(X["income"] >= 50000)']
 
         R, metrics = apply_and_filter_by_performance(
-            X, y, rules,
+            X,
+            y,
+            rules,
             metrics_threshold=[
                 {"name": "precision", "operator": ">=", "value": 0.5},
                 {"name": "recall", "operator": ">=", "value": 0.5},
@@ -86,7 +88,10 @@ class TestApplyAndFilterByPerformance:
         rules = ['(X["age"] >= 35)']
 
         R, metrics = apply_and_filter_by_performance(
-            X, y, rules, weight_column="weight",
+            X,
+            y,
+            rules,
+            weight_column="weight",
             metrics_threshold=[
                 {"name": "precision", "operator": ">=", "value": 0.4},
                 {"name": "recall", "operator": ">=", "value": 0.4},
@@ -104,7 +109,9 @@ class TestApplyAndFilterByPerformance:
         rules = ['(X["age"] >= 50)', '(X["income"] >= 100000)']  # Very restrictive rules
 
         R, metrics = apply_and_filter_by_performance(
-            X, y, rules,
+            X,
+            y,
+            rules,
             metrics_threshold=[
                 {"name": "precision", "operator": ">=", "value": 0.9},
                 {"name": "recall", "operator": ">=", "value": 0.9},
@@ -123,7 +130,9 @@ class TestApplyAndFilterByPerformance:
         rules = ['(X["age"] >= 35)', '(X["income"] >= 50000)', '(X["age"] >= 40)']
 
         R, metrics = apply_and_filter_by_performance(
-            X, y, rules,
+            X,
+            y,
+            rules,
             metrics_threshold=[
                 {"name": "precision", "operator": ">=", "value": 0.4},
                 {"name": "recall", "operator": ">=", "value": 0.4},
@@ -144,7 +153,9 @@ class TestApplyAndFilterByPerformance:
         rules = ['(X["age"] >= 30)', '(X["income"] >= 40000)']
 
         R, metrics = apply_and_filter_by_performance(
-            X, y, rules,
+            X,
+            y,
+            rules,
             metrics_threshold=[
                 {"name": "precision", "operator": ">=", "value": 0.0},
                 {"name": "recall", "operator": ">=", "value": 0.0},
@@ -323,7 +334,9 @@ class TestApplyFilterAndDeduplicateRules:
         rules = ['(X["age"] >= 40)', '(X["income"] >= 60000)', '(X["age"] >= 45)']
 
         R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
-            X, y, rules,
+            X,
+            y,
+            rules,
             metrics_threshold=[
                 {"name": "precision", "operator": ">=", "value": 0.5},
                 {"name": "recall", "operator": ">=", "value": 0.5},
@@ -351,7 +364,9 @@ class TestApplyFilterAndDeduplicateRules:
         rules_df = pl.DataFrame({"rule": ['(X["age"] >= 35)', '(X["income"] >= 50000)']})
 
         R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
-            X, y, rules_df,
+            X,
+            y,
+            rules_df,
             metrics_threshold=[
                 {"name": "precision", "operator": ">=", "value": 0.4},
                 {"name": "recall", "operator": ">=", "value": 0.4},
@@ -370,7 +385,10 @@ class TestApplyFilterAndDeduplicateRules:
         rules = ['(X["age"] >= 35)', '(X["age"] >= 40)']
 
         R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
-            X, y, rules, weight_column="weight",
+            X,
+            y,
+            rules,
+            weight_column="weight",
             metrics_threshold=[
                 {"name": "precision", "operator": ">=", "value": 0.4},
                 {"name": "recall", "operator": ">=", "value": 0.4},
@@ -387,7 +405,9 @@ class TestApplyFilterAndDeduplicateRules:
         rules = ['(X["age"] >= 60)', '(X["income"] >= 200000)']
 
         R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
-            X, y, rules,
+            X,
+            y,
+            rules,
             metrics_threshold=[
                 {"name": "precision", "operator": ">=", "value": 0.9},
                 {"name": "recall", "operator": ">=", "value": 0.9},
@@ -414,7 +434,9 @@ class TestApplyFilterAndDeduplicateRules:
         ]
 
         R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
-            X, y, rules,
+            X,
+            y,
+            rules,
             metrics_threshold=[
                 {"name": "precision", "operator": ">=", "value": 0.3},
                 {"name": "recall", "operator": ">=", "value": 0.3},
@@ -441,7 +463,9 @@ class TestApplyFilterAndDeduplicateRules:
         ]
 
         R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
-            X, y, rules,
+            X,
+            y,
+            rules,
             metrics_threshold=[
                 {"name": "precision", "operator": ">=", "value": 0.3},
                 {"name": "recall", "operator": ">=", "value": 0.3},
@@ -464,7 +488,9 @@ class TestApplyFilterAndDeduplicateRules:
         rules = ['(X["age"] >= 40)', '(X["income"] >= 60000)', '(X["age"] >= 50)']
 
         R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
-            X, y, rules,
+            X,
+            y,
+            rules,
             metrics_threshold=[
                 {"name": "precision", "operator": ">=", "value": 0.3},
                 {"name": "recall", "operator": ">=", "value": 0.3},
@@ -489,7 +515,9 @@ class TestApplyFilterAndDeduplicateRules:
         rules = ['(X["age"] >= 35)']
 
         R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
-            X, y, rules,
+            X,
+            y,
+            rules,
             metrics_threshold=[
                 {"name": "precision", "operator": ">=", "value": 0.5},
                 {"name": "recall", "operator": ">=", "value": 0.5},

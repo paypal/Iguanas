@@ -1,13 +1,16 @@
-import polars as pl
-from iguanas.metrics import compute_metrics
-from iguanas.rule_evaluation import apply_rules
 import ast
 import re
 from collections import deque
 
+import polars as pl
+
+from iguanas.metrics import compute_metrics
+from iguanas.rule_evaluation import apply_rules
+
 
 def _to_py(expr: str) -> str:
-    return re.sub(r'\s*&\s*', ' and ', re.sub(r'\s*\|\s*', ' or ', expr))
+    return re.sub(r"\s*&\s*", " and ", re.sub(r"\s*\|\s*", " or ", expr))
+
 
 def _node_to_str(node: ast.AST) -> str:
     if isinstance(node, ast.Compare):
@@ -17,12 +20,27 @@ def _node_to_str(node: ast.AST) -> str:
         return op.join(_node_to_str(v) for v in node.values)
     else:
         s = ast.unparse(node)
-        return re.sub(r'\sand\s', ' & ', re.sub(r'\sor\s', ' | ', s))
+        return re.sub(r"\sand\s", " & ", re.sub(r"\sor\s", " | ", s))
 
-def parse_conditions(expr: str):
-    """Parses a boolean expression into a nested dict tree."""
+
+def parse_conditions(expr: str) -> dict:
+    """Parse a boolean expression string into a nested dict tree.
+
+    Parameters
+    ----------
+    expr : str
+        Boolean rule expression using ``&`` (AND) and ``|`` (OR) operators,
+        e.g. ``'(X["a"] > 1) & (X["b"] < 5)'``.
+
+    Returns
+    -------
+    dict
+        Nested dict with keys ``"op"`` (``"&"`` or ``"|"``), ``"left"``,
+        and ``"right"``. Leaf nodes are plain strings.
+    """
     tree = ast.parse(_to_py(expr), mode="eval")
     return _convert(tree.body)
+
 
 def _convert(node):
     if isinstance(node, ast.BoolOp):
@@ -39,20 +57,34 @@ def _convert(node):
     else:
         return ast.unparse(node)
 
-def parse_levels(expr: str) -> list[dict]:
-    """
-    Parses a boolean expression level by level (BFS), assigning a hierarchical
-    index to each child so the original expression can be rebuilt.
-    Each level entry: {operator: [(index, expr), ...]}
-    Child indices use dot notation to reflect their position in the tree
-    (e.g. "1.0" = first child of the item at index "1" in the parent level).
 
-    Example:
-        "(A > 1) | (B <= 5 & C < 3) | (D >= 0)"
-        -> [
-            {"|": [("0", "A > 1"), ("1", "B <= 5 & C < 3"), ("2", "D >= 0")]},
-            {"&": [("1.0", "B <= 5"), ("1.1", "C < 3")]},
-        ]
+def parse_levels(expr: str) -> list[dict]:
+    """Parse a boolean expression level by level using BFS.
+
+    Assigns a hierarchical dot-notation index to each sub-expression so the
+    original expression can be rebuilt bottom-up.
+
+    Parameters
+    ----------
+    expr : str
+        Boolean rule expression using ``&`` (AND) and ``|`` (OR) operators.
+
+    Returns
+    -------
+    list[dict]
+        BFS-ordered list of level entries.  Each entry is a dict with a single
+        key (the operator ``"&"`` or ``"|"``), whose value is a list of
+        ``(index, sub_expr)`` tuples.  Indices use dot notation reflecting
+        position in the tree (e.g. ``"1.0"`` = first child of the item
+        indexed ``"1"`` in the parent level).
+
+    Examples
+    --------
+    >>> parse_levels('(A > 1) | ((B <= 5) & (C < 3)) | (D >= 0)')
+    [
+        {'|': [('0', '(A > 1)'), ('1', '(B <= 5) & (C < 3)'), ('2', '(D >= 0)')]},
+        {'&': [('1.0', '(B <= 5)'), ('1.1', '(C < 3)')]},
+    ]
     """
     tree = ast.parse(_to_py(expr), mode="eval")
 
@@ -83,10 +115,21 @@ def parse_levels(expr: str) -> list[dict]:
 
 
 def rebuild_from_levels(levels: list[dict]) -> str:
-    """
-    Rebuilds the original expression from the output of parse_levels.
-    Processes levels bottom-up: deepest compound expressions are collapsed
-    first, then their rebuilt string replaces the placeholder in the parent level.
+    """Rebuild the original boolean expression from ``parse_levels`` output.
+
+    Processes levels bottom-up: the deepest compound sub-expressions are
+    collapsed first, then their rebuilt strings replace the placeholder in
+    the parent level.
+
+    Parameters
+    ----------
+    levels : list[dict]
+        Output of :func:`parse_levels`.
+
+    Returns
+    -------
+    str
+        Reconstructed boolean expression string.
     """
     # Seed the map with all leaf expressions across all levels
     index_map: dict[str, str] = {}
@@ -105,7 +148,7 @@ def rebuild_from_levels(levels: list[dict]) -> str:
             parent_idx = first_idx.rsplit(".", 1)[0] if "." in first_idx else None
             rebuilt = f" {op} ".join(f"({index_map[idx]})" for idx, _ in children)
             if parent_idx is None:
-                return rebuilt          # reached the root
+                return rebuilt  # reached the root
             index_map[parent_idx] = rebuilt
 
     return ""
@@ -128,8 +171,9 @@ def generate_rule_performance_report(
 
     Parameters
     ----------
-    exprs : list[str]
+    rules : str | list[str]
         List of boolean rule expression strings (using & / | operators).
+        A single string is also accepted and treated as a one-element list.
     X : pl.DataFrame
         Feature DataFrame on which to evaluate each component.
     y : pl.Series
@@ -168,9 +212,11 @@ def generate_rule_performance_report(
     R_all = apply_rules(X, unique_rules)
     M_all = compute_metrics(R_all, y, weights)
 
-    meta = pl.DataFrame({
-        "rule_index": list(idxs),
-        "rule": list(rule_strs),
-    })
+    meta = pl.DataFrame(
+        {
+            "rule_index": list(idxs),
+            "rule": list(rule_strs),
+        }
+    )
 
     return meta.join(M_all, on="rule")

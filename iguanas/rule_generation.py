@@ -370,7 +370,10 @@ def _train_rules_for_scale(
         weights_array = weights_np[:, i]
         est = XGBClassifier(**estimator_params)
         est.set_params(scale_pos_weight=scale_pos_weight)
-        est.fit(X_fit, y_train, sample_weight=weights_array)
+        try:
+            est.fit(X_fit, y_train, sample_weight=weights_array)
+        except Exception:
+            continue
 
         params = {
             "transformation": name,
@@ -425,6 +428,12 @@ def rule_grid_search_sequential(
     y_train_np = y_train.to_numpy()
     feature_names = X_train.columns if isinstance(X_train, pl.DataFrame) else list(X_train.columns)
 
+    if X_train_np.dtype == object:
+        raise ValueError(
+            "X_train contains non-numeric data. Please encode categorical features "
+            "numerically before using rule_grid_search_parallel_scales."
+        )
+
     if len(scale_pos_weight_vec) == 0:
         raise ValueError("scale_pos_weight_vec cannot be empty")
 
@@ -451,7 +460,6 @@ def rule_grid_search_sequential(
         )
 
     rules_vec = []
-    print("weight_names", weight_names)
     for scale_pos_weight in scale_pos_weight_vec:
         results = _train_rules_for_scale(
             scale_pos_weight,
@@ -463,7 +471,6 @@ def rule_grid_search_sequential(
             all_features_constrained,
             feature_names=feature_names,
         )
-        print(results)
         rules_vec.extend(results)
 
     if rules_vec:
@@ -545,6 +552,12 @@ def rule_grid_search_parallel_weights(
     X_train_np = X_train.to_numpy()
     y_train_np = y_train.to_numpy()
     feature_names = X_train.columns if isinstance(X_train, pl.DataFrame) else list(X_train.columns)
+
+    if X_train_np.dtype == object:
+        raise ValueError(
+            "X_train contains non-numeric data. Please encode categorical features "
+            "numerically before using rule_grid_search_parallel_scales."
+        )
 
     if len(scale_pos_weight_vec) == 0:
         raise ValueError("scale_pos_weight_vec cannot be empty")
@@ -653,6 +666,11 @@ def rule_grid_search_parallel_scales(
     y_train_np = y_train.to_numpy()
     feature_names = X_train.columns if isinstance(X_train, pl.DataFrame) else list(X_train.columns)
 
+    if X_train_np.dtype == object:
+        raise ValueError(
+            "X_train contains non-numeric data. Please encode categorical features "
+            "numerically before using rule_grid_search_parallel_scales."
+        )
     if len(scale_pos_weight_vec) == 0:
         raise ValueError("scale_pos_weight_vec cannot be empty")
 
@@ -710,5 +728,3 @@ def rule_grid_search_parallel_scales(
         print(f"Extracted {len(final_X)} total rules from parallel-scales grid search")
 
     return final_X
-
-

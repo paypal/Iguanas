@@ -30,6 +30,7 @@ def dataframe():
 # _power_label
 # ---------------------------------------------------------------------------
 
+
 class TestPowerLabel:
     def test_integer_power(self):
         assert _power_label(2.0) == "2"
@@ -44,6 +45,7 @@ class TestPowerLabel:
 # ---------------------------------------------------------------------------
 # _resolve
 # ---------------------------------------------------------------------------
+
 
 class TestResolve:
     def test_default_powers_used_when_none(self, series):
@@ -70,6 +72,7 @@ class TestResolve:
 # _dispatch
 # ---------------------------------------------------------------------------
 
+
 class TestDispatch:
     def test_series_returns_none(self, series):
         result = _dispatch(generate_increasing_weight, series)
@@ -92,6 +95,7 @@ class TestDispatch:
 # ---------------------------------------------------------------------------
 # _increasing_exprs / _decreasing_exprs (via the public API for coverage)
 # ---------------------------------------------------------------------------
+
 
 class TestIncreasingExprs:
     def test_without_quantile_baseline_included(self, series):
@@ -166,6 +170,7 @@ class TestDecreasingExprs:
 # generate_increasing_weight
 # ---------------------------------------------------------------------------
 
+
 class TestGenerateIncreasingWeight:
     def test_series_returns_dataframe(self, series):
         result = generate_increasing_weight(series)
@@ -234,6 +239,7 @@ class TestGenerateIncreasingWeight:
 # generate_decreasing_weight
 # ---------------------------------------------------------------------------
 
+
 class TestGenerateDecreasingWeight:
     def test_series_returns_dataframe(self, series):
         result = generate_decreasing_weight(series)
@@ -286,6 +292,7 @@ class TestGenerateDecreasingWeight:
 # ---------------------------------------------------------------------------
 # generate_all_weight
 # ---------------------------------------------------------------------------
+
 
 class TestGenerateAllWeight:
     def test_series_returns_dataframe(self, series):

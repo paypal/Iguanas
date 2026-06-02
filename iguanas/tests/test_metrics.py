@@ -270,7 +270,6 @@ class TestComputeMetrics:
         # 1 / (1 + 1) * 100 = 50%
         assert result["good_flagged(%)"][0] == 50.0
 
-
     def test_weighted_fbeta_scores(self):
         """Test weighted F-beta score calculations using default betas."""
         R = pl.DataFrame({"rule1": [True, True, False, False]})

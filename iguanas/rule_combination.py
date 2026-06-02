@@ -128,6 +128,19 @@ def combine_rules_cumulative(
     ------
     ValueError
         If operator is not 'or' or 'and', or if output_names length doesn't match columns.
+
+    Examples
+    --------
+    >>> import polars as pl
+    >>> R = pl.DataFrame({
+    ...     "rule_A": [True, False, True],
+    ...     "rule_B": [False, True, True],
+    ...     "rule_C": [True, True, False],
+    ... })
+    >>> combine_rules_cumulative(R, operator="or")
+    # Column 1: rule_A | ...; Column 2: rule_A | rule_B | ...; Column 3: all three
+    >>> combine_rules_cumulative(R, operator="and", output_names=["step1", "step2", "step3"])
+    # Named columns, each True only if all rules up to that position are True
     """
     if operator not in ["or", "and"]:
         raise ValueError(f"operator must be 'or' or 'and', got '{operator}'")
@@ -557,9 +570,10 @@ def combine_rules_a_star(
             f"Available metrics: {list(metrics_R.columns)}"
         )
 
+    # Build a rule→row-index map for O(1) lookups instead of O(n) list.index()
+    rule_to_idx = {rule: idx for idx, rule in enumerate(rules)}
     for rule in rules:
-        rule_idx = rules.index(rule)
-        single_rule_metrics[rule] = metrics_R[metric_to_use].item(rule_idx)
+        single_rule_metrics[rule] = metrics_R[metric_to_use].item(rule_to_idx[rule])
 
     # Cache for computed combinations to avoid redundant evaluations
     combination_cache: dict[tuple[str, ...], float] = {}
