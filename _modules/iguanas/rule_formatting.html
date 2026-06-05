@@ -1,0 +1,1022 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iguanas.rule_formatting &#8212; Gators - Lightning Fast ML Preprocessing with Polars</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/_static/iguanas.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../_static/documentation_options.js?v=692d9a0e"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
+                gtag('js', new Date());
+                gtag('config', 'G-Z5TR8D9VTQ');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/iguanas/rule_formatting';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://paypal.github.io/iguanas/_modules/iguanas/rule_formatting.html" />
+    <link rel="icon" href="../../_static/iguanas.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/iguanas_logo.png" class="logo__image only-light" alt="Gators - Lightning Fast ML Preprocessing with Polars - Home"/>
+    <img src="../../_static/iguanas_logo.png" class="logo__image only-dark pst-js-only" alt="Gators - Lightning Fast ML Preprocessing with Polars - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../quickstart.html">
+    Quick Start
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_reference.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../examples.html">
+    Examples
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/paypal/iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../quickstart.html">
+    Quick Start
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_reference.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../examples.html">
+    Examples
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/paypal/iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">iguanas.rule_formatting</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for iguanas.rule_formatting</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<span class="c1"># Pre-compiled regex patterns used across multiple formatting functions.</span>
+<span class="c1"># Avoids recompiling on every call.</span>
+<span class="n">_COND_PATTERN</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\(X\[&quot;([^&quot;]+)&quot;\]\s*([&gt;&lt;=!]+)\s*([^\)]+)\)&#39;</span><span class="p">)</span>
+<span class="c1"># _COND_PATTERN_Q = re.compile(r&#39;\(X\[([&quot;\&#39;])([^&quot;\&#39;]+)\1\]\s*([&gt;&lt;=!]+)\s*([^\)]+)\)&#39;)</span>
+<span class="c1"># _BOOL_PATTERN_Q = re.compile(r&#39;\(X\[([&quot;\&#39;])([^&quot;\&#39;]+)\1\]\s*(==|!=)\s*([^\)]+)\)&#39;)</span>
+
+
+<div class="viewcode-block" id="simplify_rule">
+<a class="viewcode-back" href="../../api/rule_formatting.html#iguanas.rule_formatting.simplify_rule">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">simplify_rule</span><span class="p">(</span><span class="n">rule</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simplify a rule by removing redundant conditions on the same column.</span>
+
+<span class="sd">    When multiple conditions exist on the same column, keeps only the most restrictive:</span>
+
+<span class="sd">    - For lower bounds (&gt;, &gt;=): keeps the highest threshold, preferring &gt; over &gt;= when equal</span>
+<span class="sd">    - For upper bounds (&lt;, &lt;=): keeps the lowest threshold, preferring &lt; over &lt;= when equal</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rule : str</span>
+<span class="sd">        Rule string with conditions like (X[&quot;col&quot;] &gt; val) &amp; (X[&quot;col&quot;] &gt;= val).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        Simplified rule string with redundant conditions removed.</span>
+<span class="sd">        Column order is preserved based on first appearance.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; simplify_rule(&#39;(X[&quot;amount&quot;] &gt;= 100.0) &amp; (X[&quot;amount&quot;] &gt; 100.0)&#39;)</span>
+<span class="sd">    &#39;(X[&quot;amount&quot;] &gt; 100.0)&#39;</span>
+
+<span class="sd">    &gt;&gt;&gt; simplify_rule(&#39;(X[&quot;amount&quot;] &lt; 100.0) &amp; (X[&quot;amount&quot;] &lt;= 100.0)&#39;)</span>
+<span class="sd">    &#39;(X[&quot;amount&quot;] &lt; 100.0)&#39;</span>
+
+<span class="sd">    &gt;&gt;&gt; simplify_rule(&#39;(X[&quot;a&quot;] &gt;= 50) &amp; (X[&quot;b&quot;] &lt; 10) &amp; (X[&quot;a&quot;] &gt; 100)&#39;)</span>
+<span class="sd">    &#39;(X[&quot;a&quot;] &gt; 100) &amp; (X[&quot;b&quot;] &lt; 10)&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Find all conditions with their full match</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">_COND_PATTERN</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">matches</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rule</span>
+
+    <span class="c1"># Track column order based on first appearance</span>
+    <span class="n">column_order</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Group conditions by column</span>
+    <span class="n">column_conditions</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">full_match</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">column_conditions</span><span class="p">:</span>
+            <span class="n">column_conditions</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">column_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>  <span class="c1"># Track first appearance</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">numeric_val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="n">column_conditions</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">full_match</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">numeric_val</span><span class="p">,</span> <span class="n">val</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Non-numeric value, keep as is</span>
+            <span class="n">column_conditions</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">full_match</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">val</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+
+    <span class="c1"># Determine which conditions to remove</span>
+    <span class="n">conditions_to_remove</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">conds</span> <span class="ow">in</span> <span class="n">column_conditions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">conds</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Separate by operator type (only numeric values)</span>
+        <span class="n">greater_conds</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">full</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">num_val</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">full</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">num_val</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">conds</span>
+            <span class="k">if</span> <span class="n">op</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&gt;=&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">num_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">]</span>
+        <span class="n">less_conds</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">full</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">num_val</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">full</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">num_val</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">conds</span>
+            <span class="k">if</span> <span class="n">op</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;=&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">num_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">]</span>
+
+        <span class="c1"># For greater/greater-equal: keep only the most restrictive (highest value)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">greater_conds</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Find max value and keeper in single pass</span>
+            <span class="n">max_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">num_val</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">num_val</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">greater_conds</span><span class="p">)</span>
+            <span class="c1"># Among max values, prefer &gt; over &gt;=</span>
+            <span class="n">keeper</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">full</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">num_val</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">greater_conds</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">num_val</span> <span class="o">==</span> <span class="n">max_val</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">keeper</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;&gt;&quot;</span> <span class="ow">and</span> <span class="n">keeper</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&gt;=&quot;</span><span class="p">):</span>
+                        <span class="n">keeper</span> <span class="o">=</span> <span class="p">(</span><span class="n">full</span><span class="p">,</span> <span class="n">op</span><span class="p">)</span>
+
+            <span class="c1"># Mark all others for removal (only iterate once)</span>
+            <span class="n">conditions_to_remove</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">full</span> <span class="k">for</span> <span class="n">full</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">greater_conds</span> <span class="k">if</span> <span class="n">full</span> <span class="o">!=</span> <span class="n">keeper</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="c1"># For less/less-equal: keep only the most restrictive (lowest value)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">less_conds</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Find min value and keeper in single pass</span>
+            <span class="n">min_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">num_val</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">num_val</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">less_conds</span><span class="p">)</span>
+            <span class="c1"># Among min values, prefer &lt; over &lt;=</span>
+            <span class="n">keeper</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">full</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">num_val</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">less_conds</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">num_val</span> <span class="o">==</span> <span class="n">min_val</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">keeper</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;&lt;&quot;</span> <span class="ow">and</span> <span class="n">keeper</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&lt;=&quot;</span><span class="p">):</span>
+                        <span class="n">keeper</span> <span class="o">=</span> <span class="p">(</span><span class="n">full</span><span class="p">,</span> <span class="n">op</span><span class="p">)</span>
+
+            <span class="c1"># Mark all others for removal (only iterate once)</span>
+            <span class="n">conditions_to_remove</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">full</span> <span class="k">for</span> <span class="n">full</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">less_conds</span> <span class="k">if</span> <span class="n">full</span> <span class="o">!=</span> <span class="n">keeper</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">result_conditions</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">full</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">column_order</span>
+        <span class="k">for</span> <span class="n">full</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">num_val</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">column_conditions</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">full</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">conditions_to_remove</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="s2">&quot; &amp; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result_conditions</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># def format_floats_as_integers(rule: str, int_columns: list[str]) -&gt; str:</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Convert float values to integers for specified columns in a rule string,</span>
+<span class="c1">#     preserving the validity of the comparison operations.</span>
+
+<span class="c1">#     For integer columns, fractional thresholds are converted as follows:</span>
+
+<span class="c1">#     - &gt;= operator: uses ceil(value) to ensure all valid integers are included</span>
+<span class="c1">#     - &gt; operator: uses floor(value) to maintain strict inequality</span>
+<span class="c1">#     - &lt;= operator: uses floor(value) to ensure all valid integers are included</span>
+<span class="c1">#     - &lt; operator: uses ceil(value) to maintain strict inequality</span>
+
+<span class="c1">#     Parameters</span>
+<span class="c1">#     ----------</span>
+<span class="c1">#     rule : str</span>
+<span class="c1">#         Rule string with conditions like (X[&quot;col&quot;] &gt;= 0.1)</span>
+<span class="c1">#     int_columns : list[str]</span>
+<span class="c1">#         List of column names that should have integer thresholds</span>
+
+<span class="c1">#     Returns</span>
+<span class="c1">#     -------</span>
+<span class="c1">#     str</span>
+<span class="c1">#         Rule string with integer thresholds for specified columns</span>
+
+<span class="c1">#     Examples</span>
+<span class="c1">#     --------</span>
+<span class="c1">#     &gt;&gt;&gt; format_floats_as_integers(&#39;(X[&quot;a&quot;] &gt;= 0.1) &amp; (X[&quot;b&quot;] &gt;= 9.1)&#39;, [&quot;a&quot;])</span>
+<span class="c1">#     &#39;(X[&quot;a&quot;] &gt;= 1) &amp; (X[&quot;b&quot;] &gt;= 9.1)&#39;</span>
+
+<span class="c1">#     &gt;&gt;&gt; format_floats_as_integers(&#39;(X[&quot;a&quot;] &gt; 0.1) &amp; (X[&quot;b&quot;] &lt; 10.9)&#39;, [&quot;a&quot;, &quot;b&quot;])</span>
+<span class="c1">#     &#39;(X[&quot;a&quot;] &gt; 0) &amp; (X[&quot;b&quot;] &lt; 11)&#39;</span>
+
+<span class="c1">#     &gt;&gt;&gt; format_floats_as_integers(&#39;(X[&quot;a&quot;] &lt;= 9.9) &amp; (X[&quot;a&quot;] &lt; 5.5)&#39;, [&quot;a&quot;])</span>
+<span class="c1">#     &#39;(X[&quot;a&quot;] &lt;= 9) &amp; (X[&quot;a&quot;] &lt; 6)&#39;</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     if not int_columns:</span>
+<span class="c1">#         return rule</span>
+
+<span class="c1">#     def replace_condition(match):</span>
+<span class="c1">#         col = match.group(1)</span>
+<span class="c1">#         op = match.group(2)</span>
+<span class="c1">#         val_str = match.group(3).strip()</span>
+
+<span class="c1">#         # Only process if column is in int_columns</span>
+<span class="c1">#         if col not in int_columns:</span>
+<span class="c1">#             return match.group(0)</span>
+
+<span class="c1">#         # Try to convert value to float</span>
+<span class="c1">#         try:</span>
+<span class="c1">#             val = float(val_str)</span>
+<span class="c1">#         except ValueError:</span>
+<span class="c1">#             # Not a numeric value, keep as is</span>
+<span class="c1">#             return match.group(0)</span>
+
+<span class="c1">#         if op == &quot;&gt;=&quot;:</span>
+<span class="c1">#             # For &gt;=, use ceiling: X[&quot;a&quot;] &gt;= 0.1 means X[&quot;a&quot;] &gt;= 1</span>
+<span class="c1">#             new_val = math.ceil(val)</span>
+<span class="c1">#         elif op == &quot;&gt;&quot;:</span>
+<span class="c1">#             # For &gt;, use floor: X[&quot;a&quot;] &gt; 0.1 means X[&quot;a&quot;] &gt; 0</span>
+<span class="c1">#             new_val = math.floor(val)</span>
+<span class="c1">#         elif op == &quot;&lt;=&quot;:</span>
+<span class="c1">#             # For &lt;=, use floor: X[&quot;a&quot;] &lt;= 9.9 means X[&quot;a&quot;] &lt;= 9</span>
+<span class="c1">#             new_val = math.floor(val)</span>
+<span class="c1">#         elif op == &quot;&lt;&quot;:</span>
+<span class="c1">#             # For &lt;, use ceiling: X[&quot;a&quot;] &lt; 9.1 means X[&quot;a&quot;] &lt; 10</span>
+<span class="c1">#             new_val = math.ceil(val)</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             # For == or != or other operators, keep as is (or could round)</span>
+<span class="c1">#             return match.group(0)</span>
+
+<span class="c1">#         # Format the new value as integer</span>
+<span class="c1">#         return f&#39;(X[&quot;{col}&quot;] {op} {new_val})&#39;</span>
+
+<span class="c1">#     result = _COND_PATTERN.sub(replace_condition, rule)</span>
+<span class="c1">#     return result</span>
+
+
+<span class="c1"># def add_missing_value_conditions(rule: str, nan_mapping: dict[str, int | float]) -&gt; str:</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Add null checks to conditions that would include the NaN replacement value.</span>
+
+<span class="c1">#     For each condition in the rule, if the column has a NaN replacement value that</span>
+<span class="c1">#     satisfies the condition, adds &quot;| X[&quot;column&quot;].isnull()&quot; to include null values.</span>
+
+<span class="c1">#     Parameters</span>
+<span class="c1">#     ----------</span>
+<span class="c1">#     rule : str</span>
+<span class="c1">#         Rule string with conditions like (X[&quot;col&quot;] &lt; val)</span>
+<span class="c1">#     nan_mapping : dict[str, int | float]</span>
+<span class="c1">#         Dictionary mapping column names to their NaN replacement values</span>
+
+<span class="c1">#     Returns</span>
+<span class="c1">#     -------</span>
+<span class="c1">#     str</span>
+<span class="c1">#         Rule string with null checks added where appropriate</span>
+
+<span class="c1">#     Examples</span>
+<span class="c1">#     --------</span>
+<span class="c1">#     &gt;&gt;&gt; mapping = {&quot;a&quot;: 0, &quot;b&quot;: 0.3, &quot;c&quot;: 100}</span>
+<span class="c1">#     &gt;&gt;&gt; add_missing_value_conditions(&#39;(X[&quot;a&quot;] &lt; 1) &amp; (X[&quot;b&quot;] &gt;= 3) &amp; (X[&quot;c&quot;] &gt; 10)&#39;, mapping)</span>
+<span class="c1">#     &#39;(X[&quot;a&quot;] &lt; 1 | X[&quot;a&quot;].isnull()) &amp; (X[&quot;b&quot;] &gt;= 3) &amp; (X[&quot;c&quot;] &gt; 10 | X[&quot;c&quot;].isnull())&#39;</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     if not nan_mapping:</span>
+<span class="c1">#         return rule</span>
+
+<span class="c1">#     def check_and_add_null(match):</span>
+<span class="c1">#         col = match.group(2)</span>
+<span class="c1">#         op = match.group(3)</span>
+<span class="c1">#         val_str = match.group(4).strip()</span>
+
+<span class="c1">#         # Only process if column is in nan_mapping</span>
+<span class="c1">#         if col not in nan_mapping:</span>
+<span class="c1">#             return match.group(0)</span>
+
+<span class="c1">#         # Try to convert value to float for comparison</span>
+<span class="c1">#         try:</span>
+<span class="c1">#             threshold = float(val_str)</span>
+<span class="c1">#         except ValueError:</span>
+<span class="c1">#             # Not a numeric value, keep as is</span>
+<span class="c1">#             return match.group(0)</span>
+
+<span class="c1">#         nan_value = nan_mapping[col]</span>
+
+<span class="c1">#         # Check if the NaN replacement value satisfies the condition</span>
+<span class="c1">#         satisfies_condition = False</span>
+
+<span class="c1">#         if op == &quot;&gt;=&quot;:</span>
+<span class="c1">#             satisfies_condition = nan_value &gt;= threshold</span>
+<span class="c1">#         elif op == &quot;&gt;&quot;:</span>
+<span class="c1">#             satisfies_condition = nan_value &gt; threshold</span>
+<span class="c1">#         elif op == &quot;&lt;=&quot;:</span>
+<span class="c1">#             satisfies_condition = nan_value &lt;= threshold</span>
+<span class="c1">#         elif op == &quot;&lt;&quot;:</span>
+<span class="c1">#             satisfies_condition = nan_value &lt; threshold</span>
+<span class="c1">#         elif op == &quot;==&quot;:</span>
+<span class="c1">#             satisfies_condition = nan_value == threshold</span>
+<span class="c1">#         elif op == &quot;!=&quot;:</span>
+<span class="c1">#             satisfies_condition = nan_value != threshold</span>
+
+<span class="c1">#         # If the NaN value satisfies the condition, add null check</span>
+<span class="c1">#         if satisfies_condition:</span>
+<span class="c1">#             return f&#39;(X[&quot;{col}&quot;] {op} {val_str} | X[&quot;{col}&quot;].isnull())&#39;</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             return match.group(0)</span>
+
+<span class="c1">#     result = _COND_PATTERN_Q.sub(check_and_add_null, rule)</span>
+<span class="c1">#     return result</span>
+
+
+<span class="c1"># def decode_scaled_feature_names(rule: str) -&gt; str:</span>
+<span class="c1">#     &quot;&quot;&quot;Decode scaled feature names in a rule string back to their original names.</span>
+
+<span class="c1">#     Parameters</span>
+<span class="c1">#     ----------</span>
+<span class="c1">#     rule : str</span>
+<span class="c1">#         Rule string potentially containing scaled feature names.</span>
+
+<span class="c1">#     Returns</span>
+<span class="c1">#     -------</span>
+<span class="c1">#     str</span>
+<span class="c1">#         Rule string with scaled feature names replaced by original names.</span>
+
+<span class="c1">#     Notes</span>
+<span class="c1">#     -----</span>
+<span class="c1">#     This is a placeholder implementation. Decoding logic must be provided</span>
+<span class="c1">#     by subclassing or extending this function once a naming convention for</span>
+<span class="c1">#     scaled features is established.</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     return rule</span>
+
+
+<span class="c1"># def decode_math_features(rule: str) -&gt; str:</span>
+<span class="c1">#     &quot;&quot;&quot;Decode conditions on mathematical feature combinations back to their original form.</span>
+
+<span class="c1">#     For each condition on a mathematically-derived feature column, this function</span>
+<span class="c1">#     would find the equivalent condition on the original underlying features and</span>
+<span class="c1">#     replace it accordingly.</span>
+
+<span class="c1">#     Parameters</span>
+<span class="c1">#     ----------</span>
+<span class="c1">#     rule : str</span>
+<span class="c1">#         Rule string with conditions on derived mathematical features,</span>
+<span class="c1">#         e.g. ``(X[&quot;a_plus_b&quot;] &gt;= val)``.</span>
+
+<span class="c1">#     Returns</span>
+<span class="c1">#     -------</span>
+<span class="c1">#     str</span>
+<span class="c1">#         Rule string with derived-feature conditions replaced by equivalent</span>
+<span class="c1">#         conditions on the original features.</span>
+
+<span class="c1">#     Notes</span>
+<span class="c1">#     -----</span>
+<span class="c1">#     This is a placeholder implementation. Decoding logic must be provided</span>
+<span class="c1">#     once the mathematical feature encoding convention is established.</span>
+
+<span class="c1">#     Examples</span>
+<span class="c1">#     --------</span>
+<span class="c1">#     &gt;&gt;&gt; decode_math_features(&#39;(X[&quot;a_plus_b&quot;] &gt;= 5)&#39;)</span>
+<span class="c1">#     &#39;(X[&quot;a_plus_b&quot;] &gt;= 5)&#39;  # unchanged until decoding is implemented</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+
+<span class="c1">#     return rule</span>
+
+
+<span class="c1"># def decode_rare_category_encodings(rule: str, rare_mapping: dict[str, list[str]]) -&gt; str:</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Convert conditions on encoded categorical columns that represent rare categories back to categorical conditions.</span>
+
+<span class="c1">#     For each condition on a column with rare categories, finds which rare categories satisfy the condition and</span>
+<span class="c1">#     replaces it with an appropriate categorical condition (.is_in() for multiple values, == for single value).</span>
+
+<span class="c1">#     Parameters</span>
+<span class="c1">#     ----------</span>
+<span class="c1">#     rule : str</span>
+<span class="c1">#         Rule string with conditions like (X[&quot;col&quot;] &gt;= val) where val is the encoded value for rare categories.</span>
+<span class="c1">#     rare_mapping : dict[str, list[str]]</span>
+<span class="c1">#         Dictionary mapping column names to lists of category names that are considered rare.</span>
+
+<span class="c1">#     Returns</span>
+<span class="c1">#     -------</span>
+<span class="c1">#     str</span>
+<span class="c1">#         Rule string with conditions on rare categories converted to categorical conditions</span>
+
+<span class="c1">#     Examples</span>
+<span class="c1">#     --------</span>
+<span class="c1">#     &gt;&gt;&gt; mapping = {&quot;A&quot;: [&quot;a&quot;, &quot;b&quot;], &quot;B&quot;: [&quot;x&quot;]}</span>
+<span class="c1">#     &gt;&gt;&gt; decode_rare_category_encodings(&#39;(X[&quot;A&quot;] &gt;= 1) &amp; (X[&quot;B&quot;] == 1)&#39;, mapping)</span>
+<span class="c1">#     &#39;(X[&quot;A&quot;].is_in([&quot;a&quot;, &quot;b&quot;])) &amp; (X[&quot;B&quot;] == &quot;x&quot;)&#39;</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     if not rare_mapping:</span>
+<span class="c1">#         return rule</span>
+
+<span class="c1">#     def decode_condition(match):</span>
+<span class="c1">#         quote_char = match.group(1)</span>
+<span class="c1">#         col = match.group(2)</span>
+<span class="c1">#         op = match.group(3)</span>
+<span class="c1">#         val_str = match.group(4).strip()</span>
+
+<span class="c1">#         # Only process if column is in rare_mapping</span>
+<span class="c1">#         if col not in rare_mapping:</span>
+<span class="c1">#             return match.group(0)</span>
+
+<span class="c1">#         # Check if the value matches the encoded value for the rare category (assumed to be 1)</span>
+<span class="c1">#         if val_str != &quot;1&quot;:</span>
+<span class="c1">#             return match.group(0)</span>
+
+<span class="c1">#         categories = rare_mapping[col]</span>
+
+<span class="c1">#         if len(categories) == 0:</span>
+<span class="c1">#             return match.group(0)</span>
+<span class="c1">#         elif len(categories) == 1:</span>
+<span class="c1">#             return f&#39;(X[&quot;{col}&quot;] == &quot;{categories[0]}&quot;)&#39;</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             categories_str = &quot;, &quot;.join(f&#39;&quot;{cat}&quot;&#39; for cat in categories)</span>
+<span class="c1">#             return f&#39;(X[&quot;{col}&quot;].is_in([{categories_str}]))&#39;</span>
+
+<span class="c1">#     result = _COND_PATTERN_Q.sub(decode_condition, rule)</span>
+<span class="c1">#     return result</span>
+
+
+<span class="c1"># def decode_numeric_encodings(rule: str, encoding_mapping: dict[str, dict[str, int | float]]) -&gt; str:</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Convert numerical conditions on encoded categorical columns to categorical conditions.</span>
+
+<span class="c1">#     For each numerical condition, finds which category values satisfy the condition and</span>
+<span class="c1">#     replaces it with an appropriate categorical condition (.is_in() for multiple values,</span>
+<span class="c1">#     == for single value).</span>
+
+<span class="c1">#     Parameters</span>
+<span class="c1">#     ----------</span>
+<span class="c1">#     rule : str</span>
+<span class="c1">#         Rule string with numerical conditions like (X[&quot;col&quot;] &gt;= val)</span>
+<span class="c1">#     encoding_mapping : dict[str, dict[str, int | float]]</span>
+<span class="c1">#         Dictionary mapping column names to their encoding dictionaries.</span>
+<span class="c1">#         Inner dict maps category names to their encoded numerical values.</span>
+
+<span class="c1">#     Returns</span>
+<span class="c1">#     -------</span>
+<span class="c1">#     str</span>
+<span class="c1">#         Rule string with categorical conditions</span>
+
+<span class="c1">#     Examples</span>
+<span class="c1">#     --------</span>
+<span class="c1">#     &gt;&gt;&gt; mapping = {&quot;A&quot;: {&quot;a&quot;: 1, &quot;b&quot;: 2, &quot;c&quot;: 3}, &quot;B&quot;: {&quot;a&quot;: -8.1, &quot;b&quot;: 1.1, &quot;c&quot;: 3}}</span>
+<span class="c1">#     &gt;&gt;&gt; decode_numeric_encodings(&#39;(X[&quot;A&quot;] &gt;= 2) &amp; (X[&quot;B&quot;] &lt; 0)&#39;, mapping)</span>
+<span class="c1">#     &#39;(X[&quot;A&quot;].is_in([&quot;b&quot;, &quot;c&quot;])) &amp; (X[&quot;B&quot;] == &quot;a&quot;)&#39;</span>
+
+<span class="c1">#     &gt;&gt;&gt; mapping = {&quot;A&quot;: {&quot;x&quot;: 1, &quot;y&quot;: 2}}</span>
+<span class="c1">#     &gt;&gt;&gt; decode_numeric_encodings(&#39;(X[&quot;A&quot;] == 1)&#39;, mapping)</span>
+<span class="c1">#     &#39;(X[&quot;A&quot;] == &quot;x&quot;)&#39;</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     if not encoding_mapping:</span>
+<span class="c1">#         return rule</span>
+
+<span class="c1">#     def decode_condition(match):</span>
+<span class="c1">#         col = match.group(2)</span>
+<span class="c1">#         op = match.group(3)</span>
+<span class="c1">#         val_str = match.group(4).strip()</span>
+
+<span class="c1">#         # Only process if column is in encoding_mapping</span>
+<span class="c1">#         if col not in encoding_mapping:</span>
+<span class="c1">#             return match.group(0)</span>
+
+<span class="c1">#         # Try to convert value to float for comparison</span>
+<span class="c1">#         try:</span>
+<span class="c1">#             threshold = float(val_str)</span>
+<span class="c1">#         except ValueError:</span>
+<span class="c1">#             # Not a numeric value, keep as is</span>
+<span class="c1">#             return match.group(0)</span>
+
+<span class="c1">#         col_mapping = encoding_mapping[col]</span>
+
+<span class="c1">#         # Find all categories that satisfy the condition</span>
+<span class="c1">#         matching_categories = []</span>
+
+<span class="c1">#         for category, encoded_value in col_mapping.items():</span>
+<span class="c1">#             satisfies = False</span>
+
+<span class="c1">#             if op == &quot;&gt;=&quot;:</span>
+<span class="c1">#                 satisfies = encoded_value &gt;= threshold</span>
+<span class="c1">#             elif op == &quot;&gt;&quot;:</span>
+<span class="c1">#                 satisfies = encoded_value &gt; threshold</span>
+<span class="c1">#             elif op == &quot;&lt;=&quot;:</span>
+<span class="c1">#                 satisfies = encoded_value &lt;= threshold</span>
+<span class="c1">#             elif op == &quot;&lt;&quot;:</span>
+<span class="c1">#                 satisfies = encoded_value &lt; threshold</span>
+<span class="c1">#             elif op == &quot;==&quot;:</span>
+<span class="c1">#                 satisfies = encoded_value == threshold</span>
+<span class="c1">#             elif op == &quot;!=&quot;:</span>
+<span class="c1">#                 satisfies = encoded_value != threshold</span>
+
+<span class="c1">#             if satisfies:</span>
+<span class="c1">#                 matching_categories.append(category)</span>
+
+<span class="c1">#         # Generate the replacement condition</span>
+<span class="c1">#         if len(matching_categories) == 0:</span>
+<span class="c1">#             # No categories match - keep original or return False condition</span>
+<span class="c1">#             # For now, keep original</span>
+<span class="c1">#             return match.group(0)</span>
+<span class="c1">#         elif len(matching_categories) == 1:</span>
+<span class="c1">#             # Single category - use equality</span>
+<span class="c1">#             return f&#39;(X[&quot;{col}&quot;] == &quot;{matching_categories[0]}&quot;)&#39;</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             # Multiple categories - use is_in (polars method)</span>
+<span class="c1">#             categories_str = &quot;, &quot;.join(f&#39;&quot;{cat}&quot;&#39; for cat in matching_categories)</span>
+<span class="c1">#             return f&#39;(X[&quot;{col}&quot;].is_in([{categories_str}]))&#39;</span>
+
+<span class="c1">#     result = _COND_PATTERN_Q.sub(decode_condition, rule)</span>
+<span class="c1">#     return result</span>
+
+
+<span class="c1"># def format_as_boolean_conditions(rule: str, bool_columns: list[str]) -&gt; str:</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Convert boolean value representations to actual boolean values in rule strings.</span>
+
+<span class="c1">#     For columns specified as boolean columns, converts string/numeric representations</span>
+<span class="c1">#     of True/False to actual boolean values and normalizes operators to ==.</span>
+
+<span class="c1">#     Conversions:</span>
+
+<span class="c1">#     - &quot;True&quot;, &quot;true&quot;, 1 with == operator becomes True</span>
+<span class="c1">#     - &quot;True&quot;, &quot;true&quot;, 1 with != operator becomes False (operator changed to ==)</span>
+<span class="c1">#     - &quot;False&quot;, &quot;false&quot;, 0 with == operator becomes False</span>
+<span class="c1">#     - &quot;False&quot;, &quot;false&quot;, 0 with != operator becomes True (operator changed to ==)</span>
+
+<span class="c1">#     Parameters</span>
+<span class="c1">#     ----------</span>
+<span class="c1">#     rule : str</span>
+<span class="c1">#         Rule string with conditions like (X[&quot;col&quot;] == &quot;True&quot;)</span>
+<span class="c1">#     bool_columns : list[str]</span>
+<span class="c1">#         List of column names that should have boolean values</span>
+
+<span class="c1">#     Returns</span>
+<span class="c1">#     -------</span>
+<span class="c1">#     str</span>
+<span class="c1">#         Rule string with boolean values and normalized operators</span>
+
+<span class="c1">#     Examples</span>
+<span class="c1">#     --------</span>
+<span class="c1">#     &gt;&gt;&gt; format_as_boolean_conditions(&#39;(X[&quot;flag&quot;] == &quot;True&quot;) &amp; (X[&quot;active&quot;] != &quot;False&quot;)&#39;, [&quot;flag&quot;, &quot;active&quot;])</span>
+<span class="c1">#     &#39;(X[&quot;flag&quot;] == True) &amp; (X[&quot;active&quot;] == True)&#39;</span>
+
+<span class="c1">#     &gt;&gt;&gt; format_as_boolean_conditions(&#39;(X[&quot;enabled&quot;] != 1) &amp; (X[&quot;disabled&quot;] == 0)&#39;, [&quot;enabled&quot;, &quot;disabled&quot;])</span>
+<span class="c1">#     &#39;(X[&quot;enabled&quot;] == False) &amp; (X[&quot;disabled&quot;] == False)&#39;</span>
+
+<span class="c1">#     &gt;&gt;&gt; format_as_boolean_conditions(&#39;(X[&quot;is_valid&quot;] == &quot;true&quot;) &amp; (X[&quot;is_ready&quot;] != &quot;false&quot;)&#39;, [&quot;is_valid&quot;, &quot;is_ready&quot;])</span>
+<span class="c1">#     &#39;(X[&quot;is_valid&quot;] == True) &amp; (X[&quot;is_ready&quot;] == True)&#39;</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     if not bool_columns:</span>
+<span class="c1">#         return rule</span>
+
+<span class="c1">#     def convert_condition(match):</span>
+<span class="c1">#         quote_char = match.group(1)</span>
+<span class="c1">#         col = match.group(2)</span>
+<span class="c1">#         op = match.group(3)</span>
+<span class="c1">#         val_str = match.group(4).strip()</span>
+
+<span class="c1">#         # Only process if column is in bool_columns</span>
+<span class="c1">#         if col not in bool_columns:</span>
+<span class="c1">#             return match.group(0)</span>
+
+<span class="c1">#         # Remove quotes if present</span>
+<span class="c1">#         value = val_str.strip(&#39;&quot;&#39;).strip(&quot;&#39;&quot;)</span>
+
+<span class="c1">#         # Determine if this is a True-like or False-like value</span>
+<span class="c1">#         is_true_like = value in [&quot;True&quot;, &quot;true&quot;, &quot;1&quot;]</span>
+<span class="c1">#         is_false_like = value in [&quot;False&quot;, &quot;false&quot;, &quot;0&quot;]</span>
+
+<span class="c1">#         if not (is_true_like or is_false_like):</span>
+<span class="c1">#             # Not a recognized boolean representation</span>
+<span class="c1">#             return match.group(0)</span>
+
+<span class="c1">#         # Determine the final boolean value based on input and operator</span>
+<span class="c1">#         if is_true_like:</span>
+<span class="c1">#             bool_value = True if op == &quot;==&quot; else False</span>
+<span class="c1">#         else:  # is_false_like</span>
+<span class="c1">#             bool_value = False if op == &quot;==&quot; else True</span>
+
+<span class="c1">#         # Always use == operator with the converted boolean value</span>
+<span class="c1">#         return f&#39;(X[&quot;{col}&quot;] == {bool_value})&#39;</span>
+
+<span class="c1">#     result = _BOOL_PATTERN_Q.sub(convert_condition, rule)</span>
+<span class="c1">#     return result</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Mozilla Public License (MPL) 2.0.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

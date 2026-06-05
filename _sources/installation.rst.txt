@@ -1,0 +1,59 @@
+Installation
+============
+
+Requirements
+------------
+
+* Python >= 3.10
+* Polars >= 1.0.0
+
+Installing from PyPI
+--------------------
+
+The easiest way to install iguanas is via pip:
+
+.. code-block:: bash
+
+    pip install iguanas
+
+Installing from Source
+----------------------
+
+To install the latest development version:
+
+.. code-block:: bash
+
+    git clone https://github.com/paypal/iguanas.git
+    cd iguanas
+    pip install -e .
+
+For development (includes testing dependencies):
+
+.. code-block:: bash
+
+    pip install -e ".[dev]"
+
+Verifying Installation
+----------------------
+
+To verify that iguanas is installed correctly:
+
+.. code-block:: python
+
+    import iguanas
+    print(iguanas.__version__)
+
+You should see the version number printed without any errors.
+
+Dependencies
+------------
+
+iguanas automatically installs the following core dependencies:
+
+* **polars** - High-performance DataFrame library
+* **numpy** - Numerical computing
+* **scikit-learn** - For sklearn-compatible API
+
+Optional dependencies for specific features:
+
+* **pytest** - For running tests (development only)

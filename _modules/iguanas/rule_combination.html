@@ -1,0 +1,1229 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iguanas.rule_combination &#8212; Gators - Lightning Fast ML Preprocessing with Polars</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/_static/iguanas.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../_static/documentation_options.js?v=692d9a0e"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
+                gtag('js', new Date());
+                gtag('config', 'G-Z5TR8D9VTQ');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/iguanas/rule_combination';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://paypal.github.io/iguanas/_modules/iguanas/rule_combination.html" />
+    <link rel="icon" href="../../_static/iguanas.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/iguanas_logo.png" class="logo__image only-light" alt="Gators - Lightning Fast ML Preprocessing with Polars - Home"/>
+    <img src="../../_static/iguanas_logo.png" class="logo__image only-dark pst-js-only" alt="Gators - Lightning Fast ML Preprocessing with Polars - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../quickstart.html">
+    Quick Start
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_reference.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../examples.html">
+    Examples
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/paypal/iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../quickstart.html">
+    Quick Start
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_reference.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../examples.html">
+    Examples
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/paypal/iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">iguanas.rule_combination</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for iguanas.rule_combination</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">heapq</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">PositiveInt</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_metrics</span><span class="p">,</span> <span class="n">compute_single_metric</span>
+
+
+<div class="viewcode-block" id="combine_rules_full_search">
+<a class="viewcode-back" href="../../api/rule_combination.html#iguanas.rule_combination.combine_rules_full_search">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">combine_rules_full_search</span><span class="p">(</span>
+    <span class="n">R</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">n</span><span class="p">:</span> <span class="n">PositiveInt</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">max_combinations_per_n</span><span class="p">:</span> <span class="n">PositiveInt</span> <span class="o">=</span> <span class="mi">200_000</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="n">PositiveInt</span> <span class="o">=</span> <span class="mi">50_000</span><span class="p">,</span>
+    <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;or&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine rules using logical operations to create new composite rules.</span>
+
+<span class="sd">    Generates all possible combinations of 2 to n rules and creates new columns</span>
+<span class="sd">    where each combination is evaluated using the specified logical operation (OR/AND).</span>
+<span class="sd">    The combined rule name reflects the operation between component rules.</span>
+
+<span class="sd">    Optimized for speed using batch processing and vectorized operations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    R : pl.DataFrame</span>
+<span class="sd">        DataFrame containing rule columns to be combined. Each column should</span>
+<span class="sd">        represent a boolean or binary rule evaluation. All columns will be</span>
+<span class="sd">        used as candidate rules.</span>
+<span class="sd">    n : PositiveInt, default=3</span>
+<span class="sd">        Maximum number of rules to combine. Generates all combinations from</span>
+<span class="sd">        size 2 up to size n.</span>
+<span class="sd">    max_combinations_per_n : int, default=250_000</span>
+<span class="sd">        Maximum number of combinations to generate per combination size.</span>
+<span class="sd">        If exceeded, only the first max_combinations_per_n are used.</span>
+<span class="sd">    batch_size : int, default=100_000</span>
+<span class="sd">        Number of combinations to process in each batch to manage memory.</span>
+<span class="sd">    operator : str, default=&#39;or&#39;</span>
+<span class="sd">        Boolean operator to apply: &#39;or&#39; for OR operations (any True),</span>
+<span class="sd">        &#39;and&#39; for AND operations (all True).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pl.DataFrame</span>
+<span class="sd">        DataFrame containing the original rules plus all generated combined</span>
+<span class="sd">        rules. Combined rule columns are named using the pattern:</span>
+
+<span class="sd">        - &quot;(rule1) | (rule2) | ...&quot; for OR operations</span>
+<span class="sd">        - &quot;(rule1) &amp; (rule2) &amp; ...&quot; for AND operations</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import polars as pl</span>
+<span class="sd">    &gt;&gt;&gt; R = pl.DataFrame({&quot;rule_A&quot;: [1, 0, 1], &quot;rule_B&quot;: [0, 1, 1]})</span>
+<span class="sd">    &gt;&gt;&gt; combine_rules_full_search(R, n=2, operator=&#39;or&#39;)</span>
+<span class="sd">    # Returns DataFrame with original columns plus &quot;(rule_A) | (rule_B)&quot;</span>
+<span class="sd">    &gt;&gt;&gt; combine_rules_full_search(R, n=2, operator=&#39;and&#39;)</span>
+<span class="sd">    # Returns DataFrame with original columns plus &quot;(rule_A) &amp; (rule_B)&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">operator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;or&quot;</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;operator must be &#39;or&#39; or &#39;and&#39;, got &#39;</span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="n">rules</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">columns</span>
+    <span class="n">separator</span> <span class="o">=</span> <span class="s2">&quot; | &quot;</span> <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span> <span class="k">else</span> <span class="s2">&quot; &amp; &quot;</span>
+
+    <span class="c1"># Step 1: Generate all combinations across all sizes from 2 to n</span>
+    <span class="n">all_combinations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">combo_size</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">combos</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">rules</span><span class="p">,</span> <span class="n">combo_size</span><span class="p">))</span>
+
+        <span class="c1"># Apply limit per combination size</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">combos</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_combinations_per_n</span><span class="p">:</span>
+            <span class="n">combos</span> <span class="o">=</span> <span class="n">combos</span><span class="p">[:</span><span class="n">max_combinations_per_n</span><span class="p">]</span>
+
+        <span class="n">all_combinations</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">combos</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">all_combinations</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">R</span>
+
+    <span class="c1"># Step 2: Process all combinations in batches for memory efficiency</span>
+    <span class="n">all_exprs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">batch_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_combinations</span><span class="p">),</span> <span class="n">batch_size</span><span class="p">):</span>
+        <span class="n">batch_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">batch_start</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_combinations</span><span class="p">))</span>
+        <span class="n">batch_combos</span> <span class="o">=</span> <span class="n">all_combinations</span><span class="p">[</span><span class="n">batch_start</span><span class="p">:</span><span class="n">batch_end</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">combi</span> <span class="ow">in</span> <span class="n">batch_combos</span><span class="p">:</span>
+            <span class="n">rule_name</span> <span class="o">=</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">rule</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">combi</span><span class="p">)</span>
+
+            <span class="n">expr</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">combi</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">combi</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span><span class="p">:</span>
+                    <span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span> <span class="o">|</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span> <span class="o">&amp;</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+            <span class="n">all_exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">rule_name</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">R</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">all_exprs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="combine_rules_cumulative">
+<a class="viewcode-back" href="../../api/rule_combination.html#iguanas.rule_combination.combine_rules_cumulative">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">combine_rules_cumulative</span><span class="p">(</span>
+    <span class="n">R</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">output_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;or&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute horizontal cumulative boolean operations across all columns.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    R : pl.DataFrame</span>
+<span class="sd">        Input DataFrame. All columns will be used in the cumulative operation.</span>
+<span class="sd">    output_names : list[str] | None, default=None</span>
+<span class="sd">        List of names for the output columns. If None, generates names based on operator.</span>
+<span class="sd">        Must have the same length as R.columns.</span>
+<span class="sd">    operator : str, default=&#39;or&#39;</span>
+<span class="sd">        Boolean operator to apply:</span>
+
+<span class="sd">        - &#39;or&#39;: cumulative OR (any True)</span>
+<span class="sd">        - &#39;and&#39;: cumulative AND (all True)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pl.DataFrame</span>
+<span class="sd">        DataFrame with boolean values:</span>
+
+<span class="sd">        - If operator=&#39;or&#39;: True if at least one condition is True up to that position</span>
+<span class="sd">        - If operator=&#39;and&#39;: True if all conditions are True up to that position</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If operator is not &#39;or&#39; or &#39;and&#39;, or if output_names length doesn&#39;t match columns.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import polars as pl</span>
+<span class="sd">    &gt;&gt;&gt; R = pl.DataFrame({</span>
+<span class="sd">    ...     &quot;rule_A&quot;: [True, False, True],</span>
+<span class="sd">    ...     &quot;rule_B&quot;: [False, True, True],</span>
+<span class="sd">    ...     &quot;rule_C&quot;: [True, True, False],</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; combine_rules_cumulative(R, operator=&quot;or&quot;)</span>
+<span class="sd">    # Column 1: rule_A | ...; Column 2: rule_A | rule_B | ...; Column 3: all three</span>
+<span class="sd">    &gt;&gt;&gt; combine_rules_cumulative(R, operator=&quot;and&quot;, output_names=[&quot;step1&quot;, &quot;step2&quot;, &quot;step3&quot;])</span>
+<span class="sd">    # Named columns, each True only if all rules up to that position are True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">operator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;or&quot;</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;operator must be &#39;or&#39; or &#39;and&#39;, got &#39;</span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">columns</span>
+
+    <span class="k">if</span> <span class="n">output_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">separator</span> <span class="o">=</span> <span class="s2">&quot; | &quot;</span> <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span> <span class="k">else</span> <span class="s2">&quot; &amp; &quot;</span>
+        <span class="n">output_names</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">[:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">))</span>
+        <span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Length of output_names (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">output_names</span><span class="p">)</span><span class="si">}</span><span class="s2">) must match length of columns (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">cumsum_R</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">cum_sum_horizontal</span><span class="p">(</span><span class="o">*</span><span class="n">columns</span><span class="p">))</span><span class="o">.</span><span class="n">unnest</span><span class="p">(</span><span class="s2">&quot;cum_sum&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span><span class="p">:</span>
+        <span class="c1"># Cumulative OR: at least one True (cumsum &gt; 0)</span>
+        <span class="k">return</span> <span class="n">cumsum_R</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span><span class="o">.</span><span class="n">gt</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">output_name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">output_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">output_names</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># operator == &#39;and&#39;</span>
+        <span class="c1"># Cumulative AND: all True up to position i (cumsum == i+1)</span>
+        <span class="k">return</span> <span class="n">cumsum_R</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">output_name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">output_name</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                    <span class="nb">zip</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">output_names</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="combine_rules_greedy">
+<a class="viewcode-back" href="../../api/rule_combination.html#iguanas.rule_combination.combine_rules_greedy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">combine_rules_greedy</span><span class="p">(</span>
+    <span class="n">R</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
+    <span class="n">max_rules</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;or&quot;</span><span class="p">,</span>
+    <span class="n">weights</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_improvement</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Greedily select rules that maximize a performance metric.</span>
+
+<span class="sd">    Starts with the best single rule, then iteratively adds rules that provide</span>
+<span class="sd">    the largest metric improvement. Stops when no rule improves the metric by</span>
+<span class="sd">    at least min_improvement or when max_rules is reached.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    R : pl.DataFrame</span>
+<span class="sd">        DataFrame containing boolean rule columns. All columns will be</span>
+<span class="sd">        used as candidate rules.</span>
+<span class="sd">    y : pl.Series</span>
+<span class="sd">        Boolean target series indicating true labels.</span>
+<span class="sd">    metric : str, default=&quot;f1&quot;</span>
+<span class="sd">        Performance metric to optimize. Must be a column name produced by</span>
+<span class="sd">        compute_metrics (e.g., &quot;f1&quot;, &quot;accuracy&quot;, &quot;precision&quot;, &quot;recall&quot;).</span>
+<span class="sd">    max_rules : int, default=5</span>
+<span class="sd">        Maximum number of rules to select.</span>
+<span class="sd">    operator : str, default=&quot;or&quot;</span>
+<span class="sd">        Boolean operator for combining rules: &#39;or&#39; or &#39;and&#39;.</span>
+<span class="sd">    weights : pl.Series | None, default=None</span>
+<span class="sd">        Optional sample weights for weighted metric computation.</span>
+<span class="sd">    min_improvement : float, default=0.0</span>
+<span class="sd">        Minimum metric improvement required to add a new rule.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pl.DataFrame</span>
+<span class="sd">        DataFrame with single column containing the combined rule.</span>
+<span class="sd">        Column name reflects the selected rules using the operator.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import polars as pl</span>
+<span class="sd">    &gt;&gt;&gt; R = pl.DataFrame({&quot;rule_A&quot;: [True, False, True],</span>
+<span class="sd">    ...                   &quot;rule_B&quot;: [False, True, True],</span>
+<span class="sd">    ...                   &quot;rule_C&quot;: [True, True, False]})</span>
+<span class="sd">    &gt;&gt;&gt; y = pl.Series([True, True, False])</span>
+<span class="sd">    &gt;&gt;&gt; result_R = combine_rules_greedy(</span>
+<span class="sd">    ...     R, y, metric=&quot;f1&quot;, max_rules=2</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(result_R.columns)  # e.g., [&#39;(rule_B) | (rule_A)&#39;]</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If operator is not &#39;or&#39; or &#39;and&#39;, or if metric column not found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">operator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;or&quot;</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;operator must be &#39;or&#39; or &#39;and&#39;, got &#39;</span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="n">rules</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">columns</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">rules</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;rules list cannot be empty&quot;</span><span class="p">)</span>
+
+    <span class="n">selected_rules</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">history</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">remaining_rules</span> <span class="o">=</span> <span class="n">rules</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">current_best_metric</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Evaluate all single rules to find the best starting point</span>
+    <span class="n">metrics_R</span> <span class="o">=</span> <span class="n">compute_metrics</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">rules</span><span class="p">),</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+
+    <span class="c1"># Use weighted metric if weights are provided</span>
+    <span class="n">metric_to_use</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">_weight&quot;</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">metric</span>
+
+    <span class="k">if</span> <span class="n">metric_to_use</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metrics_R</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Metric &#39;</span><span class="si">{</span><span class="n">metric_to_use</span><span class="si">}</span><span class="s2">&#39; not found in computed metrics. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Available metrics: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">metrics_R</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Select best single rule</span>
+    <span class="n">best_idx</span> <span class="o">=</span> <span class="n">metrics_R</span><span class="p">[</span><span class="n">metric_to_use</span><span class="p">]</span><span class="o">.</span><span class="n">arg_max</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">best_idx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot find best rule - all metrics may be null or equal&quot;</span><span class="p">)</span>
+
+    <span class="n">best_rule</span> <span class="o">=</span> <span class="n">metrics_R</span><span class="p">[</span><span class="s2">&quot;rule&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">best_idx</span><span class="p">)</span>
+    <span class="n">current_best_metric</span> <span class="o">=</span> <span class="n">metrics_R</span><span class="p">[</span><span class="n">metric_to_use</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">best_idx</span><span class="p">)</span>
+    <span class="n">selected_rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">best_rule</span><span class="p">)</span>
+    <span class="n">remaining_rules</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">best_rule</span><span class="p">)</span>
+    <span class="n">history</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_best_metric</span>
+
+    <span class="c1"># Iteratively add rules that improve the metric</span>
+    <span class="k">for</span> <span class="n">iteration</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_rules</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">remaining_rules</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="n">best_candidate</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">best_candidate_metric</span> <span class="o">=</span> <span class="n">current_best_metric</span>
+
+        <span class="c1"># Create current combined rule</span>
+        <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span><span class="p">:</span>
+            <span class="n">current_combined</span> <span class="o">=</span> <span class="n">R</span><span class="p">[</span><span class="n">selected_rules</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">selected_rules</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">current_combined</span> <span class="o">=</span> <span class="n">current_combined</span> <span class="o">|</span> <span class="n">R</span><span class="p">[</span><span class="n">rule</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># &#39;and&#39;</span>
+            <span class="n">current_combined</span> <span class="o">=</span> <span class="n">R</span><span class="p">[</span><span class="n">selected_rules</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">selected_rules</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">current_combined</span> <span class="o">=</span> <span class="n">current_combined</span> <span class="o">&amp;</span> <span class="n">R</span><span class="p">[</span><span class="n">rule</span><span class="p">]</span>
+
+        <span class="c1"># Try adding each remaining rule</span>
+        <span class="k">for</span> <span class="n">candidate_rule</span> <span class="ow">in</span> <span class="n">remaining_rules</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span><span class="p">:</span>
+                <span class="n">test_combined</span> <span class="o">=</span> <span class="n">current_combined</span> <span class="o">|</span> <span class="n">R</span><span class="p">[</span><span class="n">candidate_rule</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># &#39;and&#39;</span>
+                <span class="n">test_combined</span> <span class="o">=</span> <span class="n">current_combined</span> <span class="o">&amp;</span> <span class="n">R</span><span class="p">[</span><span class="n">candidate_rule</span><span class="p">]</span>
+
+            <span class="c1"># Evaluate the combination</span>
+            <span class="n">test_R</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;test_rule&quot;</span><span class="p">:</span> <span class="n">test_combined</span><span class="p">})</span>
+            <span class="n">test_metrics</span> <span class="o">=</span> <span class="n">compute_metrics</span><span class="p">(</span><span class="n">test_R</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+            <span class="n">candidate_metric</span> <span class="o">=</span> <span class="n">test_metrics</span><span class="p">[</span><span class="n">metric_to_use</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">candidate_metric</span> <span class="o">&gt;</span> <span class="n">best_candidate_metric</span><span class="p">:</span>
+                <span class="n">best_candidate</span> <span class="o">=</span> <span class="n">candidate_rule</span>
+                <span class="n">best_candidate_metric</span> <span class="o">=</span> <span class="n">candidate_metric</span>
+
+        <span class="c1"># Check if improvement meets threshold</span>
+        <span class="n">improvement</span> <span class="o">=</span> <span class="n">best_candidate_metric</span> <span class="o">-</span> <span class="n">current_best_metric</span>
+        <span class="k">if</span> <span class="n">best_candidate</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">improvement</span> <span class="o">&lt;</span> <span class="n">min_improvement</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="c1"># Add the best candidate</span>
+        <span class="n">selected_rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">best_candidate</span><span class="p">)</span>
+        <span class="n">remaining_rules</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">best_candidate</span><span class="p">)</span>
+        <span class="n">current_best_metric</span> <span class="o">=</span> <span class="n">best_candidate_metric</span>
+        <span class="n">history</span><span class="p">[</span><span class="n">iteration</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_best_metric</span>
+
+    <span class="c1"># Create final combined rule</span>
+    <span class="n">separator</span> <span class="o">=</span> <span class="s2">&quot; | &quot;</span> <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span> <span class="k">else</span> <span class="s2">&quot; &amp; &quot;</span>
+    <span class="n">combined_rule_name</span> <span class="o">=</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">rule</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">selected_rules</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span><span class="p">:</span>
+        <span class="n">final_combined</span> <span class="o">=</span> <span class="n">R</span><span class="p">[</span><span class="n">selected_rules</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">selected_rules</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">final_combined</span> <span class="o">=</span> <span class="n">final_combined</span> <span class="o">|</span> <span class="n">R</span><span class="p">[</span><span class="n">rule</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># &#39;and&#39;</span>
+        <span class="n">final_combined</span> <span class="o">=</span> <span class="n">R</span><span class="p">[</span><span class="n">selected_rules</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">selected_rules</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">final_combined</span> <span class="o">=</span> <span class="n">final_combined</span> <span class="o">&amp;</span> <span class="n">R</span><span class="p">[</span><span class="n">rule</span><span class="p">]</span>
+
+    <span class="n">result_R</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">combined_rule_name</span><span class="p">:</span> <span class="n">final_combined</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">result_R</span></div>
+
+
+
+<div class="viewcode-block" id="combine_rules_beam_search">
+<a class="viewcode-back" href="../../api/rule_combination.html#iguanas.rule_combination.combine_rules_beam_search">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">combine_rules_beam_search</span><span class="p">(</span>
+    <span class="n">R</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
+    <span class="n">beam_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">max_rules</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;or&quot;</span><span class="p">,</span>
+    <span class="n">weights</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_improvement</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">return_top_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find top rule combinations using beam search.</span>
+
+<span class="sd">    Maintains beam_width best partial combinations at each depth level,</span>
+<span class="sd">    exploring a broader set of combinations than greedy search while</span>
+<span class="sd">    remaining more efficient than exhaustive search.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    R : pl.DataFrame</span>
+<span class="sd">        DataFrame containing boolean rule columns. All columns will be</span>
+<span class="sd">        used as candidate rules.</span>
+<span class="sd">    y : pl.Series</span>
+<span class="sd">        Boolean target series indicating true labels.</span>
+<span class="sd">    metric : str, default=&quot;f1&quot;</span>
+<span class="sd">        Performance metric to optimize. Must be a column name produced by</span>
+<span class="sd">        compute_metrics (e.g., &quot;accuracy&quot;, &quot;f1&quot;, &quot;precision&quot;, &quot;recall&quot;).</span>
+<span class="sd">    beam_width : int, default=4</span>
+<span class="sd">        Number of best candidates to keep at each depth level.</span>
+<span class="sd">    max_rules : int, default=5</span>
+<span class="sd">        Maximum number of rules in a combination.</span>
+<span class="sd">    operator : str, default=&quot;or&quot;</span>
+<span class="sd">        Boolean operator for combining rules: &#39;or&#39; or &#39;and&#39;.</span>
+<span class="sd">    weights : pl.Series | None, default=None</span>
+<span class="sd">        Optional sample weights for weighted metric computation.</span>
+<span class="sd">    min_improvement : float, default=0.0</span>
+<span class="sd">        Minimum metric improvement required over parent combination to</span>
+<span class="sd">        add a new rule. Acts as a pruning criterion to avoid expanding</span>
+<span class="sd">        combinations that don&#39;t provide sufficient benefit.</span>
+<span class="sd">    return_top_k : int, default=10</span>
+<span class="sd">        Number of top combinations to return.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pl.DataFrame</span>
+<span class="sd">        DataFrame containing columns for the top rule combinations found.</span>
+<span class="sd">        Each column represents one combination, with the column name showing</span>
+<span class="sd">        the combined rule expression.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import polars as pl</span>
+<span class="sd">    &gt;&gt;&gt; R = pl.DataFrame({&quot;rule_A&quot;: [True, False, True],</span>
+<span class="sd">    ...                   &quot;rule_B&quot;: [False, True, True],</span>
+<span class="sd">    ...                   &quot;rule_C&quot;: [True, True, False]})</span>
+<span class="sd">    &gt;&gt;&gt; y = pl.Series([True, True, False])</span>
+<span class="sd">    &gt;&gt;&gt; result_R = combine_rules_beam_search(</span>
+<span class="sd">    ...     R, y, metric=&quot;f1&quot;, beam_width=3, max_rules=2</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(result_R.columns)  # Shows top rule combinations</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If operator is not &#39;or&#39; or &#39;and&#39;, or if metric column not found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">operator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;or&quot;</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;operator must be &#39;or&#39; or &#39;and&#39;, got &#39;</span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="n">rules</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">columns</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">rules</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;rules list cannot be empty&quot;</span><span class="p">)</span>
+
+    <span class="n">separator</span> <span class="o">=</span> <span class="s2">&quot; | &quot;</span> <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span> <span class="k">else</span> <span class="s2">&quot; &amp; &quot;</span>
+
+    <span class="c1"># Initialize beam with all single rules</span>
+    <span class="c1"># Each entry: (rule_list, metric_value, combined_expr, combined_series)</span>
+    <span class="n">beam</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">:</span>
+        <span class="n">rule_series</span> <span class="o">=</span> <span class="n">R</span><span class="p">[</span><span class="n">rule</span><span class="p">]</span>
+        <span class="n">metric_value</span> <span class="o">=</span> <span class="n">compute_single_metric</span><span class="p">(</span><span class="n">rule_series</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+        <span class="n">beam</span><span class="o">.</span><span class="n">append</span><span class="p">(([</span><span class="n">rule</span><span class="p">],</span> <span class="n">metric_value</span><span class="p">,</span> <span class="n">rule</span><span class="p">,</span> <span class="n">rule_series</span><span class="p">))</span>
+
+    <span class="c1"># Sort beam by metric value (descending)</span>
+    <span class="n">beam</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">beam</span> <span class="o">=</span> <span class="n">beam</span><span class="p">[:</span><span class="n">beam_width</span><span class="p">]</span>
+
+    <span class="c1"># Track all explored combinations to avoid duplicates</span>
+    <span class="n">all_candidates</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Expand beam for each depth level</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_rules</span><span class="p">):</span>
+        <span class="n">new_beam</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">rule_list</span><span class="p">,</span> <span class="n">parent_metric</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">parent_series</span> <span class="ow">in</span> <span class="n">beam</span><span class="p">:</span>
+            <span class="c1"># Try adding each rule not already in the combination</span>
+            <span class="k">for</span> <span class="n">candidate_rule</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">candidate_rule</span> <span class="ow">in</span> <span class="n">rule_list</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Extend combination using the cached parent series (no OR-chain replay)</span>
+                <span class="n">new_rule_list</span> <span class="o">=</span> <span class="n">rule_list</span> <span class="o">+</span> <span class="p">[</span><span class="n">candidate_rule</span><span class="p">]</span>
+                <span class="n">new_expr</span> <span class="o">=</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">new_rule_list</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span><span class="p">:</span>
+                    <span class="n">combined</span> <span class="o">=</span> <span class="n">parent_series</span> <span class="o">|</span> <span class="n">R</span><span class="p">[</span><span class="n">candidate_rule</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">combined</span> <span class="o">=</span> <span class="n">parent_series</span> <span class="o">&amp;</span> <span class="n">R</span><span class="p">[</span><span class="n">candidate_rule</span><span class="p">]</span>
+
+                <span class="c1"># Evaluate only the one needed metric</span>
+                <span class="n">metric_value</span> <span class="o">=</span> <span class="n">compute_single_metric</span><span class="p">(</span><span class="n">combined</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+
+                <span class="c1"># Only add if improvement meets threshold</span>
+                <span class="n">improvement</span> <span class="o">=</span> <span class="n">metric_value</span> <span class="o">-</span> <span class="n">parent_metric</span>
+                <span class="k">if</span> <span class="n">improvement</span> <span class="o">&gt;=</span> <span class="n">min_improvement</span><span class="p">:</span>
+                    <span class="n">new_beam</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">new_rule_list</span><span class="p">,</span> <span class="n">metric_value</span><span class="p">,</span> <span class="n">new_expr</span><span class="p">,</span> <span class="n">combined</span><span class="p">))</span>
+
+        <span class="c1"># Sort and keep top beam_width candidates</span>
+        <span class="n">new_beam</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">beam</span> <span class="o">=</span> <span class="n">new_beam</span><span class="p">[:</span><span class="n">beam_width</span><span class="p">]</span>
+
+        <span class="c1"># Add to all candidates</span>
+        <span class="n">all_candidates</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">beam</span><span class="p">)</span>
+
+    <span class="c1"># Sort all candidates and return top k</span>
+    <span class="n">all_candidates</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Remove duplicates while preserving order</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">unique_candidates</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">all_candidates</span><span class="p">:</span>
+        <span class="n">rule_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">rule_tuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rule_tuple</span><span class="p">)</span>
+            <span class="n">unique_candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_candidates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">return_top_k</span><span class="p">:</span>
+                <span class="k">break</span>
+
+    <span class="c1"># Build result DataFrame using cached boolean series (no recomputation)</span>
+    <span class="n">result_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">rule_expr</span><span class="p">:</span> <span class="n">combined</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">rule_expr</span><span class="p">,</span> <span class="n">combined</span> <span class="ow">in</span> <span class="n">unique_candidates</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">result_dict</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="combine_rules_a_star">
+<a class="viewcode-back" href="../../api/rule_combination.html#iguanas.rule_combination.combine_rules_a_star">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">combine_rules_a_star</span><span class="p">(</span>
+    <span class="n">R</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
+    <span class="n">max_rules</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;or&quot;</span><span class="p">,</span>
+    <span class="n">weights</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_improvement</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">return_top_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find top rule combinations using A* search algorithm.</span>
+
+<span class="sd">    Uses A* to efficiently explore the space of rule combinations, finding</span>
+<span class="sd">    optimal or near-optimal combinations by balancing actual performance (g)</span>
+<span class="sd">    with estimated potential (h). More thorough than greedy or beam search</span>
+<span class="sd">    when finding the globally best combination is important.</span>
+
+<span class="sd">    A* Cost Function:</span>
+<span class="sd">        - g(n): Negative metric value (better metrics = lower cost)</span>
+<span class="sd">        - h(n): Optimistic estimate of best possible improvement from remaining rules</span>
+<span class="sd">        - f(n): g(n) + h(n) (total estimated cost)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    R : pl.DataFrame</span>
+<span class="sd">        DataFrame containing boolean rule columns. All columns will be</span>
+<span class="sd">        used as candidate rules.</span>
+<span class="sd">    y : pl.Series</span>
+<span class="sd">        Boolean target series indicating true labels.</span>
+<span class="sd">    metric : str, default=&quot;f1&quot;</span>
+<span class="sd">        Performance metric to optimize. Must be a column name produced by</span>
+<span class="sd">        compute_metrics (e.g., &quot;f1&quot;, &quot;accuracy&quot;, &quot;precision&quot;, &quot;recall&quot;).</span>
+<span class="sd">    max_rules : int, default=5</span>
+<span class="sd">        Maximum number of rules in a combination.</span>
+<span class="sd">    operator : str, default=&quot;or&quot;</span>
+<span class="sd">        Boolean operator for combining rules: &#39;or&#39; or &#39;and&#39;.</span>
+<span class="sd">    weights : pl.Series | None, default=None</span>
+<span class="sd">        Optional sample weights for weighted metric computation.</span>
+<span class="sd">    min_improvement : float, default=0.0</span>
+<span class="sd">        Minimum metric improvement required over parent combination to</span>
+<span class="sd">        expand a node. Acts as a pruning criterion.</span>
+<span class="sd">    return_top_k : int, default=10</span>
+<span class="sd">        Number of top combinations to return. Set to 1 for single best.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pl.DataFrame</span>
+<span class="sd">        DataFrame containing columns for the top rule combinations found.</span>
+<span class="sd">        Each column represents one combination, with the column name showing</span>
+<span class="sd">        the combined rule expression. Ordered by metric value (best first).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import polars as pl</span>
+<span class="sd">    &gt;&gt;&gt; R = pl.DataFrame({&quot;rule_A&quot;: [True, False, True],</span>
+<span class="sd">    ...                   &quot;rule_B&quot;: [False, True, True],</span>
+<span class="sd">    ...                   &quot;rule_C&quot;: [True, True, False]})</span>
+<span class="sd">    &gt;&gt;&gt; y = pl.Series([True, True, False])</span>
+<span class="sd">    &gt;&gt;&gt; # Find single best combination</span>
+<span class="sd">    &gt;&gt;&gt; best = combine_rules_a_star(R, y, metric=&quot;f1&quot;, return_top_k=1)</span>
+<span class="sd">    &gt;&gt;&gt; # Find top 5 combinations</span>
+<span class="sd">    &gt;&gt;&gt; top_5 = combine_rules_a_star(R, y, metric=&quot;f1&quot;, return_top_k=5)</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If operator is not &#39;or&#39; or &#39;and&#39;, or if metric column not found.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    A* is guaranteed to find the optimal solution if the heuristic is admissible</span>
+<span class="sd">    (never overestimates the true cost). The heuristic used here estimates the</span>
+<span class="sd">    best possible improvement from remaining rules, which is optimistic and</span>
+<span class="sd">    thus admissible.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">operator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;or&quot;</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;operator must be &#39;or&#39; or &#39;and&#39;, got &#39;</span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="n">rules</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">columns</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">rules</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;rules list cannot be empty&quot;</span><span class="p">)</span>
+
+    <span class="n">separator</span> <span class="o">=</span> <span class="s2">&quot; | &quot;</span> <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span> <span class="k">else</span> <span class="s2">&quot; &amp; &quot;</span>
+    <span class="n">metric_to_use</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">_weight&quot;</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">metric</span>
+
+    <span class="c1"># Precompute metrics for all single rules (for heuristic calculation)</span>
+    <span class="n">single_rule_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">metrics_R</span> <span class="o">=</span> <span class="n">compute_metrics</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">metric_to_use</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metrics_R</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Metric &#39;</span><span class="si">{</span><span class="n">metric_to_use</span><span class="si">}</span><span class="s2">&#39; not found in computed metrics. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Available metrics: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">metrics_R</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Build a rule→row-index map for O(1) lookups instead of O(n) list.index()</span>
+    <span class="n">rule_to_idx</span> <span class="o">=</span> <span class="p">{</span><span class="n">rule</span><span class="p">:</span> <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">rule</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rules</span><span class="p">)}</span>
+    <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">:</span>
+        <span class="n">single_rule_metrics</span><span class="p">[</span><span class="n">rule</span><span class="p">]</span> <span class="o">=</span> <span class="n">metrics_R</span><span class="p">[</span><span class="n">metric_to_use</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">rule_to_idx</span><span class="p">[</span><span class="n">rule</span><span class="p">])</span>
+
+    <span class="c1"># Cache for computed combinations to avoid redundant evaluations</span>
+    <span class="n">combination_cache</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_combination_metric</span><span class="p">(</span><span class="n">rule_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute metric for a combination, using cache if available.&quot;&quot;&quot;</span>
+        <span class="n">rule_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">rule_list</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">rule_tuple</span> <span class="ow">in</span> <span class="n">combination_cache</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">combination_cache</span><span class="p">[</span><span class="n">rule_tuple</span><span class="p">]</span>
+
+        <span class="c1"># Compute combined rule</span>
+        <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span><span class="p">:</span>
+            <span class="n">combined</span> <span class="o">=</span> <span class="n">R</span><span class="p">[</span><span class="n">rule_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rule_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">combined</span> <span class="o">=</span> <span class="n">combined</span> <span class="o">|</span> <span class="n">R</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># &#39;and&#39;</span>
+            <span class="n">combined</span> <span class="o">=</span> <span class="n">R</span><span class="p">[</span><span class="n">rule_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rule_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">combined</span> <span class="o">=</span> <span class="n">combined</span> <span class="o">&amp;</span> <span class="n">R</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+
+        <span class="c1"># Evaluate metric</span>
+        <span class="n">test_R</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;test_rule&quot;</span><span class="p">:</span> <span class="n">combined</span><span class="p">})</span>
+        <span class="n">test_metrics</span> <span class="o">=</span> <span class="n">compute_metrics</span><span class="p">(</span><span class="n">test_R</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+        <span class="n">metric_value</span> <span class="o">=</span> <span class="n">test_metrics</span><span class="p">[</span><span class="n">metric_to_use</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">combination_cache</span><span class="p">[</span><span class="n">rule_tuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_value</span>
+        <span class="k">return</span> <span class="n">metric_value</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">heuristic</span><span class="p">(</span><span class="n">rule_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">current_metric</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Admissible heuristic: optimistic estimate of improvement potential.</span>
+
+<span class="sd">        Estimates the best possible improvement by assuming we can achieve</span>
+<span class="sd">        the maximum single-rule improvement for each remaining slot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">remaining_rules</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rules</span> <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rule_list</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">remaining_rules</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+
+        <span class="c1"># Get the best metrics from remaining rules</span>
+        <span class="n">remaining_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">single_rule_metrics</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">remaining_rules</span><span class="p">]</span>
+        <span class="n">remaining_metrics</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Optimistic: assume we can improve by the best remaining rule&#39;s metric</span>
+        <span class="c1"># This is optimistic because actual combination might not achieve this</span>
+        <span class="n">slots_left</span> <span class="o">=</span> <span class="n">max_rules</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">rule_list</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">slots_left</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+
+        <span class="c1"># Take top metrics for remaining slots (optimistic estimate)</span>
+        <span class="n">best_remaining</span> <span class="o">=</span> <span class="n">remaining_metrics</span><span class="p">[:</span><span class="n">slots_left</span><span class="p">]</span>
+        <span class="n">estimated_improvement</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">best_remaining</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">best_remaining</span><span class="p">)</span> <span class="k">if</span> <span class="n">best_remaining</span> <span class="k">else</span> <span class="mf">0.0</span>
+
+        <span class="c1"># Return negative (since we want to maximize metric = minimize negative metric)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">estimated_improvement</span>
+
+    <span class="c1"># Priority queue: (f_score, counter, g_score, rule_list, rule_expr)</span>
+    <span class="c1"># Counter ensures FIFO for equal f_scores</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">open_set</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Initialize with all single rules</span>
+    <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">:</span>
+        <span class="n">metric_value</span> <span class="o">=</span> <span class="n">single_rule_metrics</span><span class="p">[</span><span class="n">rule</span><span class="p">]</span>
+        <span class="n">g_score</span> <span class="o">=</span> <span class="o">-</span><span class="n">metric_value</span>  <span class="c1"># Negative because we minimize cost</span>
+        <span class="n">h_score</span> <span class="o">=</span> <span class="n">heuristic</span><span class="p">([</span><span class="n">rule</span><span class="p">],</span> <span class="n">metric_value</span><span class="p">)</span>
+        <span class="n">f_score</span> <span class="o">=</span> <span class="n">g_score</span> <span class="o">+</span> <span class="n">h_score</span>
+
+        <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">open_set</span><span class="p">,</span> <span class="p">(</span><span class="n">f_score</span><span class="p">,</span> <span class="n">counter</span><span class="p">,</span> <span class="n">g_score</span><span class="p">,</span> <span class="p">[</span><span class="n">rule</span><span class="p">],</span> <span class="n">rule</span><span class="p">))</span>
+        <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Track completed combinations (at max depth or promising ones)</span>
+    <span class="n">completed_combinations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Track explored states to avoid redundant exploration</span>
+    <span class="n">explored</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="c1"># A* main loop</span>
+    <span class="k">while</span> <span class="n">open_set</span><span class="p">:</span>
+        <span class="n">f_score</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">g_score</span><span class="p">,</span> <span class="n">rule_list</span><span class="p">,</span> <span class="n">rule_expr</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">heappop</span><span class="p">(</span><span class="n">open_set</span><span class="p">)</span>
+
+        <span class="c1"># Skip if already explored this combination</span>
+        <span class="n">rule_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">rule_list</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">rule_tuple</span> <span class="ow">in</span> <span class="n">explored</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">explored</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rule_tuple</span><span class="p">)</span>
+
+        <span class="n">current_metric</span> <span class="o">=</span> <span class="o">-</span><span class="n">g_score</span>  <span class="c1"># Convert back to positive metric</span>
+
+        <span class="c1"># If at max depth, save as completed</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rule_list</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">max_rules</span><span class="p">:</span>
+            <span class="n">completed_combinations</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">current_metric</span><span class="p">,</span> <span class="n">rule_list</span><span class="p">[:],</span> <span class="n">rule_expr</span><span class="p">))</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Also save current state as a potential solution</span>
+        <span class="n">completed_combinations</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">current_metric</span><span class="p">,</span> <span class="n">rule_list</span><span class="p">[:],</span> <span class="n">rule_expr</span><span class="p">))</span>
+
+        <span class="c1"># Expand node: try adding each remaining rule</span>
+        <span class="k">for</span> <span class="n">candidate_rule</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">candidate_rule</span> <span class="ow">in</span> <span class="n">rule_list</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Create new combination</span>
+            <span class="n">new_rule_list</span> <span class="o">=</span> <span class="n">rule_list</span> <span class="o">+</span> <span class="p">[</span><span class="n">candidate_rule</span><span class="p">]</span>
+            <span class="n">new_rule_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">new_rule_list</span><span class="p">))</span>
+
+            <span class="c1"># Skip if already explored</span>
+            <span class="k">if</span> <span class="n">new_rule_tuple</span> <span class="ow">in</span> <span class="n">explored</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Compute metric for new combination</span>
+            <span class="n">new_metric</span> <span class="o">=</span> <span class="n">compute_combination_metric</span><span class="p">(</span><span class="n">new_rule_list</span><span class="p">)</span>
+
+            <span class="c1"># Check improvement threshold</span>
+            <span class="n">improvement</span> <span class="o">=</span> <span class="n">new_metric</span> <span class="o">-</span> <span class="n">current_metric</span>
+            <span class="k">if</span> <span class="n">improvement</span> <span class="o">&lt;</span> <span class="n">min_improvement</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Compute costs</span>
+            <span class="n">new_g_score</span> <span class="o">=</span> <span class="o">-</span><span class="n">new_metric</span>
+            <span class="n">new_h_score</span> <span class="o">=</span> <span class="n">heuristic</span><span class="p">(</span><span class="n">new_rule_list</span><span class="p">,</span> <span class="n">new_metric</span><span class="p">)</span>
+            <span class="n">new_f_score</span> <span class="o">=</span> <span class="n">new_g_score</span> <span class="o">+</span> <span class="n">new_h_score</span>
+
+            <span class="c1"># Create expression</span>
+            <span class="n">new_expr</span> <span class="o">=</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">new_rule_list</span><span class="p">)</span>
+
+            <span class="c1"># Add to open set</span>
+            <span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">open_set</span><span class="p">,</span> <span class="p">(</span><span class="n">new_f_score</span><span class="p">,</span> <span class="n">counter</span><span class="p">,</span> <span class="n">new_g_score</span><span class="p">,</span> <span class="n">new_rule_list</span><span class="p">,</span> <span class="n">new_expr</span><span class="p">))</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Sort completed combinations by metric (descending)</span>
+    <span class="n">completed_combinations</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Remove duplicates while preserving order</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">unique_combinations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">metric_val</span><span class="p">,</span> <span class="n">rule_list</span><span class="p">,</span> <span class="n">rule_expr</span> <span class="ow">in</span> <span class="n">completed_combinations</span><span class="p">:</span>
+        <span class="n">rule_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">rule_list</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">rule_tuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rule_tuple</span><span class="p">)</span>
+            <span class="n">unique_combinations</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">metric_val</span><span class="p">,</span> <span class="n">rule_list</span><span class="p">,</span> <span class="n">rule_expr</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_combinations</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">return_top_k</span><span class="p">:</span>
+                <span class="k">break</span>
+
+    <span class="c1"># Build result DataFrame</span>
+    <span class="n">result_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">rule_list</span><span class="p">,</span> <span class="n">rule_expr</span> <span class="ow">in</span> <span class="n">unique_combinations</span><span class="p">:</span>
+        <span class="c1"># Compute the combined rule</span>
+        <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span><span class="p">:</span>
+            <span class="n">combined</span> <span class="o">=</span> <span class="n">R</span><span class="p">[</span><span class="n">rule_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rule_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">combined</span> <span class="o">=</span> <span class="n">combined</span> <span class="o">|</span> <span class="n">R</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># &#39;and&#39;</span>
+            <span class="n">combined</span> <span class="o">=</span> <span class="n">R</span><span class="p">[</span><span class="n">rule_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rule_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">combined</span> <span class="o">=</span> <span class="n">combined</span> <span class="o">&amp;</span> <span class="n">R</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+
+        <span class="n">result_dict</span><span class="p">[</span><span class="n">rule_expr</span><span class="p">]</span> <span class="o">=</span> <span class="n">combined</span>
+
+    <span class="k">return</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">result_dict</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Mozilla Public License (MPL) 2.0.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
