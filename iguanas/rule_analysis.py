@@ -167,7 +167,7 @@ def generate_rule_performance_report(
 
     The ``rule_index`` column uses dot notation with the rule's position
     in the list prepended as the root level, e.g. for the 2nd rule:
-      "2.0", "2.1", "2.1.0", "2.1.1", ...
+    ``"2.0"``, ``"2.1"``, ``"2.1.0"``, ``"2.1.1"``, ...
 
     Parameters
     ----------

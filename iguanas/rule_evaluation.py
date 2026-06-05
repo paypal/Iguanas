@@ -33,7 +33,7 @@ def apply_rules(X: pl.DataFrame, rules: list[str]) -> pl.DataFrame:
     rules : list[str]
         List of rule expressions as strings. Each rule should be a valid
         Polars expression that evaluates to a boolean result.
-        Format: '(X["column_name"] operator value) [& | |] ...'
+        Format: ``'(X["column_name"] operator value) [& \| \|] ...'``
 
     Returns
     -------
