@@ -78,10 +78,7 @@ def apply_and_filter_by_performance(
     y: pl.Series,
     rules: list[str],
     weight_column: str | None = None,
-    metrics_threshold: list[dict[str, Any]] = [
-        {"name": "precision", "operator": ">=", "value": 0.2},
-        {"name": "recall", "operator": ">=", "value": 0.2},
-    ],
+    metrics_threshold: list[dict[str, Any]] | None = None,
     sort_by: str = "precision",
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
     """Evaluate rules on a dataset split and filter by performance thresholds.
@@ -137,6 +134,11 @@ def apply_and_filter_by_performance(
     apply_rules : Evaluate rule expressions on a DataFrame
     compute_metrics : Compute performance metrics for rule predictions
     """
+    if metrics_threshold is None:
+        metrics_threshold = [
+            {"name": "precision", "operator": ">=", "value": 0.2},
+            {"name": "recall", "operator": ">=", "value": 0.2},
+        ]
     if not rules:
         return pl.DataFrame(), pl.DataFrame()
     R_split = apply_rules(X, rules)
@@ -245,10 +247,7 @@ def apply_filter_and_deduplicate_rules(
     y: pl.Series,
     rules: list[str] | pl.DataFrame,
     weight_column: str | None = None,
-    metrics_threshold: list[dict[str, Any]] = [
-        {"name": "precision", "operator": ">=", "value": 0.2},
-        {"name": "recall", "operator": ">=", "value": 0.2},
-    ],
+    metrics_threshold: list[dict[str, Any]] | None = None,
     top_n_rules: int | None = None,
     max_corr: float = 0.8,
     sort_by: str = "precision",
@@ -319,6 +318,11 @@ def apply_filter_and_deduplicate_rules(
     apply_and_filter_by_performance : Evaluate rules on a single data split
     select_diverse_top_rules : Select top rules while removing correlations
     """
+    if metrics_threshold is None:
+        metrics_threshold = [
+            {"name": "precision", "operator": ">=", "value": 0.2},
+            {"name": "recall", "operator": ">=", "value": 0.2},
+        ]
     # Convert rules_df to list if needed
     if isinstance(rules, pl.DataFrame):
         rules = rules.select("rule").to_series().to_list()

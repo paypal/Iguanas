@@ -2,7 +2,7 @@ import numpy as np
 import polars as pl
 import pytest
 
-from iguanas.weight_transformation import (
+from iguanas.weight_transformations import (
     _DEFAULT_POWERS,
     EPS,
     _decreasing_exprs,

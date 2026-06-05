@@ -134,14 +134,14 @@ def rebuild_from_levels(levels: list[dict]) -> str:
     # Seed the map with all leaf expressions across all levels
     index_map: dict[str, str] = {}
     for entry in levels:
-        for e in ([entry] if isinstance(entry, dict) else entry):
+        for e in [entry] if isinstance(entry, dict) else entry:
             op = next(iter(e))
             for idx, expr in e[op]:
                 index_map.setdefault(idx, expr)
 
     # Collapse bottom-up
     for entry in reversed(levels):
-        for e in ([entry] if isinstance(entry, dict) else entry):
+        for e in [entry] if isinstance(entry, dict) else entry:
             op = next(iter(e))
             children = e[op]
             first_idx = children[0][0]
@@ -195,7 +195,7 @@ def generate_rule_performance_report(
         components.append((str(rule_idx), expr))
         levels = parse_levels(expr)
         for entry in levels:
-            for e in ([entry] if isinstance(entry, dict) else entry):
+            for e in [entry] if isinstance(entry, dict) else entry:
                 op = next(iter(e))
                 for idx, rule_str in e[op]:
                     components.append((f"{rule_idx}.{idx}", rule_str))
@@ -203,7 +203,7 @@ def generate_rule_performance_report(
     if not components:
         return pl.DataFrame()
 
-    idxs, rule_strs = zip(*components)
+    idxs, rule_strs = zip(*components, strict=False)
 
     # Deduplicate across all expressions to avoid duplicate column names
     unique_rules = list(dict.fromkeys(rule_strs))

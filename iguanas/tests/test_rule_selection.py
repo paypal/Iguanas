@@ -5,6 +5,7 @@ from iguanas.rule_selection import (
     extract_feature_names_from_rule,
     filter_rules_by_feature_overlap,
     filter_correlated_rules,
+    select_best_rule_per_column_combination,
 )
 
 
@@ -485,6 +486,48 @@ class TestFilterCorrelatedRules:
 
         # 0.95 is NOT > 0.95, so no filtering
         assert set(result) == {"rule_A", "rule_B"}
+
+
+class TestSelectBestRulePerColumnCombination:
+    def test_basic_selection(self):
+        """Best rule per unique column combination is returned (lines 273-299)."""
+        metrics = pl.DataFrame({
+            "rule": ['(X["a"] > 1)', '(X["a"] > 2)', '(X["b"] < 3)'],
+            "precision": [0.95, 0.98, 0.96],
+        })
+        result = select_best_rule_per_column_combination(metrics, sort_by="precision")
+        assert '(X["a"] > 2)' in result
+        assert '(X["b"] < 3)' in result
+        assert len(result) == 2
+
+    def test_missing_rule_column_raises(self):
+        """ValueError when 'rule' column is absent (line 268-269)."""
+        metrics = pl.DataFrame({"not_rule": ['(X["a"] > 1)'], "precision": [0.9]})
+        with pytest.raises(ValueError, match="must contain a 'rule' column"):
+            select_best_rule_per_column_combination(metrics)
+
+    def test_missing_sort_by_raises(self):
+        """ValueError when sort_by column is absent (line 270-271)."""
+        metrics = pl.DataFrame({"rule": ['(X["a"] > 1)'], "precision": [0.9]})
+        with pytest.raises(ValueError, match="not found in metrics columns"):
+            select_best_rule_per_column_combination(metrics, sort_by="recall")
+
+
+class TestFilterCorrelatedRulesColIRemoval:
+    def test_col_i_removed_when_less_important(self):
+        """When col_j is more important, col_i is removed and inner loop breaks (lines 234-235)."""
+        C = pl.DataFrame({
+            "rule_A": [1.0, 0.98, 0.1],
+            "rule_B": [0.98, 1.0, 0.2],
+            "rule_C": [0.1, 0.2, 1.0],
+        })
+        # rule_B > rule_A in importance, so when (A, B) pair is examined,
+        # col_i=A is removed and the break on line 235 is triggered
+        importance = {"rule_A": 0.3, "rule_B": 0.9, "rule_C": 0.7}
+        result = filter_correlated_rules(C, importance, max_corr=0.95)
+        assert "rule_A" not in result
+        assert "rule_B" in result
+        assert "rule_C" in result
 
 
 if __name__ == "__main__":

@@ -166,6 +166,17 @@ class TestApplyAndFilterByPerformance:
         assert len(metrics) == len(rules)
         assert R.shape[1] == len(rules)
 
+    def test_empty_rules_list_returns_empty(self):
+        """Test that an empty rules list returns two empty DataFrames (line 141)."""
+        X = pl.DataFrame({"age": [25, 30, 35]})
+        y = pl.Series([0, 1, 1])
+        R, metrics = apply_and_filter_by_performance(
+            X, y, rules=[],
+            metrics_threshold=[{"name": "precision", "operator": ">=", "value": 0.5}],
+        )
+        assert R.is_empty()
+        assert metrics.is_empty()
+
 
 class TestSelectDiverseTopRules:
     """Test cases for select_diverse_top_rules function."""

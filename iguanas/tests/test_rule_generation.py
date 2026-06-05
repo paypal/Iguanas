@@ -6,6 +6,8 @@ from xgboost import XGBClassifier
 
 from iguanas.rule_generation import (
     _check_all_features_have_monotone_constraints,
+    _train_rules_for_weight_transformation,
+    _train_rules_for_scale,
     extract_rule_by_max_gain,
     extract_rule_with_monotone_constraints,
     extract_rules,
@@ -458,6 +460,30 @@ class TestRuleGridSearchParallelWeights:
         assert isinstance(result, pl.DataFrame)
         assert len(result) > 0
 
+    def test_verbose_prints(self, capsys):
+        """Test verbose=1 prints summary lines (lines 680, 693)."""
+        np.random.seed(42)
+        X_train = pd.DataFrame({"f1": np.random.randn(50), "f2": np.random.randn(50)})
+        y_train = pd.Series(np.random.randint(0, 2, 50))
+        estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
+        rule_grid_search_parallel_weights(
+            estimator, X_train, y_train, np.array([1.0]), n_jobs=1, verbose=1
+        )
+        captured = capsys.readouterr()
+        assert "rule grid search" in captured.out.lower()
+
+    def test_polars_weights_train_vec(self):
+        """Polars DataFrame weights_train_vec triggers .to_pandas() branch (line 680)."""
+        np.random.seed(42)
+        X_train = pd.DataFrame({"f1": np.random.randn(50), "f2": np.random.randn(50)})
+        y_train = pd.Series(np.random.randint(0, 2, 50))
+        weights = pl.DataFrame({"Baseline": np.ones(50)})
+        estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
+        result = rule_grid_search_parallel_weights(
+            estimator, X_train, y_train, np.array([1.0]), weights_train_vec=weights, n_jobs=1
+        )
+        assert isinstance(result, pl.DataFrame)
+
 
 class TestRuleGridSearchParallelScales:
     """Test cases for rule_grid_search_parallel_scales function."""
@@ -613,6 +639,44 @@ class TestRuleGridSearchParallelScales:
         # Results should cover multiple scale values
         if result.height > 0:
             assert result["scale_pos_weight"].n_unique() > 1
+
+    def test_verbose_prints(self, capsys):
+        """Test verbose=1 prints summary lines (lines 724, 728)."""
+        np.random.seed(42)
+        X_train = pd.DataFrame({"f1": np.random.randn(50), "f2": np.random.randn(50)})
+        y_train = pd.Series(np.random.randint(0, 2, 50))
+        estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
+        rule_grid_search_parallel_scales(
+            estimator, X_train, y_train, np.array([1.0]), n_jobs=1, verbose=1
+        )
+        captured = capsys.readouterr()
+        assert "parallel-scales" in captured.out.lower()
+
+    def test_polars_weights_train_vec(self):
+        """Polars DataFrame weights_train_vec uses .to_pandas() (line 680)."""
+        np.random.seed(42)
+        X_train = pd.DataFrame({"f1": np.random.randn(50), "f2": np.random.randn(50)})
+        y_train = pd.Series(np.random.randint(0, 2, 50))
+        weights = pl.DataFrame({"Baseline": np.ones(50)})
+        estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
+        result = rule_grid_search_parallel_scales(
+            estimator, X_train, y_train, np.array([1.0]), weights_train_vec=weights, n_jobs=1
+        )
+        assert isinstance(result, pl.DataFrame)
+
+    def test_empty_result_path(self):
+        """No rules produced → empty DataFrame branch (line 724)."""
+        from unittest.mock import patch
+        np.random.seed(42)
+        X_train = pd.DataFrame({"f1": np.random.randn(20), "f2": np.random.randn(20)})
+        y_train = pd.Series(np.random.randint(0, 2, 20))
+        estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
+        with patch("iguanas.rule_generation._train_rules_for_scale", return_value=[]):
+            result = rule_grid_search_parallel_scales(
+                estimator, X_train, y_train, np.array([1.0]), n_jobs=1
+            )
+        assert isinstance(result, pl.DataFrame)
+        assert result.is_empty()
 
 
 class TestExtractRules:
@@ -826,6 +890,16 @@ class TestRuleGridSearchSequential:
             rule_grid_search_sequential(
                 estimator, X_train, y_train, np.array([]), weights_train_vec=None
             )
+
+    def test_verbose_prints(self, capsys):
+        """Test verbose=1 prints summary lines (lines 456, 483)."""
+        np.random.seed(42)
+        X_train = pd.DataFrame({"f1": np.random.randn(50), "f2": np.random.randn(50)})
+        y_train = pd.Series(np.random.randint(0, 2, 50))
+        estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
+        rule_grid_search_sequential(estimator, X_train, y_train, np.array([1.0]), verbose=1)
+        captured = capsys.readouterr()
+        assert "sequential" in captured.out.lower()
 
 
 class TestRuleGridSearchPandasWeights:
@@ -1298,6 +1372,49 @@ class TestNonNumericInputRaises:
             rule_grid_search_parallel_scales(
                 estimator, X_train_object, y_train, scale_pos_weight_vec=[1.0]
             )
+
+
+class TestPrivateRuleGenerationHelpers:
+    """Tests for _train_rules_for_weight_transformation and _train_rules_for_scale (lines 300, 307-308, 368)."""
+
+    @pytest.fixture()
+    def base_setup(self):
+        np.random.seed(0)
+        X_np = np.random.randn(50, 2)
+        y_np = np.random.randint(0, 2, 50)
+        estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=0)
+        params = estimator.get_params()
+        params.pop("scale_pos_weight", None)
+        return X_np, y_np, params
+
+    def test_train_single_weight_feature_names_none(self, base_setup):
+        """feature_names=None triggers the else branch (line 300: X_fit = X_train)."""
+        X_np, y_np, params = base_setup
+        weights = pd.Series(np.ones(50), name="Baseline")
+        result = _train_rules_for_weight_transformation(
+            weights, params, X_np, y_np, [1.0], False, feature_names=None
+        )
+        assert isinstance(result, list)
+
+    def test_train_scale_feature_names_none(self, base_setup):
+        """feature_names=None triggers the else branch (line 368: X_fit = X_train)."""
+        X_np, y_np, params = base_setup
+        weights_np = np.ones((50, 1))
+        result = _train_rules_for_scale(
+            1.0, weights_np, ["Baseline"], params, X_np, y_np, False, feature_names=None
+        )
+        assert isinstance(result, list)
+
+    def test_train_single_weight_exception_is_caught(self, base_setup):
+        """Exception during fit is caught and skipped (lines 307-308)."""
+        from unittest.mock import patch
+        X_np, y_np, params = base_setup
+        weights = pd.Series(np.ones(50), name="Baseline")
+        with patch("iguanas.rule_generation.XGBClassifier.fit", side_effect=RuntimeError("fail")):
+            result = _train_rules_for_weight_transformation(
+                weights, params, X_np, y_np, [1.0], False, feature_names=None
+            )
+        assert result == []
 
 
 if __name__ == "__main__":

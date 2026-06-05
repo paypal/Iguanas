@@ -164,7 +164,7 @@ def combine_rules_cumulative(
         return cumsum_R.select(
             [
                 pl.col(col_name).gt(0).alias(output_name)
-                for col_name, output_name in zip(columns, output_names)
+                for col_name, output_name in zip(columns, output_names, strict=False)
             ]
         )
     else:  # operator == 'and'
@@ -172,7 +172,7 @@ def combine_rules_cumulative(
         return cumsum_R.select(
             [
                 pl.col(col_name).eq(i + 1).alias(output_name)
-                for i, (col_name, output_name) in enumerate(zip(columns, output_names))
+                for i, (col_name, output_name) in enumerate(zip(columns, output_names, strict=False))
             ]
         )
 
@@ -722,7 +722,7 @@ def combine_rules_a_star(
 
     # Build result DataFrame
     result_dict = {}
-    for metric_val, rule_list, rule_expr in unique_combinations:
+    for _, rule_list, rule_expr in unique_combinations:
         # Compute the combined rule
         if operator == "or":
             combined = R[rule_list[0]]

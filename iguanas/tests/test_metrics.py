@@ -1,7 +1,7 @@
 import polars as pl
 import pytest
 
-from iguanas.metrics import compute_metrics
+from iguanas.metrics import compute_metrics, compute_single_metric
 
 
 class TestComputeMetrics:
@@ -310,3 +310,20 @@ class TestComputeMetrics:
             + result["FN_weight"][0]
         )
         assert result["total_weight"][0] == expected_total_weight
+
+
+class TestComputeSingleMetric:
+    def test_accuracy_no_weights(self):
+        # TP=1, FP=1, TN=1, FN=1 → accuracy = 2/4 = 0.5
+        combined = pl.Series([True, True, False, False])
+        y = pl.Series([True, False, True, False])
+        result = compute_single_metric(combined, y, "accuracy")
+        assert result == pytest.approx(0.5)
+
+    def test_accuracy_with_weights(self):
+        # TP_w=2, FP_w=0, TN_w=3, FN_w=0 → accuracy_w = 5/5 = 1.0
+        combined = pl.Series([True, False, False, False])
+        y = pl.Series([True, False, False, False])
+        weights = pl.Series([2.0, 1.0, 1.0, 1.0])
+        result = compute_single_metric(combined, y, "accuracy", weights=weights)
+        assert result == pytest.approx(1.0)
