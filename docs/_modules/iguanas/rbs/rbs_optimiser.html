@@ -189,11 +189,11 @@
 <span class="sd">        The algorithm leveraged by hyperopt&#39;s `fmin` function, which optimises</span>
 <span class="sd">        the rules. Defaults to tpe.suggest, which corresponds to </span>
 <span class="sd">        Tree-of-Parzen-Estimator.</span>
-<span class="sd">    pos_pred_rules : List[str], optional</span>
+<span class="sd">    pos_pred_rules : list[str], optional</span>
 <span class="sd">        The list of rules that predict a positive case (i.e. 1). This parameter </span>
 <span class="sd">        and/or `neg_pred_rules` must be given when the `config` parameter in </span>
 <span class="sd">        the `pipeline` is an empty list. Defaults to None.</span>
-<span class="sd">    neg_pred_rules : List[str], optional</span>
+<span class="sd">    neg_pred_rules : list[str], optional</span>
 <span class="sd">        The list of rules that predict a negative case (i.e. 0). This parameter </span>
 <span class="sd">        and/or `pos_pred_rules` must be given when the `config` parameter in </span>
 <span class="sd">        the `pipeline` is an empty list. Defaults to None.    </span>
@@ -213,13 +213,13 @@
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    config : List[Tuple(int, list)] </span>
+<span class="sd">    config : list[Tuple(int, list)] </span>
 <span class="sd">        The optimised pipeline configuration, where each element aligns to a</span>
 <span class="sd">        stage in the pipeline. Each element is a tuple with 2 elements: the </span>
 <span class="sd">        first element corresponds to the decision made at that stage (either 0</span>
 <span class="sd">        or 1); the second element is a list of the rules that must trigger to </span>
 <span class="sd">        give that decision.</span>
-<span class="sd">    rules_to_keep: List[str]</span>
+<span class="sd">    rules_to_keep: list[str]</span>
 <span class="sd">        The rules used in the optimised pipeline.    </span>
 <span class="sd">    rules : Rules</span>
 <span class="sd">        The Rules object containing the rules remaining after optimisation.</span>

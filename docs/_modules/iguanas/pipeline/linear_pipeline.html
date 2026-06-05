@@ -178,13 +178,13 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    steps : List[Tuple[str, object]]</span>
+<span class="sd">    steps : list[Tuple[str, object]]</span>
 <span class="sd">        The steps to be applied as part of the pipeline. Each element of the</span>
 <span class="sd">        list corresponds to a single step. Each step should be a tuple of two</span>
 <span class="sd">        elements - the first element should be a string which refers to the </span>
 <span class="sd">        step; the second element should be the instantiated class which is run</span>
 <span class="sd">        as part of the step. </span>
-<span class="sd">    use_init_data : List[str], optional</span>
+<span class="sd">    use_init_data : list[str], optional</span>
 <span class="sd">        Use to denote steps that come after the first step which require the </span>
 <span class="sd">        initial dataset `X` to be used as the input to the `fit` method. For </span>
 <span class="sd">        example, if a rule optimiser class is placed after a rule generator </span>
@@ -198,7 +198,7 @@
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    steps_ : List[Tuple[str, object]]</span>
+<span class="sd">    steps_ : list[Tuple[str, object]]</span>
 <span class="sd">        The steps corresponding to the fitted pipeline.</span>
 <span class="sd">    rules : Rules</span>
 <span class="sd">        The Rules object containing the rules produced from fitting the </span>

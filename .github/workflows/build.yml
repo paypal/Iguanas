@@ -1,56 +1,88 @@
-name: Build
+name: Tests
+
 on:
   push:
     branches:
-      - dev
       - main
+      - master
+      - develop
   pull_request:
     branches:
-      - dev
       - main
+      - master
+      - develop
+
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: true
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        python-version: [3.7, 3.8, 3.9]
-    env:
-      OS: ${{ matrix.os }}
-      PYTHON_VERSION: ${{ matrix.python-version }}
-      SPARK_LOCAL_IP: 127.0.0.1
+  lint:
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |        
-        python -m pip install --upgrade pip        
-        python -m pip install --upgrade setuptools
-        pip install flake8 pytest 
-        pip install .        
-        pip install .[dev]
-        pip install .[spark]  
-        python -m ipykernel install --user --name iguanas
-    - name: Lint with flake8
+        allow-prereleases: true
+        cache: 'pip'
+
+    - name: Install linting tools
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics    
-    - name: Unit tests
-      run: |                             
-        coverage run --omit iguanas/*/test*.py -m pytest -vv --doctest-modules iguanas && coverage report && coverage xml
-    - name: Notebook tests
-      run: |                             
-        pytest iguanas/*/examples/ --nbmake --nbmake-kernel=iguanas
-        pytest examples/ --nbmake --nbmake-kernel=iguanas             
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v2
+        python -m pip install --upgrade pip
+        pip install ruff
+
+    # - name: Check formatting with ruff
+    #   run: ruff format --check iguanas/
+
+    - name: Lint with ruff
+      run: ruff check iguanas/
+
+    # - name: Type check with mypy
+    #   run: mypy iguanas/
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        os: [ubuntu-latest]
+        include:
+          - python-version: "3.13"
+            os: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v6
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: coverage.xml
-    
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+  
+    - name: Install libomp on macOS
+      if: runner.os == 'macOS'
+      run: brew install libomp
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+
+    - name: Run tests with coverage
+      run: |
+        pytest
+
+    - name: Build wheel
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
+      run: |
+        python -m pip install build
+        python -m build
+
+    - name: Upload wheel
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
+      uses: actions/upload-artifact@v5
+      with:
+        name: dist-packages
+        path: dist/

@@ -180,7 +180,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    objs : List[Union[PandasDataFrameType, PandasSeriesType, KoalasDataFrameType, KoalasSeriesType]]</span>
+<span class="sd">    objs : list[Union[PandasDataFrameType, PandasSeriesType, KoalasDataFrameType, KoalasSeriesType]]</span>
 <span class="sd">        List of Pandas/Koalas DataFrame to concatenate.</span>
 
 <span class="sd">    Raises</span>
@@ -480,7 +480,7 @@
 <span class="sd">        Binary integer target column.</span>
 <span class="sd">    y_preds : Union[PandasDataFrameType, np.ndarray, KoalasDataFrameType]</span>
 <span class="sd">        Set of binary integer predictors. Can also be a single predictor.</span>
-<span class="sd">    y_preds_columns : List[str]</span>
+<span class="sd">    y_preds_columns : list[str]</span>
 <span class="sd">        Column names for the y_preds array.</span>
 <span class="sd">    sample_weight : Union[PandasSeriesType, np.ndarray, KoalasSeriesType], optional</span>
 <span class="sd">        Row-wise sample_weights to apply. Defaults to None.</span>
@@ -535,7 +535,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    X_rules : Union[PandasDataFrameType, KoalasDataFrameType]</span>
 <span class="sd">        Set of rule binary columns.</span>
-<span class="sd">    X_rules_cols : List[str]</span>
+<span class="sd">    X_rules_cols : list[str]</span>
 <span class="sd">        Columns associated with `X_rules`.</span>
 <span class="sd">    y_true : Union[PandasSeriesType, np.ndarray, KoalasSeriesType], optional</span>
 <span class="sd">        Binary integer target column. Defaults to None.</span>
@@ -682,7 +682,7 @@
 <span class="sd">        The object to check the type of.</span>
 <span class="sd">    x_name : str</span>
 <span class="sd">        The objects name (used when raising the error).</span>
-<span class="sd">    allowed_types : List[str]</span>
+<span class="sd">    allowed_types : list[str]</span>
 <span class="sd">        The list of allowed types (in string format).</span>
 
 <span class="sd">    Raises</span>
@@ -710,7 +710,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    x : object</span>
 <span class="sd">        The object to check the type of.</span>
-<span class="sd">    types : List[str]</span>
+<span class="sd">    types : list[str]</span>
 <span class="sd">        The list of allowed types (in string format) to check against.</span>
 
 <span class="sd">    Returns</span>

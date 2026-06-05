@@ -174,13 +174,13 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    imputed_values : Dict[str, Union[str, float]], optional</span>
+<span class="sd">    imputed_values : dict[str, Union[str, float]], optional</span>
 <span class="sd">        The value used to impute nulls (values) for each feature in the </span>
 <span class="sd">        original, unprocessed dataset (keys). Providing this information </span>
 <span class="sd">        converts conditions that include null values into two separate  </span>
 <span class="sd">        conditions - one for the numeric condition, one for the null </span>
 <span class="sd">        condition. Defaults to None.</span>
-<span class="sd">    ohe_categories : Dict[str, str], optional</span>
+<span class="sd">    ohe_categories : dict[str, str], optional</span>
 <span class="sd">        The category (values) linked to each OHE column (keys). If the OHE</span>
 <span class="sd">        column represents when null values are present, include this </span>
 <span class="sd">        feature in the `imputed_values` parameter. Providing this </span>
@@ -260,7 +260,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        rule_strings : Dict[str, str] </span>
+<span class="sd">        rule_strings : dict[str, str] </span>
 <span class="sd">            Set of rules defined using the standard Iguanas string format </span>
 <span class="sd">            (values) and their names (keys).</span>
 <span class="sd">        X : PandasDataFrameType, optional </span>
@@ -269,7 +269,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Dict[str, str]</span>
+<span class="sd">        dict[str, str]</span>
 <span class="sd">            Set of generalised rules defined using the standard Iguanas string format.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">general_rule_strings</span> <span class="o">=</span> <span class="p">{}</span>
@@ -530,7 +530,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Dict[str, Union[str, float]]</span>
+<span class="sd">        dict[str, Union[str, float]]</span>
 <span class="sd">            The value used to impute nulls for each feature.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -550,19 +550,19 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        pre_ohe_cols : List[str]</span>
+<span class="sd">        pre_ohe_cols : list[str]</span>
 <span class="sd">            List of column names from the dataset before one hot encoding was</span>
 <span class="sd">            applied.</span>
-<span class="sd">        post_ohe_cols : List[str]</span>
+<span class="sd">        post_ohe_cols : list[str]</span>
 <span class="sd">            List of column names from the dataset after one hot encoding was</span>
 <span class="sd">            applied.</span>
-<span class="sd">        pre_ohe_dtypes : Dict[str. str]</span>
+<span class="sd">        pre_ohe_dtypes : dict[str. str]</span>
 <span class="sd">            The datatype (values) of each column (keys) from the dataset before</span>
 <span class="sd">            one hot encoding was applied.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Dict[str, str]</span>
+<span class="sd">        dict[str, str]</span>
 <span class="sd">            The category linked to each One Hot Encoded column.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ohe_categories</span> <span class="o">=</span> <span class="p">{}</span>

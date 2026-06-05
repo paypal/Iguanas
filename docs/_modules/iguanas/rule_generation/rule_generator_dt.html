@@ -197,7 +197,7 @@
 <span class="sd">    num_cores : int, optional</span>
 <span class="sd">        The number of cores to use when iterating through the ensemble to</span>
 <span class="sd">        generate rules. Defaults to 1.</span>
-<span class="sd">    target_feat_corr_types : Union[Dict[str, List[str]], str], optional</span>
+<span class="sd">    target_feat_corr_types : Union[dict[str, list[str]], str], optional</span>
 <span class="sd">        Limits the conditions of the rules based on the target-feature</span>
 <span class="sd">        correlation (e.g. if a feature has a positive correlation with</span>
 <span class="sd">        respect to the target, then only greater than operators are used</span>
@@ -223,18 +223,18 @@
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    rule_strings : Dict[str, str]</span>
+<span class="sd">    rule_strings : dict[str, str]</span>
 <span class="sd">        The generated rules, defined using the standard Iguanas string </span>
 <span class="sd">        format (values) and their names (keys).   </span>
-<span class="sd">    rule_lambdas : Dict[str, object]</span>
+<span class="sd">    rule_lambdas : dict[str, object]</span>
 <span class="sd">        The generated rules, defined using the standard Iguanas lambda </span>
 <span class="sd">        expression format (values) and their names (keys).   </span>
-<span class="sd">    lambda_kwargs : Dict[str, object]</span>
+<span class="sd">    lambda_kwargs : dict[str, object]</span>
 <span class="sd">        The keyword arguments for the generated rules defined using the </span>
 <span class="sd">        standard Iguanas lambda expression format.</span>
 <span class="sd">    rules : Rules</span>
 <span class="sd">        The Rules object containing the generated rules.</span>
-<span class="sd">    rule_names : List[str]</span>
+<span class="sd">    rule_names : list[str]</span>
 <span class="sd">        The names of the generated rules.</span>
 
 <span class="sd">    Examples</span>

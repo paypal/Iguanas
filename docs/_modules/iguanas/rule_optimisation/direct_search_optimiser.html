@@ -179,10 +179,10 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    rule_lambdas : Dict[str, Callable]</span>
+<span class="sd">    rule_lambdas : dict[str, Callable]</span>
 <span class="sd">        Set of rules defined using the standard Iguanas lambda expression</span>
 <span class="sd">        format (values) and their names (keys).</span>
-<span class="sd">    lambda_kwargs : Dict[str, Dict[str, float]]</span>
+<span class="sd">    lambda_kwargs : dict[str, dict[str, float]]</span>
 <span class="sd">        For each rule (keys), a dictionary containing the features used in</span>
 <span class="sd">        the rule (keys) and the current values (values).</span>
 <span class="sd">    metric : Callable</span>
@@ -238,35 +238,35 @@
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    rule_strings : Dict[str, str]</span>
+<span class="sd">    rule_strings : dict[str, str]</span>
 <span class="sd">        The optimised + unoptimisable (but applicable) rules, defined using the</span>
 <span class="sd">        standard Iguanas string format (values) and their names (keys).</span>
-<span class="sd">    rule_lambdas : Dict[str, object]</span>
+<span class="sd">    rule_lambdas : dict[str, object]</span>
 <span class="sd">        The optimised rules + unoptimisable (but applicable), defined using the</span>
 <span class="sd">        standard Iguanas lambda expression format (values) and their names</span>
 <span class="sd">        (keys).</span>
-<span class="sd">    lambda_kwargs : Dict[str, object]</span>
+<span class="sd">    lambda_kwargs : dict[str, object]</span>
 <span class="sd">        The keyword arguments for the optimised + unoptimisable (but</span>
 <span class="sd">        applicable) rules defined using the standard Iguanas lambda expression</span>
 <span class="sd">        format.</span>
 <span class="sd">    rules : Rules</span>
 <span class="sd">        The Rules object containing the optimised + unoptimisable (but</span>
 <span class="sd">        applicable) rules.</span>
-<span class="sd">    rule_names : List[str]</span>
+<span class="sd">    rule_names : list[str]</span>
 <span class="sd">        The names of the optimised + unoptimisable (but applicable) rules.</span>
-<span class="sd">    rule_names_missing_features : List[str]</span>
+<span class="sd">    rule_names_missing_features : list[str]</span>
 <span class="sd">        Names of rules which use features that are not present in the dataset</span>
 <span class="sd">        (and therefore can&#39;t be optimised or applied).</span>
-<span class="sd">    rule_names_no_opt_conditions : List[str]</span>
+<span class="sd">    rule_names_no_opt_conditions : list[str]</span>
 <span class="sd">        Names of rules which have no optimisable conditions (e.g. rules that</span>
 <span class="sd">        only contain string-based conditions).</span>
-<span class="sd">    rule_names_zero_var_features : List[str]</span>
+<span class="sd">    rule_names_zero_var_features : list[str]</span>
 <span class="sd">        Names of rules which exclusively contain zero variance features (based</span>
 <span class="sd">        on `X`), so cannot be optimised.</span>
-<span class="sd">    opt_rule_performances : Dict[str, float]</span>
+<span class="sd">    opt_rule_performances : dict[str, float]</span>
 <span class="sd">        The optimisation metric (values) calculated for each optimised rule</span>
 <span class="sd">        (keys).</span>
-<span class="sd">    orig_rule_performances : Dict[str, float]</span>
+<span class="sd">    orig_rule_performances : dict[str, float]</span>
 <span class="sd">        The optimisation metric (values) calculated for each original rule</span>
 <span class="sd">        (keys).</span>
 <span class="sd">    non_optimisable_rules : Rules</span>
@@ -426,13 +426,13 @@
 <span class="sd">        ----------</span>
 <span class="sd">        X : PandasDataFrameType</span>
 <span class="sd">            The feature set.</span>
-<span class="sd">        lambda_kwargs : Dict[str, Dict[str, float]]</span>
+<span class="sd">        lambda_kwargs : dict[str, dict[str, float]]</span>
 <span class="sd">            For each rule (keys), a dictionary containing the features used in</span>
 <span class="sd">            the rule (keys) and the current values (values).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Dict[str, np.ndarray]</span>
+<span class="sd">        dict[str, np.ndarray]</span>
 <span class="sd">            The bounds for each feature (values) in each rule (keys).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -454,13 +454,13 @@
 <span class="sd">        ----------</span>
 <span class="sd">        X : PandasDataFrameType</span>
 <span class="sd">            The feature set.</span>
-<span class="sd">        lambda_kwargs : Dict[str, Dict[str, float]]</span>
+<span class="sd">        lambda_kwargs : dict[str, dict[str, float]]</span>
 <span class="sd">            For each rule (keys), a dictionary containing the features used in</span>
 <span class="sd">            the rule (keys) and the current values (values).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Dict[str, np.ndarray]</span>
+<span class="sd">        dict[str, np.ndarray]</span>
 <span class="sd">            The x0 for each feature (values) in each rule (keys).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -482,7 +482,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        X : PandasDataFrameType</span>
 <span class="sd">            The feature set.</span>
-<span class="sd">        lambda_kwargs : Dict[str, dict]</span>
+<span class="sd">        lambda_kwargs : dict[str, dict]</span>
 <span class="sd">            For each rule (keys), a dictionary</span>
 <span class="sd">            containing the features used in the rule (keys) and the current</span>
 <span class="sd">            values (values).</span>
@@ -495,7 +495,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Dict[str, np.ndarray]</span>
+<span class="sd">        dict[str, np.ndarray]</span>
 <span class="sd">            The initial simplex (values) for each rule (keys).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 

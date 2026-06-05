@@ -6,13 +6,16 @@
 *.exe
 *.o
 *.so
-
+.coverage
 *.pem
 
 Build
 ###################
 build/
 dist/
+docs/
+htmlcov/
+
 __cache__.py
 *.pyc
 *.pyo
