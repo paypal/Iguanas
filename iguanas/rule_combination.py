@@ -167,16 +167,14 @@ def combine_rules_cumulative(
                 for col_name, output_name in zip(columns, output_names, strict=False)
             ]
         )
-    else:  # operator == 'and'
-        # Cumulative AND: all True up to position i (cumsum == i+1)
-        return cumsum_R.select(
-            [
-                pl.col(col_name).eq(i + 1).alias(output_name)
-                for i, (col_name, output_name) in enumerate(
-                    zip(columns, output_names, strict=False)
-                )
-            ]
-        )
+    # operator == 'and'
+    # Cumulative AND: all True up to position i (cumsum == i+1)
+    return cumsum_R.select(
+        [
+            pl.col(col_name).eq(i + 1).alias(output_name)
+            for i, (col_name, output_name) in enumerate(zip(columns, output_names, strict=False))
+        ]
+    )
 
 
 def combine_rules_greedy(

@@ -15,12 +15,11 @@ def _to_py(expr: str) -> str:
 def _node_to_str(node: ast.AST) -> str:
     if isinstance(node, ast.Compare):
         return f"({ast.unparse(node)})"
-    elif isinstance(node, ast.BoolOp):
+    if isinstance(node, ast.BoolOp):
         op = " & " if isinstance(node.op, ast.And) else " | "
         return op.join(_node_to_str(v) for v in node.values)
-    else:
-        s = ast.unparse(node)
-        return re.sub(r"\sand\s", " & ", re.sub(r"\sor\s", " | ", s))
+    s = ast.unparse(node)
+    return re.sub(r"\sand\s", " & ", re.sub(r"\sor\s", " | ", s))
 
 
 def parse_conditions(expr: str) -> dict:
@@ -50,12 +49,11 @@ def _convert(node):
         for v in values[1:]:
             result = {"op": op, "left": result, "right": v}
         return result
-    elif isinstance(node, ast.Name):
+    if isinstance(node, ast.Name):
         return node.id
-    elif isinstance(node, ast.Compare):
+    if isinstance(node, ast.Compare):
         return ast.unparse(node)
-    else:
-        return ast.unparse(node)
+    return ast.unparse(node)
 
 
 def parse_levels(expr: str) -> list[dict]:

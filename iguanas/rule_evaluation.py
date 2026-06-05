@@ -19,7 +19,7 @@ _OPS: dict[str, str] = {
 
 
 def apply_rules(X: pl.DataFrame, rules: list[str]) -> pl.DataFrame:
-    """Evaluate rule expressions on a DataFrame to produce boolean predictions.
+    r"""Evaluate rule expressions on a DataFrame to produce boolean predictions.
 
     Takes a list of rule strings (logical conditions) and evaluates them against
     the input DataFrame to produce a boolean DataFrame where each column represents

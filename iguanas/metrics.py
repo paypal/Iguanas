@@ -43,26 +43,25 @@ def compute_single_metric(
 
     if metric == "precision":
         return TP / (TP + FP) if (TP + FP) > 0 else 0.0
-    elif metric == "recall":
+    if metric == "recall":
         return TP / (TP + FN) if (TP + FN) > 0 else 0.0
-    elif metric == "accuracy":
+    if metric == "accuracy":
         TN = (
             float((~y_bool & ~combined_bool).sum())
             if weights is None
             else float(weights.filter(~y_bool & ~combined_bool).sum())
         )
         return (TP + TN) / (TP + TN + FP + FN) if (TP + TN + FP + FN) > 0 else 0.0
-    elif metric.startswith("f"):
+    if metric.startswith("f"):
         beta = float(metric[1:])
         precision = TP / (TP + FP) if (TP + FP) > 0 else 0.0
         recall = TP / (TP + FN) if (TP + FN) > 0 else 0.0
         denom = beta**2 * precision + recall
         return (1 + beta**2) * precision * recall / denom if denom > 0 else 0.0
-    else:
-        raise ValueError(
-            f"Unsupported metric '{metric}'. Must be 'precision', 'recall', "
-            f"'accuracy', or an F-beta score (f<number>)."
-        )
+    raise ValueError(
+        f"Unsupported metric '{metric}'. Must be 'precision', 'recall', "
+        f"'accuracy', or an F-beta score (f<number>)."
+    )
 
 
 def compute_metrics(

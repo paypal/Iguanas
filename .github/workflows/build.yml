@@ -35,7 +35,7 @@ jobs:
     #   run: ruff format --check iguanas/
 
     - name: Lint with ruff
-      run: ruff check --select=I,F,E,W,R,C,B,S iguanas/
+      run: ruff check iguanas/
 
     # - name: Type check with mypy
     #   run: mypy iguanas/
