@@ -10,8 +10,8 @@ from .metrics import compute_metrics, compute_single_metric
 def combine_rules_full_search(
     R: pl.DataFrame,
     n: PositiveInt = 3,
-    max_combinations_per_n: int = 250_000,
-    batch_size: int = 100_000,
+    max_combinations_per_n: PositiveInt = 200_000,
+    batch_size: PositiveInt = 50_000,
     operator: str = "or",
 ) -> pl.DataFrame:
     """Combine rules using logical operations to create new composite rules.
@@ -172,7 +172,9 @@ def combine_rules_cumulative(
         return cumsum_R.select(
             [
                 pl.col(col_name).eq(i + 1).alias(output_name)
-                for i, (col_name, output_name) in enumerate(zip(columns, output_names, strict=False))
+                for i, (col_name, output_name) in enumerate(
+                    zip(columns, output_names, strict=False)
+                )
             ]
         )
 
