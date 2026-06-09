@@ -1,0 +1,45 @@
+{% extends "!layout.html" %}
+
+{%- block extrahead %}
+{{ super() }}
+<!-- Site Verification -->
+<meta name="msvalidate.01" content="278C9456AC3400A90623536C8A2114C1" />
+
+<!-- Structured Data for SEO -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "Iguanas",
+  "description": "Lightning fast rule generation library.",
+  "url": "https://paypal.github.io/Iguanas/",
+  "codeRepository": "https://github.com/paypal/Iguanas",
+  "license": "https://opensource.org/licenses/Apache-2.0",
+  "programmingLanguage": "Python",
+  "runtimePlatform": "Python 3.10+",
+  "author": {
+    "@type": "Person",
+    "name": "Charles Poli"
+  },
+  "maintainer": {
+    "@type": "Organization",
+    "name": "PayPal"
+  },
+  "keywords": ["data science", "machine learning", "rule generation", "polars", "python"]
+}
+</script>
+
+<!-- Additional meta tags for better SEO -->
+<meta name="description" content="Lightning fast rule generation library.">
+<meta name="keywords" content="data science, machine learning, rule generation, python, polars">
+<meta name="author" content="Charles Poli, PayPal">
+<link rel="canonical" href="https://paypal.github.io/Iguanas/{{ pagename }}.html" />
+
+<!-- Open Graph -->
+<meta property="og:title" content="{{ title }} - Iguanas Documentation">
+<meta property="og:description" content="High-performance rule generation library">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://paypal.github.io/Iguanas/{{ pagename }}.html">
+<meta property="og:image" content="https://paypal.github.io/Iguanas/_static/iguanas.png">
+
+{% endblock %}
