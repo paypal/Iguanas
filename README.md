@@ -1,6 +1,6 @@
 <picture align="center">
-  <source media="(prefers-color-scheme: dark)" srcset="https://paypal.github.io/iguanas/_images/IGUANAS_LOGO.png">
-  <img alt="Iguanas Logo" src="https://paypal.github.io/iguanas/_images/IGUANAS_LOGO.png">
+  <source media="(prefers-color-scheme: dark)" srcset="hhttps://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png">
+  <img alt="Iguanas Logo" src="hhttps://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png">
 </picture>
 
 # Iguanas: A Lightning-Fast Rule Generation Python Library
