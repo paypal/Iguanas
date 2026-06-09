@@ -13,7 +13,6 @@ Build
 ###################
 build/
 dist/
-docs/
 htmlcov/
 
 __cache__.py
@@ -111,8 +110,7 @@ coverage.xml
 *.pot
 
 # Sphinx documentation
-docs/_build/
-
+docs/build/
 #Misc
 dev/
 .pytest_cache/
