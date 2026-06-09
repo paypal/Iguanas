@@ -21,14 +21,14 @@ class TestRuleClassifierInitialization:
             estimator=estimator,
             scale_pos_weight_vec=scale_pos_weight_vec,
             opt_metric="accuracy",
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.2},
                 {"name": "recall", "operator": ">=", "value": 0.3},
             ],
         )
 
         assert clf.opt_metric == "accuracy"
-        assert clf.metrics_threshold == [
+        assert clf.metric_thresholds == [
             {"name": "precision", "operator": ">=", "value": 0.2},
             {"name": "recall", "operator": ">=", "value": 0.3},
         ]
@@ -44,10 +44,10 @@ class TestRuleClassifierInitialization:
         )
 
         assert clf.opt_metric == "accuracy"
-        assert clf.metrics_threshold is None
+        assert clf.metric_thresholds is None
 
     def test_precision_out_of_range_low(self):
-        """Test validation rejects metrics_threshold with negative precision value."""
+        """Test validation rejects metric_thresholds with negative precision value."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
         scale_pos_weight_vec = np.array([1.0])
 
@@ -55,11 +55,11 @@ class TestRuleClassifierInitialization:
             RuleClassifier(
                 estimator=estimator,
                 scale_pos_weight_vec=scale_pos_weight_vec,
-                metrics_threshold=[{"name": "precision", "operator": ">=", "value": -0.1}],
+                metric_thresholds=[{"name": "precision", "operator": ">=", "value": -0.1}],
             )
 
     def test_precision_out_of_range_high(self):
-        """Test validation rejects metrics_threshold with precision value > 1."""
+        """Test validation rejects metric_thresholds with precision value > 1."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
         scale_pos_weight_vec = np.array([1.0])
 
@@ -67,11 +67,11 @@ class TestRuleClassifierInitialization:
             RuleClassifier(
                 estimator=estimator,
                 scale_pos_weight_vec=scale_pos_weight_vec,
-                metrics_threshold=[{"name": "precision", "operator": ">=", "value": 1.5}],
+                metric_thresholds=[{"name": "precision", "operator": ">=", "value": 1.5}],
             )
 
     def test_recall_out_of_range_low(self):
-        """Test validation rejects metrics_threshold with negative recall value."""
+        """Test validation rejects metric_thresholds with negative recall value."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
         scale_pos_weight_vec = np.array([1.0])
 
@@ -79,11 +79,11 @@ class TestRuleClassifierInitialization:
             RuleClassifier(
                 estimator=estimator,
                 scale_pos_weight_vec=scale_pos_weight_vec,
-                metrics_threshold=[{"name": "recall", "operator": ">=", "value": -0.1}],
+                metric_thresholds=[{"name": "recall", "operator": ">=", "value": -0.1}],
             )
 
     def test_recall_out_of_range_high(self):
-        """Test validation rejects metrics_threshold with recall value > 1."""
+        """Test validation rejects metric_thresholds with recall value > 1."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
         scale_pos_weight_vec = np.array([1.0])
 
@@ -91,7 +91,7 @@ class TestRuleClassifierInitialization:
             RuleClassifier(
                 estimator=estimator,
                 scale_pos_weight_vec=scale_pos_weight_vec,
-                metrics_threshold=[{"name": "recall", "operator": ">=", "value": 1.5}],
+                metric_thresholds=[{"name": "recall", "operator": ">=", "value": 1.5}],
             )
 
 
@@ -119,7 +119,7 @@ class TestRuleClassifierFitPredict:
             estimator=estimator,
             scale_pos_weight_vec=scale_pos_weight_vec,
             opt_metric="accuracy",
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.0},
                 {"name": "recall", "operator": ">=", "value": 0.0},
             ],
@@ -220,7 +220,7 @@ class TestRulesetClassifierInitialization:
             estimator=estimator,
             scale_pos_weight_vec=scale_pos_weight_vec,
             opt_metric="f1",
-            metrics_threshold=[{"name": "precision", "operator": ">=", "value": 0.15}, {"name": "recall", "operator": ">=", "value": 0.15}],
+            metric_thresholds=[{"name": "precision", "operator": ">=", "value": 0.15}, {"name": "recall", "operator": ">=", "value": 0.15}],
             max_rules=10,
             max_corr=0.9,
             combine_operator="and",
@@ -228,7 +228,7 @@ class TestRulesetClassifierInitialization:
 
         assert clf.opt_metric == "f1"
         assert clf.max_rules == 10
-        assert clf.metrics_threshold == [{"name": "precision", "operator": ">=", "value": 0.15}, {"name": "recall", "operator": ">=", "value": 0.15}]
+        assert clf.metric_thresholds == [{"name": "precision", "operator": ">=", "value": 0.15}, {"name": "recall", "operator": ">=", "value": 0.15}]
         assert clf.max_corr == 0.9
         assert clf.combine_operator == "and"
 
@@ -244,7 +244,7 @@ class TestRulesetClassifierInitialization:
 
         assert clf.opt_metric == "accuracy"
         assert clf.max_rules == 10
-        assert clf.metrics_threshold is None
+        assert clf.metric_thresholds is None
         assert clf.max_corr == 0.8
         assert clf.combine_operator == "or"
 
@@ -281,7 +281,7 @@ class TestRulesetClassifierInitialization:
             RulesetClassifier(
                 estimator=estimator,
                 scale_pos_weight_vec=scale_pos_weight_vec,
-                metrics_threshold=[{"name": "precision", "operator": ">=", "value": 1.5}],
+                metric_thresholds=[{"name": "precision", "operator": ">=", "value": 1.5}],
             )
 
     def test_recall_out_of_range(self):
@@ -293,7 +293,7 @@ class TestRulesetClassifierInitialization:
             RulesetClassifier(
                 estimator=estimator,
                 scale_pos_weight_vec=scale_pos_weight_vec,
-                metrics_threshold=[{"name": "recall", "operator": ">=", "value": -0.5}],
+                metric_thresholds=[{"name": "recall", "operator": ">=", "value": -0.5}],
             )
 
     def test_max_corr_out_of_range(self):
@@ -346,7 +346,7 @@ class TestRulesetClassifierFitPredict:
             scale_pos_weight_vec=scale_pos_weight_vec,
             opt_metric="accuracy",
             max_rules=5,
-            metrics_threshold=[{"name": "precision", "operator": ">=", "value": 0.0}, {"name": "recall", "operator": ">=", "value": 0.0}],
+            metric_thresholds=[{"name": "precision", "operator": ">=", "value": 0.0}, {"name": "recall", "operator": ">=", "value": 0.0}],
             combine_operator="or",
         )
 
@@ -362,7 +362,7 @@ class TestRulesetClassifierFitPredict:
             scale_pos_weight_vec=scale_pos_weight_vec,
             opt_metric="accuracy",
             max_rules=5,
-            metrics_threshold=[{"name": "precision", "operator": ">=", "value": 0.0}, {"name": "recall", "operator": ">=", "value": 0.0}],
+            metric_thresholds=[{"name": "precision", "operator": ">=", "value": 0.0}, {"name": "recall", "operator": ">=", "value": 0.0}],
             combine_operator="and",
         )
 

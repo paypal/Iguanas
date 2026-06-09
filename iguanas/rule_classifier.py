@@ -23,7 +23,7 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     1. **Rule generation**: candidate rules are extracted from XGBoost decision
        trees trained across a sweep of ``scale_pos_weight`` values.
     2. **Performance filtering**: rules that fail any condition in
-       ``metrics_threshold`` are discarded.
+       ``metric_thresholds`` are discarded.
     3. **Ranking**: the surviving rules are sorted by ``opt_metric`` (descending)
        and the top-ranked rule is stored in ``_best_rule_``.
 
@@ -36,7 +36,7 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     opt_metric : str, default="accuracy"
         Metric used to rank candidate rules. The single highest-scoring rule
         is kept. Must be a column produced by compute_metrics.
-    metrics_threshold : list[dict[str, Any]] | None, default=None
+    metric_thresholds : list[dict[str, Any]] | None, default=None
         List of threshold dicts used to filter candidate rules. Each dict must
         have keys ``"name"`` (metric column), ``"operator"`` (one of
         ``">="``, ``">"``, ``"<="``, ``"<"``, ``"=="``, ``"!="``), and
@@ -50,18 +50,18 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     estimator: XGBClassifier
     scale_pos_weight_vec: np.ndarray
     opt_metric: str = "accuracy"
-    metrics_threshold: list[dict[str, Any]] | None = None
+    metric_thresholds: list[dict[str, Any]] | None = None
 
-    @field_validator("metrics_threshold")
+    @field_validator("metric_thresholds")
     @classmethod
-    def _check_metrics_threshold(cls, v: list[dict[str, Any]] | None) -> list[dict[str, Any]] | None:
+    def _check_metric_thresholds(cls, v: list[dict[str, Any]] | None) -> list[dict[str, Any]] | None:
         if v is None:
             return v
         for t in v:
             val = t.get("value")
             if val is not None and not (0.0 <= val <= 1.0):
                 raise ValueError(
-                    f"metrics_threshold value {val!r} is out of range [0, 1] for threshold {t!r}"
+                    f"metric_thresholds value {val!r} is out of range [0, 1] for threshold {t!r}"
                 )
         return v
 
@@ -95,7 +95,7 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
 
         _, M = apply_and_filter_by_performance(
             X[self._feature_cols_], y, rules["rule"].to_list(),
-            metrics_threshold=self.metrics_threshold,
+            metric_thresholds=self.metric_thresholds,
             sort_by=self.opt_metric,
         )
 

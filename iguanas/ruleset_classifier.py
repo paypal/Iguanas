@@ -25,7 +25,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     1. **Rule generation**: candidate rules are extracted from XGBoost decision
        trees trained across a sweep of ``scale_pos_weight`` values.
     2. **Performance filtering**: rules that fail any condition in
-       ``metrics_threshold`` are discarded.
+       ``metric_thresholds`` are discarded.
     3. **Correlation filtering**: among rules that are correlated above
        ``max_corr``, only the one with the highest ``opt_metric`` score is kept.
     4. **Greedy combination**: starting from the single best rule, rules are
@@ -49,7 +49,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         produced by compute_metrics (e.g. "f1", "precision", "recall").
     max_rules : int, default=10
         Maximum number of rules the greedy search may select. Must be > 0.
-    metrics_threshold : list[dict[str, Any]] | None, default=None
+    metric_thresholds : list[dict[str, Any]] | None, default=None
         List of threshold dicts used to filter candidate rules. Each dict must
         have keys ``"name"`` (metric column), ``"operator"`` (one of
         ``">="``, ``">"``, ``"<="``, ``"<"``, ``"=="``, ``"!="``), and
@@ -72,18 +72,19 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     scale_pos_weight_vec: np.ndarray
     opt_metric: str = "accuracy"
     max_rules: int = Field(default=10, gt=0)
-    metrics_threshold: list[dict[str, Any]] | None = None
+    metric_thresholds: list[dict[str, Any]] | None = None
+    metric_weights: pl.Series | None = None
 
-    @field_validator("metrics_threshold")
+    @field_validator("metric_thresholds")
     @classmethod
-    def _check_metrics_threshold(cls, v: list[dict[str, Any]] | None) -> list[dict[str, Any]] | None:
+    def _check_metric_thresholds(cls, v: list[dict[str, Any]] | None) -> list[dict[str, Any]] | None:
         if v is None:
             return v
         for t in v:
             val = t.get("value")
             if val is not None and not (0.0 <= val <= 1.0):
                 raise ValueError(
-                    f"metrics_threshold value {val!r} is out of range [0, 1] for threshold {t!r}"
+                    f"metric_thresholds value {val!r} is out of range [0, 1] for threshold {t!r}"
                 )
         return v
 
@@ -102,7 +103,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
             raise ValueError(f"combine_operator must be 'or' or 'and', got '{v}'")
         return v
 
-    def fit(self, X: pl.DataFrame, y: pl.Series, sample_weight: pl.Series | None = None) -> RulesetClassifier:
+    def fit(self, X: pl.DataFrame, y: pl.Series, sample_weights: pl.DataFrame | None = None) -> RulesetClassifier:
         """Generate, filter, and select rules from training data.
 
         Parameters
@@ -117,18 +118,19 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         RulesetClassifier
             Fitted pipeline instance (self).
         """
-        if self.metrics_threshold is None:
-            self.metrics_threshold = [{"name": "accuracy", "operator": ">=", "value": 0.5}]
+        if self.metric_thresholds is None:
+            self.metric_thresholds = [{"name": "accuracy", "operator": ">=", "value": 0.5}]
         self._feature_cols_ = [c for c, dt in X.schema.items() if dt in _NUMERIC_DTYPES]
         rules = rule_grid_search_parallel_scales(
             self.estimator,
             X[self._feature_cols_],
             y,
             scale_pos_weight_vec=self.scale_pos_weight_vec,
+            weights_train_vec=sample_weights,
         )
         R, M = apply_and_filter_by_performance(
             X[self._feature_cols_], y, rules["rule"].to_list(),
-            metrics_threshold=self.metrics_threshold,
+            metric_thresholds=self.metric_thresholds,
             sort_by=self.opt_metric,
         )
         candidate_rules = M["rule"].to_list()
@@ -144,6 +146,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
             metric=self.opt_metric,
             max_rules=self.max_rules,
             min_improvement=self.min_improvement,
+            weights=self.metric_weights,
         )
         self._best_ruleset_ = R_greedy.columns[0]
         return self

@@ -78,7 +78,7 @@ def apply_and_filter_by_performance(
     y: pl.Series,
     rules: list[str],
     weight_column: str | None = None,
-    metrics_threshold: list[dict[str, Any]] | None = None,
+    metric_thresholds: list[dict[str, Any]] | None = None,
     sort_by: str = "precision",
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
     """Evaluate rules on a dataset split and filter by performance thresholds.
@@ -98,7 +98,7 @@ def apply_and_filter_by_performance(
     weight_column : str | None, default=None
         Name of column in X to use as sample weights for metric computation.
         If None, all samples are weighted equally.
-    metrics_threshold : list[dict[str, Any]], default=[{"name": "accuracy", "operator": ">=", "value": 0.5}]
+    metric_thresholds : list[dict[str, Any]], default=[{"name": "accuracy", "operator": ">=", "value": 0.5}]
         List of threshold dicts, each with keys:
 
         - ``"name"``: metric column name (e.g. ``"precision"``, ``"recall"``, ``"f1"``).
@@ -124,8 +124,8 @@ def apply_and_filter_by_performance(
     >>> X = pl.DataFrame({"age": [25, 30, 35, 40], "income": [50000, 60000, 70000, 80000]})
     >>> y = pl.Series([0, 0, 1, 1])
     >>> rules = ['(X["age"] >= 30)', '(X["income"] > 55000)']
-    >>> metrics_threshold = [{"name": "accuracy", "operator": ">=", "value": 0.5}]
-    >>> R, metrics = apply_and_filter_by_performance(X, y, rules, metrics_threshold=metrics_threshold)
+    >>> metric_thresholds = [{"name": "accuracy", "operator": ">=", "value": 0.5}]
+    >>> R, metrics = apply_and_filter_by_performance(X, y, rules, metric_thresholds=metric_thresholds)
     >>> metrics[['rule', 'precision', 'recall']]
 
     See Also
@@ -133,8 +133,8 @@ def apply_and_filter_by_performance(
     apply_rules : Evaluate rule expressions on a DataFrame
     compute_metrics : Compute performance metrics for rule predictions
     """
-    if metrics_threshold is None:
-        metrics_threshold = [{"name": "accuracy", "operator": ">=", "value": 0.5}]
+    if metric_thresholds is None:
+        metric_thresholds = [{"name": "accuracy", "operator": ">=", "value": 0.5}]
     if not rules:
         return pl.DataFrame(), pl.DataFrame()
     R_split = apply_rules(X, rules)
@@ -143,7 +143,7 @@ def apply_and_filter_by_performance(
 
     filter_expr = reduce(
         lambda acc, t: acc & getattr(pl.col(t["name"]), _OPS[t["operator"]])(t["value"]),
-        metrics_threshold,
+        metric_thresholds,
         pl.lit(True),
     )
     metrics_split = metrics_split.filter(filter_expr)
@@ -243,7 +243,7 @@ def apply_filter_and_deduplicate_rules(
     y: pl.Series,
     rules: list[str] | pl.DataFrame,
     weight_column: str | None = None,
-    metrics_threshold: list[dict[str, Any]] | None = None,
+    metric_thresholds: list[dict[str, Any]] | None = None,
     top_n_rules: int | None = None,
     max_corr: float = 0.8,
     sort_by: str = "precision",
@@ -265,7 +265,7 @@ def apply_filter_and_deduplicate_rules(
         Either a list of rule expressions as strings, or a DataFrame with a 'rule' column.
     weight_column : str | None, default=None
         Name of weight column in X. If None, unweighted metrics are computed.
-    metrics_threshold : list[dict[str, Any]], default=[precision >= 0.2, recall >= 0.2]
+    metric_thresholds : list[dict[str, Any]], default=[precision >= 0.2, recall >= 0.2]
         List of threshold dicts forwarded to :func:`apply_and_filter_by_performance`.
         Each dict must have keys ``"name"``, ``"operator"``, and ``"value"``.
         All conditions are combined with AND.
@@ -297,7 +297,7 @@ def apply_filter_and_deduplicate_rules(
     >>> thresholds = [{"name": "precision", "operator": ">=", "value": 0.5},
     ...               {"name": "recall",    "operator": ">=", "value": 0.5}]
     >>> R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
-    ...     X, y, rules, metrics_threshold=thresholds, top_n_rules=10
+    ...     X, y, rules, metric_thresholds=thresholds, top_n_rules=10
     ... )
     >>> print(f"Selected {len(selected_rules)} rules")
     >>> metrics[['rule', 'precision', 'recall', 'f1']]
@@ -314,8 +314,8 @@ def apply_filter_and_deduplicate_rules(
     apply_and_filter_by_performance : Evaluate rules on a single data split
     select_diverse_top_rules : Select top rules while removing correlations
     """
-    if metrics_threshold is None:
-        metrics_threshold = [
+    if metric_thresholds is None:
+        metric_thresholds = [
             {"name": "precision", "operator": ">=", "value": 0.2},
             {"name": "recall", "operator": ">=", "value": 0.2},
         ]
@@ -325,7 +325,7 @@ def apply_filter_and_deduplicate_rules(
 
     # Evaluate and filter by thresholds
     R, metrics = apply_and_filter_by_performance(
-        X, y, rules, weight_column, metrics_threshold, sort_by
+        X, y, rules, weight_column, metric_thresholds, sort_by
     )
 
     # Select top uncorrelated rules

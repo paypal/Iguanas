@@ -64,7 +64,7 @@ class TestApplyAndFilterByPerformance:
             X,
             y,
             rules,
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.5},
                 {"name": "recall", "operator": ">=", "value": 0.5},
             ],
@@ -92,7 +92,7 @@ class TestApplyAndFilterByPerformance:
             y,
             rules,
             weight_column="weight",
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.4},
                 {"name": "recall", "operator": ">=", "value": 0.4},
             ],
@@ -112,7 +112,7 @@ class TestApplyAndFilterByPerformance:
             X,
             y,
             rules,
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.9},
                 {"name": "recall", "operator": ">=", "value": 0.9},
             ],
@@ -133,7 +133,7 @@ class TestApplyAndFilterByPerformance:
             X,
             y,
             rules,
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.4},
                 {"name": "recall", "operator": ">=", "value": 0.4},
             ],
@@ -156,7 +156,7 @@ class TestApplyAndFilterByPerformance:
             X,
             y,
             rules,
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.0},
                 {"name": "recall", "operator": ">=", "value": 0.0},
             ],
@@ -172,7 +172,7 @@ class TestApplyAndFilterByPerformance:
         y = pl.Series([0, 1, 1])
         R, metrics = apply_and_filter_by_performance(
             X, y, rules=[],
-            metrics_threshold=[{"name": "precision", "operator": ">=", "value": 0.5}],
+            metric_thresholds=[{"name": "precision", "operator": ">=", "value": 0.5}],
         )
         assert R.is_empty()
         assert metrics.is_empty()
@@ -348,7 +348,7 @@ class TestApplyFilterAndDeduplicateRules:
             X,
             y,
             rules,
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.5},
                 {"name": "recall", "operator": ">=", "value": 0.5},
             ],
@@ -378,7 +378,7 @@ class TestApplyFilterAndDeduplicateRules:
             X,
             y,
             rules_df,
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.4},
                 {"name": "recall", "operator": ">=", "value": 0.4},
             ],
@@ -400,7 +400,7 @@ class TestApplyFilterAndDeduplicateRules:
             y,
             rules,
             weight_column="weight",
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.4},
                 {"name": "recall", "operator": ">=", "value": 0.4},
             ],
@@ -419,7 +419,7 @@ class TestApplyFilterAndDeduplicateRules:
             X,
             y,
             rules,
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.9},
                 {"name": "recall", "operator": ">=", "value": 0.9},
             ],
@@ -448,7 +448,7 @@ class TestApplyFilterAndDeduplicateRules:
             X,
             y,
             rules,
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.3},
                 {"name": "recall", "operator": ">=", "value": 0.3},
             ],
@@ -477,7 +477,7 @@ class TestApplyFilterAndDeduplicateRules:
             X,
             y,
             rules,
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.3},
                 {"name": "recall", "operator": ">=", "value": 0.3},
             ],
@@ -502,7 +502,7 @@ class TestApplyFilterAndDeduplicateRules:
             X,
             y,
             rules,
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.3},
                 {"name": "recall", "operator": ">=", "value": 0.3},
             ],
@@ -529,7 +529,7 @@ class TestApplyFilterAndDeduplicateRules:
             X,
             y,
             rules,
-            metrics_threshold=[
+            metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.5},
                 {"name": "recall", "operator": ">=", "value": 0.5},
             ],

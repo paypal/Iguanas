@@ -130,7 +130,7 @@ rules_df = rule_grid_search_parallel_weights(
 # 4. Evaluate, filter, and deduplicate rules
 R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
     X_train, y_train, rules_df,
-    metrics_threshold=[
+    metric_thresholds=[
         {"name": "precision", "operator": ">=", "value": 0.6},
         {"name": "recall",    "operator": ">=", "value": 0.5},
     ],
