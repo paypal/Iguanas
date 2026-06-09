@@ -20,6 +20,24 @@ _NUMERIC_DTYPES = (pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.Float32, pl.Float64
 class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     """End-to-end rule-based classification pipeline.
 
+    The best ruleset is selected through the following steps:
+
+    1. **Rule generation**: candidate rules are extracted from XGBoost decision
+       trees trained across a sweep of ``scale_pos_weight`` values.
+    2. **Performance filtering**: rules that fail any condition in
+       ``metrics_threshold`` are discarded.
+    3. **Correlation filtering**: among rules that are correlated above
+       ``max_corr``, only the one with the highest ``opt_metric`` score is kept.
+    4. **Greedy combination**: starting from the single best rule, rules are
+       added one at a time — each iteration picks the candidate that yields the
+       largest improvement in ``opt_metric`` when combined (via
+       ``combine_operator``) with the already-selected rules. Addition stops
+       when no candidate improves the metric by at least ``min_improvement`` or
+       when ``max_rules`` rules have been selected.
+
+    The resulting combined rule expression is stored in ``_best_ruleset_`` as a
+    string (e.g. ``"(rule_A) | (rule_B) | (rule_C)"``).
+
     Parameters
     ----------
     estimator : XGBClassifier
@@ -29,22 +47,23 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     opt_metric : str, default="accuracy"
         Metric used to rank and select candidate rules. Must be a column
         produced by compute_metrics (e.g. "f1", "precision", "recall").
-    max_rules : int, default=20
-        Maximum number of top-ranked rules (by opt_metric) to consider when
-        building the combined ruleset. Must be > 0.
+    max_rules : int, default=10
+        Maximum number of rules the greedy search may select. Must be > 0.
     metrics_threshold : list[dict[str, Any]] | None, default=None
         List of threshold dicts used to filter candidate rules. Each dict must
         have keys ``"name"`` (metric column), ``"operator"`` (one of
         ``">="``, ``">"``, ``"<="``, ``"<"``, ``"=="``, ``"!="``), and
         ``"value"`` (numeric threshold). All conditions are combined with AND.
-        If None, defaults to ``[{"name": "accuracy", "operator": ">=", "value": 0.5}]``.
+        If None, the default threshold of ``apply_and_filter_by_performance``
+        is used.
     max_corr : float, default=0.8
         Maximum pairwise correlation allowed between rules; correlated pairs
         are pruned to keep only the highest-ranked one. Must be in [0, 1].
     combine_operator : str, default="or"
         Boolean operator used to combine selected rules: "or" or "and".
     min_improvement : float, default=0.01
-        Minimum improvement in opt_metric required to add a new rule to the combined ruleset during greedy selection.
+        Minimum improvement in opt_metric required to add a new rule to the
+        combined ruleset during greedy selection.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)

@@ -18,8 +18,14 @@ _NUMERIC_DTYPES = (pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.Float32, pl.Float64
 class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     """Rule-based classifier that selects the single best rule.
 
-    Generates candidate rules, filters by minimum precision and recall,
-    then keeps only the top rule ranked by opt_metric.
+    The best rule is selected through the following steps:
+
+    1. **Rule generation**: candidate rules are extracted from XGBoost decision
+       trees trained across a sweep of ``scale_pos_weight`` values.
+    2. **Performance filtering**: rules that fail any condition in
+       ``metrics_threshold`` are discarded.
+    3. **Ranking**: the surviving rules are sorted by ``opt_metric`` (descending)
+       and the top-ranked rule is stored in ``_best_rule_``.
 
     Parameters
     ----------
@@ -35,7 +41,8 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         have keys ``"name"`` (metric column), ``"operator"`` (one of
         ``">="``, ``">"``, ``"<="``, ``"<"``, ``"=="``, ``"!="``), and
         ``"value"`` (numeric threshold). All conditions are combined with AND.
-        If None, defaults to ``[precision >= 0.2, recall >= 0.2]``.
+        If None, the default threshold of ``apply_and_filter_by_performance``
+        is used.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
