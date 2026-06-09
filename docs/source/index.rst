@@ -1,5 +1,5 @@
 
-.. image:: _static/IGUANAS_LOGO.png
+.. image:: https://paypal.github.io/iguanas/_images/IGUANAS_LOGO.png
    :align: center
    :alt: Iguanas Logo
 
