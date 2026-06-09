@@ -13,7 +13,7 @@
 | Documentation | [![Documentation](https://img.shields.io/badge/docs-online-blue)](https://paypal.github.io/Iguanas/) |
 | Code style | [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff) |
 | Downloads | [![Downloads](https://static.pepy.tech/badge/iguanas)](https://pepy.tech/project/iguanas) [![Downloads/Month](https://static.pepy.tech/badge/iguanas/month)](https://pepy.tech/project/iguanas) |
-| Community | [![GitHub Stars](https://img.shields.io/github/stars/paypal/iguanas?style=social)](https://github.com/paypal/iguanas) [![GitHub Forks](https://img.shields.io/github/forks/paypal/iguanas?style=social)](https://github.com/paypal/iguanas) [![Contributors](https://img.shields.io/github/contributors/paypal/Iguanas)](https://github.com/paypal/Iguanas/graphs/contributors) [![Last Commit](https://img.shields.io/github/last-commit/paypal/Iguanas)](https://github.com/paypal/Iguanas/commits/main) |
+| Community | [![GitHub Stars](https://img.shields.io/github/stars/paypal/Iguanas?style=social)](https://github.com/paypal/Iguanas) [![GitHub Forks](https://img.shields.io/github/forks/paypal/Iguanas?style=social)](https://github.com/paypal/Iguanas) [![Contributors](https://img.shields.io/github/contributors/paypal/Iguanas)](https://github.com/paypal/Iguanas/graphs/contributors) [![Last Commit](https://img.shields.io/github/last-commit/paypal/Iguanas)](https://github.com/paypal/Iguanas/commits/main) |
 
 
 📚 **[Full Documentation](https://paypal.github.io/iguanas/)**
