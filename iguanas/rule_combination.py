@@ -2,16 +2,15 @@ import heapq
 import itertools
 
 import polars as pl
-from pydantic import PositiveInt
 
 from .metrics import compute_metrics, compute_single_metric
 
 
 def combine_rules_full_search(
     R: pl.DataFrame,
-    n: PositiveInt = 3,
-    max_combinations_per_n: PositiveInt = 200_000,
-    batch_size: PositiveInt = 50_000,
+    n: int = 3,
+    max_combinations_per_n: int = 200_000,
+    batch_size: int = 50_000,
     operator: str = "or",
 ) -> pl.DataFrame:
     """Combine rules using logical operations to create new composite rules.
@@ -28,7 +27,7 @@ def combine_rules_full_search(
         DataFrame containing rule columns to be combined. Each column should
         represent a boolean or binary rule evaluation. All columns will be
         used as candidate rules.
-    n : PositiveInt, default=3
+    n : int, default=3
         Maximum number of rules to combine. Generates all combinations from
         size 2 up to size n.
     max_combinations_per_n : int, default=250_000

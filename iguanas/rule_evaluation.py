@@ -98,7 +98,7 @@ def apply_and_filter_by_performance(
     weight_column : str | None, default=None
         Name of column in X to use as sample weights for metric computation.
         If None, all samples are weighted equally.
-    metrics_threshold : list[dict[str, Any]], default=[precision >= 0.2, recall >= 0.2]
+    metrics_threshold : list[dict[str, Any]], default=[{"name": "accuracy", "operator": ">=", "value": 0.5}]
         List of threshold dicts, each with keys:
 
         - ``"name"``: metric column name (e.g. ``"precision"``, ``"recall"``, ``"f1"``).
@@ -124,9 +124,8 @@ def apply_and_filter_by_performance(
     >>> X = pl.DataFrame({"age": [25, 30, 35, 40], "income": [50000, 60000, 70000, 80000]})
     >>> y = pl.Series([0, 0, 1, 1])
     >>> rules = ['(X["age"] >= 30)', '(X["income"] > 55000)']
-    >>> thresholds = [{"name": "precision", "operator": ">=", "value": 0.5},
-    ...               {"name": "recall",    "operator": ">=", "value": 0.5}]
-    >>> R, metrics = apply_and_filter_by_performance(X, y, rules, metrics_threshold=thresholds)
+    >>> metrics_threshold = [{"name": "accuracy", "operator": ">=", "value": 0.5}]
+    >>> R, metrics = apply_and_filter_by_performance(X, y, rules, metrics_threshold=metrics_threshold)
     >>> metrics[['rule', 'precision', 'recall']]
 
     See Also
@@ -135,10 +134,7 @@ def apply_and_filter_by_performance(
     compute_metrics : Compute performance metrics for rule predictions
     """
     if metrics_threshold is None:
-        metrics_threshold = [
-            {"name": "precision", "operator": ">=", "value": 0.2},
-            {"name": "recall", "operator": ">=", "value": 0.2},
-        ]
+        metrics_threshold = [{"name": "accuracy", "operator": ">=", "value": 0.5}]
     if not rules:
         return pl.DataFrame(), pl.DataFrame()
     R_split = apply_rules(X, rules)

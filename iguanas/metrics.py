@@ -65,7 +65,7 @@ def compute_single_metric(
 
 
 def compute_metrics(
-    R: pl.DataFrame,
+    R: pl.Series| pl.DataFrame,
     y: pl.Series,
     weights: pl.Series | None = None,
     betas: list[float] | None = None,
@@ -125,6 +125,8 @@ def compute_metrics(
         betas = [0.25, 0.5, 1, 1.5, 2]
     if y.dtype != pl.Boolean:
         y = y.cast(pl.Boolean)
+    if isinstance(R, pl.Series):
+        R = R.to_frame()
     # Compute confusion matrix for all columns
     if weights is not None:
         # Both count and weighted metrics
