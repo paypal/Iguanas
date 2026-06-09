@@ -10,7 +10,7 @@
 |:--|:-:|
 | Package | [![PyPI version](https://img.shields.io/pypi/v/iguanas)](https://pypi.org/project/iguanas/) [![Python versions](https://img.shields.io/pypi/pyversions/iguanas)](https://pypi.org/project/iguanas/) |
 | Quality | [![License](https://img.shields.io/github/license/paypal/iguanas)](https://github.com/paypal/iguanas/blob/main/LICENSE) [![Coverage](https://img.shields.io/codecov/c/github/paypal/iguanas)](https://codecov.io/gh/paypal/iguanas) |
-| Documentation | [![Documentation](https://img.shields.io/badge/docs-online-blue)](https://paypal.github.io/iguanas/) |
+| Documentation | [![Documentation](https://img.shields.io/badge/docs-online-blue)](https://paypal.github.io/Iguanas/) |
 | Code style | [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff) |
 | Downloads | [![Downloads](https://static.pepy.tech/badge/iguanas)](https://pepy.tech/project/iguanas) [![Downloads/Month](https://static.pepy.tech/badge/iguanas/month)](https://pepy.tech/project/iguanas) |
 | Community | [![GitHub Stars](https://img.shields.io/github/stars/paypal/iguanas?style=social)](https://github.com/paypal/iguanas) [![GitHub Forks](https://img.shields.io/github/forks/paypal/iguanas?style=social)](https://github.com/paypal/iguanas) [![Contributors](https://img.shields.io/github/contributors/paypal/iguanas)](https://github.com/paypal/iguanas/graphs/contributors) [![Last Commit](https://img.shields.io/github/last-commit/paypal/iguanas)](https://github.com/paypal/iguanas/commits/main) |
