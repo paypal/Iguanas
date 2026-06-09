@@ -9,10 +9,10 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.exceptions import NotFittedError
 from xgboost import XGBClassifier
 
+from .rule_combination import combine_rules_greedy
 from .rule_evaluation import apply_and_filter_by_performance, apply_rules
 from .rule_generation import rule_grid_search_parallel_scales
 from .rule_selection import filter_correlated_rules
-from .rule_combination import combine_rules_greedy
 
 _NUMERIC_DTYPES = (pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.Float32, pl.Float64)
 
@@ -77,7 +77,9 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
 
     @field_validator("metric_thresholds")
     @classmethod
-    def _check_metric_thresholds(cls, v: list[dict[str, Any]] | None) -> list[dict[str, Any]] | None:
+    def _check_metric_thresholds(
+        cls, v: list[dict[str, Any]] | None
+    ) -> list[dict[str, Any]] | None:
         if v is None:
             return v
         for t in v:
@@ -103,7 +105,9 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
             raise ValueError(f"combine_operator must be 'or' or 'and', got '{v}'")
         return v
 
-    def fit(self, X: pl.DataFrame, y: pl.Series, sample_weights: pl.DataFrame | None = None) -> RulesetClassifier:
+    def fit(
+        self, X: pl.DataFrame, y: pl.Series, sample_weights: pl.DataFrame | None = None
+    ) -> RulesetClassifier:
         """Generate, filter, and select rules from training data.
 
         Parameters
@@ -129,7 +133,9 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
             weights_train_vec=sample_weights,
         )
         R, M = apply_and_filter_by_performance(
-            X[self._feature_cols_], y, rules["rule"].to_list(),
+            X[self._feature_cols_],
+            y,
+            rules["rule"].to_list(),
             metric_thresholds=self.metric_thresholds,
             sort_by=self.opt_metric,
         )

@@ -54,7 +54,9 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
 
     @field_validator("metric_thresholds")
     @classmethod
-    def _check_metric_thresholds(cls, v: list[dict[str, Any]] | None) -> list[dict[str, Any]] | None:
+    def _check_metric_thresholds(
+        cls, v: list[dict[str, Any]] | None
+    ) -> list[dict[str, Any]] | None:
         if v is None:
             return v
         for t in v:
@@ -94,7 +96,9 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         ).unique("rule")
 
         _, M = apply_and_filter_by_performance(
-            X[self._feature_cols_], y, rules["rule"].to_list(),
+            X[self._feature_cols_],
+            y,
+            rules["rule"].to_list(),
             metric_thresholds=self.metric_thresholds,
             sort_by=self.opt_metric,
         )

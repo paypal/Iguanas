@@ -65,7 +65,7 @@ def compute_single_metric(
 
 
 def compute_metrics(
-    R: pl.Series| pl.DataFrame,
+    R: pl.Series | pl.DataFrame,
     y: pl.Series,
     weights: pl.Series | None = None,
     betas: list[float] | None = None,
