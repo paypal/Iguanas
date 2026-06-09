@@ -109,8 +109,7 @@ coverage.xml
 *.log
 *.pot
 
-# Sphinx documentation
-docs/build/
+
 #Misc
 dev/
 .pytest_cache/
