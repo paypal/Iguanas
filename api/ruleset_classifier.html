@@ -448,7 +448,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="iguanas.ruleset_classifier.RulesetClassifier">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">iguanas.ruleset_classifier.</span></span><span class="sig-name descname"><span class="pre">RulesetClassifier</span></span><a class="reference internal" href="../_modules/iguanas/ruleset_classifier.html#RulesetClassifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code>, <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="(in scikit-learn v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></a>, <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.base.ClassifierMixin.html#sklearn.base.ClassifierMixin" title="(in scikit-learn v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassifierMixin</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pydantic.main.BaseModel</span></code>, <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="(in scikit-learn v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.base.BaseEstimator</span></code></a>, <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.base.ClassifierMixin.html#sklearn.base.ClassifierMixin" title="(in scikit-learn v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.base.ClassifierMixin</span></code></a></p>
 <p>End-to-end rule-based classification pipeline.</p>
 <p>The best ruleset is selected through the following steps:</p>
 <ol class="arabic simple">
@@ -471,66 +471,68 @@ string (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>estimator</strong> (<em>XGBClassifier</em>) – XGBoost classifier used for rule generation.</p></li>
-<li><p><strong>scale_pos_weight_vec</strong> (<em>np.ndarray</em>) – Vector of scale_pos_weight values swept during rule generation.</p></li>
-<li><p><strong>opt_metric</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default=&quot;accuracy&quot;</em>) – Metric used to rank and select candidate rules. Must be a column
+<li><p><strong>scale_pos_weight_vec</strong> (<em>np.ndarray</em><em> | </em>list<em>[</em>float<em>]</em><em>, </em><em>default=np.array</em><em>(</em><em>[</em><em>1.0</em><em>]</em><em>)</em>) – Vector of scale_pos_weight values swept during rule generation.</p></li>
+<li><p><strong>opt_metric</strong> (str<em>, </em><em>default=&quot;accuracy&quot;</em>) – Metric used to rank and select candidate rules. Must be a column
 produced by compute_metrics (e.g. “f1”, “precision”, “recall”).</p></li>
-<li><p><strong>max_rules</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=10</em>) – Maximum number of rules the greedy search may select. Must be &gt; 0.</p></li>
-<li><p><strong>metric_thresholds</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>Any</em><em>]</em><em>] </em><em>| </em><em>None</em><em>, </em><em>default=None</em>) – List of threshold dicts used to filter candidate rules. Each dict must
+<li><p><strong>max_rules</strong> (int<em>, </em><em>default=10</em>) – Maximum number of rules the greedy search may select. Must be &gt; 0.</p></li>
+<li><p><strong>metric_thresholds</strong> (list<em>[</em>dict<em>[</em>str<em>, </em><em>Any</em><em>]</em><em>] </em><em>| </em><em>None</em><em>, </em><em>default=None</em>) – List of threshold dicts used to filter candidate rules. Each dict must
 have keys <code class="docutils literal notranslate"><span class="pre">&quot;name&quot;</span></code> (metric column), <code class="docutils literal notranslate"><span class="pre">&quot;operator&quot;</span></code> (one of
 <code class="docutils literal notranslate"><span class="pre">&quot;&gt;=&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;&gt;&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;&lt;=&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;&lt;&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;==&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;!=&quot;</span></code>), and
 <code class="docutils literal notranslate"><span class="pre">&quot;value&quot;</span></code> (numeric threshold). All conditions are combined with AND.
 If None, the default threshold of <code class="docutils literal notranslate"><span class="pre">apply_and_filter_by_performance</span></code>
 is used.</p></li>
-<li><p><strong>max_corr</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.8</em>) – Maximum pairwise correlation allowed between rules; correlated pairs
+<li><p><strong>max_corr</strong> (float<em>, </em><em>default=0.8</em>) – Maximum pairwise correlation allowed between rules; correlated pairs
 are pruned to keep only the highest-ranked one. Must be in [0, 1].</p></li>
-<li><p><strong>combine_operator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default=&quot;or&quot;</em>) – Boolean operator used to combine selected rules: “or” or “and”.</p></li>
-<li><p><strong>min_improvement</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.01</em>) – Minimum improvement in opt_metric required to add a new rule to the
+<li><p><strong>combine_operator</strong> (str<em>, </em><em>default=&quot;or&quot;</em>) – Boolean operator used to combine selected rules: “or” or “and”.</p></li>
+<li><p><strong>min_improvement</strong> (float<em>, </em><em>default=0.01</em>) – Minimum improvement in opt_metric required to add a new rule to the
 combined ruleset during greedy selection.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.ruleset_classifier.RulesetClassifier.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/ruleset_classifier.html#RulesetClassifier.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.fit" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weights_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#iguanas.ruleset_classifier.RulesetClassifier" title="iguanas.ruleset_classifier.RulesetClassifier"><span class="pre">iguanas.ruleset_classifier.RulesetClassifier</span></a></span></span><a class="reference internal" href="../_modules/iguanas/ruleset_classifier.html#RulesetClassifier.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.fit" title="Link to this definition">#</a></dt>
 <dd><p>Generate, filter, and select rules from training data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span>) – Feature DataFrame. Only numeric columns are used for rule generation.</p></li>
-<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></span>) – Binary target series.</p></li>
+<li><p><strong>X</strong> (<em>pl.DataFrame</em>) – Feature DataFrame. Only numeric columns are used for rule generation.</p></li>
+<li><p><strong>y</strong> (<em>pl.Series</em>) – Binary target series.</p></li>
+<li><p><strong>sample_weights_df</strong> (<em>pl.DataFrame</em><em> | </em><em>None</em><em>, </em><em>default=None</em>) – Optional DataFrame of sample weights with a single column. If provided,
+weights are used during rule generation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Fitted pipeline instance (self).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iguanas.ruleset_classifier.RulesetClassifier" title="iguanas.ruleset_classifier.RulesetClassifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">RulesetClassifier</span></code></a></span></p>
+<dd class="field-odd"><p><a class="reference internal" href="#iguanas.ruleset_classifier.RulesetClassifier" title="iguanas.ruleset_classifier.RulesetClassifier">RulesetClassifier</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.ruleset_classifier.RulesetClassifier.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/ruleset_classifier.html#RulesetClassifier.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.predict" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.Series</span></span></span><a class="reference internal" href="../_modules/iguanas/ruleset_classifier.html#RulesetClassifier.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.predict" title="Link to this definition">#</a></dt>
 <dd><p>Predict binary labels for each sample.</p>
 <p>A sample is positive if any (OR) or all (AND) selected rules fire,
 depending on combine_operator.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span>) – Feature DataFrame with the same columns seen during fit.</p>
+<dd class="field-odd"><p><strong>X</strong> (<em>pl.DataFrame</em>) – Feature DataFrame with the same columns seen during fit.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Boolean series named “prediction”.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></span></p>
+<dd class="field-odd"><p>pl.Series</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.ruleset_classifier.RulesetClassifier.predict_proba">
-<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/ruleset_classifier.html#RulesetClassifier.predict_proba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.predict_proba" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.Series</span></span></span><a class="reference internal" href="../_modules/iguanas/ruleset_classifier.html#RulesetClassifier.predict_proba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.predict_proba" title="Link to this definition">#</a></dt>
 <dd><p>Predict rule-coverage probability for each sample.</p>
 <p>Probability is a piecewise-linear function of the number of selected
 rules that fire for each sample:</p>
@@ -542,31 +544,28 @@ rules that fire for each sample:</p>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span>) – Feature DataFrame with the same columns seen during fit.</p>
+<dd class="field-odd"><p><strong>X</strong> (<em>pl.DataFrame</em>) – Feature DataFrame with the same columns seen during fit.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Float64 series named “proba” with values in [0.0, 1.0].</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></span></p>
+<dd class="field-odd"><p>pl.Series</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.ruleset_classifier.RulesetClassifier.fit_predict">
-<span class="sig-name descname"><span class="pre">fit_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/ruleset_classifier.html#RulesetClassifier.fit_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.fit_predict" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">fit_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.Series</span></span></span><a class="reference internal" href="../_modules/iguanas/ruleset_classifier.html#RulesetClassifier.fit_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.fit_predict" title="Link to this definition">#</a></dt>
 <dd><p>Fit pipeline and return binary predictions on the same data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></span></p>
-</dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.ruleset_classifier.RulesetClassifier.set_fit_request">
-<span class="sig-name descname"><span class="pre">set_fit_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.set_fit_request" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">set_fit_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weights_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#iguanas.ruleset_classifier.RulesetClassifier" title="iguanas.ruleset_classifier.RulesetClassifier"><span class="pre">iguanas.ruleset_classifier.RulesetClassifier</span></a></span></span><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.set_fit_request" title="Link to this definition">#</a></dt>
 <dd><p>Configure whether metadata should be requested to be passed to the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method.</p>
 <p>Note that this method is only relevant when this estimator is used as a
 sub-estimator within a <a class="reference external" href="https://scikit-learn.org/stable/glossary.html#term-meta-estimator" title="(in scikit-learn v1.9)"><span class="xref std std-term">meta-estimator</span></a> and metadata routing is enabled
@@ -588,7 +587,7 @@ parameters and not others.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>sample_weights</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">sample_weights</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p>
+<dd class="field-odd"><p><strong>sample_weights_df</strong> (str<em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">sample_weights_df</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>self</strong> – The updated object.</p>
@@ -601,7 +600,7 @@ parameters and not others.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.ruleset_classifier.RulesetClassifier.set_score_request">
-<span class="sig-name descname"><span class="pre">set_score_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.set_score_request" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">set_score_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#iguanas.ruleset_classifier.RulesetClassifier" title="iguanas.ruleset_classifier.RulesetClassifier"><span class="pre">iguanas.ruleset_classifier.RulesetClassifier</span></a></span></span><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.set_score_request" title="Link to this definition">#</a></dt>
 <dd><p>Configure whether metadata should be requested to be passed to the <code class="docutils literal notranslate"><span class="pre">score</span></code> method.</p>
 <p>Note that this method is only relevant when this estimator is used as a
 sub-estimator within a <a class="reference external" href="https://scikit-learn.org/stable/glossary.html#term-meta-estimator" title="(in scikit-learn v1.9)"><span class="xref std std-term">meta-estimator</span></a> and metadata routing is enabled
@@ -623,7 +622,7 @@ parameters and not others.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>sample_weight</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">sample_weight</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p>
+<dd class="field-odd"><p><strong>sample_weight</strong> (str<em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">sample_weight</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>self</strong> – The updated object.</p>

@@ -447,17 +447,17 @@
 <h3>extract_feature_names_from_rule<a class="headerlink" href="#extract-feature-names-from-rule" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="iguanas.rule_selection.extract_feature_names_from_rule">
-<span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">extract_feature_names_from_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/rule_selection.html#extract_feature_names_from_rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.extract_feature_names_from_rule" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">extract_feature_names_from_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/iguanas/rule_selection.html#extract_feature_names_from_rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.extract_feature_names_from_rule" title="Link to this definition">#</a></dt>
 <dd><p>Extract column names from a rule string with X[“column_name”] patterns.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>rule</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Rule string containing X[“column_name”] patterns.</p>
+<dd class="field-odd"><p><strong>rule</strong> (str) – Rule string containing X[“column_name”] patterns.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of unique column names extracted from the rule, in order of appearance.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+<dd class="field-odd"><p>list[str]</p>
 </dd>
 </dl>
 <div class="admonition-examples admonition">
@@ -475,7 +475,7 @@
 <h3>filter_rules_by_feature_overlap<a class="headerlink" href="#filter-rules-by-feature-overlap" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="iguanas.rule_selection.filter_rules_by_feature_overlap">
-<span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">filter_rules_by_feature_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">importance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_difference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rule'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/rule_selection.html#filter_rules_by_feature_overlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.filter_rules_by_feature_overlap" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">filter_rules_by_feature_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">importance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_difference</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.14)"><span class="pre">Annotated</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">annotated_types.Gt</span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">gt</span></span><span class="o"><span class="pre">=</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'rule'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_selection.html#filter_rules_by_feature_overlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.filter_rules_by_feature_overlap" title="Link to this definition">#</a></dt>
 <dd><p>Filter out rules that are too similar based on column usage, keeping the most important.</p>
 <p>Uses a greedy algorithm that processes rules sequentially. Note that this can result
 in keeping rules that are transitively similar (A similar to B, B filtered out,
@@ -485,21 +485,21 @@ min_difference value (max one-sided difference = 0).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>R</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span>) – DataFrame with a column containing rule strings (X[“column_name”] patterns).</p></li>
-<li><p><strong>importance</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]</span>) – Dictionary mapping rule strings to their importance values.
+<li><p><strong>R</strong> (<em>pl.DataFrame</em>) – DataFrame with a column containing rule strings (X[“column_name”] patterns).</p></li>
+<li><p><strong>importance</strong> (dict) – Dictionary mapping rule strings to their importance values.
 Keys: rule strings matching those in R[rule_column]
 Values: importance values for each rule (missing rules default to 0.0)</p></li>
-<li><p><strong>min_difference</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Minimum number of different columns required between two rules.
+<li><p><strong>min_difference</strong> (<em>PositiveInt</em><em>, </em><em>default=1</em>) – Minimum number of different columns required between two rules.
 If two rules differ by fewer than this many columns, only the one
 with highest importance is kept. Must be &gt;= 1.</p></li>
-<li><p><strong>rule_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the column containing rule strings.</p></li>
+<li><p><strong>rule_column</strong> (str<em>, </em><em>default=&quot;rule&quot;</em>) – Name of the column containing rule strings.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Filtered DataFrame with similar rules removed (keeping highest importance).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
+<dd class="field-odd"><p>pl.DataFrame</p>
 </dd>
 </dl>
 <div class="admonition-examples admonition">
@@ -524,7 +524,7 @@ with highest importance is kept. Must be &gt;= 1.</p></li>
 <h3>filter_correlated_rules<a class="headerlink" href="#filter-correlated-rules" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="iguanas.rule_selection.filter_correlated_rules">
-<span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">filter_correlated_rules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">importance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_corr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_abs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/rule_selection.html#filter_correlated_rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.filter_correlated_rules" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">filter_correlated_rules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">importance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_corr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_abs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/iguanas/rule_selection.html#filter_correlated_rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.filter_correlated_rules" title="Link to this definition">#</a></dt>
 <dd><p>Filter highly correlated columns, keeping only the most important.</p>
 <p>Accepts either a boolean predictions DataFrame (correlation is computed internally)
 or a pre-computed float correlation matrix. For each pair of columns with correlation
@@ -532,13 +532,13 @@ above max_corr threshold, keeps only the column with higher importance value.</p
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>R</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span>) – Either a boolean DataFrame of rule predictions (one column per rule, one row per
+<li><p><strong>R</strong> (<em>pl.DataFrame</em>) – Either a boolean DataFrame of rule predictions (one column per rule, one row per
 sample) or a pre-computed n×n float correlation matrix. When boolean, Pearson
 correlations are computed automatically.</p></li>
-<li><p><strong>importance</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></span>) – Dictionary mapping rule names (column names) to their importance values.</p></li>
-<li><p><strong>max_corr</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Maximum correlation threshold. Pairs with correlation above this value
+<li><p><strong>importance</strong> (dict) – Dictionary mapping rule names (column names) to their importance values.</p></li>
+<li><p><strong>max_corr</strong> (float<em>, </em><em>default=0.95</em>) – Maximum correlation threshold. Pairs with correlation above this value
 will be filtered to keep only the most important rule.</p></li>
-<li><p><strong>use_abs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – If True, compares the absolute value of the correlation against max_corr,
+<li><p><strong>use_abs</strong> (bool<em>, </em><em>default=True</em>) – If True, compares the absolute value of the correlation against max_corr,
 treating strong negative correlations (e.g. -0.97) the same as strong
 positive ones. If False, only positive correlations above max_corr trigger
 filtering.</p></li>
@@ -548,7 +548,7 @@ filtering.</p></li>
 <dd class="field-even"><p>List of selected columns to keep.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+<dd class="field-odd"><p>list[str]</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If length of importance dict doesn’t match number of columns in R.</p>
@@ -575,21 +575,21 @@ filtering.</p></li>
 <h3>select_best_rule_per_column_combination<a class="headerlink" href="#select-best-rule-per-column-combination" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="iguanas.rule_selection.select_best_rule_per_column_combination">
-<span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">select_best_rule_per_column_combination</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'precision'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/rule_selection.html#select_best_rule_per_column_combination"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.select_best_rule_per_column_combination" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">select_best_rule_per_column_combination</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'precision'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/iguanas/rule_selection.html#select_best_rule_per_column_combination"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.select_best_rule_per_column_combination" title="Link to this definition">#</a></dt>
 <dd><p>Select the rule with the highest metric score for each unique column combination.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>metrics</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span>) – DataFrame containing rule performance metrics. Must have a “rule” column
+<li><p><strong>metrics</strong> (<em>pl.DataFrame</em>) – DataFrame containing rule performance metrics. Must have a “rule” column
 and the metric specified in sort_by.</p></li>
-<li><p><strong>sort_by</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the metric column to use for selecting the best rule in each group.</p></li>
+<li><p><strong>sort_by</strong> (str<em>, </em><em>default=&quot;precision&quot;</em>) – Name of the metric column to use for selecting the best rule in each group.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Filtered rules with only the best rule for each column combination.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+<dd class="field-odd"><p>list[str]</p>
 </dd>
 </dl>
 <div class="admonition-examples admonition">

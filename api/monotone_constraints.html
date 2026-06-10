@@ -448,13 +448,13 @@
 <h3>infer_monotone_constraints_from_correlations<a class="headerlink" href="#infer-monotone-constraints-from-correlations" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="iguanas.monotone_constraints.infer_monotone_constraints_from_correlations">
-<span class="sig-prename descclassname"><span class="pre">iguanas.monotone_constraints.</span></span><span class="sig-name descname"><span class="pre">infer_monotone_constraints_from_correlations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/monotone_constraints.html#infer_monotone_constraints_from_correlations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.monotone_constraints.infer_monotone_constraints_from_correlations" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">iguanas.monotone_constraints.</span></span><span class="sig-name descname"><span class="pre">infer_monotone_constraints_from_correlations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/monotone_constraints.html#infer_monotone_constraints_from_correlations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.monotone_constraints.infer_monotone_constraints_from_correlations" title="Link to this definition">#</a></dt>
 <dd><p>Compute monotone constraint signs for XGBoost based on feature-target correlations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span>) – DataFrame containing features.</p></li>
-<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></span>) – Target series for computing correlations.</p></li>
+<li><p><strong>X</strong> (<em>pl.DataFrame</em>) – DataFrame containing features.</p></li>
+<li><p><strong>y</strong> (<em>pl.Series</em>) – Target series for computing correlations.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -462,12 +462,12 @@
 <ul class="simple">
 <li><p>feature: Feature name</p></li>
 <li><p>pearson_corr: Pearson correlation with target</p></li>
-<li><p>constraint: Constraint value (1 for positive, -1 for negative, 0 for no correlation)</p></li>
+<li><p>constraint: Constraint value (1 for positive constraint, -1 for negative constraint, 0 for no constraint)</p></li>
 </ul>
 </p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
+<dd class="field-odd"><p>pl.DataFrame</p>
 </dd>
 </dl>
 <p>Compute monotone constraint signs for XGBoost based on feature-target correlations.</p>
@@ -494,28 +494,28 @@ assigns constraint values:</p>
 <h3>infer_monotone_constraints_from_stumps<a class="headerlink" href="#infer-monotone-constraints-from-stumps" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="iguanas.monotone_constraints.infer_monotone_constraints_from_stumps">
-<span class="sig-prename descclassname"><span class="pre">iguanas.monotone_constraints.</span></span><span class="sig-name descname"><span class="pre">infer_monotone_constraints_from_stumps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stump</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/monotone_constraints.html#infer_monotone_constraints_from_stumps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.monotone_constraints.infer_monotone_constraints_from_stumps" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">iguanas.monotone_constraints.</span></span><span class="sig-name descname"><span class="pre">infer_monotone_constraints_from_stumps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stump</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">xgboost.sklearn.XGBClassifier</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/monotone_constraints.html#infer_monotone_constraints_from_stumps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.monotone_constraints.infer_monotone_constraints_from_stumps" title="Link to this definition">#</a></dt>
 <dd><p>Determine monotone constraints by training decision stumps for each feature.</p>
 <p>Trains a single-split tree (max_depth=1) for each feature and examines how
 predictions change from min to max value to determine monotonic relationship.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>stump</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">XGBClassifier</span></code></span>) – XGBoost classifier configured as a stump (max_depth=1).</p></li>
-<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span>) – Features DataFrame.</p></li>
-<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></span>) – Target series for training.</p></li>
+<li><p><strong>stump</strong> (<em>XGBClassifier</em>) – XGBoost classifier configured as a stump (max_depth=1).</p></li>
+<li><p><strong>X</strong> (<em>pl.DataFrame</em>) – Features DataFrame.</p></li>
+<li><p><strong>y</strong> (<em>pl.Series</em>) – Target series for training.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>DataFrame with columns:
 - feature: Feature name
-- constraint: Constraint value (1 for increasing, -1 for decreasing, 0 for flat)
+- constraint: Constraint value (1 for positive constraint, -1 for negative constraint, 0 for no constraint)
 - pred_at_min: Predicted probability at minimum feature value
 - pred_at_max: Predicted probability at maximum feature value
 - delta: Change in probability (pred_at_max - pred_at_min)</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
+<dd class="field-odd"><p>pl.DataFrame</p>
 </dd>
 </dl>
 <p>Determine monotone constraints by training decision stumps for each feature.</p>

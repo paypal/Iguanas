@@ -427,7 +427,7 @@
 
 <span class="sd">        - feature: Feature name</span>
 <span class="sd">        - pearson_corr: Pearson correlation with target</span>
-<span class="sd">        - constraint: Constraint value (1 for positive, -1 for negative, 0 for no correlation)</span>
+<span class="sd">        - constraint: Constraint value (1 for positive constraint, -1 for negative constraint, 0 for no constraint)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Add y as temporary column for efficient correlation computation</span>
     <span class="n">X_temp</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;_target&quot;</span><span class="p">))</span>
@@ -476,7 +476,7 @@
 <span class="sd">    pl.DataFrame</span>
 <span class="sd">        DataFrame with columns:</span>
 <span class="sd">        - feature: Feature name</span>
-<span class="sd">        - constraint: Constraint value (1 for increasing, -1 for decreasing, 0 for flat)</span>
+<span class="sd">        - constraint: Constraint value (1 for positive constraint, -1 for negative constraint, 0 for no constraint)</span>
 <span class="sd">        - pred_at_min: Predicted probability at minimum feature value</span>
 <span class="sd">        - pred_at_max: Predicted probability at maximum feature value</span>
 <span class="sd">        - delta: Change in probability (pred_at_max - pred_at_min)</span>

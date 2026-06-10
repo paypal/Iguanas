@@ -447,11 +447,11 @@
 <h3>parse_conditions<a class="headerlink" href="#parse-conditions" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="iguanas.rule_analysis.parse_conditions">
-<span class="sig-prename descclassname"><span class="pre">iguanas.rule_analysis.</span></span><span class="sig-name descname"><span class="pre">parse_conditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/rule_analysis.html#parse_conditions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_analysis.parse_conditions" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_analysis.</span></span><span class="sig-name descname"><span class="pre">parse_conditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_analysis.html#parse_conditions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_analysis.parse_conditions" title="Link to this definition">#</a></dt>
 <dd><p>Parse a boolean expression string into a nested dict tree.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>expr</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Boolean rule expression using <code class="docutils literal notranslate"><span class="pre">&amp;</span></code> (AND) and <code class="docutils literal notranslate"><span class="pre">|</span></code> (OR) operators,
+<dd class="field-odd"><p><strong>expr</strong> (str) – Boolean rule expression using <code class="docutils literal notranslate"><span class="pre">&amp;</span></code> (AND) and <code class="docutils literal notranslate"><span class="pre">|</span></code> (OR) operators,
 e.g. <code class="docutils literal notranslate"><span class="pre">'(X[&quot;a&quot;]</span> <span class="pre">&gt;</span> <span class="pre">1)</span> <span class="pre">&amp;</span> <span class="pre">(X[&quot;b&quot;]</span> <span class="pre">&lt;</span> <span class="pre">5)'</span></code>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -459,7 +459,7 @@ e.g. <code class="docutils literal notranslate"><span class="pre">'(X[&quot;a&qu
 and <code class="docutils literal notranslate"><span class="pre">&quot;right&quot;</span></code>. Leaf nodes are plain strings.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></span></p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -469,13 +469,13 @@ and <code class="docutils literal notranslate"><span class="pre">&quot;right&quo
 <h3>parse_levels<a class="headerlink" href="#parse-levels" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="iguanas.rule_analysis.parse_levels">
-<span class="sig-prename descclassname"><span class="pre">iguanas.rule_analysis.</span></span><span class="sig-name descname"><span class="pre">parse_levels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/rule_analysis.html#parse_levels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_analysis.parse_levels" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_analysis.</span></span><span class="sig-name descname"><span class="pre">parse_levels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/iguanas/rule_analysis.html#parse_levels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_analysis.parse_levels" title="Link to this definition">#</a></dt>
 <dd><p>Parse a boolean expression level by level using BFS.</p>
 <p>Assigns a hierarchical dot-notation index to each sub-expression so the
 original expression can be rebuilt bottom-up.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>expr</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Boolean rule expression using <code class="docutils literal notranslate"><span class="pre">&amp;</span></code> (AND) and <code class="docutils literal notranslate"><span class="pre">|</span></code> (OR) operators.</p>
+<dd class="field-odd"><p><strong>expr</strong> (str) – Boolean rule expression using <code class="docutils literal notranslate"><span class="pre">&amp;</span></code> (AND) and <code class="docutils literal notranslate"><span class="pre">|</span></code> (OR) operators.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>BFS-ordered list of level entries.  Each entry is a dict with a single
@@ -485,7 +485,7 @@ position in the tree (e.g. <code class="docutils literal notranslate"><span clas
 indexed <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code> in the parent level).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>]</span></p>
+<dd class="field-odd"><p>list[dict]</p>
 </dd>
 </dl>
 <div class="admonition-examples admonition">
@@ -505,20 +505,20 @@ indexed <code class="docutils literal notranslate"><span class="pre">&quot;1&quo
 <h3>rebuild_from_levels<a class="headerlink" href="#rebuild-from-levels" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="iguanas.rule_analysis.rebuild_from_levels">
-<span class="sig-prename descclassname"><span class="pre">iguanas.rule_analysis.</span></span><span class="sig-name descname"><span class="pre">rebuild_from_levels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">levels</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/rule_analysis.html#rebuild_from_levels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_analysis.rebuild_from_levels" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_analysis.</span></span><span class="sig-name descname"><span class="pre">rebuild_from_levels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_analysis.html#rebuild_from_levels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_analysis.rebuild_from_levels" title="Link to this definition">#</a></dt>
 <dd><p>Rebuild the original boolean expression from <code class="docutils literal notranslate"><span class="pre">parse_levels</span></code> output.</p>
 <p>Processes levels bottom-up: the deepest compound sub-expressions are
 collapsed first, then their rebuilt strings replace the placeholder in
 the parent level.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>levels</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>]</span>) – Output of <a class="reference internal" href="#iguanas.rule_analysis.parse_levels" title="iguanas.rule_analysis.parse_levels"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse_levels()</span></code></a>.</p>
+<dd class="field-odd"><p><strong>levels</strong> (list<em>[</em>dict<em>]</em>) – Output of <a class="reference internal" href="#iguanas.rule_analysis.parse_levels" title="iguanas.rule_analysis.parse_levels"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse_levels()</span></code></a>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Reconstructed boolean expression string.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -528,7 +528,7 @@ the parent level.</p>
 <h3>generate_rule_performance_report<a class="headerlink" href="#generate-rule-performance-report" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="iguanas.rule_analysis.generate_rule_performance_report">
-<span class="sig-prename descclassname"><span class="pre">iguanas.rule_analysis.</span></span><span class="sig-name descname"><span class="pre">generate_rule_performance_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rules</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iguanas/rule_analysis.html#generate_rule_performance_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_analysis.generate_rule_performance_report" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_analysis.</span></span><span class="sig-name descname"><span class="pre">generate_rule_performance_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_analysis.html#generate_rule_performance_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_analysis.generate_rule_performance_report" title="Link to this definition">#</a></dt>
 <dd><p>For each rule in <em>rules</em>, parses it into its components (BFS levels),
 evaluates every component on X, computes metrics, and returns a DataFrame
 with one row per component across all rules.</p>
@@ -538,11 +538,11 @@ in the list prepended as the root level, e.g. for the 2nd rule:
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>rules</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span>) – List of boolean rule expression strings (using &amp; / | operators).
+<li><p><strong>rules</strong> (str<em> | </em>list<em>[</em>str<em>]</em>) – List of boolean rule expression strings (using &amp; / | operators).
 A single string is also accepted and treated as a one-element list.</p></li>
-<li><p><strong>X</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span>) – Feature DataFrame on which to evaluate each component.</p></li>
-<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></span>) – Boolean target series.</p></li>
-<li><p><strong>weights</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Optional sample weights passed to compute_metrics.</p></li>
+<li><p><strong>X</strong> (<em>pl.DataFrame</em>) – Feature DataFrame on which to evaluate each component.</p></li>
+<li><p><strong>y</strong> (<em>pl.Series</em>) – Boolean target series.</p></li>
+<li><p><strong>weights</strong> (<em>pl.Series</em><em> | </em><em>None</em><em>, </em><em>default=None</em>) – Optional sample weights passed to compute_metrics.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -550,7 +550,7 @@ A single string is also accepted and treated as a one-element list.</p></li>
 rule_index, rule, + all metric columns from compute_metrics.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
+<dd class="field-odd"><p>pl.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>

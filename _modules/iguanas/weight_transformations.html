@@ -407,6 +407,8 @@
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">.rule_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">filter_correlated_rules</span>
+
 <span class="n">EPS</span> <span class="o">=</span> <span class="mf">1e-6</span>
 <span class="n">_DEFAULT_POWERS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">])</span>
 
@@ -418,8 +420,6 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_increasing_exprs</span><span class="p">(</span>
     <span class="n">col_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">powers</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">quantile_val</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">quantile_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">pl</span><span class="o">.</span><span class="n">Expr</span><span class="p">]:</span>
     <span class="n">base</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span>
     <span class="n">exprs</span> <span class="o">=</span> <span class="p">[</span><span class="n">pl</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;Baseline&quot;</span><span class="p">)]</span>
@@ -427,20 +427,12 @@
         <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;(1+x)&quot;</span> <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="mf">1.0</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;(1+x)^</span><span class="si">{</span><span class="n">_power_label</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
     <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;log(1+x)__</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">quantile_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">quantile_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="n">clipped</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">upper_bound</span><span class="o">=</span><span class="n">quantile_val</span><span class="p">)</span>
-        <span class="n">q_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">quantile_value</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">th&quot;</span>
-        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">powers</span><span class="p">:</span>
-            <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clipped</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(1+x_clipped_</span><span class="si">{</span><span class="n">q_str</span><span class="si">}</span><span class="s2">)^</span><span class="si">{</span><span class="n">p</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">exprs</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_decreasing_exprs</span><span class="p">(</span>
     <span class="n">col_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">powers</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">quantile_val</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">quantile_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">pl</span><span class="o">.</span><span class="n">Expr</span><span class="p">]:</span>
     <span class="n">inv</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
     <span class="n">exprs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -448,12 +440,6 @@
         <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;1/(1+x)&quot;</span> <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="mf">1.0</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;1/(1+x)^</span><span class="si">{</span><span class="n">_power_label</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">inv</span><span class="o">**</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
     <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">())</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;1/log(1+x)__</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">quantile_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">quantile_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="n">clipped_inv</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">upper_bound</span><span class="o">=</span><span class="n">quantile_val</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
-        <span class="n">q_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">quantile_value</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">th&quot;</span>
-        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">powers</span><span class="p">:</span>
-            <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clipped_inv</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;1/(1+x_clipped_</span><span class="si">{</span><span class="n">q_str</span><span class="si">}</span><span class="s2">)^</span><span class="si">{</span><span class="n">p</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">exprs</span>
 
 
@@ -479,7 +465,6 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">generate_increasing_weight</span><span class="p">(</span>
     <span class="n">X</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">powers</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">quantile_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate weight transformations where larger input values receive larger weights.</span>
 
@@ -490,8 +475,6 @@
 <span class="sd">        transformations are applied to each column and concatenated horizontally.</span>
 <span class="sd">    powers : np.ndarray | None, default=[0.25, 0.5, 1.0, 2.0, 4.0]</span>
 <span class="sd">        Power values for polynomial transformations.</span>
-<span class="sd">    quantile_value : float | None, default=None</span>
-<span class="sd">        If specified, adds clipped transformations at this quantile.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -511,13 +494,12 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">out</span> <span class="o">:=</span> <span class="n">_dispatch</span><span class="p">(</span>
-            <span class="n">generate_increasing_weight</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="o">=</span><span class="n">powers</span><span class="p">,</span> <span class="n">quantile_value</span><span class="o">=</span><span class="n">quantile_value</span>
+            <span class="n">generate_increasing_weight</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="o">=</span><span class="n">powers</span>
         <span class="p">)</span>
     <span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">out</span>
     <span class="n">df</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
-    <span class="n">qval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">quantile_value</span><span class="p">))</span> <span class="k">if</span> <span class="n">quantile_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># type: ignore[arg-type]</span>
-    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">_increasing_exprs</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">qval</span><span class="p">,</span> <span class="n">quantile_value</span><span class="p">))</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">_increasing_exprs</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span><span class="p">))</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span></div>
 
 
 
@@ -526,7 +508,6 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">generate_decreasing_weight</span><span class="p">(</span>
     <span class="n">X</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">powers</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">quantile_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate weight transformations where smaller input values receive larger weights.</span>
 
@@ -537,8 +518,6 @@
 <span class="sd">        transformations are applied to each column and concatenated horizontally.</span>
 <span class="sd">    powers : np.ndarray | None, default=[0.25, 0.5, 1.0, 2.0, 4.0]</span>
 <span class="sd">        Power values for reciprocal transformations (1/(1+x)^power).</span>
-<span class="sd">    quantile_value : float | None, default=None</span>
-<span class="sd">        If specified, adds clipped transformations at this quantile.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -554,14 +533,13 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">out</span> <span class="o">:=</span> <span class="n">_dispatch</span><span class="p">(</span>
-            <span class="n">generate_decreasing_weight</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="o">=</span><span class="n">powers</span><span class="p">,</span> <span class="n">quantile_value</span><span class="o">=</span><span class="n">quantile_value</span>
+            <span class="n">generate_decreasing_weight</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="o">=</span><span class="n">powers</span>
         <span class="p">)</span>
     <span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">out</span>
     <span class="n">df</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
-    <span class="n">qval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">quantile_value</span><span class="p">))</span> <span class="k">if</span> <span class="n">quantile_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># type: ignore[arg-type]</span>
     <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">pl</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;Baseline&quot;</span><span class="p">)]</span> <span class="o">+</span> <span class="n">_decreasing_exprs</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">qval</span><span class="p">,</span> <span class="n">quantile_value</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">pl</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;Baseline&quot;</span><span class="p">)]</span> <span class="o">+</span> <span class="n">_decreasing_exprs</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
     <span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span></div>
 
 
@@ -571,7 +549,6 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">generate_all_weight</span><span class="p">(</span>
     <span class="n">X</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">powers</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">quantile_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate all weight transformations (increasing and decreasing).</span>
 
@@ -582,8 +559,6 @@
 <span class="sd">        transformations are applied to each column and concatenated horizontally.</span>
 <span class="sd">    powers : np.ndarray | None, default=[0.25, 0.5, 1.0, 2.0, 4.0]</span>
 <span class="sd">        Power values used for both increasing and decreasing transformations.</span>
-<span class="sd">    quantile_value : float | None, default=None</span>
-<span class="sd">        If specified, adds clipped transformations at this quantile.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -598,15 +573,81 @@
 <span class="sd">    &gt;&gt;&gt; # Columns include both (1+x)^p and 1/(1+x)^p families plus log variants</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="p">(</span>
-        <span class="n">out</span> <span class="o">:=</span> <span class="n">_dispatch</span><span class="p">(</span><span class="n">generate_all_weight</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="o">=</span><span class="n">powers</span><span class="p">,</span> <span class="n">quantile_value</span><span class="o">=</span><span class="n">quantile_value</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">:=</span> <span class="n">_dispatch</span><span class="p">(</span><span class="n">generate_all_weight</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="o">=</span><span class="n">powers</span><span class="p">)</span>
     <span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">out</span>
     <span class="n">df</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
-    <span class="n">qval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">quantile_value</span><span class="p">))</span> <span class="k">if</span> <span class="n">quantile_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># type: ignore[arg-type]</span>
-    <span class="n">exprs</span> <span class="o">=</span> <span class="n">_increasing_exprs</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">qval</span><span class="p">,</span> <span class="n">quantile_value</span><span class="p">)</span>
-    <span class="n">exprs</span> <span class="o">+=</span> <span class="n">_decreasing_exprs</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">qval</span><span class="p">,</span> <span class="n">quantile_value</span><span class="p">)</span>
+    <span class="n">exprs</span> <span class="o">=</span> <span class="n">_increasing_exprs</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
+    <span class="n">exprs</span> <span class="o">+=</span> <span class="n">_decreasing_exprs</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">exprs</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">select_uncorrelated_weights</span><span class="p">(</span>
+    <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">importance</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">target_len</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">min_corr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+    <span class="n">max_corr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.99</span><span class="p">,</span>
+    <span class="n">step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+    <span class="n">use_abs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the closest filtered weight set for a target number of rules.</span>
+
+<span class="sd">    The helper searches the correlation threshold range [min_corr, max_corr] using</span>
+<span class="sd">    binary search. It computes the filtered rule list for each candidate threshold</span>
+<span class="sd">    and returns the first length that is &gt;= target_len.</span>
+
+<span class="sd">    If the target length is below the minimum length at `min_corr`, it returns the</span>
+<span class="sd">    minimum result. If the target length is above the maximum length at `max_corr`,</span>
+<span class="sd">    it returns the maximum result.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">target_len</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;target_len must be non-negative&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">min_corr</span> <span class="o">&lt;</span> <span class="n">max_corr</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;min_corr and max_corr must satisfy 0 &lt; min_corr &lt; max_corr &lt; 1.0&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">step</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;step must be positive&quot;</span><span class="p">)</span>
+
+    <span class="n">min_step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">min_corr</span> <span class="o">/</span> <span class="n">step</span><span class="p">))</span>
+    <span class="n">max_step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">max_corr</span> <span class="o">/</span> <span class="n">step</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_filtered</span><span class="p">(</span><span class="n">step_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="n">max_corr_value</span> <span class="o">=</span> <span class="n">step_idx</span> <span class="o">*</span> <span class="n">step</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="n">filter_correlated_rules</span><span class="p">(</span>
+            <span class="n">sample_weights_df</span><span class="p">,</span>
+            <span class="n">importance</span><span class="o">=</span><span class="n">importance</span><span class="p">,</span>
+            <span class="n">max_corr</span><span class="o">=</span><span class="n">max_corr_value</span><span class="p">,</span>
+            <span class="n">use_abs</span><span class="o">=</span><span class="n">use_abs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered</span><span class="p">),</span> <span class="n">filtered</span><span class="p">,</span> <span class="n">max_corr_value</span>
+
+    <span class="n">min_len</span><span class="p">,</span> <span class="n">min_filtered</span><span class="p">,</span> <span class="n">min_corr_value</span> <span class="o">=</span> <span class="n">compute_filtered</span><span class="p">(</span><span class="n">min_step</span><span class="p">)</span>
+    <span class="n">max_len</span><span class="p">,</span> <span class="n">max_filtered</span><span class="p">,</span> <span class="n">max_corr_value</span> <span class="o">=</span> <span class="n">compute_filtered</span><span class="p">(</span><span class="n">max_step</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">target_len</span> <span class="o">&lt;=</span> <span class="n">min_len</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">min_filtered</span><span class="p">,</span> <span class="n">min_corr_value</span>
+    <span class="k">if</span> <span class="n">target_len</span> <span class="o">&gt;=</span> <span class="n">max_len</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">max_filtered</span><span class="p">,</span> <span class="n">max_corr_value</span>
+
+    <span class="n">lo</span> <span class="o">=</span> <span class="n">min_step</span>
+    <span class="n">hi</span> <span class="o">=</span> <span class="n">max_step</span>
+    <span class="k">while</span> <span class="n">lo</span> <span class="o">&lt;=</span> <span class="n">hi</span><span class="p">:</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">lo</span> <span class="o">+</span> <span class="n">hi</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="n">cur_len</span><span class="p">,</span> <span class="n">cur_filtered</span><span class="p">,</span> <span class="n">cur_corr_value</span> <span class="o">=</span> <span class="n">compute_filtered</span><span class="p">(</span><span class="n">mid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cur_len</span> <span class="o">==</span> <span class="n">target_len</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cur_filtered</span><span class="p">,</span> <span class="n">cur_corr_value</span>
+        <span class="k">if</span> <span class="n">cur_len</span> <span class="o">&lt;</span> <span class="n">target_len</span><span class="p">:</span>
+            <span class="n">lo</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hi</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">lo</span> <span class="o">&gt;</span> <span class="n">max_step</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">max_filtered</span><span class="p">,</span> <span class="n">max_corr_value</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">upper_filtered</span><span class="p">,</span> <span class="n">upper_corr_value</span> <span class="o">=</span> <span class="n">compute_filtered</span><span class="p">(</span><span class="n">lo</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">upper_filtered</span><span class="p">,</span> <span class="n">upper_corr_value</span>
 </pre></div>
 
                 </article>

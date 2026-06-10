@@ -410,7 +410,7 @@
 <div class="viewcode-block" id="compute_single_metric">
 <a class="viewcode-back" href="../../api/metrics.html#iguanas.metrics.compute_single_metric">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_single_metric</span><span class="p">(</span>
-    <span class="n">combined</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">y_pred</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">weights</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -423,7 +423,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    combined : pl.Series</span>
+<span class="sd">    y_pred : pl.Series</span>
 <span class="sd">        Boolean prediction series.</span>
 <span class="sd">    y : pl.Series</span>
 <span class="sd">        Boolean target series.</span>
@@ -438,16 +438,16 @@
 <span class="sd">        The requested metric value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">y_bool</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Boolean</span><span class="p">)</span>
-    <span class="n">combined_bool</span> <span class="o">=</span> <span class="n">combined</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Boolean</span><span class="p">)</span>
+    <span class="n">y_pred_bool</span> <span class="o">=</span> <span class="n">y_pred</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Boolean</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">TP</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="n">combined_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-        <span class="n">FP</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">~</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="n">combined_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-        <span class="n">FN</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">combined_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">TP</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="n">y_pred_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">FP</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">~</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="n">y_pred_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">FN</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">y_pred_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">TP</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="n">combined_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-        <span class="n">FP</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="o">~</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="n">combined_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-        <span class="n">FN</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">combined_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">TP</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="n">y_pred_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">FP</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="o">~</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="n">y_pred_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">FN</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">y_pred_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;precision&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">TP</span> <span class="o">/</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">FP</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">FP</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
@@ -455,9 +455,9 @@
         <span class="k">return</span> <span class="n">TP</span> <span class="o">/</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">FN</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">FN</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
     <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">:</span>
         <span class="n">TN</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="nb">float</span><span class="p">((</span><span class="o">~</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">combined_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+            <span class="nb">float</span><span class="p">((</span><span class="o">~</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">y_pred_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
             <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span>
-            <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">~</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">combined_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+            <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">~</span><span class="n">y_bool</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">y_pred_bool</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">TN</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">TN</span> <span class="o">+</span> <span class="n">FP</span> <span class="o">+</span> <span class="n">FN</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">TN</span> <span class="o">+</span> <span class="n">FP</span> <span class="o">+</span> <span class="n">FN</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
     <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;f&quot;</span><span class="p">):</span>
@@ -512,7 +512,7 @@
 <span class="sd">        - flagged(%): Percentage of total flagged as positive</span>
 <span class="sd">        - good_flagged(%): Percentage of negatives flagged as positive</span>
 <span class="sd">        - f{b} for each b in *betas*: F-beta scores</span>
-<span class="sd">        - num_rules: Number of individual rules combined (1 for single rules)</span>
+<span class="sd">        - num_rules: Number of individual rules y_pred (1 for single rules)</span>
 
 <span class="sd">        If weights is provided, additional columns with &quot;_weight&quot; suffix:</span>
 
@@ -524,13 +524,13 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import polars as pl</span>
 <span class="sd">    &gt;&gt;&gt; # Count-based metrics only</span>
-<span class="sd">    &gt;&gt;&gt; metrics_X = compute_metrics(R, y, weights=None)</span>
+<span class="sd">    &gt;&gt;&gt; metrics_df = compute_metrics(R, y, weights=None)</span>
 <span class="sd">    &gt;&gt;&gt;</span>
 <span class="sd">    &gt;&gt;&gt; # Both count and weighted metrics</span>
-<span class="sd">    &gt;&gt;&gt; metrics_X = compute_metrics(R, y, weights=transaction_amounts)</span>
+<span class="sd">    &gt;&gt;&gt; metrics_df = compute_metrics(R, y, weights=transaction_amounts)</span>
 <span class="sd">    &gt;&gt;&gt;</span>
 <span class="sd">    &gt;&gt;&gt; # Sort by TPVE3 to find best rules</span>
-<span class="sd">    &gt;&gt;&gt; top_rules = metrics_X.sort(&quot;TPVE3&quot;, descending=True).head(10)</span>
+<span class="sd">    &gt;&gt;&gt; top_rules = metrics_df.sort(&quot;TPVE3&quot;, descending=True).head(10)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">betas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">betas</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
@@ -541,7 +541,7 @@
     <span class="c1"># Compute confusion matrix for all columns</span>
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Both count and weighted metrics</span>
-        <span class="n">metrics_X</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="n">metrics_df</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="n">R</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
                 <span class="s2">&quot;TP&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="n">y</span> <span class="o">&amp;</span> <span class="n">R</span><span class="p">[</span><span class="n">col</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">R</span><span class="o">.</span><span class="n">columns</span><span class="p">],</span>
@@ -556,7 +556,7 @@
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Only count metrics</span>
-        <span class="n">metrics_X</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="n">metrics_df</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="n">R</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
                 <span class="s2">&quot;TP&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="n">y</span> <span class="o">&amp;</span> <span class="n">R</span><span class="p">[</span><span class="n">col</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">R</span><span class="o">.</span><span class="n">columns</span><span class="p">],</span>
@@ -567,7 +567,7 @@
         <span class="p">)</span>
 
     <span class="c1"># Step 1: Add basic metrics (precision, recall, and accuracy)</span>
-    <span class="n">metrics_X</span> <span class="o">=</span> <span class="n">metrics_X</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+    <span class="n">metrics_df</span> <span class="o">=</span> <span class="n">metrics_df</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;FP&quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;precision&quot;</span><span class="p">),</span>
             <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;FN&quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;recall&quot;</span><span class="p">),</span>
@@ -601,7 +601,7 @@
 
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># First compute total_weight</span>
-        <span class="n">metrics_X</span> <span class="o">=</span> <span class="n">metrics_X</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+        <span class="n">metrics_df</span> <span class="o">=</span> <span class="n">metrics_df</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="p">(</span>
                     <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP_weight&quot;</span><span class="p">)</span>
@@ -612,7 +612,7 @@
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="c1"># Then compute precision, recall, and accuracy using total_weight</span>
-        <span class="n">metrics_X</span> <span class="o">=</span> <span class="n">metrics_X</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+        <span class="n">metrics_df</span> <span class="o">=</span> <span class="n">metrics_df</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP_weight&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP_weight&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;FP_weight&quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
                     <span class="s2">&quot;precision_weight&quot;</span>
@@ -639,9 +639,9 @@
             <span class="p">]</span>
         <span class="p">)</span>
 
-    <span class="n">metrics_X</span> <span class="o">=</span> <span class="n">metrics_X</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">expressions</span><span class="p">)</span>
+    <span class="n">metrics_df</span> <span class="o">=</span> <span class="n">metrics_df</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">expressions</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">metrics_X</span></div>
+    <span class="k">return</span> <span class="n">metrics_df</span></div>
 
 </pre></div>
 
