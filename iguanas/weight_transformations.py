@@ -169,7 +169,7 @@ def generate_all_weight(
 
 
 def select_uncorrelated_weights(
-    sample_weights: pl.DataFrame,
+    sample_weights_df: pl.DataFrame,
     importance: dict[str, float],
     target_len: int,
     min_corr: float = 0.01,
@@ -200,7 +200,7 @@ def select_uncorrelated_weights(
     def compute_filtered(step_idx: int) -> tuple[int, list[str], float]:
         max_corr_value = step_idx * step
         filtered = filter_correlated_rules(
-            sample_weights,
+            sample_weights_df,
             importance=importance,
             max_corr=max_corr_value,
             use_abs=use_abs,
