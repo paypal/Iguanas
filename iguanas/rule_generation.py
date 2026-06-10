@@ -391,7 +391,7 @@ def rule_grid_search_sequential(
     X_train: pl.DataFrame | pd.DataFrame,
     y_train: pl.Series | pd.Series,
     scale_pos_weight_vec: list[float] | np.ndarray,
-    weights_train_vec: pl.DataFrame | pd.DataFrame | None = None,
+    sample_weights_df: pl.DataFrame | pd.DataFrame | None = None,
     verbose: int = 0,
 ) -> pl.DataFrame:
     """
@@ -412,7 +412,7 @@ def rule_grid_search_sequential(
         Training target values.
     scale_pos_weight_vec : list | np.ndarray
         Array of scale_pos_weight values to try.
-    weights_train_vec : pl.DataFrame | pd.DataFrame | None, default=None
+    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None
         DataFrame mapping transformation names to sample weight arrays.
         If None, uses baseline weights of 1.0 for all samples.
     verbose : int, default=0
@@ -437,15 +437,15 @@ def rule_grid_search_sequential(
     if len(scale_pos_weight_vec) == 0:
         raise ValueError("scale_pos_weight_vec cannot be empty")
 
-    if weights_train_vec is None:
-        weights_train_vec_pd = pd.DataFrame({"Baseline": np.ones(len(X_train))})
-    elif isinstance(weights_train_vec, pl.DataFrame):
-        weights_train_vec_pd = weights_train_vec.to_pandas()
+    if sample_weights_df is None:
+        sample_weights_df_pd = pd.DataFrame({"Baseline": np.ones(len(X_train))})
+    elif isinstance(sample_weights_df, pl.DataFrame):
+        sample_weights_df_pd = sample_weights_df.to_pandas()
     else:
-        weights_train_vec_pd = weights_train_vec
+        sample_weights_df_pd = sample_weights_df
 
-    weight_columns = list(weights_train_vec_pd.columns)
-    weights_np = weights_train_vec_pd.to_numpy()
+    weight_columns = list(sample_weights_df_pd.columns)
+    weights_np = sample_weights_df_pd.to_numpy()
     estimator_params = estimator.get_params()
     estimator_params.pop("scale_pos_weight", None)
 
@@ -490,7 +490,7 @@ def rule_grid_search_parallel_weights(
     X_train: pl.DataFrame | pd.DataFrame,
     y_train: pl.Series | pd.Series,
     scale_pos_weight_vec: list | np.ndarray,
-    weights_train_vec: pl.DataFrame | pd.DataFrame | None = None,
+    sample_weights_df: pl.DataFrame | pd.DataFrame | None = None,
     n_jobs: int = -1,
     verbose: int = 0,
 ) -> pl.DataFrame:
@@ -517,7 +517,7 @@ def rule_grid_search_parallel_weights(
         Training target values
     scale_pos_weight_vec : list | np.ndarray
         Array of scale_pos_weight values to try
-    weights_train_vec : pl.DataFrame | pd.DataFrame | None, default=None
+    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None
         DataFrame mapping transformation names (columns) to sample weight arrays (rows).
         If None, uses baseline weights of 1.0 for all samples.
     n_jobs : int, default=-1
@@ -562,14 +562,14 @@ def rule_grid_search_parallel_weights(
     if len(scale_pos_weight_vec) == 0:
         raise ValueError("scale_pos_weight_vec cannot be empty")
 
-    if weights_train_vec is None:
-        weights_train_vec_pd = pd.DataFrame({"Baseline": np.ones(len(X_train))})
-    elif isinstance(weights_train_vec, pl.DataFrame):
-        weights_train_vec_pd = weights_train_vec.to_pandas()
+    if sample_weights_df is None:
+        sample_weights_df_pd = pd.DataFrame({"Baseline": np.ones(len(X_train))})
+    elif isinstance(sample_weights_df, pl.DataFrame):
+        sample_weights_df_pd = sample_weights_df.to_pandas()
     else:
-        weights_train_vec_pd = weights_train_vec
+        sample_weights_df_pd = sample_weights_df
 
-    weight_columns = weights_train_vec_pd.columns
+    weight_columns = sample_weights_df_pd.columns
     estimator_params = estimator.get_params()
     estimator_params.pop("scale_pos_weight", None)
 
@@ -588,7 +588,7 @@ def rule_grid_search_parallel_weights(
 
     results_nested = Parallel(n_jobs=n_jobs, backend="loky", verbose=joblib_verbose)(
         delayed(_train_rules_for_weight_transformation)(
-            weights_train_vec_pd[name],
+            sample_weights_df_pd[name],
             estimator_params,
             X_train_np,
             y_train_np,
@@ -622,7 +622,7 @@ def rule_grid_search_parallel_scales(
     X_train: pl.DataFrame | pd.DataFrame,
     y_train: pl.Series | pd.Series,
     scale_pos_weight_vec: list | np.ndarray,
-    weights_train_vec: pl.DataFrame | pd.DataFrame | None = None,
+    sample_weights_df: pl.DataFrame | pd.DataFrame | None = None,
     n_jobs: int = -1,
     verbose: int = 0,
 ) -> pl.DataFrame:
@@ -631,7 +631,7 @@ def rule_grid_search_parallel_scales(
 
     Identical behaviour to :func:`rule_grid_search_parallel_weights` but parallelises
     over the ``scale_pos_weight_vec`` axis instead of the weight-transformation axis.
-    Prefer this variant when ``len(scale_pos_weight_vec) >= len(weights_train_vec.columns)``
+    Prefer this variant when ``len(scale_pos_weight_vec) >= len(sample_weights_df.columns)``
     so that workers are kept maximally busy.
 
     Parameters
@@ -644,7 +644,7 @@ def rule_grid_search_parallel_scales(
         Training target values.
     scale_pos_weight_vec : list | np.ndarray
         Array of scale_pos_weight values to try. Parallelised across workers.
-    weights_train_vec : pl.DataFrame | pd.DataFrame | None, default=None
+    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None
         DataFrame mapping transformation names to sample weight arrays.
         If None, uses baseline weights of 1.0 for all samples.
     n_jobs : int, default=-1
@@ -674,15 +674,15 @@ def rule_grid_search_parallel_scales(
     if len(scale_pos_weight_vec) == 0:
         raise ValueError("scale_pos_weight_vec cannot be empty")
 
-    if weights_train_vec is None:
-        weights_train_vec_pd = pd.DataFrame({"Baseline": np.ones(len(X_train))})
-    elif isinstance(weights_train_vec, pl.DataFrame):
-        weights_train_vec_pd = weights_train_vec.to_pandas()
+    if sample_weights_df is None:
+        sample_weights_df_pd = pd.DataFrame({"Baseline": np.ones(len(X_train))})
+    elif isinstance(sample_weights_df, pl.DataFrame):
+        sample_weights_df_pd = sample_weights_df.to_pandas()
     else:
-        weights_train_vec_pd = weights_train_vec
+        sample_weights_df_pd = sample_weights_df
 
-    weight_columns = list(weights_train_vec_pd.columns)
-    weights_np = weights_train_vec_pd.to_numpy()
+    weight_columns = list(sample_weights_df_pd.columns)
+    weights_np = sample_weights_df_pd.to_numpy()
     estimator_params = estimator.get_params()
     estimator_params.pop("scale_pos_weight", None)
 

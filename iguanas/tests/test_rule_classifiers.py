@@ -248,6 +248,10 @@ class TestRulesetClassifierInitialization:
         assert clf.max_corr == 0.8
         assert clf.combine_operator == "or"
 
+    def test_metric_thresholds_validator_accepts_none(self):
+        """Test validator returns None when metric_thresholds is None."""
+        assert RulesetClassifier._check_metric_thresholds(None) is None
+
     def test_max_rules_validation_zero(self):
         """Test validation rejects max_rules <= 0."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
@@ -471,3 +475,113 @@ class TestRulesetClassifierFitPredict:
         assert isinstance(pred, pl.Series)
         assert len(pred) == len(X)
         assert pred.dtype == pl.Boolean
+
+    def test_fit_sets_default_metric_thresholds_when_none(self, sample_data, monkeypatch):
+        """Test fit populates default metric_thresholds when None."""
+        X, y = sample_data
+        estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
+        clf = RulesetClassifier(estimator=estimator, scale_pos_weight_vec=np.array([1.0]))
+
+        def fake_weights(estimator_, X_, y_, scale_pos_weight_vec, sample_weights_df):
+            return pl.DataFrame({"rule": ["(X[\"age\"] >= 25)"]})
+
+        monkeypatch.setattr("iguanas.ruleset_classifier.rule_grid_search_parallel_weights", fake_weights)
+
+        clf.fit(X, y)
+
+        assert clf.metric_thresholds == [{"name": "accuracy", "operator": ">=", "value": 0.5}]
+        assert isinstance(clf._best_ruleset_, str)
+
+    def test_predict_and_predict_proba_return_empty_outputs_when_no_best_ruleset(self):
+        """Test predict and predict_proba with an empty best ruleset."""
+        clf = RulesetClassifier(
+            estimator=XGBClassifier(n_estimators=1, max_depth=1, eval_metric="logloss", random_state=0),
+            scale_pos_weight_vec=np.array([1.0]),
+        )
+        clf._feature_cols_ = ["age"]
+        clf._best_ruleset_ = ""
+        X = pl.DataFrame({"age": [10, 20, 30]})
+
+        pred = clf.predict(X)
+        assert isinstance(pred, pl.Series)
+        assert pred.dtype == pl.Boolean
+        assert pred.to_list() == [False, False, False]
+
+        proba = clf.predict_proba(X)
+        assert isinstance(proba, pl.Series)
+        assert proba.dtype == pl.Float64
+        assert proba.to_list() == [0.0, 0.0, 0.0]
+
+    def test_fit_uses_parallel_scales_when_sample_weights_have_fewer_columns(self, sample_data, monkeypatch):
+        """Test fit uses parallel scales when sample_weights_df has fewer columns than scale_pos_weight_vec."""
+        X, y = sample_data
+        estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
+        clf = RulesetClassifier(
+            estimator=estimator,
+            scale_pos_weight_vec=np.array([0.1, 1.0]),
+            opt_metric="accuracy",
+            metric_thresholds=[{"name": "precision", "operator": ">=", "value": 0.0}, {"name": "recall", "operator": ">=", "value": 0.0}],
+        )
+
+        called = {"scales": False, "weights": False}
+
+        def fake_scales(estimator_, X_, y_, scale_pos_weight_vec, sample_weights_df):
+            called["scales"] = True
+            assert sample_weights_df is not None
+            assert len(scale_pos_weight_vec) == 2
+            return pl.DataFrame({"rule": ["(X[\"age\"] >= 25)"]})
+
+        def fake_weights(estimator_, X_, y_, scale_pos_weight_vec, sample_weights_df):
+            called["weights"] = True
+            return pl.DataFrame({"rule": ["(X[\"age\"] >= 25)"]})
+
+        monkeypatch.setattr(
+            "iguanas.ruleset_classifier.rule_grid_search_parallel_scales",
+            fake_scales,
+        )
+        monkeypatch.setattr(
+            "iguanas.ruleset_classifier.rule_grid_search_parallel_weights",
+            fake_weights,
+        )
+
+        sample_weights_df = pl.DataFrame({"sample_weight": [1.0] * X.height})
+        clf.fit(X, y, sample_weights_df=sample_weights_df)
+
+        assert called["scales"] is True
+        assert called["weights"] is False
+
+    def test_fit_uses_parallel_weights_when_no_sample_weights(self, sample_data, monkeypatch):
+        """Test fit uses parallel weights when sample_weights_df is not provided."""
+        X, y = sample_data
+        estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
+        clf = RulesetClassifier(
+            estimator=estimator,
+            scale_pos_weight_vec=np.array([0.1, 1.0]),
+            opt_metric="accuracy",
+            metric_thresholds=[{"name": "precision", "operator": ">=", "value": 0.0}, {"name": "recall", "operator": ">=", "value": 0.0}],
+        )
+
+        called = {"scales": False, "weights": False}
+
+        def fake_scales(estimator_, X_, y_, scale_pos_weight_vec, sample_weights_df):
+            called["scales"] = True
+            return pl.DataFrame({"rule": ["(X[\"age\"] >= 25)"]})
+
+        def fake_weights(estimator_, X_, y_, scale_pos_weight_vec, sample_weights_df):
+            called["weights"] = True
+            assert sample_weights_df is None
+            return pl.DataFrame({"rule": ["(X[\"age\"] >= 25)"]})
+
+        monkeypatch.setattr(
+            "iguanas.ruleset_classifier.rule_grid_search_parallel_scales",
+            fake_scales,
+        )
+        monkeypatch.setattr(
+            "iguanas.ruleset_classifier.rule_grid_search_parallel_weights",
+            fake_weights,
+        )
+
+        clf.fit(X, y)
+
+        assert called["weights"] is True
+        assert called["scales"] is False

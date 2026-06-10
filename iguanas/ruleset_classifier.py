@@ -11,7 +11,7 @@ from xgboost import XGBClassifier
 
 from .rule_combination import combine_rules_greedy
 from .rule_evaluation import apply_and_filter_by_performance, apply_rules
-from .rule_generation import rule_grid_search_parallel_scales
+from .rule_generation import rule_grid_search_parallel_scales, rule_grid_search_parallel_weights
 from .rule_selection import filter_correlated_rules
 
 _NUMERIC_DTYPES = (pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.Float32, pl.Float64)
@@ -42,7 +42,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     ----------
     estimator : XGBClassifier
         XGBoost classifier used for rule generation.
-    scale_pos_weight_vec : np.ndarray
+    scale_pos_weight_vec : np.ndarray | list[float], default=np.array([1.0])
         Vector of scale_pos_weight values swept during rule generation.
     opt_metric : str, default="accuracy"
         Metric used to rank and select candidate rules. Must be a column
@@ -69,7 +69,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     estimator: XGBClassifier
-    scale_pos_weight_vec: np.ndarray
+    scale_pos_weight_vec: np.ndarray | list[float] = Field(default_factory=lambda: np.array([1.0]))
     opt_metric: str = "accuracy"
     max_rules: int = Field(default=10, gt=0)
     metric_thresholds: list[dict[str, Any]] | None = None
@@ -106,7 +106,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         return v
 
     def fit(
-        self, X: pl.DataFrame, y: pl.Series, sample_weights: pl.DataFrame | None = None
+        self, X: pl.DataFrame, y: pl.Series, sample_weights_df: pl.DataFrame | None = None
     ) -> RulesetClassifier:
         """Generate, filter, and select rules from training data.
 
@@ -116,7 +116,9 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
             Feature DataFrame. Only numeric columns are used for rule generation.
         y : pl.Series
             Binary target series.
-
+        sample_weights_df : pl.DataFrame | None, default=None
+            Optional DataFrame of sample weights with a single column. If provided,
+            weights are used during rule generation.
         Returns
         -------
         RulesetClassifier
@@ -125,17 +127,27 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         if self.metric_thresholds is None:
             self.metric_thresholds = [{"name": "accuracy", "operator": ">=", "value": 0.5}]
         self._feature_cols_ = [c for c, dt in X.schema.items() if dt in _NUMERIC_DTYPES]
-        rules = rule_grid_search_parallel_scales(
-            self.estimator,
-            X[self._feature_cols_],
-            y,
-            scale_pos_weight_vec=self.scale_pos_weight_vec,
-            weights_train_vec=sample_weights,
-        )
+        if len(self.scale_pos_weight_vec) > sample_weights_df.shape[1] if sample_weights_df is not None else 0:
+            rules_df = rule_grid_search_parallel_scales(
+                self.estimator,
+                X[self._feature_cols_],
+                y,
+                scale_pos_weight_vec=self.scale_pos_weight_vec,
+                sample_weights_df=sample_weights_df,
+            )
+        else:
+            rules_df = rule_grid_search_parallel_weights(
+                self.estimator,
+                X[self._feature_cols_],
+                y,
+                scale_pos_weight_vec=self.scale_pos_weight_vec,
+                sample_weights_df=sample_weights_df,
+            )
+        rules = rules_df["rule"].to_list()
         R, M = apply_and_filter_by_performance(
             X[self._feature_cols_],
             y,
-            rules["rule"].to_list(),
+            rules,
             metric_thresholds=self.metric_thresholds,
             sort_by=self.opt_metric,
         )

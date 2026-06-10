@@ -388,7 +388,7 @@ class TestRuleGridSearchParallelWeights:
             X_train,
             y_train,
             scale_pos_weight_vec,
-            weights_train_vec=weights_train,
+            sample_weights_df=weights_train,
             n_jobs=1,
         )
 
@@ -472,15 +472,15 @@ class TestRuleGridSearchParallelWeights:
         captured = capsys.readouterr()
         assert "rule grid search" in captured.out.lower()
 
-    def test_polars_weights_train_vec(self):
-        """Polars DataFrame weights_train_vec triggers .to_pandas() branch (line 680)."""
+    def test_polars_sample_weights_df(self):
+        """Polars DataFrame sample_weights_df triggers .to_pandas() branch (line 680)."""
         np.random.seed(42)
         X_train = pd.DataFrame({"f1": np.random.randn(50), "f2": np.random.randn(50)})
         y_train = pd.Series(np.random.randint(0, 2, 50))
         weights = pl.DataFrame({"Baseline": np.ones(50)})
         estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
         result = rule_grid_search_parallel_weights(
-            estimator, X_train, y_train, np.array([1.0]), weights_train_vec=weights, n_jobs=1
+            estimator, X_train, y_train, np.array([1.0]), sample_weights_df=weights, n_jobs=1
         )
         assert isinstance(result, pl.DataFrame)
 
@@ -539,7 +539,7 @@ class TestRuleGridSearchParallelScales:
             X_train,
             y_train,
             scale_pos_weight_vec,
-            weights_train_vec=weights_train,
+            sample_weights_df=weights_train,
             n_jobs=1,
         )
 
@@ -631,7 +631,7 @@ class TestRuleGridSearchParallelScales:
             X_train,
             y_train,
             scale_pos_weight_vec,
-            weights_train_vec=weights_train,
+            sample_weights_df=weights_train,
             n_jobs=1,
         )
 
@@ -652,15 +652,15 @@ class TestRuleGridSearchParallelScales:
         captured = capsys.readouterr()
         assert "parallel-scales" in captured.out.lower()
 
-    def test_polars_weights_train_vec(self):
-        """Polars DataFrame weights_train_vec uses .to_pandas() (line 680)."""
+    def test_polars_sample_weights_df(self):
+        """Polars DataFrame sample_weights_df uses .to_pandas() (line 680)."""
         np.random.seed(42)
         X_train = pd.DataFrame({"f1": np.random.randn(50), "f2": np.random.randn(50)})
         y_train = pd.Series(np.random.randint(0, 2, 50))
         weights = pl.DataFrame({"Baseline": np.ones(50)})
         estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
         result = rule_grid_search_parallel_scales(
-            estimator, X_train, y_train, np.array([1.0]), weights_train_vec=weights, n_jobs=1
+            estimator, X_train, y_train, np.array([1.0]), sample_weights_df=weights, n_jobs=1
         )
         assert isinstance(result, pl.DataFrame)
 
@@ -842,7 +842,7 @@ class TestRuleGridSearchSequential:
         scale_pos_weight_vec = np.array([1.0, 2.0])
 
         result = rule_grid_search_sequential(
-            estimator, X_train, y_train, scale_pos_weight_vec, weights_train_vec=None
+            estimator, X_train, y_train, scale_pos_weight_vec, sample_weights_df=None
         )
 
         assert isinstance(result, pl.DataFrame)
@@ -888,7 +888,7 @@ class TestRuleGridSearchSequential:
 
         with pytest.raises(ValueError, match="scale_pos_weight_vec cannot be empty"):
             rule_grid_search_sequential(
-                estimator, X_train, y_train, np.array([]), weights_train_vec=None
+                estimator, X_train, y_train, np.array([]), sample_weights_df=None
             )
 
     def test_verbose_prints(self, capsys):
@@ -927,7 +927,7 @@ class TestRuleGridSearchPandasWeights:
             X_train,
             y_train,
             scale_pos_weight_vec,
-            weights_train_vec=weights_train,
+            sample_weights_df=weights_train,
             n_jobs=1,
         )
 
@@ -976,7 +976,7 @@ class TestRuleGridSearchWithNoneWeights:
     """Test rule_grid_search with None weights (line 417 coverage)."""
 
     def test_grid_search_with_none_weights(self):
-        """Test rule_grid_search with weights_train_vec=None."""
+        """Test rule_grid_search with sample_weights_df=None."""
         np.random.seed(42)
         X_train = pd.DataFrame(
             {
@@ -995,7 +995,7 @@ class TestRuleGridSearchWithNoneWeights:
             X_train,
             y_train,
             scale_pos_weight_vec,
-            weights_train_vec=None,
+            sample_weights_df=None,
             n_jobs=1,
         )
 
@@ -1024,7 +1024,7 @@ class TestRuleGridSearchVerbose:
             X_train,
             y_train,
             scale_pos_weight_vec,
-            weights_train_vec=None,
+            sample_weights_df=None,
             n_jobs=1,
             verbose=1,  # Enable verbose output
         )
@@ -1053,7 +1053,7 @@ class TestRuleGridSearchEmptyResults:
             X_train,
             y_train,
             scale_pos_weight_vec,
-            weights_train_vec=None,
+            sample_weights_df=None,
             n_jobs=1,
         )
 
@@ -1065,7 +1065,7 @@ class TestRuleGridSearchSequentialWithNoneWeights:
     """Test rule_grid_search_sequential with None weights (line 533 coverage)."""
 
     def test_sequential_with_none_weights(self):
-        """Test rule_grid_search_sequential with weights_train_vec=None."""
+        """Test rule_grid_search_sequential with sample_weights_df=None."""
         np.random.seed(42)
         X_train = pd.DataFrame(
             {
@@ -1083,7 +1083,7 @@ class TestRuleGridSearchSequentialWithNoneWeights:
             X_train,
             y_train,
             scale_pos_weight_vec,
-            weights_train_vec=None,  # Explicitly None
+            sample_weights_df=None,  # Explicitly None
         )
 
         assert isinstance(result, pl.DataFrame)
@@ -1107,7 +1107,7 @@ class TestRuleGridSearchSequentialEmptyResults:
             X_train,
             y_train,
             scale_pos_weight_vec,
-            weights_train_vec=None,
+            sample_weights_df=None,
         )
 
         # Even with no rules, should return an empty DataFrame
@@ -1201,7 +1201,7 @@ class TestPandasWeightsElseBranch:
     """Test to cover line 418 - elif branch for Polars weights in rule_grid_search."""
 
     def test_polars_weights_conversion(self):
-        """Test line 418: when weights_train_vec is Polars DataFrame (elif branch)."""
+        """Test line 418: when sample_weights_df is Polars DataFrame (elif branch)."""
         np.random.seed(100)
         X_train = pd.DataFrame(
             {
@@ -1226,7 +1226,7 @@ class TestPandasWeightsElseBranch:
             X_train,
             y_train,
             scale_pos_weight_vec,
-            weights_train_vec=weights_pl,  # Pass Polars DataFrame
+            sample_weights_df=weights_pl,  # Pass Polars DataFrame
             n_jobs=1,
             verbose=0,
         )
@@ -1257,7 +1257,7 @@ class TestPolarsInputSequential:
             X_train,
             y_train,
             scale_pos_weight_vec,
-            weights_train_vec=None,
+            sample_weights_df=None,
         )
 
         assert isinstance(result, pl.DataFrame)
@@ -1292,7 +1292,7 @@ class TestPandasWeightsSequential:
             X_train,
             y_train,
             scale_pos_weight_vec,
-            weights_train_vec=weights_pl,  # Pass Polars DataFrame
+            sample_weights_df=weights_pl,  # Pass Polars DataFrame
         )
 
         assert isinstance(result, pl.DataFrame)
@@ -1333,7 +1333,7 @@ class TestFitExceptionSequential:
             X_train,
             y_train,
             scale_pos_weight_vec,
-            weights_train_vec=None,
+            sample_weights_df=None,
         )
 
         # Should succeed with second scale_pos_weight
