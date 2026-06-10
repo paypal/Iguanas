@@ -124,13 +124,6 @@ class TestIncreasingExprs:
         result = df.with_columns(exprs).drop(col)
         assert "(1+x)^0.25__x" in result.columns
 
-    def test_with_quantile_adds_clipped_columns(self, series):
-        qval = float(series.quantile(0.9))
-        df, col, powers = _resolve(series, np.array([1.0]))
-        exprs = _increasing_exprs(col, powers, qval, 0.9)
-        result = df.with_columns(exprs).drop(col)
-        assert any("clipped_90th" in c for c in result.columns)
-
 
 class TestDecreasingExprs:
     def test_without_quantile_special_p1_label(self, series):
@@ -158,13 +151,6 @@ class TestDecreasingExprs:
         result = df.with_columns(exprs).drop(col)
         assert "1/log(1+x)__x" in result.columns
 
-    def test_with_quantile_adds_clipped_columns(self, series):
-        qval = float(series.quantile(0.9))
-        df, col, powers = _resolve(series, np.array([1.0]))
-        exprs = _decreasing_exprs(col, powers, qval, 0.9)
-        result = df.with_columns(exprs).drop(col)
-        assert any("clipped_90th" in c for c in result.columns)
-
 
 # ---------------------------------------------------------------------------
 # generate_increasing_weight
@@ -188,15 +174,6 @@ class TestGenerateIncreasingWeight:
         # Baseline + 5 powers + log = 7
         result = generate_increasing_weight(series)
         assert result.shape[1] == 7
-
-    def test_with_quantile_column_count(self, series):
-        # Baseline + 5 powers + log + 5 clipped = 12
-        result = generate_increasing_weight(series, quantile_value=0.9)
-        assert result.shape[1] == 12
-
-    def test_with_quantile_clipped_column_names(self, series):
-        result = generate_increasing_weight(series, quantile_value=0.9)
-        assert any("clipped_90th" in c for c in result.columns)
 
     def test_custom_powers_column_count(self, series):
         # Baseline + 2 powers + log = 4
@@ -258,14 +235,6 @@ class TestGenerateDecreasingWeight:
         result = generate_decreasing_weight(series)
         assert result.shape[1] == 7
 
-    def test_with_quantile_column_count(self, series):
-        result = generate_decreasing_weight(series, quantile_value=0.9)
-        assert result.shape[1] == 12
-
-    def test_with_quantile_clipped_column_names(self, series):
-        result = generate_decreasing_weight(series, quantile_value=0.9)
-        assert any("clipped_90th" in c for c in result.columns)
-
     def test_reciprocal_column_values(self, series):
         # shifted: [0,1,2,3,4]; 1/(1+x) = [1, 0.5, 1/3, 0.25, 0.2]
         result = generate_decreasing_weight(series, powers=np.array([1.0]))
@@ -307,11 +276,6 @@ class TestGenerateAllWeight:
         # Baseline + 5 inc powers + log + 5 dec powers + 1/log = 13
         result = generate_all_weight(series)
         assert result.shape[1] == 13
-
-    def test_with_quantile_column_count(self, series):
-        # 13 + 5 inc clipped + 5 dec clipped = 23
-        result = generate_all_weight(series, quantile_value=0.9)
-        assert result.shape[1] == 23
 
     def test_contains_increasing_columns(self, series):
         result = generate_all_weight(series)

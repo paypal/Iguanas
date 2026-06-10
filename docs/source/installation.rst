@@ -54,6 +54,8 @@ Core dependencies (installed automatically):
 * **pandas** - DataFrame library for interoperability
 * **XGBoost** - For rule generation using gradient boosting models
 * **joblib** - For parallel processing during rule generation
+* **scikit-learn** - For model evaluation and metrics
+* **pydantic** - For data validation and settings management
 
 Optional dependencies for specific features:
 
@@ -84,3 +86,4 @@ Install optional extras from PyPI:
 
     pip install "iguanas[dev]"
     pip install "iguanas[notebook]"
+    pip install "iguanas[all]"

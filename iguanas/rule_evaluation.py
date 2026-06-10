@@ -228,14 +228,14 @@ def select_diverse_top_rules(
 
     # Filter correlated rules — returns list[str]
     importance_dict = dict(metrics_sorted[["rule", importance_metric]].rows())
-    rule_lst = filter_correlated_rules(
+    selected_rules = filter_correlated_rules(
         R[metrics_sorted["rule"].to_list()], max_corr=max_corr, importance=importance_dict
     )
-    R_filtered = R[rule_lst] if rule_lst else pl.DataFrame()
+    R_filtered = R[selected_rules] if selected_rules else pl.DataFrame()
 
-    print(f"Number of uncorrelated rules: {len(rule_lst)}")
+    print(f"Number of uncorrelated rules: {len(selected_rules)}")
 
-    return R_filtered, metrics_sorted.filter(pl.col("rule").is_in(rule_lst)), rule_lst
+    return R_filtered, metrics_sorted.filter(pl.col("rule").is_in(selected_rules)), selected_rules
 
 
 def apply_filter_and_deduplicate_rules(

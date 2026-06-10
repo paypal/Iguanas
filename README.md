@@ -48,7 +48,7 @@ Generate interpretable rules from labelled datasets using XGBoost tree extractio
 ### 📊 Metrics
 Compute classification performance metrics for rule predictions:
 - `compute_metrics` - Compute a full metrics table (accuracy, precision, recall, F-beta, TP/FP/TN/FN, flagged %) for a set of rules
-- `compute_single_metric` - Compute a single scalar metric (precision, recall, accuracy, or F-beta) — optimised for hot-path evaluation
+- `compute_single_metric` - Compute a single scalar metric (accuracy, precision, recall or F-beta) — optimised for hot-path evaluation
 
 ### 🔍 Rule Evaluation
 Evaluate rules on data and filter by performance:

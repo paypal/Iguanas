@@ -103,7 +103,7 @@ def filter_rules_by_feature_overlap(
         rule_columns.append(cols)
 
     # Track which indices to keep
-    indices_to_keep = []
+    indices_to_keep: list[int] = []
 
     for i, cols_i in enumerate(rule_columns):
         rule_i = rules[i]

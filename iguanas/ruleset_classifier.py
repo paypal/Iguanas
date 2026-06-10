@@ -181,9 +181,8 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
             Boolean series named "prediction".
         """
         self._check_is_fitted()
-        combined_name = self._best_ruleset_
         if not self._best_ruleset_:
-            return pl.Series(combined_name, [False] * X.height, dtype=pl.Boolean)
+            return pl.Series(self._best_ruleset_, [False] * X.height, dtype=pl.Boolean)
 
         R = apply_rules(X[self._feature_cols_], [self._best_ruleset_])
         return R[self._best_ruleset_]
@@ -210,13 +209,11 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
             Float64 series named "proba" with values in [0.0, 1.0].
         """
         self._check_is_fitted()
-        combined_name = self._best_ruleset_
-
         if not self._best_ruleset_:
-            return pl.Series(combined_name, [0.0] * X.height, dtype=pl.Float64)
+            return pl.Series(self._best_ruleset_, [0.0] * X.height, dtype=pl.Float64)
 
         R = apply_rules(X[self._feature_cols_], [self._best_ruleset_])
-        proba_expr = pl.col(self._best_ruleset_).cast(pl.Float64).alias(combined_name)
+        proba_expr = pl.col(self._best_ruleset_).cast(pl.Float64).alias(self._best_ruleset_)
         return R.select(proba_expr).to_series()
 
     def fit_predict(self, X: pl.DataFrame, y: pl.Series) -> pl.Series:

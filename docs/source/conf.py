@@ -4,6 +4,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.abspath("../../"))
@@ -25,14 +26,13 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
     "sphinx.ext.autosummary",
-    "sphinx_autodoc_typehints",
     "nbsphinx",
     "sphinxext.opengraph",
     "sphinx_sitemap",
 ]
 
 templates_path = ["_templates"]
-exclude_patterns = []
+exclude_patterns: list[str] = []
 
 # -- SEO Configuration -------------------------------------------------------
 
@@ -98,8 +98,13 @@ autodoc_default_options = {
     "member-order": "bysource",
     "exclude-members": "__init__, __new__, __weakref__, __dict__, __module__, __len__, __getitem__, __setitem__, __delitem__, __iter__, __next__, __repr__, __str__",
 }
-autodoc_typehints = "none"
+autodoc_typehints = "both"
 autodoc_typehints_description_target = "documented"
+autodoc_typehints_format = "fully-qualified"
+autodoc_type_aliases = {
+    "polars.series.series.Series": "polars.Series",
+    "polars.dataframe.frame.DataFrame": "polars.DataFrame",
+}
 autodoc_class_signature = "separated"
 
 html_favicon = "_static/iguanas.ico"
@@ -112,7 +117,6 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
     """Skip Pydantic fields, validators, and internal members."""
     import inspect
 
-    from pydantic import BaseModel
     from pydantic.fields import FieldInfo, ModelPrivateAttr
 
     # Allow _Base* classes (base classes for documentation)
@@ -136,7 +140,7 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
         return True
 
     # Skip if the object is a FieldInfo (Pydantic field descriptor)
-    if isinstance(obj, (FieldInfo, ModelPrivateAttr)):
+    if isinstance(obj, FieldInfo | ModelPrivateAttr):
         return True
 
     # Check if it's a descriptor or data attribute (not a method)
@@ -148,7 +152,12 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
 
 
 def remove_attributes_section(app, what, name, obj, options, lines):
-    """Remove Attributes section from docstrings."""
+    """Remove Attributes section from docstrings and strip type-role markup."""
+    # strip type role markup like :py:class:`str` or :py:data:`list`
+    pattern = re.compile(r":py:(?:class|data|obj|func|meth|attr|mod):`~?([^`]+)`")
+    for idx, line in enumerate(lines):
+        lines[idx] = pattern.sub(r"\1", line)
+
     if what in ("class", "exception"):
         i = 0
         while i < len(lines):
@@ -183,9 +192,57 @@ def remove_attributes_section(app, what, name, obj, options, lines):
             i += 1
 
 
+def autodoc_process_signature(app, what, name, obj, options, signature, return_annotation):
+    """Replace long Polars type names and remove type-role markup in autodoc signatures."""
+
+    def strip_type_roles(text: str) -> str:
+        return re.sub(
+            r":py:(?:class|data|obj|func|meth|attr|mod):`~?([^`]+)`",
+            r"\1",
+            text,
+        )
+
+    if signature is not None:
+        signature = signature.replace("polars.series.series.Series", "pl.Series").replace(
+            "polars.dataframe.frame.DataFrame", "pl.DataFrame"
+        )
+        signature = strip_type_roles(signature)
+    if return_annotation is not None:
+        return_annotation = return_annotation.replace(
+            "polars.series.series.Series", "pl.Series"
+        ).replace("polars.dataframe.frame.DataFrame", "pl.DataFrame")
+        return_annotation = strip_type_roles(return_annotation)
+    return signature, return_annotation
+
+
+def remove_builtin_type_links(app, doctree, docname):
+    """Convert builtin Python type references into plain text."""
+    from docutils import nodes
+
+    builtin_types = {
+        "str",
+        "list",
+        "dict",
+        "tuple",
+        "set",
+        "float",
+        "int",
+        "bool",
+        "None",
+        "NoneType",
+    }
+
+    for node in doctree.traverse(nodes.reference):
+        refuri = node.get("refuri", "")
+        if refuri.startswith("https://docs.python.org/3") and node.astext() in builtin_types:
+            node.replace_self(nodes.Text(node.astext()))
+
+
 def setup(app):
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-docstring", remove_attributes_section)
+    app.connect("autodoc-process-signature", autodoc_process_signature)
+    app.connect("doctree-resolved", remove_builtin_type_links)
 
 
 # -- Options for HTML output -------------------------------------------------

@@ -12,8 +12,6 @@ def _power_label(power: float) -> str:
 def _increasing_exprs(
     col_name: str,
     powers: np.ndarray,
-    quantile_val: float | None = None,
-    quantile_value: float | None = None,
 ) -> list[pl.Expr]:
     base = 1 + pl.col(col_name)
     exprs = [pl.lit(1.0).alias("Baseline")]
@@ -21,20 +19,12 @@ def _increasing_exprs(
         label = "(1+x)" if p == 1.0 else f"(1+x)^{_power_label(p)}"
         exprs.append(base.pow(p).alias(f"{label}__{col_name}"))
     exprs.append((pl.col(col_name) + 1).log().alias(f"log(1+x)__{col_name}"))
-    if quantile_val is not None:
-        assert quantile_value is not None
-        clipped = 1 + pl.col(col_name).clip(upper_bound=quantile_val)
-        q_str = f"{quantile_value * 100:.0f}th"
-        for p in powers:
-            exprs.append(clipped.pow(p).alias(f"(1+x_clipped_{q_str})^{p:.2f}__{col_name}"))
     return exprs
 
 
 def _decreasing_exprs(
     col_name: str,
     powers: np.ndarray,
-    quantile_val: float | None = None,
-    quantile_value: float | None = None,
 ) -> list[pl.Expr]:
     inv = 1.0 / (pl.col(col_name) + 1.0)
     exprs = []
@@ -42,12 +32,6 @@ def _decreasing_exprs(
         label = "1/(1+x)" if p == 1.0 else f"1/(1+x)^{_power_label(p)}"
         exprs.append((inv**p).alias(f"{label}__{col_name}"))
     exprs.append((1.0 / (pl.col(col_name) + 1 + EPS).log()).alias(f"1/log(1+x)__{col_name}"))
-    if quantile_val is not None:
-        assert quantile_value is not None
-        clipped_inv = 1.0 / (pl.col(col_name).clip(upper_bound=quantile_val) + 1.0)
-        q_str = f"{quantile_value * 100:.0f}th"
-        for p in powers:
-            exprs.append(clipped_inv.pow(p).alias(f"1/(1+x_clipped_{q_str})^{p:.2f}__{col_name}"))
     return exprs
 
 
@@ -71,7 +55,6 @@ def _dispatch(fn, X: pl.Series | pl.DataFrame, **kwargs) -> pl.DataFrame | None:
 def generate_increasing_weight(
     X: pl.Series | pl.DataFrame,
     powers: np.ndarray | None = None,
-    quantile_value: float | None = None,
 ) -> pl.DataFrame:
     """Generate weight transformations where larger input values receive larger weights.
 
@@ -82,8 +65,6 @@ def generate_increasing_weight(
         transformations are applied to each column and concatenated horizontally.
     powers : np.ndarray | None, default=[0.25, 0.5, 1.0, 2.0, 4.0]
         Power values for polynomial transformations.
-    quantile_value : float | None, default=None
-        If specified, adds clipped transformations at this quantile.
 
     Returns
     -------
@@ -103,19 +84,17 @@ def generate_increasing_weight(
     """
     if (
         out := _dispatch(
-            generate_increasing_weight, X, powers=powers, quantile_value=quantile_value
+            generate_increasing_weight, X, powers=powers
         )
     ) is not None:
         return out
     df, col_name, powers = _resolve(X, powers)
-    qval: float | None = float(X.quantile(quantile_value)) if quantile_value is not None else None  # type: ignore[arg-type]
-    return df.with_columns(_increasing_exprs(col_name, powers, qval, quantile_value)).drop(col_name)
+    return df.with_columns(_increasing_exprs(col_name, powers)).drop(col_name)
 
 
 def generate_decreasing_weight(
     X: pl.Series | pl.DataFrame,
     powers: np.ndarray | None = None,
-    quantile_value: float | None = None,
 ) -> pl.DataFrame:
     """Generate weight transformations where smaller input values receive larger weights.
 
@@ -126,8 +105,6 @@ def generate_decreasing_weight(
         transformations are applied to each column and concatenated horizontally.
     powers : np.ndarray | None, default=[0.25, 0.5, 1.0, 2.0, 4.0]
         Power values for reciprocal transformations (1/(1+x)^power).
-    quantile_value : float | None, default=None
-        If specified, adds clipped transformations at this quantile.
 
     Returns
     -------
@@ -143,21 +120,19 @@ def generate_decreasing_weight(
     """
     if (
         out := _dispatch(
-            generate_decreasing_weight, X, powers=powers, quantile_value=quantile_value
+            generate_decreasing_weight, X, powers=powers
         )
     ) is not None:
         return out
     df, col_name, powers = _resolve(X, powers)
-    qval: float | None = float(X.quantile(quantile_value)) if quantile_value is not None else None  # type: ignore[arg-type]
     return df.with_columns(
-        [pl.lit(1.0).alias("Baseline")] + _decreasing_exprs(col_name, powers, qval, quantile_value)
+        [pl.lit(1.0).alias("Baseline")] + _decreasing_exprs(col_name, powers)
     ).drop(col_name)
 
 
 def generate_all_weight(
     X: pl.Series | pl.DataFrame,
     powers: np.ndarray | None = None,
-    quantile_value: float | None = None,
 ) -> pl.DataFrame:
     """Generate all weight transformations (increasing and decreasing).
 
@@ -168,8 +143,6 @@ def generate_all_weight(
         transformations are applied to each column and concatenated horizontally.
     powers : np.ndarray | None, default=[0.25, 0.5, 1.0, 2.0, 4.0]
         Power values used for both increasing and decreasing transformations.
-    quantile_value : float | None, default=None
-        If specified, adds clipped transformations at this quantile.
 
     Returns
     -------
@@ -184,11 +157,10 @@ def generate_all_weight(
     >>> # Columns include both (1+x)^p and 1/(1+x)^p families plus log variants
     """
     if (
-        out := _dispatch(generate_all_weight, X, powers=powers, quantile_value=quantile_value)
+        out := _dispatch(generate_all_weight, X, powers=powers)
     ) is not None:
         return out
     df, col_name, powers = _resolve(X, powers)
-    qval: float | None = float(X.quantile(quantile_value)) if quantile_value is not None else None  # type: ignore[arg-type]
-    exprs = _increasing_exprs(col_name, powers, qval, quantile_value)
-    exprs += _decreasing_exprs(col_name, powers, qval, quantile_value)
+    exprs = _increasing_exprs(col_name, powers)
+    exprs += _decreasing_exprs(col_name, powers)
     return df.with_columns(exprs).drop(col_name)

@@ -266,7 +266,7 @@ def _train_rules_for_weight_transformation(
     Parameters
     ----------
     weights : pd.Series | np.ndarray
-        Weights for this transformation
+        Sample weights for this transformation
     estimator_params : dict
         XGBoost estimator parameters to reconstruct the model
     X_train : pd.DataFrame | np.ndarray
@@ -287,7 +287,7 @@ def _train_rules_for_weight_transformation(
     list[pd.DataFrame]
         List of DataFrames with extracted rules
     """
-    rules_vec = []
+    rules_dfs = []
     transformation = weights.name if hasattr(weights, "name") else "Baseline"  # type: ignore
     weights_array = weights.values if hasattr(weights, "values") else weights  # type: ignore
 
@@ -314,15 +314,15 @@ def _train_rules_for_weight_transformation(
         rules_df = extract_rules(est, all_features_constrained, **params)
 
         if not rules_df.empty:
-            rules_vec.append(rules_df)
+            rules_dfs.append(rules_df)
 
-    return rules_vec
+    return rules_dfs
 
 
 def _train_rules_for_scale(
     scale_pos_weight: float,
     weights_np: np.ndarray,
-    weight_names: list[str],
+    weight_columns: list[str],
     estimator_params: dict[str, Any],
     X_train: np.ndarray,
     y_train: np.ndarray,
@@ -340,7 +340,7 @@ def _train_rules_for_scale(
         The scale_pos_weight value to use for this run.
     weights_np : np.ndarray
         2D array of shape (n_samples, n_transformations) containing all weight columns.
-    weight_names : list[str]
+    weight_columns : list[str]
         Names of the weight transformations (column labels for weights_np).
     estimator_params : dict
         XGBoost estimator parameters to reconstruct the model.
@@ -360,13 +360,13 @@ def _train_rules_for_scale(
         List of DataFrames with extracted rules, one entry per weight
         transformation that produced at least one rule.
     """
-    rules_vec = []
+    rules_dfs = []
 
     if feature_names is not None and isinstance(X_train, np.ndarray):
         X_fit: pd.DataFrame | np.ndarray = pd.DataFrame(X_train, columns=feature_names)
     else:
         X_fit = X_train
-    for i, name in enumerate(weight_names):
+    for i, name in enumerate(weight_columns):
         weights_array = weights_np[:, i]
         est = XGBClassifier(**estimator_params)
         est.set_params(scale_pos_weight=scale_pos_weight)
@@ -381,9 +381,9 @@ def _train_rules_for_scale(
         }
         rules_df = extract_rules(est, all_features_constrained, **params)
         if not rules_df.empty:
-            rules_vec.append(rules_df)
+            rules_dfs.append(rules_df)
 
-    return rules_vec
+    return rules_dfs
 
 
 def rule_grid_search_sequential(
@@ -444,7 +444,7 @@ def rule_grid_search_sequential(
     else:
         weights_train_vec_pd = weights_train_vec
 
-    weight_names = list(weights_train_vec_pd.columns)
+    weight_columns = list(weights_train_vec_pd.columns)
     weights_np = weights_train_vec_pd.to_numpy()
     estimator_params = estimator.get_params()
     estimator_params.pop("scale_pos_weight", None)
@@ -454,27 +454,27 @@ def rule_grid_search_sequential(
 
     if verbose > 0:
         print(
-            f"Starting sequential rule grid search with {len(weight_names)} weight "
+            f"Starting sequential rule grid search with {len(weight_columns)} weight "
             f"transformations and {len(scale_pos_weight_vec)} scale_pos_weight values "
-            f"({len(weight_names) * len(scale_pos_weight_vec)} total combinations)"
+            f"({len(weight_columns) * len(scale_pos_weight_vec)} total combinations)"
         )
 
-    rules_vec = []
+    rules_dfs = []
     for scale_pos_weight in scale_pos_weight_vec:
         results = _train_rules_for_scale(
             scale_pos_weight,
             weights_np,
-            weight_names,
+            weight_columns,
             estimator_params,
             X_train_np,
             y_train_np,
             all_features_constrained,
             feature_names=feature_names,
         )
-        rules_vec.extend(results)
+        rules_dfs.extend(results)
 
-    if rules_vec:
-        final_X = pl.from_pandas(pd.concat(rules_vec, ignore_index=True))
+    if rules_dfs:
+        final_X = pl.from_pandas(pd.concat(rules_dfs, ignore_index=True))
     else:
         final_X = pl.DataFrame()
 
@@ -599,13 +599,13 @@ def rule_grid_search_parallel_weights(
         for name in weight_columns
     )
 
-    rules_vec = []
+    rules_dfs = []
     for sublist in results_nested:
         if sublist is not None:
-            rules_vec.extend(sublist)
+            rules_dfs.extend(sublist)
 
-    if rules_vec:
-        final_X_pd = pd.concat(rules_vec, ignore_index=True)
+    if rules_dfs:
+        final_X_pd = pd.concat(rules_dfs, ignore_index=True)
         final_X = pl.from_pandas(final_X_pd)
     else:
         final_X = pl.DataFrame()
@@ -681,7 +681,7 @@ def rule_grid_search_parallel_scales(
     else:
         weights_train_vec_pd = weights_train_vec
 
-    weight_names = list(weights_train_vec_pd.columns)
+    weight_columns = list(weights_train_vec_pd.columns)
     weights_np = weights_train_vec_pd.to_numpy()
     estimator_params = estimator.get_params()
     estimator_params.pop("scale_pos_weight", None)
@@ -691,9 +691,9 @@ def rule_grid_search_parallel_scales(
 
     if verbose > 0:
         print(
-            f"Starting parallel-scales rule grid search with {len(weight_names)} weight "
+            f"Starting parallel-scales rule grid search with {len(weight_columns)} weight "
             f"transformations and {len(scale_pos_weight_vec)} scale_pos_weight values "
-            f"({len(weight_names) * len(scale_pos_weight_vec)} total combinations)"
+            f"({len(weight_columns) * len(scale_pos_weight_vec)} total combinations)"
         )
 
     joblib_verbose = 10 if verbose >= 2 else 0
@@ -702,7 +702,7 @@ def rule_grid_search_parallel_scales(
         delayed(_train_rules_for_scale)(
             scale_pos_weight,
             weights_np,
-            weight_names,
+            weight_columns,
             estimator_params,
             X_train_np,
             y_train_np,
@@ -712,13 +712,13 @@ def rule_grid_search_parallel_scales(
         for scale_pos_weight in scale_pos_weight_vec
     )
 
-    rules_vec = []
+    rules_dfs = []
     for sublist in results_nested:
         if sublist is not None:
-            rules_vec.extend(sublist)
+            rules_dfs.extend(sublist)
 
-    if rules_vec:
-        final_X_pd = pd.concat(rules_vec, ignore_index=True)
+    if rules_dfs:
+        final_X_pd = pd.concat(rules_dfs, ignore_index=True)
         final_X = pl.from_pandas(final_X_pd)
     else:
         final_X = pl.DataFrame()
