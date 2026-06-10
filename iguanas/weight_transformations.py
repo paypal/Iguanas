@@ -177,15 +177,51 @@ def select_uncorrelated_weights(
     step: float = 0.01,
     use_abs: bool = False,
 ) -> tuple[list[str], float]:
-    """Return the closest filtered weight set for a target number of rules.
+    """Return a filtered set of weight columns closest to a target length.
 
-    The helper searches the correlation threshold range [min_corr, max_corr] using
-    binary search. It computes the filtered rule list for each candidate threshold
-    and returns the first length that is >= target_len.
+    The function searches the correlation threshold range ``[min_corr, max_corr]``
+    (discretised by ``step``) using binary search. For each candidate threshold
+    it calls :func:`iguanas.rule_selection.filter_correlated_rules` with
+    ``max_corr`` set to the candidate value and returns the first filtered list
+    whose length is ``>= target_len``.
 
-    If the target length is below the minimum length at `min_corr`, it returns the
-    minimum result. If the target length is above the maximum length at `max_corr`,
-    it returns the maximum result.
+    Parameters
+    ----------
+    sample_weights_df : pl.DataFrame
+        DataFrame containing candidate weight series (columns are weight names).
+    importance : dict[str, float]
+        Mapping from rule/weight name to importance score used by the filter.
+    target_len : int
+        Desired number of selected rules (must be non-negative).
+    min_corr : float, default=0.01
+        Minimum correlation threshold to consider (lower bound of search).
+    max_corr : float, default=0.99
+        Maximum correlation threshold to consider (upper bound of search).
+    step : float, default=0.01
+        Step size used to discretise the correlation thresholds in the search.
+    use_abs : bool, default=False
+        If True, use absolute correlation values when filtering.
+
+    Returns
+    -------
+    tuple[list[str], float]
+        A tuple ``(filtered_names, corr_value)`` where ``filtered_names`` is the
+        list of selected weight names at the chosen correlation threshold and
+        ``corr_value`` is the correlation threshold that produced that list.
+
+    Notes
+    -----
+    If ``target_len`` is below the minimum achievable length at ``min_corr``,
+    the minimum result is returned. If it is above the maximum achievable length
+    at ``max_corr``, the maximum result is returned. The search discretises
+    thresholds as ``i * step`` where ``i`` ranges between ``round(min_corr/step)``
+    and ``round(max_corr/step)``.
+
+    Examples
+    --------
+    >>> import polars as pl
+    >>> df = pl.DataFrame({"w1": [0.1, 0.2], "w2": [0.0, 0.3]})
+    >>> selected, corr = select_uncorrelated_weights(df, {"w1": 1.0, "w2": 0.5}, 1)
     """
     if target_len < 0:
         raise ValueError("target_len must be non-negative")
