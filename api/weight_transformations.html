@@ -11,10 +11,10 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://paypal.github.io/Iguanas/api/weight_transformations.html" />
 <meta property="og:site_name" content="Iguanas - Lightning Fast Rule generation with Polars" />
-<meta property="og:description" content="Functions: generate_increasing_weight: generate_decreasing_weight: generate_all_weight:" />
+<meta property="og:description" content="Functions: generate_increasing_weight: generate_decreasing_weight: generate_all_weight: select_uncorrelated_weights:" />
 <meta property="og:image" content="https://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png" />
 <meta property="og:image:alt" content="Iguanas - Lightning Fast Rule generation with Polars" />
-<meta name="description" content="Functions: generate_increasing_weight: generate_decreasing_weight: generate_all_weight:" />
+<meta name="description" content="Functions: generate_increasing_weight: generate_decreasing_weight: generate_all_weight: select_uncorrelated_weights:" />
 <meta name="description" content="High-performance rule generation library with sklearn-compatible API." />
 <meta name="keywords" content="data science, machine learning, rule generation, python, polars, sklearn" />
 
@@ -546,6 +546,61 @@ transformations are applied to each column and concatenated horizontally.</p></l
 </dd></dl>
 
 </section>
+<section id="select-uncorrelated-weights">
+<h3>select_uncorrelated_weights<a class="headerlink" href="#select-uncorrelated-weights" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.weight_transformations.select_uncorrelated_weights">
+<span class="sig-prename descclassname"><span class="pre">iguanas.weight_transformations.</span></span><span class="sig-name descname"><span class="pre">select_uncorrelated_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_weights_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">importance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_len</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_corr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_corr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_abs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/iguanas/weight_transformations.html#select_uncorrelated_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.weight_transformations.select_uncorrelated_weights" title="Link to this definition">#</a></dt>
+<dd><p>Return a filtered set of weight columns closest to a target length.</p>
+<p>The function searches the correlation threshold range <code class="docutils literal notranslate"><span class="pre">[min_corr,</span> <span class="pre">max_corr]</span></code>
+(discretised by <code class="docutils literal notranslate"><span class="pre">step</span></code>) using binary search. For each candidate threshold
+it calls <a class="reference internal" href="rule_selection.html#iguanas.rule_selection.filter_correlated_rules" title="iguanas.rule_selection.filter_correlated_rules"><code class="xref py py-func docutils literal notranslate"><span class="pre">iguanas.rule_selection.filter_correlated_rules()</span></code></a> with
+<code class="docutils literal notranslate"><span class="pre">max_corr</span></code> set to the candidate value and returns the first filtered list
+whose length is <code class="docutils literal notranslate"><span class="pre">&gt;=</span> <span class="pre">target_len</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_weights_df</strong> (<em>pl.DataFrame</em>) – DataFrame containing candidate weight series (columns are weight names).</p></li>
+<li><p><strong>importance</strong> (dict<em>[</em>str<em>, </em>float<em>]</em>) – Mapping from rule/weight name to importance score used by the filter.</p></li>
+<li><p><strong>target_len</strong> (int) – Desired number of selected rules (must be non-negative).</p></li>
+<li><p><strong>min_corr</strong> (float<em>, </em><em>default=0.01</em>) – Minimum correlation threshold to consider (lower bound of search).</p></li>
+<li><p><strong>max_corr</strong> (float<em>, </em><em>default=0.99</em>) – Maximum correlation threshold to consider (upper bound of search).</p></li>
+<li><p><strong>step</strong> (float<em>, </em><em>default=0.01</em>) – Step size used to discretise the correlation thresholds in the search.</p></li>
+<li><p><strong>use_abs</strong> (bool<em>, </em><em>default=False</em>) – If True, use absolute correlation values when filtering.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple <code class="docutils literal notranslate"><span class="pre">(filtered_names,</span> <span class="pre">corr_value)</span></code> where <code class="docutils literal notranslate"><span class="pre">filtered_names</span></code> is the
+list of selected weight names at the chosen correlation threshold and
+<code class="docutils literal notranslate"><span class="pre">corr_value</span></code> is the correlation threshold that produced that list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[list[str], float]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">target_len</span></code> is negative, if <code class="docutils literal notranslate"><span class="pre">step</span></code> is not positive, or if
+    <code class="docutils literal notranslate"><span class="pre">min_corr</span></code>/<code class="docutils literal notranslate"><span class="pre">max_corr</span></code> do not satisfy <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;</span> <span class="pre">min_corr</span> <span class="pre">&lt;</span> <span class="pre">max_corr</span> <span class="pre">&lt;</span> <span class="pre">1.0</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">target_len</span></code> is below the minimum achievable length at <code class="docutils literal notranslate"><span class="pre">min_corr</span></code>,
+the minimum result is returned. If it is above the maximum achievable length
+at <code class="docutils literal notranslate"><span class="pre">max_corr</span></code>, the maximum result is returned. The search discretises
+thresholds as <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">*</span> <span class="pre">step</span></code> where <code class="docutils literal notranslate"><span class="pre">i</span></code> ranges between <code class="docutils literal notranslate"><span class="pre">round(min_corr/step)</span></code>
+and <code class="docutils literal notranslate"><span class="pre">round(max_corr/step)</span></code>.</p>
+</div>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;w1&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="s2">&quot;w2&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">selected</span><span class="p">,</span> <span class="n">corr</span> <span class="o">=</span> <span class="n">select_uncorrelated_weights</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;w1&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;w2&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
 </section>
 </section>
 
@@ -607,6 +662,10 @@ transformations are applied to each column and concatenated horizontally.</p></l
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generate-all-weight">generate_all_weight</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.weight_transformations.generate_all_weight"><code class="docutils literal notranslate"><span class="pre">generate_all_weight()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#select-uncorrelated-weights">select_uncorrelated_weights</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.weight_transformations.select_uncorrelated_weights"><code class="docutils literal notranslate"><span class="pre">select_uncorrelated_weights()</span></code></a></li>
 </ul>
 </li>
 </ul>

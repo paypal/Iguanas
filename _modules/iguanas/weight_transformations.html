@@ -583,6 +583,8 @@
 
 
 
+<div class="viewcode-block" id="select_uncorrelated_weights">
+<a class="viewcode-back" href="../../api/weight_transformations.html#iguanas.weight_transformations.select_uncorrelated_weights">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">select_uncorrelated_weights</span><span class="p">(</span>
     <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">importance</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
@@ -592,15 +594,57 @@
     <span class="n">step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
     <span class="n">use_abs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the closest filtered weight set for a target number of rules.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a filtered set of weight columns closest to a target length.</span>
 
-<span class="sd">    The helper searches the correlation threshold range [min_corr, max_corr] using</span>
-<span class="sd">    binary search. It computes the filtered rule list for each candidate threshold</span>
-<span class="sd">    and returns the first length that is &gt;= target_len.</span>
+<span class="sd">    The function searches the correlation threshold range ``[min_corr, max_corr]``</span>
+<span class="sd">    (discretised by ``step``) using binary search. For each candidate threshold</span>
+<span class="sd">    it calls :func:`iguanas.rule_selection.filter_correlated_rules` with</span>
+<span class="sd">    ``max_corr`` set to the candidate value and returns the first filtered list</span>
+<span class="sd">    whose length is ``&gt;= target_len``.</span>
 
-<span class="sd">    If the target length is below the minimum length at `min_corr`, it returns the</span>
-<span class="sd">    minimum result. If the target length is above the maximum length at `max_corr`,</span>
-<span class="sd">    it returns the maximum result.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sample_weights_df : pl.DataFrame</span>
+<span class="sd">        DataFrame containing candidate weight series (columns are weight names).</span>
+<span class="sd">    importance : dict[str, float]</span>
+<span class="sd">        Mapping from rule/weight name to importance score used by the filter.</span>
+<span class="sd">    target_len : int</span>
+<span class="sd">        Desired number of selected rules (must be non-negative).</span>
+<span class="sd">    min_corr : float, default=0.01</span>
+<span class="sd">        Minimum correlation threshold to consider (lower bound of search).</span>
+<span class="sd">    max_corr : float, default=0.99</span>
+<span class="sd">        Maximum correlation threshold to consider (upper bound of search).</span>
+<span class="sd">    step : float, default=0.01</span>
+<span class="sd">        Step size used to discretise the correlation thresholds in the search.</span>
+<span class="sd">    use_abs : bool, default=False</span>
+<span class="sd">        If True, use absolute correlation values when filtering.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple[list[str], float]</span>
+<span class="sd">        A tuple ``(filtered_names, corr_value)`` where ``filtered_names`` is the</span>
+<span class="sd">        list of selected weight names at the chosen correlation threshold and</span>
+<span class="sd">        ``corr_value`` is the correlation threshold that produced that list.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``target_len`` is negative, if ``step`` is not positive, or if</span>
+<span class="sd">        ``min_corr``/``max_corr`` do not satisfy ``0 &lt; min_corr &lt; max_corr &lt; 1.0``.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If ``target_len`` is below the minimum achievable length at ``min_corr``,</span>
+<span class="sd">    the minimum result is returned. If it is above the maximum achievable length</span>
+<span class="sd">    at ``max_corr``, the maximum result is returned. The search discretises</span>
+<span class="sd">    thresholds as ``i * step`` where ``i`` ranges between ``round(min_corr/step)``</span>
+<span class="sd">    and ``round(max_corr/step)``.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import polars as pl</span>
+<span class="sd">    &gt;&gt;&gt; df = pl.DataFrame({&quot;w1&quot;: [0.1, 0.2], &quot;w2&quot;: [0.0, 0.3]})</span>
+<span class="sd">    &gt;&gt;&gt; selected, corr = select_uncorrelated_weights(df, {&quot;w1&quot;: 1.0, &quot;w2&quot;: 0.5}, 1)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">target_len</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;target_len must be non-negative&quot;</span><span class="p">)</span>
@@ -647,7 +691,8 @@
         <span class="k">return</span> <span class="n">max_filtered</span><span class="p">,</span> <span class="n">max_corr_value</span>
 
     <span class="n">_</span><span class="p">,</span> <span class="n">upper_filtered</span><span class="p">,</span> <span class="n">upper_corr_value</span> <span class="o">=</span> <span class="n">compute_filtered</span><span class="p">(</span><span class="n">lo</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">upper_filtered</span><span class="p">,</span> <span class="n">upper_corr_value</span>
+    <span class="k">return</span> <span class="n">upper_filtered</span><span class="p">,</span> <span class="n">upper_corr_value</span></div>
+
 </pre></div>
 
                 </article>
