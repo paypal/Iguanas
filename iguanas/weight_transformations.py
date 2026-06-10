@@ -1,6 +1,8 @@
 import numpy as np
 import polars as pl
 
+from .rule_selection import filter_correlated_rules
+
 EPS = 1e-6
 _DEFAULT_POWERS = np.array([0.25, 0.5, 1.0, 2.0, 4.0])
 
@@ -164,3 +166,70 @@ def generate_all_weight(
     exprs = _increasing_exprs(col_name, powers)
     exprs += _decreasing_exprs(col_name, powers)
     return df.with_columns(exprs).drop(col_name)
+
+
+def select_uncorrelated_weights(
+    sample_weights: pl.DataFrame,
+    importance: dict[str, float],
+    target_len: int,
+    min_corr: float = 0.01,
+    max_corr: float = 0.99,
+    step: float = 0.01,
+    use_abs: bool = False,
+) -> tuple[list[str], float]:
+    """Return the closest filtered weight set for a target number of rules.
+
+    The helper searches the correlation threshold range [min_corr, max_corr] using
+    binary search. It computes the filtered rule list for each candidate threshold
+    and returns the first length that is >= target_len.
+
+    If the target length is below the minimum length at `min_corr`, it returns the
+    minimum result. If the target length is above the maximum length at `max_corr`,
+    it returns the maximum result.
+    """
+    if target_len < 0:
+        raise ValueError("target_len must be non-negative")
+    if not 0 < min_corr < max_corr < 1.0:
+        raise ValueError("min_corr and max_corr must satisfy 0 < min_corr < max_corr < 1.0")
+    if step <= 0:
+        raise ValueError("step must be positive")
+
+    min_step = int(round(min_corr / step))
+    max_step = int(round(max_corr / step))
+
+    def compute_filtered(step_idx: int) -> tuple[int, list[str], float]:
+        max_corr_value = step_idx * step
+        filtered = filter_correlated_rules(
+            sample_weights,
+            importance=importance,
+            max_corr=max_corr_value,
+            use_abs=use_abs,
+        )
+        return len(filtered), filtered, max_corr_value
+
+    min_len, min_filtered, min_corr_value = compute_filtered(min_step)
+    max_len, max_filtered, max_corr_value = compute_filtered(max_step)
+
+    if target_len <= min_len:
+        return min_filtered, min_corr_value
+    if target_len >= max_len:
+        return max_filtered, max_corr_value
+
+    lo = min_step
+    hi = max_step
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        cur_len, cur_filtered, cur_corr_value = compute_filtered(mid)
+
+        if cur_len == target_len:
+            return cur_filtered, cur_corr_value
+        if cur_len < target_len:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+
+    if lo > max_step:
+        return max_filtered, max_corr_value
+
+    _, upper_filtered, upper_corr_value = compute_filtered(lo)
+    return upper_filtered, upper_corr_value

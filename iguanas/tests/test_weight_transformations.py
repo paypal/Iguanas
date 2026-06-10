@@ -2,6 +2,7 @@ import numpy as np
 import polars as pl
 import pytest
 
+import iguanas.weight_transformations as wt
 from iguanas.weight_transformations import (
     _DEFAULT_POWERS,
     EPS,
@@ -13,6 +14,7 @@ from iguanas.weight_transformations import (
     generate_all_weight,
     generate_decreasing_weight,
     generate_increasing_weight,
+    select_uncorrelated_weights,
 )
 
 
@@ -256,6 +258,186 @@ class TestGenerateDecreasingWeight:
         assert result.columns.count("Baseline") == 1
         assert any(c.endswith("__a") for c in result.columns)
         assert any(c.endswith("__b") for c in result.columns)
+
+
+class TestSelectUncorrelatedWeights:
+    @pytest.mark.parametrize(
+        "min_corr,max_corr",
+        [
+            (0.0, 0.5),
+            (0.5, 0.5),
+            (0.75, 0.25),
+        ],
+    )
+    def test_invalid_correlation_bounds_raises(self, min_corr, max_corr):
+        sample_weights = pl.DataFrame({"A": [1.0], "B": [1.0]})
+        importance = {"A": 1.0, "B": 2.0}
+
+        with pytest.raises(ValueError, match="min_corr and max_corr must satisfy"):
+            select_uncorrelated_weights(
+                sample_weights,
+                importance,
+                target_len=1,
+                min_corr=min_corr,
+                max_corr=max_corr,
+            )
+
+    def test_negative_target_len_raises(self):
+        sample_weights = pl.DataFrame({"A": [1.0], "B": [1.0]})
+        importance = {"A": 1.0, "B": 2.0}
+
+        with pytest.raises(ValueError, match="target_len must be non-negative"):
+            select_uncorrelated_weights(sample_weights, importance, target_len=-1)
+
+    def test_non_positive_step_raises(self):
+        sample_weights = pl.DataFrame({"A": [1.0], "B": [1.0]})
+        importance = {"A": 1.0, "B": 2.0}
+
+        with pytest.raises(ValueError, match="step must be positive"):
+            select_uncorrelated_weights(
+                sample_weights,
+                importance,
+                target_len=1,
+                step=0.0,
+            )
+
+    def test_returns_closest_filtered_set_for_target_len(self):
+        sample_weights = pl.DataFrame(
+            {
+                "A": [1.0, 0.8, 0.4],
+                "B": [0.8, 1.0, 0.7],
+                "C": [0.4, 0.7, 1.0],
+            }
+        )
+        importance = {"A": 1.0, "B": 2.0, "C": 3.0}
+
+        selected, corr_value = select_uncorrelated_weights(
+            sample_weights,
+            importance,
+            target_len=2,
+            min_corr=0.01,
+            max_corr=0.99,
+            step=0.01,
+        )
+
+        assert selected == ["B", "C"]
+        assert corr_value == pytest.approx(0.75)
+
+    def test_returns_next_closest_threshold_when_exact_target_is_impossible(self):
+        sample_weights = pl.DataFrame(
+            {
+                "A": [1.0, 0.9, 0.9],
+                "B": [0.9, 1.0, 0.9],
+                "C": [0.9, 0.9, 1.0],
+            }
+        )
+        importance = {"A": 1.0, "B": 2.0, "C": 3.0}
+
+        selected, corr_value = select_uncorrelated_weights(
+            sample_weights,
+            importance,
+            target_len=2,
+            min_corr=0.01,
+            max_corr=0.99,
+            step=0.01,
+        )
+
+        assert selected == ["A", "B", "C"]
+        assert corr_value == pytest.approx(0.90)
+
+    def test_returns_max_when_search_exhausts_without_exact_match(self, monkeypatch):
+        call_state = {"count": 0}
+
+        def fake_filter_correlated_rules(R, importance, max_corr, use_abs=False):
+            if call_state["count"] == 0:
+                call_state["count"] += 1
+                assert max_corr == 0.01
+                return ["A"]
+            if call_state["count"] == 1:
+                call_state["count"] += 1
+                assert pytest.approx(max_corr, rel=1e-8) == 0.99
+                return ["A", "B", "C"]
+            call_state["count"] += 1
+            return ["A"]
+
+        monkeypatch.setattr(wt, "filter_correlated_rules", fake_filter_correlated_rules)
+        selected, corr_value = select_uncorrelated_weights(
+            pl.DataFrame({"A": [0.0], "B": [0.0], "C": [0.0]}),
+            {"A": 1.0, "B": 2.0, "C": 3.0},
+            target_len=2,
+            min_corr=0.01,
+            max_corr=0.99,
+            step=0.01,
+        )
+
+        assert selected == ["A", "B", "C"]
+        assert corr_value == pytest.approx(0.99)
+
+    def test_returns_minimum_when_target_len_below_range(self):
+        sample_weights = pl.DataFrame(
+            {
+                "A": [1.0, 0.8, 0.4],
+                "B": [0.8, 1.0, 0.7],
+                "C": [0.4, 0.7, 1.0],
+            }
+        )
+        importance = {"A": 1.0, "B": 2.0, "C": 3.0}
+
+        selected, corr_value = select_uncorrelated_weights(
+            sample_weights,
+            importance,
+            target_len=1,
+            min_corr=0.01,
+            max_corr=0.99,
+            step=0.01,
+        )
+
+        assert selected == ["C"]
+        assert corr_value == pytest.approx(0.01)
+
+    def test_returns_maximum_when_target_len_above_range(self):
+        sample_weights = pl.DataFrame(
+            {
+                "A": [1.0, 0.8, 0.4],
+                "B": [0.8, 1.0, 0.7],
+                "C": [0.4, 0.7, 1.0],
+            }
+        )
+        importance = {"A": 1.0, "B": 2.0, "C": 3.0}
+
+        selected, corr_value = select_uncorrelated_weights(
+            sample_weights,
+            importance,
+            target_len=4,
+            min_corr=0.01,
+            max_corr=0.99,
+            step=0.01,
+        )
+
+        assert selected == ["A", "B", "C"]
+        assert corr_value == pytest.approx(0.99)
+
+    def test_use_abs_false_preserves_negative_correlations(self):
+        sample_weights = pl.DataFrame(
+            {
+                "A": [1.0, -0.95],
+                "B": [-0.95, 1.0],
+            }
+        )
+        importance = {"A": 1.0, "B": 2.0}
+
+        selected, corr_value = select_uncorrelated_weights(
+            sample_weights,
+            importance,
+            target_len=2,
+            min_corr=0.01,
+            max_corr=0.99,
+            step=0.01,
+            use_abs=False,
+        )
+
+        assert selected == ["A", "B"]
+        assert corr_value == pytest.approx(0.01)
 
 
 # ---------------------------------------------------------------------------

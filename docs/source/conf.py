@@ -203,14 +203,14 @@ def autodoc_process_signature(app, what, name, obj, options, signature, return_a
         )
 
     if signature is not None:
-        signature = signature.replace("polars.series.series.Series", "pl.Series").replace(
-            "polars.dataframe.frame.DataFrame", "pl.DataFrame"
+        signature = signature.replace("polars.series.series.Series", "polars.Series").replace(
+            "polars.dataframe.frame.DataFrame", "polars.DataFrame"
         )
         signature = strip_type_roles(signature)
     if return_annotation is not None:
         return_annotation = return_annotation.replace(
-            "polars.series.series.Series", "pl.Series"
-        ).replace("polars.dataframe.frame.DataFrame", "pl.DataFrame")
+            "polars.series.series.Series", "polars.Series"
+        ).replace("polars.dataframe.frame.DataFrame", "polars.DataFrame")
         return_annotation = strip_type_roles(return_annotation)
     return signature, return_annotation
 
