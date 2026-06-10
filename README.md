@@ -16,7 +16,7 @@
 | Community | [![GitHub Stars](https://img.shields.io/github/stars/paypal/Iguanas?style=social)](https://github.com/paypal/Iguanas) [![GitHub Forks](https://img.shields.io/github/forks/paypal/Iguanas?style=social)](https://github.com/paypal/Iguanas) [![Contributors](https://img.shields.io/github/contributors/paypal/Iguanas)](https://github.com/paypal/Iguanas/graphs/contributors) [![Last Commit](https://img.shields.io/github/last-commit/paypal/Iguanas)](https://github.com/paypal/Iguanas/commits/main) |
 
 
-📚 **[Full Documentation](https://paypal.github.io/iguanas/)**
+📚 **[Full Documentation](https://paypal.github.io/Iguanas/)**
 
 
 ## What is Iguanas?
