@@ -428,7 +428,7 @@ both <strong>faster</strong> and <strong>simpler</strong>.</p>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xgboost</span><span class="w"> </span><span class="kn">import</span> <span class="n">XGBClassifier</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">iguanas.weight_transformations</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_all_weight</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">iguanas.weight_transformations</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_weights</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">iguanas.rule_generation</span><span class="w"> </span><span class="kn">import</span> <span class="n">rule_grid_search_parallel_weights</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">iguanas.rule_evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_filter_and_deduplicate_rules</span>
 
@@ -440,15 +440,15 @@ both <strong>faster</strong> and <strong>simpler</strong>.</p>
 <span class="n">y_train</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 
 <span class="c1"># 2. Generate sample weight transformations</span>
-<span class="n">weights</span> <span class="o">=</span> <span class="n">generate_all_weight</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="s2">&quot;income&quot;</span><span class="p">])</span>
+<span class="n">weights</span> <span class="o">=</span> <span class="n">generate_weights</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="s2">&quot;income&quot;</span><span class="p">])</span>
 
 <span class="c1"># 3. Run a parallel grid search to extract rules</span>
 <span class="n">estimator</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_estimators</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-<span class="n">scale_pos_weight_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">scale_pos_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 
 <span class="n">rules_df</span> <span class="o">=</span> <span class="n">rule_grid_search_parallel_weights</span><span class="p">(</span>
     <span class="n">estimator</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span>
-    <span class="n">scale_pos_weight_vec</span><span class="o">=</span><span class="n">scale_pos_weight_vec</span><span class="p">,</span>
+    <span class="n">scale_pos_weights</span><span class="o">=</span><span class="n">scale_pos_weights</span><span class="p">,</span>
     <span class="n">weights_train_vec</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span>
     <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>

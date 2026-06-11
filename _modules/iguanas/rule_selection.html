@@ -657,7 +657,7 @@
 <div class="viewcode-block" id="select_best_rule_per_column_combination">
 <a class="viewcode-back" href="../../api/rule_selection.html#iguanas.rule_selection.select_best_rule_per_column_combination">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">select_best_rule_per_column_combination</span><span class="p">(</span>
-    <span class="n">metrics</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">sort_by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;precision&quot;</span>
+    <span class="n">metrics</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">ranking_metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;precision&quot;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Select the rule with the highest metric score for each unique column combination.</span>
@@ -666,8 +666,8 @@
 <span class="sd">    ----------</span>
 <span class="sd">    metrics : pl.DataFrame</span>
 <span class="sd">        DataFrame containing rule performance metrics. Must have a &quot;rule&quot; column</span>
-<span class="sd">        and the metric specified in sort_by.</span>
-<span class="sd">    sort_by : str, default=&quot;precision&quot;</span>
+<span class="sd">        and the metric specified in ranking_metric.</span>
+<span class="sd">    ranking_metric : str, default=&quot;precision&quot;</span>
 <span class="sd">        Name of the metric column to use for selecting the best rule in each group.</span>
 
 <span class="sd">    Returns</span>
@@ -681,14 +681,14 @@
 <span class="sd">    ...     &quot;rule&quot;: [&#39;(X[&quot;a&quot;] &gt; 1)&#39;, &#39;(X[&quot;a&quot;] &gt; 2)&#39;, &#39;(X[&quot;b&quot;] &lt; 3)&#39;],</span>
 <span class="sd">    ...     &quot;precision&quot;: [0.95, 0.98, 0.96]</span>
 <span class="sd">    ... })</span>
-<span class="sd">    &gt;&gt;&gt; select_best_rule_per_column_combination(metrics, sort_by=&quot;precision&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; select_best_rule_per_column_combination(metrics, ranking_metric=&quot;precision&quot;)</span>
 <span class="sd">    # Returns the rule with highest precision for column &quot;a&quot; and the rule for column &quot;b&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Validate inputs</span>
     <span class="k">if</span> <span class="s2">&quot;rule&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;metrics DataFrame must contain a &#39;rule&#39; column&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">sort_by</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sort_by metric &#39;</span><span class="si">{</span><span class="n">sort_by</span><span class="si">}</span><span class="s2">&#39; not found in metrics columns&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ranking_metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ranking_metric metric &#39;</span><span class="si">{</span><span class="n">ranking_metric</span><span class="si">}</span><span class="s2">&#39; not found in metrics columns&quot;</span><span class="p">)</span>
 
     <span class="c1"># Extract rules and build rule → column-combination mapping</span>
     <span class="n">rules</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;rule&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
@@ -705,9 +705,9 @@
     <span class="p">)</span>
     <span class="n">metrics_with_combo</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">combo_series</span><span class="p">)</span>
 
-    <span class="c1"># Group by column combination and select the row with max sort_by value</span>
+    <span class="c1"># Group by column combination and select the row with max ranking_metric value</span>
     <span class="n">best_rules</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">metrics_with_combo</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">sort_by</span><span class="p">,</span> <span class="n">descending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">metrics_with_combo</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">ranking_metric</span><span class="p">,</span> <span class="n">descending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="o">.</span><span class="n">group_by</span><span class="p">(</span><span class="s2">&quot;column_combination&quot;</span><span class="p">,</span> <span class="n">maintain_order</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="o">.</span><span class="n">first</span><span class="p">()</span>
         <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;column_combination&quot;</span><span class="p">)</span>

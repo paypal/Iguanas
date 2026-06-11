@@ -359,7 +359,7 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Core Modules</span></p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Functions</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rule_generation.html">Rule Generation</a></li>
@@ -370,6 +370,11 @@
 <li class="toctree-l1"><a class="reference internal" href="rule_formatting.html">Rule Formatting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotone_constraints.html">Monotone Constraints</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weight_transformations.html">Weight Transformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rule_classifier.html">Rule Classifier</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Ruleset Classifier</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Classifiers (scikit-learn API)</span></p>
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="rule_classifier.html">Rule Classifier</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Ruleset Classifier</a></li>
 </ul>
@@ -457,10 +462,10 @@ trees trained across a sweep of <code class="docutils literal notranslate"><span
 <li><p><strong>Performance filtering</strong>: rules that fail any condition in
 <code class="docutils literal notranslate"><span class="pre">metric_thresholds</span></code> are discarded.</p></li>
 <li><p><strong>Correlation filtering</strong>: among rules that are correlated above
-<code class="docutils literal notranslate"><span class="pre">max_corr</span></code>, only the one with the highest <code class="docutils literal notranslate"><span class="pre">opt_metric</span></code> score is kept.</p></li>
+<code class="docutils literal notranslate"><span class="pre">max_corr</span></code>, only the one with the highest <code class="docutils literal notranslate"><span class="pre">ranking_metric</span></code> score is kept.</p></li>
 <li><p><strong>Greedy combination</strong>: starting from the single best rule, rules are
 added one at a time — each iteration picks the candidate that yields the
-largest improvement in <code class="docutils literal notranslate"><span class="pre">opt_metric</span></code> when combined (via
+largest improvement in <code class="docutils literal notranslate"><span class="pre">ranking_metric</span></code> when combined (via
 <code class="docutils literal notranslate"><span class="pre">combine_operator</span></code>) with the already-selected rules. Addition stops
 when no candidate improves the metric by at least <code class="docutils literal notranslate"><span class="pre">min_improvement</span></code> or
 when <code class="docutils literal notranslate"><span class="pre">max_rules</span></code> rules have been selected.</p></li>
@@ -471,8 +476,8 @@ string (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>estimator</strong> (<em>XGBClassifier</em>) – XGBoost classifier used for rule generation.</p></li>
-<li><p><strong>scale_pos_weight_vec</strong> (<em>np.ndarray</em><em> | </em>list<em>[</em>float<em>]</em><em>, </em><em>default=np.array</em><em>(</em><em>[</em><em>1.0</em><em>]</em><em>)</em>) – Vector of scale_pos_weight values swept during rule generation.</p></li>
-<li><p><strong>opt_metric</strong> (str<em>, </em><em>default=&quot;accuracy&quot;</em>) – Metric used to rank and select candidate rules. Must be a column
+<li><p><strong>scale_pos_weights</strong> (<em>np.ndarray</em><em> | </em>list<em>[</em>float<em>]</em><em>, </em><em>default=np.array</em><em>(</em><em>[</em><em>1.0</em><em>]</em><em>)</em>) – Array of scale_pos_weight values swept during rule generation.</p></li>
+<li><p><strong>ranking_metric</strong> (str<em>, </em><em>default=&quot;accuracy&quot;</em>) – Metric used to rank and select candidate rules. Must be a column
 produced by compute_metrics (e.g. “f1”, “precision”, “recall”).</p></li>
 <li><p><strong>max_rules</strong> (int<em>, </em><em>default=10</em>) – Maximum number of rules the greedy search may select. Must be &gt; 0.</p></li>
 <li><p><strong>metric_thresholds</strong> (list<em>[</em>dict<em>[</em>str<em>, </em><em>Any</em><em>]</em><em>] </em><em>| </em><em>None</em><em>, </em><em>default=None</em>) – List of threshold dicts used to filter candidate rules. Each dict must
@@ -484,22 +489,20 @@ is used.</p></li>
 <li><p><strong>max_corr</strong> (float<em>, </em><em>default=0.8</em>) – Maximum pairwise correlation allowed between rules; correlated pairs
 are pruned to keep only the highest-ranked one. Must be in [0, 1].</p></li>
 <li><p><strong>combine_operator</strong> (str<em>, </em><em>default=&quot;or&quot;</em>) – Boolean operator used to combine selected rules: “or” or “and”.</p></li>
-<li><p><strong>min_improvement</strong> (float<em>, </em><em>default=0.01</em>) – Minimum improvement in opt_metric required to add a new rule to the
+<li><p><strong>min_improvement</strong> (float<em>, </em><em>default=0.01</em>) – Minimum improvement in ranking_metric required to add a new rule to the
 combined ruleset during greedy selection.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="iguanas.ruleset_classifier.RulesetClassifier.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weights_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#iguanas.ruleset_classifier.RulesetClassifier" title="iguanas.ruleset_classifier.RulesetClassifier"><span class="pre">iguanas.ruleset_classifier.RulesetClassifier</span></a></span></span><a class="reference internal" href="../_modules/iguanas/ruleset_classifier.html#RulesetClassifier.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.fit" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#iguanas.ruleset_classifier.RulesetClassifier" title="iguanas.ruleset_classifier.RulesetClassifier"><span class="pre">iguanas.ruleset_classifier.RulesetClassifier</span></a></span></span><a class="reference internal" href="../_modules/iguanas/ruleset_classifier.html#RulesetClassifier.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.fit" title="Link to this definition">#</a></dt>
 <dd><p>Generate, filter, and select rules from training data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> (<em>pl.DataFrame</em>) – Feature DataFrame. Only numeric columns are used for rule generation.</p></li>
 <li><p><strong>y</strong> (<em>pl.Series</em>) – Binary target series.</p></li>
-<li><p><strong>sample_weights_df</strong> (<em>pl.DataFrame</em><em> | </em><em>None</em><em>, </em><em>default=None</em>) – Optional DataFrame of sample weights with a single column. If provided,
-weights are used during rule generation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -560,41 +563,6 @@ rules that fire for each sample:</p>
 <span class="sig-name descname"><span class="pre">fit_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.Series</span></span></span><a class="reference internal" href="../_modules/iguanas/ruleset_classifier.html#RulesetClassifier.fit_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.fit_predict" title="Link to this definition">#</a></dt>
 <dd><p>Fit pipeline and return binary predictions on the same data.</p>
 <dl class="field-list simple">
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="iguanas.ruleset_classifier.RulesetClassifier.set_fit_request">
-<span class="sig-name descname"><span class="pre">set_fit_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weights_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#iguanas.ruleset_classifier.RulesetClassifier" title="iguanas.ruleset_classifier.RulesetClassifier"><span class="pre">iguanas.ruleset_classifier.RulesetClassifier</span></a></span></span><a class="headerlink" href="#iguanas.ruleset_classifier.RulesetClassifier.set_fit_request" title="Link to this definition">#</a></dt>
-<dd><p>Configure whether metadata should be requested to be passed to the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method.</p>
-<p>Note that this method is only relevant when this estimator is used as a
-sub-estimator within a <a class="reference external" href="https://scikit-learn.org/stable/glossary.html#term-meta-estimator" title="(in scikit-learn v1.9)"><span class="xref std std-term">meta-estimator</span></a> and metadata routing is enabled
-with <code class="docutils literal notranslate"><span class="pre">enable_metadata_routing=True</span></code> (see <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.set_config.html#sklearn.set_config" title="(in scikit-learn v1.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.set_config()</span></code></a>).
-Please check the <a class="reference external" href="https://scikit-learn.org/stable/metadata_routing.html#metadata-routing" title="(in scikit-learn v1.9)"><span class="xref std std-ref">User Guide</span></a> on how the routing
-mechanism works.</p>
-<p>The options for each parameter are:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: metadata is requested, and passed to <code class="docutils literal notranslate"><span class="pre">fit</span></code> if provided. The request is ignored if metadata is not provided.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: metadata is not requested and the meta-estimator will not pass it to <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: metadata is not requested, and the meta-estimator will raise an error if the user provides it.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">str</span></code>: metadata should be passed to the meta-estimator with this given alias instead of the original name.</p></li>
-</ul>
-<p>The default (<code class="docutils literal notranslate"><span class="pre">sklearn.utils.metadata_routing.UNCHANGED</span></code>) retains the
-existing request. This allows you to change the request for some
-parameters and not others.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.3.</span></p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>sample_weights_df</strong> (str<em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">sample_weights_df</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>self</strong> – The updated object.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)">object</a></p>
-</dd>
 </dl>
 </dd></dl>
 
@@ -693,7 +661,6 @@ parameters and not others.</p>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.ruleset_classifier.RulesetClassifier.predict"><code class="docutils literal notranslate"><span class="pre">RulesetClassifier.predict()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.ruleset_classifier.RulesetClassifier.predict_proba"><code class="docutils literal notranslate"><span class="pre">RulesetClassifier.predict_proba()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.ruleset_classifier.RulesetClassifier.fit_predict"><code class="docutils literal notranslate"><span class="pre">RulesetClassifier.fit_predict()</span></code></a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.ruleset_classifier.RulesetClassifier.set_fit_request"><code class="docutils literal notranslate"><span class="pre">RulesetClassifier.set_fit_request()</span></code></a></li>
 <li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.ruleset_classifier.RulesetClassifier.set_score_request"><code class="docutils literal notranslate"><span class="pre">RulesetClassifier.set_score_request()</span></code></a></li>
 </ul>
 </li>

@@ -454,12 +454,12 @@
 <span class="p">)</span>
 
 <span class="c1"># 4. Generate rules using grid search</span>
-<span class="n">scale_pos_weight_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># Try different class balance weights</span>
+<span class="n">scale_pos_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># Try different class balance weights</span>
 <span class="n">rules_df</span> <span class="o">=</span> <span class="n">rule_grid_search_parallel_scales</span><span class="p">(</span>
    <span class="n">estimator</span><span class="o">=</span><span class="n">estimator</span><span class="p">,</span>
    <span class="n">X_train</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span>
    <span class="n">y_train</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span>
-   <span class="n">scale_pos_weight_vec</span><span class="o">=</span><span class="n">scale_pos_weight_vec</span><span class="p">,</span>
+   <span class="n">scale_pos_weights</span><span class="o">=</span><span class="n">scale_pos_weights</span><span class="p">,</span>
    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
 <span class="p">)</span>

@@ -359,7 +359,7 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Core Modules</span></p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Functions</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rule_generation.html">Rule Generation</a></li>
@@ -370,6 +370,11 @@
 <li class="toctree-l1"><a class="reference internal" href="rule_formatting.html">Rule Formatting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotone_constraints.html">Monotone Constraints</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weight_transformations.html">Weight Transformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rule_classifier.html">Rule Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ruleset_classifier.html">Ruleset Classifier</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Classifiers (scikit-learn API)</span></p>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="rule_classifier.html">Rule Classifier</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ruleset_classifier.html">Ruleset Classifier</a></li>
 </ul>
@@ -575,14 +580,14 @@ filtering.</p></li>
 <h3>select_best_rule_per_column_combination<a class="headerlink" href="#select-best-rule-per-column-combination" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="iguanas.rule_selection.select_best_rule_per_column_combination">
-<span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">select_best_rule_per_column_combination</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'precision'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/iguanas/rule_selection.html#select_best_rule_per_column_combination"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.select_best_rule_per_column_combination" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_selection.</span></span><span class="sig-name descname"><span class="pre">select_best_rule_per_column_combination</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranking_metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'precision'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/iguanas/rule_selection.html#select_best_rule_per_column_combination"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_selection.select_best_rule_per_column_combination" title="Link to this definition">#</a></dt>
 <dd><p>Select the rule with the highest metric score for each unique column combination.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>metrics</strong> (<em>pl.DataFrame</em>) – DataFrame containing rule performance metrics. Must have a “rule” column
-and the metric specified in sort_by.</p></li>
-<li><p><strong>sort_by</strong> (str<em>, </em><em>default=&quot;precision&quot;</em>) – Name of the metric column to use for selecting the best rule in each group.</p></li>
+and the metric specified in ranking_metric.</p></li>
+<li><p><strong>ranking_metric</strong> (str<em>, </em><em>default=&quot;precision&quot;</em>) – Name of the metric column to use for selecting the best rule in each group.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -598,7 +603,7 @@ and the metric specified in sort_by.</p></li>
 <span class="gp">... </span>    <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;(X[&quot;a&quot;] &gt; 1)&#39;</span><span class="p">,</span> <span class="s1">&#39;(X[&quot;a&quot;] &gt; 2)&#39;</span><span class="p">,</span> <span class="s1">&#39;(X[&quot;b&quot;] &lt; 3)&#39;</span><span class="p">],</span>
 <span class="gp">... </span>    <span class="s2">&quot;precision&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.96</span><span class="p">]</span>
 <span class="gp">... </span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">select_best_rule_per_column_combination</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">sort_by</span><span class="o">=</span><span class="s2">&quot;precision&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">select_best_rule_per_column_combination</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">ranking_metric</span><span class="o">=</span><span class="s2">&quot;precision&quot;</span><span class="p">)</span>
 <span class="go"># Returns the rule with highest precision for column &quot;a&quot; and the rule for column &quot;b&quot;</span>
 </pre></div>
 </div>

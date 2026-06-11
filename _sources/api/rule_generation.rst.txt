@@ -22,6 +22,11 @@ extract_rules
 
 .. autofunction:: extract_rules
 
+rule_grid_search
+---------------------------------
+
+.. autofunction:: rule_grid_search
+
 rule_grid_search_sequential
 ----------------------------
 

@@ -461,7 +461,7 @@
     <span class="n">combine_rules_greedy</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">iguanas.rule_evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_rules</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">iguanas.rule_generation</span><span class="w"> </span><span class="kn">import</span> <span class="n">rule_grid_search_parallel_scales</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">iguanas.rule_generation</span><span class="w"> </span><span class="kn">import</span> <span class="n">rule_grid_search</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">iguanas.rule_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">filter_correlated_rules</span>
 </pre></div>
 </div>
@@ -508,11 +508,11 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimator</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">eval_metric</span><span class="o">=</span><span class="s2">&quot;logloss&quot;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">rules</span> <span class="o">=</span> <span class="n">rule_grid_search_parallel_scales</span><span class="p">(</span>
+<span class="n">rules</span> <span class="o">=</span> <span class="n">rule_grid_search</span><span class="p">(</span>
     <span class="n">estimator</span><span class="p">,</span>
     <span class="n">X_train</span><span class="p">[</span><span class="n">num_columns</span><span class="p">]</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">(),</span>
     <span class="n">y_train</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">(),</span>
-    <span class="n">scale_pos_weight_vec</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span>
+    <span class="n">scale_pos_weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span>
 <span class="p">)</span>
 <span class="n">rules_df</span> <span class="o">=</span> <span class="n">rules</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="s2">&quot;rule&quot;</span><span class="p">)</span>
 </pre></div>
@@ -538,7 +538,7 @@
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (3, 4)</small><table border="1" class="dataframe"><thead><tr><th>rule</th><th>tree</th><th>transformation</th><th>scale_pos_weight</th></tr><tr><td>str</td><td>i64</td><td>str</td><td>f64</td></tr></thead><tbody><tr><td>&quot;(X[&quot;Pclass&quot;] &lt; 3.0) &amp; (X[&quot;Parc…</td><td>5</td><td>&quot;Baseline&quot;</td><td>0.029471</td></tr><tr><td>&quot;(X[&quot;Fare&quot;] &gt;= 10.5) &amp; (X[&quot;SibS…</td><td>6</td><td>&quot;Baseline&quot;</td><td>0.068665</td></tr><tr><td>&quot;(X[&quot;Fare&quot;] &gt;= 52.5542) &amp; (X[&quot;S…</td><td>8</td><td>&quot;Baseline&quot;</td><td>59.636233</td></tr></tbody></table></div></div>
+<small>shape: (3, 4)</small><table border="1" class="dataframe"><thead><tr><th>rule</th><th>tree</th><th>transformation</th><th>scale_pos_weight</th></tr><tr><td>str</td><td>i64</td><td>str</td><td>f64</td></tr></thead><tbody><tr><td>&quot;(X[&quot;Pclass&quot;] &lt; 3.0) &amp; (X[&quot;Fare…</td><td>3</td><td>&quot;Baseline&quot;</td><td>59.636233</td></tr><tr><td>&quot;(X[&quot;Fare&quot;] &gt;= 15.2458) &amp; (X[&quot;F…</td><td>7</td><td>&quot;Baseline&quot;</td><td>33.932218</td></tr><tr><td>&quot;(X[&quot;Fare&quot;] &lt; 15.2458) &amp; (X[&quot;Ag…</td><td>5</td><td>&quot;Baseline&quot;</td><td>0.655129</td></tr></tbody></table></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:

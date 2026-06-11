@@ -359,7 +359,7 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Core Modules</span></p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Functions</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rule_generation.html">Rule Generation</a></li>
@@ -370,6 +370,11 @@
 <li class="toctree-l1"><a class="reference internal" href="rule_formatting.html">Rule Formatting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotone_constraints.html">Monotone Constraints</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weight_transformations.html">Weight Transformations</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Rule Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ruleset_classifier.html">Ruleset Classifier</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Classifiers (scikit-learn API)</span></p>
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Rule Classifier</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ruleset_classifier.html">Ruleset Classifier</a></li>
 </ul>
@@ -456,15 +461,16 @@
 trees trained across a sweep of <code class="docutils literal notranslate"><span class="pre">scale_pos_weight</span></code> values.</p></li>
 <li><p><strong>Performance filtering</strong>: rules that fail any condition in
 <code class="docutils literal notranslate"><span class="pre">metric_thresholds</span></code> are discarded.</p></li>
-<li><p><strong>Ranking</strong>: the surviving rules are sorted by <code class="docutils literal notranslate"><span class="pre">opt_metric</span></code> (descending)
+<li><p><strong>Ranking</strong>: the surviving rules are sorted by <code class="docutils literal notranslate"><span class="pre">ranking_metric</span></code> (descending)
 and the top-ranked rule is stored in <code class="docutils literal notranslate"><span class="pre">_best_rule_</span></code>.</p></li>
 </ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>estimator</strong> (<em>XGBClassifier</em>) – XGBoost classifier used for rule generation.</p></li>
-<li><p><strong>scale_pos_weight_vec</strong> (<em>np.ndarray</em>) – Vector of scale_pos_weight values swept during rule generation.</p></li>
-<li><p><strong>opt_metric</strong> (str<em>, </em><em>default=&quot;accuracy&quot;</em>) – Metric used to rank candidate rules. The single highest-scoring rule
+<li><p><strong>scale_pos_weights</strong> (list<em>[</em>float<em>] </em><em>| </em><em>np.ndarray</em><em>, </em><em>default=np.array</em><em>(</em><em>[</em><em>1.0</em><em>]</em><em>)</em>) – Array of scale_pos_weight values swept during rule generation.</p></li>
+<li><p><strong>sample_weights_df</strong> (<em>pl.DataFrame</em><em> | </em><em>None</em><em>, </em><em>default=None</em>) – DataFrame of sample weights used for rule generation.</p></li>
+<li><p><strong>ranking_metric</strong> (str<em>, </em><em>default=&quot;accuracy&quot;</em>) – Metric used to rank candidate rules. The single highest-scoring rule
 is kept. Must be a column produced by compute_metrics.</p></li>
 <li><p><strong>metric_thresholds</strong> (list<em>[</em>dict<em>[</em>str<em>, </em><em>Any</em><em>]</em><em>] </em><em>| </em><em>None</em><em>, </em><em>default=None</em>) – List of threshold dicts used to filter candidate rules. Each dict must
 have keys <code class="docutils literal notranslate"><span class="pre">&quot;name&quot;</span></code> (metric column), <code class="docutils literal notranslate"><span class="pre">&quot;operator&quot;</span></code> (one of

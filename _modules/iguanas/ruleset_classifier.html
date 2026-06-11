@@ -417,7 +417,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.rule_combination</span><span class="w"> </span><span class="kn">import</span> <span class="n">combine_rules_greedy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.rule_evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_and_filter_by_performance</span><span class="p">,</span> <span class="n">apply_rules</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.rule_generation</span><span class="w"> </span><span class="kn">import</span> <span class="n">rule_grid_search_parallel_scales</span><span class="p">,</span> <span class="n">rule_grid_search_parallel_weights</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.rule_generation</span><span class="w"> </span><span class="kn">import</span> <span class="n">rule_grid_search</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.rule_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">filter_correlated_rules</span>
 
 <span class="n">_NUMERIC_DTYPES</span> <span class="o">=</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Int8</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Int16</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Int32</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Int64</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Float32</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Float64</span><span class="p">)</span>
@@ -435,10 +435,10 @@
 <span class="sd">    2. **Performance filtering**: rules that fail any condition in</span>
 <span class="sd">       ``metric_thresholds`` are discarded.</span>
 <span class="sd">    3. **Correlation filtering**: among rules that are correlated above</span>
-<span class="sd">       ``max_corr``, only the one with the highest ``opt_metric`` score is kept.</span>
+<span class="sd">       ``max_corr``, only the one with the highest ``ranking_metric`` score is kept.</span>
 <span class="sd">    4. **Greedy combination**: starting from the single best rule, rules are</span>
 <span class="sd">       added one at a time — each iteration picks the candidate that yields the</span>
-<span class="sd">       largest improvement in ``opt_metric`` when combined (via</span>
+<span class="sd">       largest improvement in ``ranking_metric`` when combined (via</span>
 <span class="sd">       ``combine_operator``) with the already-selected rules. Addition stops</span>
 <span class="sd">       when no candidate improves the metric by at least ``min_improvement`` or</span>
 <span class="sd">       when ``max_rules`` rules have been selected.</span>
@@ -450,9 +450,9 @@
 <span class="sd">    ----------</span>
 <span class="sd">    estimator : XGBClassifier</span>
 <span class="sd">        XGBoost classifier used for rule generation.</span>
-<span class="sd">    scale_pos_weight_vec : np.ndarray | list[float], default=np.array([1.0])</span>
-<span class="sd">        Vector of scale_pos_weight values swept during rule generation.</span>
-<span class="sd">    opt_metric : str, default=&quot;accuracy&quot;</span>
+<span class="sd">    scale_pos_weights : np.ndarray | list[float], default=np.array([1.0])</span>
+<span class="sd">        Array of scale_pos_weight values swept during rule generation.</span>
+<span class="sd">    ranking_metric : str, default=&quot;accuracy&quot;</span>
 <span class="sd">        Metric used to rank and select candidate rules. Must be a column</span>
 <span class="sd">        produced by compute_metrics (e.g. &quot;f1&quot;, &quot;precision&quot;, &quot;recall&quot;).</span>
 <span class="sd">    max_rules : int, default=10</span>
@@ -470,15 +470,16 @@
 <span class="sd">    combine_operator : str, default=&quot;or&quot;</span>
 <span class="sd">        Boolean operator used to combine selected rules: &quot;or&quot; or &quot;and&quot;.</span>
 <span class="sd">    min_improvement : float, default=0.01</span>
-<span class="sd">        Minimum improvement in opt_metric required to add a new rule to the</span>
+<span class="sd">        Minimum improvement in ranking_metric required to add a new rule to the</span>
 <span class="sd">        combined ruleset during greedy selection.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">estimator</span><span class="p">:</span> <span class="n">XGBClassifier</span>
-    <span class="n">scale_pos_weight_vec</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">]))</span>
-    <span class="n">opt_metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;accuracy&quot;</span>
+    <span class="n">scale_pos_weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">]))</span>
+    <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ranking_metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;accuracy&quot;</span>
     <span class="n">max_rules</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">metric_thresholds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">metric_weights</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -515,9 +516,7 @@
 
 <div class="viewcode-block" id="RulesetClassifier.fit">
 <a class="viewcode-back" href="../../api/ruleset_classifier.html#iguanas.ruleset_classifier.RulesetClassifier.fit">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RulesetClassifier</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RulesetClassifier</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate, filter, and select rules from training data.</span>
 
 <span class="sd">        Parameters</span>
@@ -526,9 +525,6 @@
 <span class="sd">            Feature DataFrame. Only numeric columns are used for rule generation.</span>
 <span class="sd">        y : pl.Series</span>
 <span class="sd">            Binary target series.</span>
-<span class="sd">        sample_weights_df : pl.DataFrame | None, default=None</span>
-<span class="sd">            Optional DataFrame of sample weights with a single column. If provided,</span>
-<span class="sd">            weights are used during rule generation.</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        RulesetClassifier</span>
@@ -537,32 +533,23 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_thresholds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metric_thresholds</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span> <span class="s2">&quot;operator&quot;</span><span class="p">:</span> <span class="s2">&quot;&gt;=&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">}]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_feature_cols_</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">dt</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">dt</span> <span class="ow">in</span> <span class="n">_NUMERIC_DTYPES</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_pos_weight_vec</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">sample_weights_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">sample_weights_df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">rules_df</span> <span class="o">=</span> <span class="n">rule_grid_search_parallel_scales</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span>
-                <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_cols_</span><span class="p">],</span>
-                <span class="n">y</span><span class="p">,</span>
-                <span class="n">scale_pos_weight_vec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_pos_weight_vec</span><span class="p">,</span>
-                <span class="n">sample_weights_df</span><span class="o">=</span><span class="n">sample_weights_df</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">rules_df</span> <span class="o">=</span> <span class="n">rule_grid_search_parallel_weights</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span>
-                <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_cols_</span><span class="p">],</span>
-                <span class="n">y</span><span class="p">,</span>
-                <span class="n">scale_pos_weight_vec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_pos_weight_vec</span><span class="p">,</span>
-                <span class="n">sample_weights_df</span><span class="o">=</span><span class="n">sample_weights_df</span><span class="p">,</span>
-            <span class="p">)</span>
+        <span class="n">rules_df</span> <span class="o">=</span> <span class="n">rule_grid_search</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span>
+            <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_cols_</span><span class="p">],</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">scale_pos_weights</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_pos_weights</span><span class="p">,</span>
+            <span class="n">sample_weights_df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_weights_df</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">rules</span> <span class="o">=</span> <span class="n">rules_df</span><span class="p">[</span><span class="s2">&quot;rule&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
         <span class="n">R</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="n">apply_and_filter_by_performance</span><span class="p">(</span>
             <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_cols_</span><span class="p">],</span>
             <span class="n">y</span><span class="p">,</span>
             <span class="n">rules</span><span class="p">,</span>
             <span class="n">metric_thresholds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_thresholds</span><span class="p">,</span>
-            <span class="n">sort_by</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_metric</span><span class="p">,</span>
+            <span class="n">ranking_metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ranking_metric</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">candidate_rules</span> <span class="o">=</span> <span class="n">M</span><span class="p">[</span><span class="s2">&quot;rule&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
-        <span class="n">importance</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">M</span><span class="p">[</span><span class="s2">&quot;rule&quot;</span><span class="p">],</span> <span class="n">M</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_metric</span><span class="p">],</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">importance</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">M</span><span class="p">[</span><span class="s2">&quot;rule&quot;</span><span class="p">],</span> <span class="n">M</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ranking_metric</span><span class="p">],</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
         <span class="n">candidate_rules</span> <span class="o">=</span> <span class="n">filter_correlated_rules</span><span class="p">(</span>
             <span class="n">R</span><span class="p">[</span><span class="n">candidate_rules</span><span class="p">],</span>
             <span class="n">importance</span><span class="o">=</span><span class="n">importance</span><span class="p">,</span>
@@ -571,7 +558,7 @@
         <span class="n">R_greedy</span> <span class="o">=</span> <span class="n">combine_rules_greedy</span><span class="p">(</span>
             <span class="n">R</span><span class="p">[</span><span class="n">candidate_rules</span><span class="p">],</span>
             <span class="n">y</span><span class="p">,</span>
-            <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_metric</span><span class="p">,</span>
+            <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ranking_metric</span><span class="p">,</span>
             <span class="n">max_rules</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_rules</span><span class="p">,</span>
             <span class="n">min_improvement</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_improvement</span><span class="p">,</span>
             <span class="n">weights</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_weights</span><span class="p">,</span>

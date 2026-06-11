@@ -5,7 +5,7 @@ Complete reference for all Iguanas functions, organized by module.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Core Modules
+   :caption: Functions
 
    api/metrics
    api/rule_generation
@@ -19,3 +19,9 @@ Complete reference for all Iguanas functions, organized by module.
    api/rule_classifier
    api/ruleset_classifier
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Classifiers (scikit-learn API)
+
+   api/rule_classifier
+   api/ruleset_classifier

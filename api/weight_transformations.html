@@ -11,10 +11,10 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://paypal.github.io/Iguanas/api/weight_transformations.html" />
 <meta property="og:site_name" content="Iguanas - Lightning Fast Rule generation with Polars" />
-<meta property="og:description" content="Functions: generate_increasing_weight: generate_decreasing_weight: generate_all_weight: select_uncorrelated_weights:" />
+<meta property="og:description" content="Functions: generate_increasing_weights: generate_decreasing_weights: generate_weights: select_uncorrelated_weights:" />
 <meta property="og:image" content="https://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png" />
 <meta property="og:image:alt" content="Iguanas - Lightning Fast Rule generation with Polars" />
-<meta name="description" content="Functions: generate_increasing_weight: generate_decreasing_weight: generate_all_weight: select_uncorrelated_weights:" />
+<meta name="description" content="Functions: generate_increasing_weights: generate_decreasing_weights: generate_weights: select_uncorrelated_weights:" />
 <meta name="description" content="High-performance rule generation library with sklearn-compatible API." />
 <meta name="keywords" content="data science, machine learning, rule generation, python, polars, sklearn" />
 
@@ -359,7 +359,7 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Core Modules</span></p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Functions</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rule_generation.html">Rule Generation</a></li>
@@ -370,6 +370,11 @@
 <li class="toctree-l1"><a class="reference internal" href="rule_formatting.html">Rule Formatting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotone_constraints.html">Monotone Constraints</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Weight Transformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rule_classifier.html">Rule Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ruleset_classifier.html">Ruleset Classifier</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Classifiers (scikit-learn API)</span></p>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="rule_classifier.html">Rule Classifier</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ruleset_classifier.html">Ruleset Classifier</a></li>
 </ul>
@@ -443,11 +448,11 @@
 <h1>Weight Transformations<a class="headerlink" href="#weight-transformations" title="Link to this heading">#</a></h1>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h2>
-<section id="generate-increasing-weight">
-<h3>generate_increasing_weight<a class="headerlink" href="#generate-increasing-weight" title="Link to this heading">#</a></h3>
+<section id="generate-increasing-weights">
+<h3>generate_increasing_weights<a class="headerlink" href="#generate-increasing-weights" title="Link to this heading">#</a></h3>
 <dl class="py function">
-<dt class="sig sig-object py" id="iguanas.weight_transformations.generate_increasing_weight">
-<span class="sig-prename descclassname"><span class="pre">iguanas.weight_transformations.</span></span><span class="sig-name descname"><span class="pre">generate_increasing_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">powers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/weight_transformations.html#generate_increasing_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.weight_transformations.generate_increasing_weight" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="iguanas.weight_transformations.generate_increasing_weights">
+<span class="sig-prename descclassname"><span class="pre">iguanas.weight_transformations.</span></span><span class="sig-name descname"><span class="pre">generate_increasing_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">powers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/weight_transformations.html#generate_increasing_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.weight_transformations.generate_increasing_weights" title="Link to this definition">#</a></dt>
 <dd><p>Generate weight transformations where larger input values receive larger weights.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -468,11 +473,11 @@ transformations are applied to each column and concatenated horizontally.</p></l
 <p class="admonition-title">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">generate_increasing_weight</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">generate_increasing_weights</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">columns</span>  <span class="c1"># &#39;Baseline&#39;, &#39;(1+x)^0.25__amount&#39;, ..., &#39;log(1+x)__amount&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># DataFrame input: each column processed independently</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">],</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">]})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_increasing_weight</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_increasing_weights</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
 <span class="go">(3, ...)  # 1 Baseline + 5 power cols + 1 log col per feature, minus duplicate Baselines</span>
 </pre></div>
 </div>
@@ -480,11 +485,11 @@ transformations are applied to each column and concatenated horizontally.</p></l
 </dd></dl>
 
 </section>
-<section id="generate-decreasing-weight">
-<h3>generate_decreasing_weight<a class="headerlink" href="#generate-decreasing-weight" title="Link to this heading">#</a></h3>
+<section id="generate-decreasing-weights">
+<h3>generate_decreasing_weights<a class="headerlink" href="#generate-decreasing-weights" title="Link to this heading">#</a></h3>
 <dl class="py function">
-<dt class="sig sig-object py" id="iguanas.weight_transformations.generate_decreasing_weight">
-<span class="sig-prename descclassname"><span class="pre">iguanas.weight_transformations.</span></span><span class="sig-name descname"><span class="pre">generate_decreasing_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">powers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/weight_transformations.html#generate_decreasing_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.weight_transformations.generate_decreasing_weight" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="iguanas.weight_transformations.generate_decreasing_weights">
+<span class="sig-prename descclassname"><span class="pre">iguanas.weight_transformations.</span></span><span class="sig-name descname"><span class="pre">generate_decreasing_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">powers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/weight_transformations.html#generate_decreasing_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.weight_transformations.generate_decreasing_weights" title="Link to this definition">#</a></dt>
 <dd><p>Generate weight transformations where smaller input values receive larger weights.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -505,7 +510,7 @@ transformations are applied to each column and concatenated horizontally.</p></l
 <p class="admonition-title">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">generate_decreasing_weight</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">generate_decreasing_weights</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">columns</span>  <span class="c1"># &#39;1/(1+x)__amount&#39;, &#39;1/(1+x)^0.25__amount&#39;, ..., &#39;1/log(1+x)__amount&#39;</span>
 </pre></div>
 </div>
@@ -513,11 +518,11 @@ transformations are applied to each column and concatenated horizontally.</p></l
 </dd></dl>
 
 </section>
-<section id="generate-all-weight">
-<h3>generate_all_weight<a class="headerlink" href="#generate-all-weight" title="Link to this heading">#</a></h3>
+<section id="generate-weights">
+<h3>generate_weights<a class="headerlink" href="#generate-weights" title="Link to this heading">#</a></h3>
 <dl class="py function">
-<dt class="sig sig-object py" id="iguanas.weight_transformations.generate_all_weight">
-<span class="sig-prename descclassname"><span class="pre">iguanas.weight_transformations.</span></span><span class="sig-name descname"><span class="pre">generate_all_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">powers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/weight_transformations.html#generate_all_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.weight_transformations.generate_all_weight" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="iguanas.weight_transformations.generate_weights">
+<span class="sig-prename descclassname"><span class="pre">iguanas.weight_transformations.</span></span><span class="sig-name descname"><span class="pre">generate_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">powers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/weight_transformations.html#generate_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.weight_transformations.generate_weights" title="Link to this definition">#</a></dt>
 <dd><p>Generate all weight transformations (increasing and decreasing).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -538,7 +543,7 @@ transformations are applied to each column and concatenated horizontally.</p></l
 <p class="admonition-title">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">generate_all_weight</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">generate_weights</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Columns include both (1+x)^p and 1/(1+x)^p families plus log variants</span>
 </pre></div>
 </div>
@@ -576,10 +581,6 @@ list of selected weight names at the chosen correlation threshold and
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple[list[str], float]</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">target_len</span></code> is negative, if <code class="docutils literal notranslate"><span class="pre">step</span></code> is not positive, or if
-    <code class="docutils literal notranslate"><span class="pre">min_corr</span></code>/<code class="docutils literal notranslate"><span class="pre">max_corr</span></code> do not satisfy <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;</span> <span class="pre">min_corr</span> <span class="pre">&lt;</span> <span class="pre">max_corr</span> <span class="pre">&lt;</span> <span class="pre">1.0</span></code>.</p>
 </dd>
 </dl>
 <div class="admonition-notes admonition">
@@ -652,16 +653,16 @@ and <code class="docutils literal notranslate"><span class="pre">round(max_corr/
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a><ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generate-increasing-weight">generate_increasing_weight</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.weight_transformations.generate_increasing_weight"><code class="docutils literal notranslate"><span class="pre">generate_increasing_weight()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generate-increasing-weights">generate_increasing_weights</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.weight_transformations.generate_increasing_weights"><code class="docutils literal notranslate"><span class="pre">generate_increasing_weights()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generate-decreasing-weight">generate_decreasing_weight</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.weight_transformations.generate_decreasing_weight"><code class="docutils literal notranslate"><span class="pre">generate_decreasing_weight()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generate-decreasing-weights">generate_decreasing_weights</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.weight_transformations.generate_decreasing_weights"><code class="docutils literal notranslate"><span class="pre">generate_decreasing_weights()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generate-all-weight">generate_all_weight</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.weight_transformations.generate_all_weight"><code class="docutils literal notranslate"><span class="pre">generate_all_weight()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#generate-weights">generate_weights</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.weight_transformations.generate_weights"><code class="docutils literal notranslate"><span class="pre">generate_weights()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#select-uncorrelated-weights">select_uncorrelated_weights</a><ul class="nav section-nav flex-column">

@@ -669,7 +669,7 @@
     <span class="n">estimator_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">X_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">y_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">scale_pos_weight_vec</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">scale_pos_weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">all_features_constrained</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">feature_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
@@ -688,7 +688,7 @@
 <span class="sd">        Training features as numpy array (serializes faster than DataFrame for IPC).</span>
 <span class="sd">    y_train : pd.Series | np.ndarray</span>
 <span class="sd">        Training target as numpy array.</span>
-<span class="sd">    scale_pos_weight_vec : np.ndarray</span>
+<span class="sd">    scale_pos_weights : np.ndarray</span>
 <span class="sd">        Array of scale_pos_weight values to try</span>
 <span class="sd">    all_features_constrained : bool</span>
 <span class="sd">        Whether to use monotone constraint-based extraction</span>
@@ -714,7 +714,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">X_fit</span> <span class="o">=</span> <span class="n">X_train</span>
 
-    <span class="k">for</span> <span class="n">scale_pos_weight</span> <span class="ow">in</span> <span class="n">scale_pos_weight_vec</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">scale_pos_weight</span> <span class="ow">in</span> <span class="n">scale_pos_weights</span><span class="p">:</span>
         <span class="n">est</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">(</span><span class="o">**</span><span class="n">estimator_params</span><span class="p">)</span>
         <span class="n">est</span><span class="o">.</span><span class="n">scale_pos_weight</span> <span class="o">=</span> <span class="n">scale_pos_weight</span>
         <span class="k">try</span><span class="p">:</span>
@@ -785,10 +785,7 @@
         <span class="n">weights_array</span> <span class="o">=</span> <span class="n">weights_np</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
         <span class="n">est</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">(</span><span class="o">**</span><span class="n">estimator_params</span><span class="p">)</span>
         <span class="n">est</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">scale_pos_weight</span><span class="o">=</span><span class="n">scale_pos_weight</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">est</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_fit</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights_array</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="k">continue</span>
+        <span class="n">est</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_fit</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights_array</span><span class="p">)</span>
 
         <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;transformation&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
@@ -801,13 +798,115 @@
     <span class="k">return</span> <span class="n">rules_dfs</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_setup_and_validate_grid_search</span><span class="p">(</span>
+    <span class="n">X_train</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">scale_pos_weights</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">estimator</span><span class="p">:</span> <span class="n">XGBClassifier</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate inputs and prepare data for grid search functions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X_train : pl.DataFrame | pd.DataFrame</span>
+<span class="sd">        Training feature matrix.</span>
+<span class="sd">    y_train : pl.Series | pd.Series</span>
+<span class="sd">        Training target values.</span>
+<span class="sd">    scale_pos_weights : list[float] | np.ndarray</span>
+<span class="sd">        Array of scale_pos_weight values to try.</span>
+<span class="sd">    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None</span>
+<span class="sd">        DataFrame mapping transformation names to sample weight arrays.</span>
+<span class="sd">    estimator : XGBClassifier | None, default=None</span>
+<span class="sd">        Estimator to check for monotone constraints.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        (X_train_np, y_train_np, feature_names, sample_weights_df_pd,</span>
+<span class="sd">         estimator_params, all_features_constrained)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">X_train_np</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">y_train_np</span> <span class="o">=</span> <span class="n">y_train</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">feature_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">X_train_np</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;X_train contains non-numeric data. Please encode categorical features &quot;</span>
+            <span class="s2">&quot;numerically before using rule_grid_search_parallel_scales.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weights</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;scale_pos_weights cannot be empty&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">sample_weights_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sample_weights_df_pd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;Baseline&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">))})</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_weights_df</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="n">sample_weights_df_pd</span> <span class="o">=</span> <span class="n">sample_weights_df</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sample_weights_df_pd</span> <span class="o">=</span> <span class="n">sample_weights_df</span>
+
+    <span class="n">estimator_params</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">all_features_constrained</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">estimator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">estimator_params</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+        <span class="n">estimator_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;scale_pos_weight&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">n_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">all_features_constrained</span> <span class="o">=</span> <span class="n">_check_all_features_have_monotone_constraints</span><span class="p">(</span>
+            <span class="n">estimator</span><span class="p">,</span> <span class="n">n_features</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">X_train_np</span><span class="p">,</span>
+        <span class="n">y_train_np</span><span class="p">,</span>
+        <span class="n">feature_names</span><span class="p">,</span>
+        <span class="n">sample_weights_df_pd</span><span class="p">,</span>
+        <span class="n">estimator_params</span><span class="p">,</span>
+        <span class="n">all_features_constrained</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_finalize_grid_search_results</span><span class="p">(</span>
+    <span class="n">rules_dfs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">context</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;grid search&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Concatenate, deduplicate, and convert rules to Polars DataFrame.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rules_dfs : list[pd.DataFrame]</span>
+<span class="sd">        List of rule DataFrames to consolidate.</span>
+<span class="sd">    verbose : int, default=0</span>
+<span class="sd">        Verbosity level for output messages.</span>
+<span class="sd">    context : str, default=&quot;grid search&quot;</span>
+<span class="sd">        Description of the search context for logging.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pl.DataFrame</span>
+<span class="sd">        Deduplicated rules as a Polars DataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">rules_dfs</span><span class="p">:</span>
+        <span class="n">final_X_pd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">rules_dfs</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">final_X</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">final_X_pd</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">final_X</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+    <span class="n">final_X</span> <span class="o">=</span> <span class="n">final_X</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="s2">&quot;rule&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">final_X</span><span class="o">.</span><span class="n">height</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">final_X</span>
+    <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">final_X</span><span class="p">)</span><span class="si">}</span><span class="s2"> total rules from </span><span class="si">{</span><span class="n">context</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">final_X</span>
+
+
 <div class="viewcode-block" id="rule_grid_search_sequential">
 <a class="viewcode-back" href="../../api/rule_generation.html#iguanas.rule_generation.rule_grid_search_sequential">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">rule_grid_search_sequential</span><span class="p">(</span>
     <span class="n">estimator</span><span class="p">:</span> <span class="n">XGBClassifier</span><span class="p">,</span>
     <span class="n">X_train</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">y_train</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
-    <span class="n">scale_pos_weight_vec</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">scale_pos_weights</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -827,7 +926,7 @@
 <span class="sd">        Training feature matrix.</span>
 <span class="sd">    y_train : pl.Series | pd.Series</span>
 <span class="sd">        Training target values.</span>
-<span class="sd">    scale_pos_weight_vec : list | np.ndarray</span>
+<span class="sd">    scale_pos_weights : list | np.ndarray</span>
 <span class="sd">        Array of scale_pos_weight values to try.</span>
 <span class="sd">    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None</span>
 <span class="sd">        DataFrame mapping transformation names to sample weight arrays.</span>
@@ -841,43 +940,29 @@
 <span class="sd">        Same schema as :func:`rule_grid_search`: columns rule, tree,</span>
 <span class="sd">        scale_pos_weight, transformation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">X_train_np</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-    <span class="n">y_train_np</span> <span class="o">=</span> <span class="n">y_train</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-    <span class="n">feature_names</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">X_train_np</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;X_train contains non-numeric data. Please encode categorical features &quot;</span>
-            <span class="s2">&quot;numerically before using rule_grid_search_parallel_scales.&quot;</span>
-        <span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weight_vec</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;scale_pos_weight_vec cannot be empty&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">sample_weights_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">sample_weights_df_pd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;Baseline&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">))})</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_weights_df</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-        <span class="n">sample_weights_df_pd</span> <span class="o">=</span> <span class="n">sample_weights_df</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">sample_weights_df_pd</span> <span class="o">=</span> <span class="n">sample_weights_df</span>
+    <span class="p">(</span>
+        <span class="n">X_train_np</span><span class="p">,</span>
+        <span class="n">y_train_np</span><span class="p">,</span>
+        <span class="n">feature_names</span><span class="p">,</span>
+        <span class="n">sample_weights_df_pd</span><span class="p">,</span>
+        <span class="n">estimator_params</span><span class="p">,</span>
+        <span class="n">all_features_constrained</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">_setup_and_validate_grid_search</span><span class="p">(</span>
+        <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">scale_pos_weights</span><span class="p">,</span> <span class="n">sample_weights_df</span><span class="p">,</span> <span class="n">estimator</span>
+    <span class="p">)</span>
 
     <span class="n">weight_columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sample_weights_df_pd</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
     <span class="n">weights_np</span> <span class="o">=</span> <span class="n">sample_weights_df_pd</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-    <span class="n">estimator_params</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
-    <span class="n">estimator_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;scale_pos_weight&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-
-    <span class="n">n_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-    <span class="n">all_features_constrained</span> <span class="o">=</span> <span class="n">_check_all_features_have_monotone_constraints</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">n_features</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Starting sequential rule grid search with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">weight_columns</span><span class="p">)</span><span class="si">}</span><span class="s2"> weight &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;transformations and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weight_vec</span><span class="p">)</span><span class="si">}</span><span class="s2"> scale_pos_weight values &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">weight_columns</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weight_vec</span><span class="p">)</span><span class="si">}</span><span class="s2"> total combinations)&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;transformations and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weights</span><span class="p">)</span><span class="si">}</span><span class="s2"> scale_pos_weight values &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">weight_columns</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weights</span><span class="p">)</span><span class="si">}</span><span class="s2"> total combinations)&quot;</span>
         <span class="p">)</span>
 
     <span class="n">rules_dfs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">scale_pos_weight</span> <span class="ow">in</span> <span class="n">scale_pos_weight_vec</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">scale_pos_weight</span> <span class="ow">in</span> <span class="n">scale_pos_weights</span><span class="p">:</span>
         <span class="n">results</span> <span class="o">=</span> <span class="n">_train_rules_for_scale</span><span class="p">(</span>
             <span class="n">scale_pos_weight</span><span class="p">,</span>
             <span class="n">weights_np</span><span class="p">,</span>
@@ -890,16 +975,7 @@
         <span class="p">)</span>
         <span class="n">rules_dfs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">rules_dfs</span><span class="p">:</span>
-        <span class="n">final_X</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">rules_dfs</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">final_X</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
-
-    <span class="n">final_X</span> <span class="o">=</span> <span class="n">final_X</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="s2">&quot;rule&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">final_X</span><span class="o">.</span><span class="n">height</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">final_X</span>
-    <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">final_X</span><span class="p">)</span><span class="si">}</span><span class="s2"> total rules from sequential grid search&quot;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">final_X</span></div>
+    <span class="k">return</span> <span class="n">_finalize_grid_search_results</span><span class="p">(</span><span class="n">rules_dfs</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="s2">&quot;sequential grid search&quot;</span><span class="p">)</span></div>
 
 
 
@@ -909,7 +985,7 @@
     <span class="n">estimator</span><span class="p">:</span> <span class="n">XGBClassifier</span><span class="p">,</span>
     <span class="n">X_train</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">y_train</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
-    <span class="n">scale_pos_weight_vec</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">scale_pos_weights</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -918,144 +994,11 @@
 <span class="sd">    Perform grid search over sample weight transformations and scale_pos_weight values to find optimal rules.</span>
 
 <span class="sd">    This function systematically trains XGBoost models with different combinations of:</span>
-<span class="sd">    - sample weight transformations (e.g., linear, power, logarithmic, clipped)</span>
-<span class="sd">    - scale_pos_weight values to handle class imbalance</span>
+<span class="sd">    - sample weights</span>
+<span class="sd">    - scale_pos_weight values</span>
 
 <span class="sd">    For each combination, it extracts rules from the fitted models and returns them as a Polars DataFrame.</span>
 <span class="sd">    The weight transformations loop is parallelized using joblib for improved performance.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    estimator : XGBClassifier</span>
-<span class="sd">        Base XGBoost classifier to use as a template for rule extraction. The estimator&#39;s</span>
-<span class="sd">        hyperparameters (except scale_pos_weight and sample_weight) will be used as defaults</span>
-<span class="sd">        for training multiple models during the grid search.</span>
-<span class="sd">    X_train : pl.DataFrame | pd.DataFrame | np.ndarray</span>
-<span class="sd">        Training feature matrix (without target column). Can be Polars/Pandas DataFrame or NumPy array.</span>
-<span class="sd">        NumPy arrays provide fastest serialization for parallel processing.</span>
-<span class="sd">    y_train : pl.Series | pd.Series | np.ndarray</span>
-<span class="sd">        Training target values</span>
-<span class="sd">    scale_pos_weight_vec : list | np.ndarray</span>
-<span class="sd">        Array of scale_pos_weight values to try</span>
-<span class="sd">    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None</span>
-<span class="sd">        DataFrame mapping transformation names (columns) to sample weight arrays (rows).</span>
-<span class="sd">        If None, uses baseline weights of 1.0 for all samples.</span>
-<span class="sd">    n_jobs : int, default=-1</span>
-<span class="sd">        Number of parallel jobs to run. -1 means using all processors</span>
-<span class="sd">    verbose : int, default=0</span>
-<span class="sd">        Controls the verbosity level. Higher values show more information:</span>
-
-<span class="sd">        - 0: silent (no output)</span>
-<span class="sd">        - 1: progress information (start/end summary)</span>
-<span class="sd">        - &gt;=2: detailed progress with live updates from joblib Parallel backend</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    pl.DataFrame</span>
-<span class="sd">        DataFrame containing rule information and metrics for all combinations of</span>
-<span class="sd">        weight transformations and scale_pos_weight values. Each row includes:</span>
-
-<span class="sd">        - rule: str, the extracted rule as a string</span>
-<span class="sd">        - tree: int, the tree number from which the rule was extracted</span>
-<span class="sd">        - scale_pos_weight: float, the scale_pos_weight value used for this tree</span>
-<span class="sd">        - transformation: str, the name of the weight transformation used</span>
-
-<span class="sd">    Examples</span>
-<span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; weights_train = generate_sample_weight_transformations(X_train[&quot;amount&quot;])</span>
-<span class="sd">    &gt;&gt;&gt; scale_weights = np.logspace(0, np.log10(imbalance_ratio*2), 20)</span>
-<span class="sd">    &gt;&gt;&gt; results = rule_grid_search(</span>
-<span class="sd">    ...     estimator, X_train, y_train,</span>
-<span class="sd">    ...     scale_weights, weights_train, n_jobs=-1, verbose=1</span>
-<span class="sd">    ... )</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">X_train_np</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-    <span class="n">y_train_np</span> <span class="o">=</span> <span class="n">y_train</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-    <span class="n">feature_names</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">X_train_np</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;X_train contains non-numeric data. Please encode categorical features &quot;</span>
-            <span class="s2">&quot;numerically before using rule_grid_search_parallel_scales.&quot;</span>
-        <span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weight_vec</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;scale_pos_weight_vec cannot be empty&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">sample_weights_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">sample_weights_df_pd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;Baseline&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">))})</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_weights_df</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-        <span class="n">sample_weights_df_pd</span> <span class="o">=</span> <span class="n">sample_weights_df</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">sample_weights_df_pd</span> <span class="o">=</span> <span class="n">sample_weights_df</span>
-
-    <span class="n">weight_columns</span> <span class="o">=</span> <span class="n">sample_weights_df_pd</span><span class="o">.</span><span class="n">columns</span>
-    <span class="n">estimator_params</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
-    <span class="n">estimator_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;scale_pos_weight&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-
-    <span class="n">n_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-    <span class="n">all_features_constrained</span> <span class="o">=</span> <span class="n">_check_all_features_have_monotone_constraints</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">n_features</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Starting rule grid search with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">weight_columns</span><span class="p">)</span><span class="si">}</span><span class="s2"> weight transformations &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weight_vec</span><span class="p">)</span><span class="si">}</span><span class="s2"> scale_pos_weight values &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">weight_columns</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weight_vec</span><span class="p">)</span><span class="si">}</span><span class="s2"> total combinations)&quot;</span>
-        <span class="p">)</span>
-
-    <span class="c1"># Map verbose levels for joblib: 0=silent, 1=silent, 2+=detailed (10+)</span>
-    <span class="n">joblib_verbose</span> <span class="o">=</span> <span class="mi">10</span> <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span>
-
-    <span class="n">results_nested</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;loky&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">joblib_verbose</span><span class="p">)(</span>
-        <span class="n">delayed</span><span class="p">(</span><span class="n">_train_rules_for_weight_transformation</span><span class="p">)(</span>
-            <span class="n">sample_weights_df_pd</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
-            <span class="n">estimator_params</span><span class="p">,</span>
-            <span class="n">X_train_np</span><span class="p">,</span>
-            <span class="n">y_train_np</span><span class="p">,</span>
-            <span class="n">scale_pos_weight_vec</span><span class="p">,</span>
-            <span class="n">all_features_constrained</span><span class="p">,</span>
-            <span class="n">feature_names</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">weight_columns</span>
-    <span class="p">)</span>
-
-    <span class="n">rules_dfs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">results_nested</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">sublist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">rules_dfs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sublist</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">rules_dfs</span><span class="p">:</span>
-        <span class="n">final_X_pd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">rules_dfs</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">final_X</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">final_X_pd</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">final_X</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
-
-    <span class="n">final_X</span> <span class="o">=</span> <span class="n">final_X</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="s2">&quot;rule&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">final_X</span><span class="o">.</span><span class="n">height</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">final_X</span>
-    <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">final_X</span><span class="p">)</span><span class="si">}</span><span class="s2"> total rules from grid search&quot;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">final_X</span></div>
-
-
-
-<div class="viewcode-block" id="rule_grid_search_parallel_scales">
-<a class="viewcode-back" href="../../api/rule_generation.html#iguanas.rule_generation.rule_grid_search_parallel_scales">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">rule_grid_search_parallel_scales</span><span class="p">(</span>
-    <span class="n">estimator</span><span class="p">:</span> <span class="n">XGBClassifier</span><span class="p">,</span>
-    <span class="n">X_train</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-    <span class="n">y_train</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
-    <span class="n">scale_pos_weight_vec</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Perform grid search parallelised over scale_pos_weight values.</span>
-
-<span class="sd">    Identical behaviour to :func:`rule_grid_search_parallel_weights` but parallelises</span>
-<span class="sd">    over the ``scale_pos_weight_vec`` axis instead of the weight-transformation axis.</span>
-<span class="sd">    Prefer this variant when ``len(scale_pos_weight_vec) &gt;= len(sample_weights_df.columns)``</span>
-<span class="sd">    so that workers are kept maximally busy.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1065,7 +1008,7 @@
 <span class="sd">        Training feature matrix.</span>
 <span class="sd">    y_train : pl.Series | pd.Series</span>
 <span class="sd">        Training target values.</span>
-<span class="sd">    scale_pos_weight_vec : list | np.ndarray</span>
+<span class="sd">    scale_pos_weights : list | np.ndarray</span>
 <span class="sd">        Array of scale_pos_weight values to try. Parallelised across workers.</span>
 <span class="sd">    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None</span>
 <span class="sd">        DataFrame mapping transformation names to sample weight arrays.</span>
@@ -1082,44 +1025,127 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    pl.DataFrame</span>
-<span class="sd">        Same schema as :func:`rule_grid_search_parallel_weights`: columns rule, tree,</span>
+<span class="sd">        Same schema as :func:`rule_grid_search`: columns rule, tree,</span>
+<span class="sd">        scale_pos_weight, transformation.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; weights_train = generate_sample_weight_transformations(X_train[&quot;amount&quot;])</span>
+<span class="sd">    &gt;&gt;&gt; scale_pos_weights = np.logspace(0, np.log10(imbalance_ratio*2), 20)</span>
+<span class="sd">    &gt;&gt;&gt; results = rule_grid_search(</span>
+<span class="sd">    ...     estimator, X_train, y_train,</span>
+<span class="sd">    ...     scale_weights, weights_train, n_jobs=-1, verbose=1</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="p">(</span>
+        <span class="n">X_train_np</span><span class="p">,</span>
+        <span class="n">y_train_np</span><span class="p">,</span>
+        <span class="n">feature_names</span><span class="p">,</span>
+        <span class="n">sample_weights_df_pd</span><span class="p">,</span>
+        <span class="n">estimator_params</span><span class="p">,</span>
+        <span class="n">all_features_constrained</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">_setup_and_validate_grid_search</span><span class="p">(</span>
+        <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">scale_pos_weights</span><span class="p">,</span> <span class="n">sample_weights_df</span><span class="p">,</span> <span class="n">estimator</span>
+    <span class="p">)</span>
+
+    <span class="n">weight_columns</span> <span class="o">=</span> <span class="n">sample_weights_df_pd</span><span class="o">.</span><span class="n">columns</span>
+    <span class="n">joblib_verbose</span> <span class="o">=</span> <span class="mi">10</span> <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Starting rule grid search with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">weight_columns</span><span class="p">)</span><span class="si">}</span><span class="s2"> weight transformations &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weights</span><span class="p">)</span><span class="si">}</span><span class="s2"> scale_pos_weight values &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">weight_columns</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weights</span><span class="p">)</span><span class="si">}</span><span class="s2"> total combinations)&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">results_nested</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;loky&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">joblib_verbose</span><span class="p">)(</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">_train_rules_for_weight_transformation</span><span class="p">)(</span>
+            <span class="n">sample_weights_df_pd</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
+            <span class="n">estimator_params</span><span class="p">,</span>
+            <span class="n">X_train_np</span><span class="p">,</span>
+            <span class="n">y_train_np</span><span class="p">,</span>
+            <span class="n">scale_pos_weights</span><span class="p">,</span>
+            <span class="n">all_features_constrained</span><span class="p">,</span>
+            <span class="n">feature_names</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">weight_columns</span>
+    <span class="p">)</span>
+
+    <span class="n">rules_dfs</span> <span class="o">=</span> <span class="p">[</span><span class="n">rule_df</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">results_nested</span> <span class="k">if</span> <span class="n">sublist</span> <span class="k">for</span> <span class="n">rule_df</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">_finalize_grid_search_results</span><span class="p">(</span><span class="n">rules_dfs</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="s2">&quot;grid search&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="rule_grid_search_parallel_scales">
+<a class="viewcode-back" href="../../api/rule_generation.html#iguanas.rule_generation.rule_grid_search_parallel_scales">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rule_grid_search_parallel_scales</span><span class="p">(</span>
+    <span class="n">estimator</span><span class="p">:</span> <span class="n">XGBClassifier</span><span class="p">,</span>
+    <span class="n">X_train</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">scale_pos_weights</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform grid search parallelised over scale_pos_weight values.</span>
+
+<span class="sd">    This function systematically trains XGBoost models with different combinations of:</span>
+<span class="sd">    - sample weights</span>
+<span class="sd">    - scale_pos_weight values</span>
+
+<span class="sd">    For each combination, it extracts rules from the fitted models and returns them as a Polars DataFrame.</span>
+<span class="sd">    The weight transformations loop is parallelized using joblib for improved performance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    estimator : XGBClassifier</span>
+<span class="sd">        Base XGBoost classifier to use as a template for rule extraction.</span>
+<span class="sd">    X_train : pl.DataFrame | pd.DataFrame</span>
+<span class="sd">        Training feature matrix.</span>
+<span class="sd">    y_train : pl.Series | pd.Series</span>
+<span class="sd">        Training target values.</span>
+<span class="sd">    scale_pos_weights : list | np.ndarray</span>
+<span class="sd">        Array of scale_pos_weight values to try. Parallelised across workers.</span>
+<span class="sd">    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None</span>
+<span class="sd">        DataFrame mapping transformation names to sample weight arrays.</span>
+<span class="sd">        If None, uses baseline weights of 1.0 for all samples.</span>
+<span class="sd">    n_jobs : int, default=-1</span>
+<span class="sd">        Number of parallel jobs to run. -1 means using all processors.</span>
+<span class="sd">    verbose : int, default=0</span>
+<span class="sd">        Controls the verbosity level:</span>
+
+<span class="sd">        - 0: silent (no output)</span>
+<span class="sd">        - 1: progress information (start/end summary)</span>
+<span class="sd">        - &gt;=2: detailed progress with live updates from joblib Parallel backend</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pl.DataFrame</span>
+<span class="sd">        Same schema as :func:`rule_grid_search`: columns rule, tree,</span>
 <span class="sd">        scale_pos_weight, transformation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">X_train_np</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-    <span class="n">y_train_np</span> <span class="o">=</span> <span class="n">y_train</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-    <span class="n">feature_names</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">X_train_np</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">object</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;X_train contains non-numeric data. Please encode categorical features &quot;</span>
-            <span class="s2">&quot;numerically before using rule_grid_search_parallel_scales.&quot;</span>
-        <span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weight_vec</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;scale_pos_weight_vec cannot be empty&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">sample_weights_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">sample_weights_df_pd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;Baseline&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">))})</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_weights_df</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-        <span class="n">sample_weights_df_pd</span> <span class="o">=</span> <span class="n">sample_weights_df</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">sample_weights_df_pd</span> <span class="o">=</span> <span class="n">sample_weights_df</span>
+    <span class="p">(</span>
+        <span class="n">X_train_np</span><span class="p">,</span>
+        <span class="n">y_train_np</span><span class="p">,</span>
+        <span class="n">feature_names</span><span class="p">,</span>
+        <span class="n">sample_weights_df_pd</span><span class="p">,</span>
+        <span class="n">estimator_params</span><span class="p">,</span>
+        <span class="n">all_features_constrained</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">_setup_and_validate_grid_search</span><span class="p">(</span>
+        <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">scale_pos_weights</span><span class="p">,</span> <span class="n">sample_weights_df</span><span class="p">,</span> <span class="n">estimator</span>
+    <span class="p">)</span>
 
     <span class="n">weight_columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sample_weights_df_pd</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
     <span class="n">weights_np</span> <span class="o">=</span> <span class="n">sample_weights_df_pd</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-    <span class="n">estimator_params</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
-    <span class="n">estimator_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;scale_pos_weight&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-
-    <span class="n">n_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-    <span class="n">all_features_constrained</span> <span class="o">=</span> <span class="n">_check_all_features_have_monotone_constraints</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">n_features</span><span class="p">)</span>
+    <span class="n">joblib_verbose</span> <span class="o">=</span> <span class="mi">10</span> <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span>
 
     <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Starting parallel-scales rule grid search with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">weight_columns</span><span class="p">)</span><span class="si">}</span><span class="s2"> weight &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;transformations and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weight_vec</span><span class="p">)</span><span class="si">}</span><span class="s2"> scale_pos_weight values &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">weight_columns</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weight_vec</span><span class="p">)</span><span class="si">}</span><span class="s2"> total combinations)&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;transformations and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weights</span><span class="p">)</span><span class="si">}</span><span class="s2"> scale_pos_weight values &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">weight_columns</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weights</span><span class="p">)</span><span class="si">}</span><span class="s2"> total combinations)&quot;</span>
         <span class="p">)</span>
-
-    <span class="n">joblib_verbose</span> <span class="o">=</span> <span class="mi">10</span> <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span>
 
     <span class="n">results_nested</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;loky&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">joblib_verbose</span><span class="p">)(</span>
         <span class="n">delayed</span><span class="p">(</span><span class="n">_train_rules_for_scale</span><span class="p">)(</span>
@@ -1132,25 +1158,75 @@
             <span class="n">all_features_constrained</span><span class="p">,</span>
             <span class="n">feature_names</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">scale_pos_weight</span> <span class="ow">in</span> <span class="n">scale_pos_weight_vec</span>
+        <span class="k">for</span> <span class="n">scale_pos_weight</span> <span class="ow">in</span> <span class="n">scale_pos_weights</span>
     <span class="p">)</span>
 
-    <span class="n">rules_dfs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">results_nested</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">sublist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">rules_dfs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sublist</span><span class="p">)</span>
+    <span class="n">rules_dfs</span> <span class="o">=</span> <span class="p">[</span><span class="n">rule_df</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">results_nested</span> <span class="k">if</span> <span class="n">sublist</span> <span class="k">for</span> <span class="n">rule_df</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">_finalize_grid_search_results</span><span class="p">(</span><span class="n">rules_dfs</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="s2">&quot;parallel-scales grid search&quot;</span><span class="p">)</span></div>
 
-    <span class="k">if</span> <span class="n">rules_dfs</span><span class="p">:</span>
-        <span class="n">final_X_pd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">rules_dfs</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">final_X</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">final_X_pd</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="rule_grid_search">
+<a class="viewcode-back" href="../../api/rule_generation.html#iguanas.rule_generation.rule_grid_search">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rule_grid_search</span><span class="p">(</span>
+    <span class="n">estimator</span><span class="p">:</span> <span class="n">XGBClassifier</span><span class="p">,</span>
+    <span class="n">X_train</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">y_train</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">scale_pos_weights</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform grid search parallelised over scale_pos_weight values or sample_weights to find optimal rules.</span>
+
+<span class="sd">    This function systematically trains XGBoost models with different combinations of:</span>
+<span class="sd">    - sample weights</span>
+<span class="sd">    - scale_pos_weight values</span>
+
+<span class="sd">    For each combination, it extracts rules from the fitted models and returns them as a Polars DataFrame.</span>
+<span class="sd">    The weight transformations loop is parallelized using joblib for improved performance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    estimator : XGBClassifier</span>
+<span class="sd">        Base XGBoost classifier to use as a template for rule extraction.</span>
+<span class="sd">    X_train : pl.DataFrame | pd.DataFrame</span>
+<span class="sd">        Training feature matrix.</span>
+<span class="sd">    y_train : pl.Series | pd.Series</span>
+<span class="sd">        Training target values.</span>
+<span class="sd">    scale_pos_weights : list | np.ndarray</span>
+<span class="sd">        Array of scale_pos_weight values to try. Parallelised across workers.</span>
+<span class="sd">    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None</span>
+<span class="sd">        DataFrame mapping transformation names to sample weight arrays.</span>
+<span class="sd">        If None, uses baseline weights of 1.0 for all samples.</span>
+<span class="sd">    n_jobs : int, default=-1</span>
+<span class="sd">        Number of parallel jobs to run. -1 means using all processors.</span>
+<span class="sd">    verbose : int, default=0</span>
+<span class="sd">        Controls the verbosity level:</span>
+
+<span class="sd">        - 0: silent (no output)</span>
+<span class="sd">        - 1: progress information (start/end summary)</span>
+<span class="sd">        - &gt;=2: detailed progress with live updates from joblib Parallel backend</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pl.DataFrame</span>
+<span class="sd">        Same schema as :func:`rule_grid_search`: columns rule, tree,</span>
+<span class="sd">        scale_pos_weight, transformation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">scale_pos_weights</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_weights_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sample_weights_df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="mi">1</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="n">rule_grid_search_parallel_scales</span><span class="p">(</span>
+            <span class="n">estimator</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">scale_pos_weights</span><span class="p">,</span> <span class="n">sample_weights_df</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">,</span> <span class="n">verbose</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">final_X</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
-
-    <span class="n">final_X</span> <span class="o">=</span> <span class="n">final_X</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="s2">&quot;rule&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">final_X</span><span class="o">.</span><span class="n">height</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">final_X</span>
-    <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">final_X</span><span class="p">)</span><span class="si">}</span><span class="s2"> total rules from parallel-scales grid search&quot;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">final_X</span></div>
+        <span class="k">return</span> <span class="n">rule_grid_search_parallel_weights</span><span class="p">(</span>
+            <span class="n">estimator</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">scale_pos_weights</span><span class="p">,</span> <span class="n">sample_weights_df</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">,</span> <span class="n">verbose</span>
+        <span class="p">)</span></div>
 
 </pre></div>
 

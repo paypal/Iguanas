@@ -410,13 +410,13 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ConfigDict</span><span class="p">,</span> <span class="n">PrivateAttr</span><span class="p">,</span> <span class="n">field_validator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ConfigDict</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">PrivateAttr</span><span class="p">,</span> <span class="n">field_validator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClassifierMixin</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NotFittedError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xgboost</span><span class="w"> </span><span class="kn">import</span> <span class="n">XGBClassifier</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.rule_evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_and_filter_by_performance</span><span class="p">,</span> <span class="n">apply_rules</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.rule_generation</span><span class="w"> </span><span class="kn">import</span> <span class="n">rule_grid_search_parallel_scales</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.rule_generation</span><span class="w"> </span><span class="kn">import</span> <span class="n">rule_grid_search</span>
 
 <span class="n">_NUMERIC_DTYPES</span> <span class="o">=</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Int8</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Int16</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Int32</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Int64</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Float32</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Float64</span><span class="p">)</span>
 
@@ -432,16 +432,18 @@
 <span class="sd">       trees trained across a sweep of ``scale_pos_weight`` values.</span>
 <span class="sd">    2. **Performance filtering**: rules that fail any condition in</span>
 <span class="sd">       ``metric_thresholds`` are discarded.</span>
-<span class="sd">    3. **Ranking**: the surviving rules are sorted by ``opt_metric`` (descending)</span>
+<span class="sd">    3. **Ranking**: the surviving rules are sorted by ``ranking_metric`` (descending)</span>
 <span class="sd">       and the top-ranked rule is stored in ``_best_rule_``.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    estimator : XGBClassifier</span>
 <span class="sd">        XGBoost classifier used for rule generation.</span>
-<span class="sd">    scale_pos_weight_vec : np.ndarray</span>
-<span class="sd">        Vector of scale_pos_weight values swept during rule generation.</span>
-<span class="sd">    opt_metric : str, default=&quot;accuracy&quot;</span>
+<span class="sd">    scale_pos_weights : list[float] | np.ndarray, default=np.array([1.0])</span>
+<span class="sd">        Array of scale_pos_weight values swept during rule generation.</span>
+<span class="sd">    sample_weights_df : pl.DataFrame | None, default=None</span>
+<span class="sd">        DataFrame of sample weights used for rule generation.</span>
+<span class="sd">    ranking_metric : str, default=&quot;accuracy&quot;</span>
 <span class="sd">        Metric used to rank candidate rules. The single highest-scoring rule</span>
 <span class="sd">        is kept. Must be a column produced by compute_metrics.</span>
 <span class="sd">    metric_thresholds : list[dict[str, Any]] | None, default=None</span>
@@ -456,8 +458,9 @@
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">estimator</span><span class="p">:</span> <span class="n">XGBClassifier</span>
-    <span class="n">scale_pos_weight_vec</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
-    <span class="n">opt_metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;accuracy&quot;</span>
+    <span class="n">scale_pos_weights</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">]))</span>
+    <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ranking_metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;accuracy&quot;</span>
     <span class="n">metric_thresholds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;metric_thresholds&quot;</span><span class="p">)</span>
@@ -498,19 +501,24 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_feature_cols_</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">dt</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">dt</span> <span class="ow">in</span> <span class="n">_NUMERIC_DTYPES</span><span class="p">]</span>
 
-        <span class="n">rules</span> <span class="o">=</span> <span class="n">rule_grid_search_parallel_scales</span><span class="p">(</span>
+        <span class="n">rules</span> <span class="o">=</span> <span class="n">rule_grid_search</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span>
             <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_cols_</span><span class="p">]</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">(),</span>
             <span class="n">y</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">(),</span>
-            <span class="n">scale_pos_weight_vec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_pos_weight_vec</span><span class="p">,</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="s2">&quot;rule&quot;</span><span class="p">)</span>
+            <span class="n">scale_pos_weights</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_pos_weights</span><span class="p">,</span>
+            <span class="n">sample_weights_df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_weights_df</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">rules</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_best_rule_</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="n">rules</span> <span class="o">=</span> <span class="n">rules</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="s2">&quot;rule&quot;</span><span class="p">)</span>
 
         <span class="n">_</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="n">apply_and_filter_by_performance</span><span class="p">(</span>
             <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_feature_cols_</span><span class="p">],</span>
             <span class="n">y</span><span class="p">,</span>
             <span class="n">rules</span><span class="p">[</span><span class="s2">&quot;rule&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">(),</span>
             <span class="n">metric_thresholds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_thresholds</span><span class="p">,</span>
-            <span class="n">sort_by</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_metric</span><span class="p">,</span>
+            <span class="n">ranking_metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ranking_metric</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_best_rule_</span> <span class="o">=</span> <span class="n">M</span><span class="p">[</span><span class="s2">&quot;rule&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">M</span><span class="o">.</span><span class="n">height</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>

@@ -36,12 +36,12 @@ Here's a simple example showing the core Iguanas workflow:
    )
 
    # 4. Generate rules using grid search
-   scale_pos_weight_vec = np.logspace(0, 1, 5)  # Try different class balance weights
+   scale_pos_weights = np.logspace(0, 1, 5)  # Try different class balance weights
    rules_df = rule_grid_search_parallel_scales(
       estimator=estimator,
       X_train=X_train,
       y_train=y_train,
-      scale_pos_weight_vec=scale_pos_weight_vec,
+      scale_pos_weights=scale_pos_weights,
       n_jobs=-1,
       verbose=1
    )

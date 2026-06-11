@@ -460,9 +460,9 @@
     <span class="k">return</span> <span class="n">pl</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;Baseline&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="mi">1</span><span class="p">:]],</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="generate_increasing_weight">
-<a class="viewcode-back" href="../../api/weight_transformations.html#iguanas.weight_transformations.generate_increasing_weight">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_increasing_weight</span><span class="p">(</span>
+<div class="viewcode-block" id="generate_increasing_weights">
+<a class="viewcode-back" href="../../api/weight_transformations.html#iguanas.weight_transformations.generate_increasing_weights">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_increasing_weights</span><span class="p">(</span>
     <span class="n">X</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">powers</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -485,27 +485,23 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import polars as pl</span>
 <span class="sd">    &gt;&gt;&gt; s = pl.Series(&quot;amount&quot;, [0.0, 10.0, 50.0, 100.0])</span>
-<span class="sd">    &gt;&gt;&gt; df = generate_increasing_weight(s)</span>
+<span class="sd">    &gt;&gt;&gt; df = generate_increasing_weights(s)</span>
 <span class="sd">    &gt;&gt;&gt; df.columns  # &#39;Baseline&#39;, &#39;(1+x)^0.25__amount&#39;, ..., &#39;log(1+x)__amount&#39;</span>
 <span class="sd">    &gt;&gt;&gt; # DataFrame input: each column processed independently</span>
 <span class="sd">    &gt;&gt;&gt; X = pl.DataFrame({&quot;a&quot;: [1.0, 2.0, 3.0], &quot;b&quot;: [4.0, 5.0, 6.0]})</span>
-<span class="sd">    &gt;&gt;&gt; generate_increasing_weight(X).shape</span>
+<span class="sd">    &gt;&gt;&gt; generate_increasing_weights(X).shape</span>
 <span class="sd">    (3, ...)  # 1 Baseline + 5 power cols + 1 log col per feature, minus duplicate Baselines</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">out</span> <span class="o">:=</span> <span class="n">_dispatch</span><span class="p">(</span>
-            <span class="n">generate_increasing_weight</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="o">=</span><span class="n">powers</span>
-        <span class="p">)</span>
-    <span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">out</span> <span class="o">:=</span> <span class="n">_dispatch</span><span class="p">(</span><span class="n">generate_increasing_weights</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="o">=</span><span class="n">powers</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">out</span>
     <span class="n">df</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">_increasing_exprs</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span><span class="p">))</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="generate_decreasing_weight">
-<a class="viewcode-back" href="../../api/weight_transformations.html#iguanas.weight_transformations.generate_decreasing_weight">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_decreasing_weight</span><span class="p">(</span>
+<div class="viewcode-block" id="generate_decreasing_weights">
+<a class="viewcode-back" href="../../api/weight_transformations.html#iguanas.weight_transformations.generate_decreasing_weights">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_decreasing_weights</span><span class="p">(</span>
     <span class="n">X</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">powers</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -528,14 +524,10 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import polars as pl</span>
 <span class="sd">    &gt;&gt;&gt; s = pl.Series(&quot;amount&quot;, [0.0, 10.0, 50.0, 100.0])</span>
-<span class="sd">    &gt;&gt;&gt; df = generate_decreasing_weight(s)</span>
+<span class="sd">    &gt;&gt;&gt; df = generate_decreasing_weights(s)</span>
 <span class="sd">    &gt;&gt;&gt; df.columns  # &#39;1/(1+x)__amount&#39;, &#39;1/(1+x)^0.25__amount&#39;, ..., &#39;1/log(1+x)__amount&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">out</span> <span class="o">:=</span> <span class="n">_dispatch</span><span class="p">(</span>
-            <span class="n">generate_decreasing_weight</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="o">=</span><span class="n">powers</span>
-        <span class="p">)</span>
-    <span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">out</span> <span class="o">:=</span> <span class="n">_dispatch</span><span class="p">(</span><span class="n">generate_decreasing_weights</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="o">=</span><span class="n">powers</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">out</span>
     <span class="n">df</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
@@ -544,9 +536,9 @@
 
 
 
-<div class="viewcode-block" id="generate_all_weight">
-<a class="viewcode-back" href="../../api/weight_transformations.html#iguanas.weight_transformations.generate_all_weight">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_all_weight</span><span class="p">(</span>
+<div class="viewcode-block" id="generate_weights">
+<a class="viewcode-back" href="../../api/weight_transformations.html#iguanas.weight_transformations.generate_weights">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_weights</span><span class="p">(</span>
     <span class="n">X</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">powers</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -569,12 +561,10 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import polars as pl</span>
 <span class="sd">    &gt;&gt;&gt; s = pl.Series(&quot;amount&quot;, [0.0, 10.0, 50.0, 100.0])</span>
-<span class="sd">    &gt;&gt;&gt; df = generate_all_weight(s)</span>
+<span class="sd">    &gt;&gt;&gt; df = generate_weights(s)</span>
 <span class="sd">    &gt;&gt;&gt; # Columns include both (1+x)^p and 1/(1+x)^p families plus log variants</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">out</span> <span class="o">:=</span> <span class="n">_dispatch</span><span class="p">(</span><span class="n">generate_all_weight</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="o">=</span><span class="n">powers</span><span class="p">)</span>
-    <span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">out</span> <span class="o">:=</span> <span class="n">_dispatch</span><span class="p">(</span><span class="n">generate_weights</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="o">=</span><span class="n">powers</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">out</span>
     <span class="n">df</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
     <span class="n">exprs</span> <span class="o">=</span> <span class="n">_increasing_exprs</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
@@ -625,12 +615,6 @@
 <span class="sd">        A tuple ``(filtered_names, corr_value)`` where ``filtered_names`` is the</span>
 <span class="sd">        list of selected weight names at the chosen correlation threshold and</span>
 <span class="sd">        ``corr_value`` is the correlation threshold that produced that list.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``target_len`` is negative, if ``step`` is not positive, or if</span>
-<span class="sd">        ``min_corr``/``max_corr`` do not satisfy ``0 &lt; min_corr &lt; max_corr &lt; 1.0``.</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
