@@ -240,7 +240,7 @@ def filter_correlated_rules(
 
 
 def select_best_rule_per_column_combination(
-    metrics: pl.DataFrame, sort_by: str = "precision"
+    metrics: pl.DataFrame, ranking_metric: str = "precision"
 ) -> list[str]:
     """
     Select the rule with the highest metric score for each unique column combination.
@@ -249,8 +249,8 @@ def select_best_rule_per_column_combination(
     ----------
     metrics : pl.DataFrame
         DataFrame containing rule performance metrics. Must have a "rule" column
-        and the metric specified in sort_by.
-    sort_by : str, default="precision"
+        and the metric specified in ranking_metric.
+    ranking_metric : str, default="precision"
         Name of the metric column to use for selecting the best rule in each group.
 
     Returns
@@ -264,14 +264,14 @@ def select_best_rule_per_column_combination(
     ...     "rule": ['(X["a"] > 1)', '(X["a"] > 2)', '(X["b"] < 3)'],
     ...     "precision": [0.95, 0.98, 0.96]
     ... })
-    >>> select_best_rule_per_column_combination(metrics, sort_by="precision")
+    >>> select_best_rule_per_column_combination(metrics, ranking_metric="precision")
     # Returns the rule with highest precision for column "a" and the rule for column "b"
     """
     # Validate inputs
     if "rule" not in metrics.columns:
         raise ValueError("metrics DataFrame must contain a 'rule' column")
-    if sort_by not in metrics.columns:
-        raise ValueError(f"sort_by metric '{sort_by}' not found in metrics columns")
+    if ranking_metric not in metrics.columns:
+        raise ValueError(f"ranking_metric metric '{ranking_metric}' not found in metrics columns")
 
     # Extract rules and build rule → column-combination mapping
     rules = metrics["rule"].to_list()
@@ -288,9 +288,9 @@ def select_best_rule_per_column_combination(
     )
     metrics_with_combo = metrics.with_columns(combo_series)
 
-    # Group by column combination and select the row with max sort_by value
+    # Group by column combination and select the row with max ranking_metric value
     best_rules = (
-        metrics_with_combo.sort(sort_by, descending=True)
+        metrics_with_combo.sort(ranking_metric, descending=True)
         .group_by("column_combination", maintain_order=True)
         .first()
         .drop("column_combination")

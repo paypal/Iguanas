@@ -15,19 +15,19 @@ class TestRuleClassifierInitialization:
     def test_valid_initialization(self):
         """Test RuleClassifier can be initialized with valid parameters."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([0.1, 1.0, 10.0])
+        scale_pos_weights = np.array([0.1, 1.0, 10.0])
 
         clf = RuleClassifier(
             estimator=estimator,
-            scale_pos_weight_vec=scale_pos_weight_vec,
-            opt_metric="accuracy",
+            scale_pos_weights=scale_pos_weights,
+            ranking_metric="accuracy",
             metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.2},
                 {"name": "recall", "operator": ">=", "value": 0.3},
             ],
         )
 
-        assert clf.opt_metric == "accuracy"
+        assert clf.ranking_metric == "accuracy"
         assert clf.metric_thresholds == [
             {"name": "precision", "operator": ">=", "value": 0.2},
             {"name": "recall", "operator": ">=", "value": 0.3},
@@ -36,61 +36,61 @@ class TestRuleClassifierInitialization:
     def test_default_parameters(self):
         """Test RuleClassifier uses sensible defaults."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         clf = RuleClassifier(
             estimator=estimator,
-            scale_pos_weight_vec=scale_pos_weight_vec,
+            scale_pos_weights=scale_pos_weights,
         )
 
-        assert clf.opt_metric == "accuracy"
+        assert clf.ranking_metric == "accuracy"
         assert clf.metric_thresholds is None
 
     def test_precision_out_of_range_low(self):
         """Test validation rejects metric_thresholds with negative precision value."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         with pytest.raises(ValidationError):
             RuleClassifier(
                 estimator=estimator,
-                scale_pos_weight_vec=scale_pos_weight_vec,
+                scale_pos_weights=scale_pos_weights,
                 metric_thresholds=[{"name": "precision", "operator": ">=", "value": -0.1}],
             )
 
     def test_precision_out_of_range_high(self):
         """Test validation rejects metric_thresholds with precision value > 1."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         with pytest.raises(ValidationError):
             RuleClassifier(
                 estimator=estimator,
-                scale_pos_weight_vec=scale_pos_weight_vec,
+                scale_pos_weights=scale_pos_weights,
                 metric_thresholds=[{"name": "precision", "operator": ">=", "value": 1.5}],
             )
 
     def test_recall_out_of_range_low(self):
         """Test validation rejects metric_thresholds with negative recall value."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         with pytest.raises(ValidationError):
             RuleClassifier(
                 estimator=estimator,
-                scale_pos_weight_vec=scale_pos_weight_vec,
+                scale_pos_weights=scale_pos_weights,
                 metric_thresholds=[{"name": "recall", "operator": ">=", "value": -0.1}],
             )
 
     def test_recall_out_of_range_high(self):
         """Test validation rejects metric_thresholds with recall value > 1."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         with pytest.raises(ValidationError):
             RuleClassifier(
                 estimator=estimator,
-                scale_pos_weight_vec=scale_pos_weight_vec,
+                scale_pos_weights=scale_pos_weights,
                 metric_thresholds=[{"name": "recall", "operator": ">=", "value": 1.5}],
             )
 
@@ -114,11 +114,11 @@ class TestRuleClassifierFitPredict:
         estimator = XGBClassifier(
             n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0
         )
-        scale_pos_weight_vec = np.logspace(-1, 1, 5)
+        scale_pos_weights = np.logspace(-1, 1, 5)
         return RuleClassifier(
             estimator=estimator,
-            scale_pos_weight_vec=scale_pos_weight_vec,
-            opt_metric="accuracy",
+            scale_pos_weights=scale_pos_weights,
+            ranking_metric="accuracy",
             metric_thresholds=[
                 {"name": "precision", "operator": ">=", "value": 0.0},
                 {"name": "recall", "operator": ">=", "value": 0.0},
@@ -214,19 +214,19 @@ class TestRulesetClassifierInitialization:
     def test_valid_initialization(self):
         """Test RulesetClassifier can be initialized with valid parameters."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([0.1, 1.0, 10.0])
+        scale_pos_weights = np.array([0.1, 1.0, 10.0])
 
         clf = RulesetClassifier(
             estimator=estimator,
-            scale_pos_weight_vec=scale_pos_weight_vec,
-            opt_metric="f1",
+            scale_pos_weights=scale_pos_weights,
+            ranking_metric="f1",
             metric_thresholds=[{"name": "precision", "operator": ">=", "value": 0.15}, {"name": "recall", "operator": ">=", "value": 0.15}],
             max_rules=10,
             max_corr=0.9,
             combine_operator="and",
         )
 
-        assert clf.opt_metric == "f1"
+        assert clf.ranking_metric == "f1"
         assert clf.max_rules == 10
         assert clf.metric_thresholds == [{"name": "precision", "operator": ">=", "value": 0.15}, {"name": "recall", "operator": ">=", "value": 0.15}]
         assert clf.max_corr == 0.9
@@ -235,14 +235,14 @@ class TestRulesetClassifierInitialization:
     def test_default_parameters(self):
         """Test RulesetClassifier uses sensible defaults."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         clf = RulesetClassifier(
             estimator=estimator,
-            scale_pos_weight_vec=scale_pos_weight_vec,
+            scale_pos_weights=scale_pos_weights,
         )
 
-        assert clf.opt_metric == "accuracy"
+        assert clf.ranking_metric == "accuracy"
         assert clf.max_rules == 10
         assert clf.metric_thresholds is None
         assert clf.max_corr == 0.8
@@ -255,72 +255,72 @@ class TestRulesetClassifierInitialization:
     def test_max_rules_validation_zero(self):
         """Test validation rejects max_rules <= 0."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         with pytest.raises(ValidationError):
             RulesetClassifier(
                 estimator=estimator,
-                scale_pos_weight_vec=scale_pos_weight_vec,
+                scale_pos_weights=scale_pos_weights,
                 max_rules=0,
             )
 
     def test_max_rules_validation_negative(self):
         """Test validation rejects max_rules < 0."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         with pytest.raises(ValidationError):
             RulesetClassifier(
                 estimator=estimator,
-                scale_pos_weight_vec=scale_pos_weight_vec,
+                scale_pos_weights=scale_pos_weights,
                 max_rules=-5,
             )
 
     def test_precision_out_of_range(self):
         """Test validation rejects invalid min_precision."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         with pytest.raises(ValidationError):
             RulesetClassifier(
                 estimator=estimator,
-                scale_pos_weight_vec=scale_pos_weight_vec,
+                scale_pos_weights=scale_pos_weights,
                 metric_thresholds=[{"name": "precision", "operator": ">=", "value": 1.5}],
             )
 
     def test_recall_out_of_range(self):
         """Test validation rejects invalid min_recall."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         with pytest.raises(ValidationError):
             RulesetClassifier(
                 estimator=estimator,
-                scale_pos_weight_vec=scale_pos_weight_vec,
+                scale_pos_weights=scale_pos_weights,
                 metric_thresholds=[{"name": "recall", "operator": ">=", "value": -0.5}],
             )
 
     def test_max_corr_out_of_range(self):
         """Test validation rejects invalid max_corr."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         with pytest.raises(ValidationError):
             RulesetClassifier(
                 estimator=estimator,
-                scale_pos_weight_vec=scale_pos_weight_vec,
+                scale_pos_weights=scale_pos_weights,
                 max_corr=1.5,
             )
 
     def test_invalid_combine_operator(self):
         """Test validation rejects invalid combine_operator."""
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         with pytest.raises(ValidationError):
             RulesetClassifier(
                 estimator=estimator,
-                scale_pos_weight_vec=scale_pos_weight_vec,
+                scale_pos_weights=scale_pos_weights,
                 combine_operator="xor",
             )
 
@@ -344,11 +344,11 @@ class TestRulesetClassifierFitPredict:
         estimator = XGBClassifier(
             n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0
         )
-        scale_pos_weight_vec = np.logspace(-1, 1, 5)
+        scale_pos_weights = np.logspace(-1, 1, 5)
         return RulesetClassifier(
             estimator=estimator,
-            scale_pos_weight_vec=scale_pos_weight_vec,
-            opt_metric="accuracy",
+            scale_pos_weights=scale_pos_weights,
+            ranking_metric="accuracy",
             max_rules=5,
             metric_thresholds=[{"name": "precision", "operator": ">=", "value": 0.0}, {"name": "recall", "operator": ">=", "value": 0.0}],
             combine_operator="or",
@@ -360,11 +360,11 @@ class TestRulesetClassifierFitPredict:
         estimator = XGBClassifier(
             n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0
         )
-        scale_pos_weight_vec = np.logspace(-1, 1, 5)
+        scale_pos_weights = np.logspace(-1, 1, 5)
         return RulesetClassifier(
             estimator=estimator,
-            scale_pos_weight_vec=scale_pos_weight_vec,
-            opt_metric="accuracy",
+            scale_pos_weights=scale_pos_weights,
+            ranking_metric="accuracy",
             max_rules=5,
             metric_thresholds=[{"name": "precision", "operator": ">=", "value": 0.0}, {"name": "recall", "operator": ">=", "value": 0.0}],
             combine_operator="and",
@@ -480,12 +480,12 @@ class TestRulesetClassifierFitPredict:
         """Test fit populates default metric_thresholds when None."""
         X, y = sample_data
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
-        clf = RulesetClassifier(estimator=estimator, scale_pos_weight_vec=np.array([1.0]))
+        clf = RulesetClassifier(estimator=estimator, scale_pos_weights=np.array([1.0]))
 
-        def fake_weights(estimator_, X_, y_, scale_pos_weight_vec, sample_weights_df):
+        def fake_rule_grid_search(estimator_, X_, y_, scale_pos_weights, sample_weights_df):
             return pl.DataFrame({"rule": ["(X[\"age\"] >= 25)"]})
 
-        monkeypatch.setattr("iguanas.ruleset_classifier.rule_grid_search_parallel_weights", fake_weights)
+        monkeypatch.setattr("iguanas.ruleset_classifier.rule_grid_search", fake_rule_grid_search)
 
         clf.fit(X, y)
 
@@ -496,7 +496,7 @@ class TestRulesetClassifierFitPredict:
         """Test predict and predict_proba with an empty best ruleset."""
         clf = RulesetClassifier(
             estimator=XGBClassifier(n_estimators=1, max_depth=1, eval_metric="logloss", random_state=0),
-            scale_pos_weight_vec=np.array([1.0]),
+            scale_pos_weights=np.array([1.0]),
         )
         clf._feature_cols_ = ["age"]
         clf._best_ruleset_ = ""
@@ -513,42 +513,31 @@ class TestRulesetClassifierFitPredict:
         assert proba.to_list() == [0.0, 0.0, 0.0]
 
     def test_fit_uses_parallel_scales_when_sample_weights_have_fewer_columns(self, sample_data, monkeypatch):
-        """Test fit uses parallel scales when sample_weights_df has fewer columns than scale_pos_weight_vec."""
+        """Test fit uses parallel scales when sample_weights_df has fewer columns than scale_pos_weights."""
         X, y = sample_data
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
+        sample_weights_df = pl.DataFrame({"sample_weight": [1.0] * X.height})
         clf = RulesetClassifier(
             estimator=estimator,
-            scale_pos_weight_vec=np.array([0.1, 1.0]),
-            opt_metric="accuracy",
+            scale_pos_weights=np.array([0.1, 1.0]),
+            sample_weights_df=sample_weights_df,
+            ranking_metric="accuracy",
             metric_thresholds=[{"name": "precision", "operator": ">=", "value": 0.0}, {"name": "recall", "operator": ">=", "value": 0.0}],
         )
 
-        called = {"scales": False, "weights": False}
+        captured = {}
 
-        def fake_scales(estimator_, X_, y_, scale_pos_weight_vec, sample_weights_df):
-            called["scales"] = True
-            assert sample_weights_df is not None
-            assert len(scale_pos_weight_vec) == 2
+        def fake_rule_grid_search(estimator_, X_, y_, scale_pos_weights, sample_weights_df):
+            captured["sample_weights_df"] = sample_weights_df
+            captured["scale_pos_weights"] = scale_pos_weights
             return pl.DataFrame({"rule": ["(X[\"age\"] >= 25)"]})
 
-        def fake_weights(estimator_, X_, y_, scale_pos_weight_vec, sample_weights_df):
-            called["weights"] = True
-            return pl.DataFrame({"rule": ["(X[\"age\"] >= 25)"]})
+        monkeypatch.setattr("iguanas.ruleset_classifier.rule_grid_search", fake_rule_grid_search)
 
-        monkeypatch.setattr(
-            "iguanas.ruleset_classifier.rule_grid_search_parallel_scales",
-            fake_scales,
-        )
-        monkeypatch.setattr(
-            "iguanas.ruleset_classifier.rule_grid_search_parallel_weights",
-            fake_weights,
-        )
+        clf.fit(X, y)
 
-        sample_weights_df = pl.DataFrame({"sample_weight": [1.0] * X.height})
-        clf.fit(X, y, sample_weights_df=sample_weights_df)
-
-        assert called["scales"] is True
-        assert called["weights"] is False
+        assert captured["sample_weights_df"] is not None
+        assert len(captured["scale_pos_weights"]) == 2
 
     def test_fit_uses_parallel_weights_when_no_sample_weights(self, sample_data, monkeypatch):
         """Test fit uses parallel weights when sample_weights_df is not provided."""
@@ -556,32 +545,19 @@ class TestRulesetClassifierFitPredict:
         estimator = XGBClassifier(n_estimators=5, max_depth=3, eval_metric="logloss", random_state=0)
         clf = RulesetClassifier(
             estimator=estimator,
-            scale_pos_weight_vec=np.array([0.1, 1.0]),
-            opt_metric="accuracy",
+            scale_pos_weights=np.array([0.1, 1.0]),
+            ranking_metric="accuracy",
             metric_thresholds=[{"name": "precision", "operator": ">=", "value": 0.0}, {"name": "recall", "operator": ">=", "value": 0.0}],
         )
 
-        called = {"scales": False, "weights": False}
+        captured = {}
 
-        def fake_scales(estimator_, X_, y_, scale_pos_weight_vec, sample_weights_df):
-            called["scales"] = True
+        def fake_rule_grid_search(estimator_, X_, y_, scale_pos_weights, sample_weights_df):
+            captured["sample_weights_df"] = sample_weights_df
             return pl.DataFrame({"rule": ["(X[\"age\"] >= 25)"]})
 
-        def fake_weights(estimator_, X_, y_, scale_pos_weight_vec, sample_weights_df):
-            called["weights"] = True
-            assert sample_weights_df is None
-            return pl.DataFrame({"rule": ["(X[\"age\"] >= 25)"]})
-
-        monkeypatch.setattr(
-            "iguanas.ruleset_classifier.rule_grid_search_parallel_scales",
-            fake_scales,
-        )
-        monkeypatch.setattr(
-            "iguanas.ruleset_classifier.rule_grid_search_parallel_weights",
-            fake_weights,
-        )
+        monkeypatch.setattr("iguanas.ruleset_classifier.rule_grid_search", fake_rule_grid_search)
 
         clf.fit(X, y)
 
-        assert called["weights"] is True
-        assert called["scales"] is False
+        assert captured["sample_weights_df"] is None

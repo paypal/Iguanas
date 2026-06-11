@@ -11,9 +11,9 @@ from iguanas.weight_transformations import (
     _increasing_exprs,
     _power_label,
     _resolve,
-    generate_all_weight,
-    generate_decreasing_weight,
-    generate_increasing_weight,
+    generate_weights,
+    generate_decreasing_weights,
+    generate_increasing_weights,
     select_uncorrelated_weights,
 )
 
@@ -77,19 +77,19 @@ class TestResolve:
 
 class TestDispatch:
     def test_series_returns_none(self, series):
-        result = _dispatch(generate_increasing_weight, series)
+        result = _dispatch(generate_increasing_weights, series)
         assert result is None
 
     def test_dataframe_returns_dataframe(self, dataframe):
-        result = _dispatch(generate_increasing_weight, dataframe)
+        result = _dispatch(generate_increasing_weights, dataframe)
         assert isinstance(result, pl.DataFrame)
 
     def test_dataframe_baseline_appears_once(self, dataframe):
-        result = _dispatch(generate_increasing_weight, dataframe)
+        result = _dispatch(generate_increasing_weights, dataframe)
         assert result.columns.count("Baseline") == 1
 
     def test_dataframe_both_column_suffixes_present(self, dataframe):
-        result = _dispatch(generate_increasing_weight, dataframe)
+        result = _dispatch(generate_increasing_weights, dataframe)
         assert any(c.endswith("__a") for c in result.columns)
         assert any(c.endswith("__b") for c in result.columns)
 
@@ -155,54 +155,54 @@ class TestDecreasingExprs:
 
 
 # ---------------------------------------------------------------------------
-# generate_increasing_weight
+# generate_increasing_weights
 # ---------------------------------------------------------------------------
 
 
 class TestGenerateIncreasingWeight:
     def test_series_returns_dataframe(self, series):
-        result = generate_increasing_weight(series)
+        result = generate_increasing_weights(series)
         assert isinstance(result, pl.DataFrame)
 
     def test_series_has_baseline(self, series):
-        result = generate_increasing_weight(series)
+        result = generate_increasing_weights(series)
         assert "Baseline" in result.columns
 
     def test_baseline_is_all_ones(self, series):
-        result = generate_increasing_weight(series)
+        result = generate_increasing_weights(series)
         assert result["Baseline"].to_list() == [1.0] * len(series)
 
     def test_default_column_count(self, series):
         # Baseline + 5 powers + log = 7
-        result = generate_increasing_weight(series)
+        result = generate_increasing_weights(series)
         assert result.shape[1] == 7
 
     def test_custom_powers_column_count(self, series):
         # Baseline + 2 powers + log = 4
-        result = generate_increasing_weight(series, powers=np.array([1.0, 2.0]))
+        result = generate_increasing_weights(series, powers=np.array([1.0, 2.0]))
         assert result.shape[1] == 4
 
     def test_power1_column_values(self, series):
         # shifted: [0,1,2,3,4]; (1+x)^1 = [1,2,3,4,5]
-        result = generate_increasing_weight(series, powers=np.array([1.0]))
+        result = generate_increasing_weights(series, powers=np.array([1.0]))
         assert result["(1+x)__x"].to_list() == pytest.approx([1.0, 2.0, 3.0, 4.0, 5.0])
 
     def test_power2_column_values(self, series):
         # shifted: [0,1,2,3,4]; (1+x)^2 = [1,4,9,16,25]
-        result = generate_increasing_weight(series, powers=np.array([2.0]))
+        result = generate_increasing_weights(series, powers=np.array([2.0]))
         assert result["(1+x)^2__x"].to_list() == pytest.approx([1.0, 4.0, 9.0, 16.0, 25.0])
 
     def test_log_column_present(self, series):
-        result = generate_increasing_weight(series)
+        result = generate_increasing_weights(series)
         assert "log(1+x)__x" in result.columns
 
     def test_increasing_monotone(self, series):
-        result = generate_increasing_weight(series, powers=np.array([1.0]))
+        result = generate_increasing_weights(series, powers=np.array([1.0]))
         vals = result["(1+x)__x"].to_list()
         assert vals == sorted(vals)
 
     def test_dataframe_input(self, dataframe):
-        result = generate_increasing_weight(dataframe)
+        result = generate_increasing_weights(dataframe)
         assert isinstance(result, pl.DataFrame)
         assert result.columns.count("Baseline") == 1
         assert any(c.endswith("__a") for c in result.columns)
@@ -210,50 +210,50 @@ class TestGenerateIncreasingWeight:
 
     def test_dataframe_column_count(self, dataframe):
         # col "a": 7; col "b": 7 - 1 (Baseline dropped) = 6; total = 13
-        result = generate_increasing_weight(dataframe)
+        result = generate_increasing_weights(dataframe)
         assert result.shape[1] == 13
 
 
 # ---------------------------------------------------------------------------
-# generate_decreasing_weight
+# generate_decreasing_weights
 # ---------------------------------------------------------------------------
 
 
 class TestGenerateDecreasingWeight:
     def test_series_returns_dataframe(self, series):
-        result = generate_decreasing_weight(series)
+        result = generate_decreasing_weights(series)
         assert isinstance(result, pl.DataFrame)
 
     def test_series_has_baseline(self, series):
-        result = generate_decreasing_weight(series)
+        result = generate_decreasing_weights(series)
         assert "Baseline" in result.columns
 
     def test_baseline_is_all_ones(self, series):
-        result = generate_decreasing_weight(series)
+        result = generate_decreasing_weights(series)
         assert result["Baseline"].to_list() == [1.0] * len(series)
 
     def test_default_column_count(self, series):
         # Baseline + 5 reciprocal powers + 1/log = 7
-        result = generate_decreasing_weight(series)
+        result = generate_decreasing_weights(series)
         assert result.shape[1] == 7
 
     def test_reciprocal_column_values(self, series):
         # shifted: [0,1,2,3,4]; 1/(1+x) = [1, 0.5, 1/3, 0.25, 0.2]
-        result = generate_decreasing_weight(series, powers=np.array([1.0]))
+        result = generate_decreasing_weights(series, powers=np.array([1.0]))
         expected = [1.0, 0.5, 1 / 3, 0.25, 0.2]
         assert result["1/(1+x)__x"].to_list() == pytest.approx(expected)
 
     def test_decreasing_monotone(self, series):
-        result = generate_decreasing_weight(series, powers=np.array([1.0]))
+        result = generate_decreasing_weights(series, powers=np.array([1.0]))
         vals = result["1/(1+x)__x"].to_list()
         assert vals == sorted(vals, reverse=True)
 
     def test_log_inverse_column_present(self, series):
-        result = generate_decreasing_weight(series)
+        result = generate_decreasing_weights(series)
         assert "1/log(1+x)__x" in result.columns
 
     def test_dataframe_input(self, dataframe):
-        result = generate_decreasing_weight(dataframe)
+        result = generate_decreasing_weights(dataframe)
         assert isinstance(result, pl.DataFrame)
         assert result.columns.count("Baseline") == 1
         assert any(c.endswith("__a") for c in result.columns)
@@ -441,42 +441,42 @@ class TestSelectUncorrelatedWeights:
 
 
 # ---------------------------------------------------------------------------
-# generate_all_weight
+# generate_weights
 # ---------------------------------------------------------------------------
 
 
 class TestGenerateAllWeight:
     def test_series_returns_dataframe(self, series):
-        result = generate_all_weight(series)
+        result = generate_weights(series)
         assert isinstance(result, pl.DataFrame)
 
     def test_series_has_baseline(self, series):
-        result = generate_all_weight(series)
+        result = generate_weights(series)
         assert "Baseline" in result.columns
 
     def test_default_column_count(self, series):
         # Baseline + 5 inc powers + log + 5 dec powers + 1/log = 13
-        result = generate_all_weight(series)
+        result = generate_weights(series)
         assert result.shape[1] == 13
 
     def test_contains_increasing_columns(self, series):
-        result = generate_all_weight(series)
+        result = generate_weights(series)
         assert "log(1+x)__x" in result.columns
 
     def test_contains_decreasing_columns(self, series):
-        result = generate_all_weight(series)
+        result = generate_weights(series)
         assert "1/log(1+x)__x" in result.columns
         assert "1/(1+x)__x" in result.columns
 
     def test_union_of_increasing_and_decreasing(self, series):
-        inc = generate_increasing_weight(series)
-        dec = generate_decreasing_weight(series)
-        all_ = generate_all_weight(series)
+        inc = generate_increasing_weights(series)
+        dec = generate_decreasing_weights(series)
+        all_ = generate_weights(series)
         expected_cols = set(inc.columns) | (set(dec.columns) - {"Baseline"})
         assert set(all_.columns) == expected_cols
 
     def test_dataframe_input(self, dataframe):
-        result = generate_all_weight(dataframe)
+        result = generate_weights(dataframe)
         assert isinstance(result, pl.DataFrame)
         assert result.columns.count("Baseline") == 1
         assert any(c.endswith("__a") for c in result.columns)

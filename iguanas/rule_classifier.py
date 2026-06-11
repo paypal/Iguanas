@@ -4,13 +4,13 @@ from typing import Any
 
 import numpy as np
 import polars as pl
-from pydantic import BaseModel, ConfigDict, PrivateAttr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.exceptions import NotFittedError
 from xgboost import XGBClassifier
 
 from .rule_evaluation import apply_and_filter_by_performance, apply_rules
-from .rule_generation import rule_grid_search_parallel_scales
+from .rule_generation import rule_grid_search
 
 _NUMERIC_DTYPES = (pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.Float32, pl.Float64)
 
@@ -24,16 +24,18 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
        trees trained across a sweep of ``scale_pos_weight`` values.
     2. **Performance filtering**: rules that fail any condition in
        ``metric_thresholds`` are discarded.
-    3. **Ranking**: the surviving rules are sorted by ``opt_metric`` (descending)
+    3. **Ranking**: the surviving rules are sorted by ``ranking_metric`` (descending)
        and the top-ranked rule is stored in ``_best_rule_``.
 
     Parameters
     ----------
     estimator : XGBClassifier
         XGBoost classifier used for rule generation.
-    scale_pos_weight_vec : np.ndarray
-        Vector of scale_pos_weight values swept during rule generation.
-    opt_metric : str, default="accuracy"
+    scale_pos_weights : list[float] | np.ndarray, default=np.array([1.0])
+        Array of scale_pos_weight values swept during rule generation.
+    sample_weights_df : pl.DataFrame | None, default=None
+        DataFrame of sample weights used for rule generation.
+    ranking_metric : str, default="accuracy"
         Metric used to rank candidate rules. The single highest-scoring rule
         is kept. Must be a column produced by compute_metrics.
     metric_thresholds : list[dict[str, Any]] | None, default=None
@@ -48,8 +50,9 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     estimator: XGBClassifier
-    scale_pos_weight_vec: np.ndarray
-    opt_metric: str = "accuracy"
+    scale_pos_weights: list[float] | np.ndarray = Field(default_factory=lambda: np.array([1.0]))
+    sample_weights_df: pl.DataFrame | None = None
+    ranking_metric: str = "accuracy"
     metric_thresholds: list[dict[str, Any]] | None = None
 
     @field_validator("metric_thresholds")
@@ -88,19 +91,24 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         """
         self._feature_cols_ = [c for c, dt in X.schema.items() if dt in _NUMERIC_DTYPES]
 
-        rules = rule_grid_search_parallel_scales(
+        rules = rule_grid_search(
             self.estimator,
             X[self._feature_cols_].to_pandas(),
             y.to_pandas(),
-            scale_pos_weight_vec=self.scale_pos_weight_vec,
-        ).unique("rule")
+            scale_pos_weights=self.scale_pos_weights,
+            sample_weights_df=self.sample_weights_df,
+        )
+        if rules.is_empty():
+            self._best_rule_ = ""
+            return self
+        rules = rules.unique("rule")
 
         _, M = apply_and_filter_by_performance(
             X[self._feature_cols_],
             y,
             rules["rule"].to_list(),
             metric_thresholds=self.metric_thresholds,
-            sort_by=self.opt_metric,
+            ranking_metric=self.ranking_metric,
         )
 
         self._best_rule_ = M["rule"].item(0) if M.height > 0 else ""

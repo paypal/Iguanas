@@ -11,6 +11,7 @@ from iguanas.rule_generation import (
     extract_rule_by_max_gain,
     extract_rule_with_monotone_constraints,
     extract_rules,
+    rule_grid_search,
     rule_grid_search_parallel_scales,
     rule_grid_search_parallel_weights,
     rule_grid_search_sequential,
@@ -343,10 +344,10 @@ class TestRuleGridSearchParallelWeights:
         y_train = pd.Series(np.random.randint(0, 2, 100))
 
         estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
-        scale_pos_weight_vec = np.array([1.0, 2.0])
+        scale_pos_weights = np.array([1.0, 2.0])
 
         result = rule_grid_search_parallel_weights(
-            estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1
+            estimator, X_train, y_train, scale_pos_weights, n_jobs=1
         )
 
         # Check result is a Polars DataFrame
@@ -381,13 +382,13 @@ class TestRuleGridSearchParallelWeights:
         )
 
         estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         result = rule_grid_search_parallel_weights(
             estimator,
             X_train,
             y_train,
-            scale_pos_weight_vec,
+            scale_pos_weights,
             sample_weights_df=weights_train,
             n_jobs=1,
         )
@@ -408,17 +409,17 @@ class TestRuleGridSearchParallelWeights:
         y_train = pl.Series(np.random.randint(0, 2, 100))
 
         estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         result = rule_grid_search_parallel_weights(
-            estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1
+            estimator, X_train, y_train, scale_pos_weights, n_jobs=1
         )
 
         assert isinstance(result, pl.DataFrame)
         assert len(result) > 0
 
     def test_empty_scale_weights_raises_error(self):
-        """Test that empty scale_pos_weight_vec raises ValueError."""
+        """Test that empty scale_pos_weights raises ValueError."""
         X_train = pd.DataFrame(
             {
                 "feature1": np.random.randn(50),
@@ -428,10 +429,10 @@ class TestRuleGridSearchParallelWeights:
         y_train = pd.Series(np.random.randint(0, 2, 50))
 
         estimator = XGBClassifier(max_depth=1, n_estimators=1)
-        scale_pos_weight_vec = np.array([])  # Empty array
+        scale_pos_weights = np.array([])  # Empty array
 
-        with pytest.raises(ValueError, match="scale_pos_weight_vec cannot be empty"):
-            rule_grid_search_parallel_weights(estimator, X_train, y_train, scale_pos_weight_vec)
+        with pytest.raises(ValueError, match="scale_pos_weights cannot be empty"):
+            rule_grid_search_parallel_weights(estimator, X_train, y_train, scale_pos_weights)
 
     def test_with_monotone_constraints(self):
         """Test grid search with monotone constraints."""
@@ -451,10 +452,10 @@ class TestRuleGridSearchParallelWeights:
             random_state=42,
             monotone_constraints={"feature1": 1, "feature2": -1},
         )
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         result = rule_grid_search_parallel_weights(
-            estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1
+            estimator, X_train, y_train, scale_pos_weights, n_jobs=1
         )
 
         assert isinstance(result, pl.DataFrame)
@@ -500,10 +501,10 @@ class TestRuleGridSearchParallelScales:
         y_train = pd.Series(np.random.randint(0, 2, 100))
 
         estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
-        scale_pos_weight_vec = np.array([1.0, 2.0])
+        scale_pos_weights = np.array([1.0, 2.0])
 
         result = rule_grid_search_parallel_scales(
-            estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1
+            estimator, X_train, y_train, scale_pos_weights, n_jobs=1
         )
 
         assert isinstance(result, pl.DataFrame)
@@ -532,13 +533,13 @@ class TestRuleGridSearchParallelScales:
         )
 
         estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
-        scale_pos_weight_vec = np.array([1.0, 2.0])
+        scale_pos_weights = np.array([1.0, 2.0])
 
         result = rule_grid_search_parallel_scales(
             estimator,
             X_train,
             y_train,
-            scale_pos_weight_vec,
+            scale_pos_weights,
             sample_weights_df=weights_train,
             n_jobs=1,
         )
@@ -558,17 +559,17 @@ class TestRuleGridSearchParallelScales:
         y_train = pl.Series(np.random.randint(0, 2, 100))
 
         estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
-        scale_pos_weight_vec = np.array([1.0, 2.0])
+        scale_pos_weights = np.array([1.0, 2.0])
 
         result = rule_grid_search_parallel_scales(
-            estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1
+            estimator, X_train, y_train, scale_pos_weights, n_jobs=1
         )
 
         assert isinstance(result, pl.DataFrame)
         assert len(result) > 0
 
     def test_empty_scale_weights_raises_error(self):
-        """Test that empty scale_pos_weight_vec raises ValueError."""
+        """Test that empty scale_pos_weights raises ValueError."""
         X_train = pd.DataFrame(
             {
                 "feature1": np.random.randn(50),
@@ -578,10 +579,10 @@ class TestRuleGridSearchParallelScales:
         y_train = pd.Series(np.random.randint(0, 2, 50))
 
         estimator = XGBClassifier(max_depth=1, n_estimators=1)
-        scale_pos_weight_vec = np.array([])
+        scale_pos_weights = np.array([])
 
-        with pytest.raises(ValueError, match="scale_pos_weight_vec cannot be empty"):
-            rule_grid_search_parallel_scales(estimator, X_train, y_train, scale_pos_weight_vec)
+        with pytest.raises(ValueError, match="scale_pos_weights cannot be empty"):
+            rule_grid_search_parallel_scales(estimator, X_train, y_train, scale_pos_weights)
 
     def test_with_monotone_constraints(self):
         """Test grid search with monotone constraints."""
@@ -600,10 +601,10 @@ class TestRuleGridSearchParallelScales:
             random_state=42,
             monotone_constraints={"feature1": 1, "feature2": -1},
         )
-        scale_pos_weight_vec = np.array([1.0, 2.0])
+        scale_pos_weights = np.array([1.0, 2.0])
 
         result = rule_grid_search_parallel_scales(
-            estimator, X_train, y_train, scale_pos_weight_vec, n_jobs=1
+            estimator, X_train, y_train, scale_pos_weights, n_jobs=1
         )
 
         assert isinstance(result, pl.DataFrame)
@@ -622,7 +623,7 @@ class TestRuleGridSearchParallelScales:
 
         # One weight column, many scale values — parallelise over scales
         weights_train = pd.DataFrame({"baseline": np.ones(100)})
-        scale_pos_weight_vec = np.array([1.0, 2.0, 4.0, 8.0])
+        scale_pos_weights = np.array([1.0, 2.0, 4.0, 8.0])
 
         estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
 
@@ -630,7 +631,7 @@ class TestRuleGridSearchParallelScales:
             estimator,
             X_train,
             y_train,
-            scale_pos_weight_vec,
+            scale_pos_weights,
             sample_weights_df=weights_train,
             n_jobs=1,
         )
@@ -677,6 +678,46 @@ class TestRuleGridSearchParallelScales:
             )
         assert isinstance(result, pl.DataFrame)
         assert result.is_empty()
+
+
+class TestRuleGridSearch:
+    """Test cases for rule_grid_search (auto-dispatch) function."""
+
+    def test_dispatches_to_parallel_scales_when_more_scales(self):
+        """Routes to parallel_scales when len(scale_pos_weights) > n_weight_cols."""
+        np.random.seed(42)
+        X_train = pd.DataFrame({"f1": np.random.randn(100), "f2": np.random.randn(100)})
+        y_train = pd.Series(np.random.randint(0, 2, 100))
+        estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
+        # 5 scale values > 1 weight column → parallel_scales path
+        scale_pos_weights = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+
+        from iguanas.rule_generation import rule_grid_search
+        result = rule_grid_search(estimator, X_train, y_train, scale_pos_weights, n_jobs=1)
+
+        assert isinstance(result, pl.DataFrame)
+        assert set(result.columns) >= {"rule", "tree", "scale_pos_weight", "transformation"}
+
+    def test_dispatches_to_parallel_weights_when_more_weights(self):
+        """Routes to parallel_weights when len(scale_pos_weights) <= n_weight_cols."""
+        np.random.seed(42)
+        X_train = pd.DataFrame({"f1": np.random.randn(100), "f2": np.random.randn(100)})
+        y_train = pd.Series(np.random.randint(0, 2, 100))
+        estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
+        # 1 scale value <= 3 weight columns → parallel_weights path
+        scale_pos_weights = np.array([1.0])
+        sample_weights_df = pd.DataFrame({
+            "w1": np.ones(100), "w2": np.ones(100) * 2, "w3": np.ones(100) * 3
+        })
+
+        from iguanas.rule_generation import rule_grid_search
+        result = rule_grid_search(
+            estimator, X_train, y_train, scale_pos_weights,
+            sample_weights_df=sample_weights_df, n_jobs=1
+        )
+
+        assert isinstance(result, pl.DataFrame)
+        assert set(result.columns) >= {"rule", "tree", "scale_pos_weight", "transformation"}
 
 
 class TestExtractRules:
@@ -839,10 +880,10 @@ class TestRuleGridSearchSequential:
         y_train = pd.Series(np.random.randint(0, 2, 50))
 
         estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
-        scale_pos_weight_vec = np.array([1.0, 2.0])
+        scale_pos_weights = np.array([1.0, 2.0])
 
         result = rule_grid_search_sequential(
-            estimator, X_train, y_train, scale_pos_weight_vec, sample_weights_df=None
+            estimator, X_train, y_train, scale_pos_weights, sample_weights_df=None
         )
 
         assert isinstance(result, pl.DataFrame)
@@ -870,10 +911,10 @@ class TestRuleGridSearchSequential:
         )
 
         estimator = XGBClassifier(max_depth=1, n_estimators=2, random_state=42)
-        scale_pos_weight_vec = np.array([1.5])
+        scale_pos_weights = np.array([1.5])
 
         result = rule_grid_search_sequential(
-            estimator, X_train, y_train, scale_pos_weight_vec, weights_train
+            estimator, X_train, y_train, scale_pos_weights, weights_train
         )
 
         assert isinstance(result, pl.DataFrame)
@@ -881,12 +922,12 @@ class TestRuleGridSearchSequential:
             assert "transformation" in result.columns
 
     def test_sequential_empty_scale_pos_weight_raises(self):
-        """Test that empty scale_pos_weight_vec raises error."""
+        """Test that empty scale_pos_weights raises error."""
         X_train = pd.DataFrame({"feature1": [1, 2, 3]})
         y_train = pd.Series([0, 1, 0])
         estimator = XGBClassifier(max_depth=1, n_estimators=1)
 
-        with pytest.raises(ValueError, match="scale_pos_weight_vec cannot be empty"):
+        with pytest.raises(ValueError, match="scale_pos_weights cannot be empty"):
             rule_grid_search_sequential(
                 estimator, X_train, y_train, np.array([]), sample_weights_df=None
             )
@@ -920,13 +961,13 @@ class TestRuleGridSearchPandasWeights:
         weights_train = pd.DataFrame({"weight1": np.ones(30)})
 
         estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         result = rule_grid_search_parallel_weights(
             estimator,
             X_train,
             y_train,
-            scale_pos_weight_vec,
+            scale_pos_weights,
             sample_weights_df=weights_train,
             n_jobs=1,
         )
@@ -987,14 +1028,14 @@ class TestRuleGridSearchWithNoneWeights:
         y_train = pd.Series(np.random.randint(0, 2, 30))
 
         estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         # Explicitly pass None for weights
         result = rule_grid_search_parallel_weights(
             estimator,
             X_train,
             y_train,
-            scale_pos_weight_vec,
+            scale_pos_weights,
             sample_weights_df=None,
             n_jobs=1,
         )
@@ -1017,13 +1058,13 @@ class TestRuleGridSearchVerbose:
         y_train = pd.Series(np.random.randint(0, 2, 30))
 
         estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         result = rule_grid_search_parallel_weights(
             estimator,
             X_train,
             y_train,
-            scale_pos_weight_vec,
+            scale_pos_weights,
             sample_weights_df=None,
             n_jobs=1,
             verbose=1,  # Enable verbose output
@@ -1046,13 +1087,13 @@ class TestRuleGridSearchEmptyResults:
         y_train = pd.Series([0, 0, 0, 1])
 
         estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         result = rule_grid_search_parallel_weights(
             estimator,
             X_train,
             y_train,
-            scale_pos_weight_vec,
+            scale_pos_weights,
             sample_weights_df=None,
             n_jobs=1,
         )
@@ -1076,13 +1117,13 @@ class TestRuleGridSearchSequentialWithNoneWeights:
         y_train = pd.Series(np.random.randint(0, 2, 30))
 
         estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         result = rule_grid_search_sequential(
             estimator,
             X_train,
             y_train,
-            scale_pos_weight_vec,
+            scale_pos_weights,
             sample_weights_df=None,  # Explicitly None
         )
 
@@ -1100,13 +1141,13 @@ class TestRuleGridSearchSequentialEmptyResults:
         y_train = pd.Series([0, 0, 0, 1])
 
         estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         result = rule_grid_search_sequential(
             estimator,
             X_train,
             y_train,
-            scale_pos_weight_vec,
+            scale_pos_weights,
             sample_weights_df=None,
         )
 
@@ -1219,13 +1260,13 @@ class TestPandasWeightsElseBranch:
         assert not isinstance(weights_pl, pd.DataFrame)
 
         estimator = XGBClassifier(max_depth=2, n_estimators=2, random_state=100)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         result = rule_grid_search_parallel_weights(
             estimator,
             X_train,
             y_train,
-            scale_pos_weight_vec,
+            scale_pos_weights,
             sample_weights_df=weights_pl,  # Pass Polars DataFrame
             n_jobs=1,
             verbose=0,
@@ -1250,13 +1291,13 @@ class TestPolarsInputSequential:
         y_train = pl.Series(np.random.randint(0, 2, 30))
 
         estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         result = rule_grid_search_sequential(
             estimator,
             X_train,
             y_train,
-            scale_pos_weight_vec,
+            scale_pos_weights,
             sample_weights_df=None,
         )
 
@@ -1285,13 +1326,13 @@ class TestPandasWeightsSequential:
         assert not isinstance(weights_pl, pd.DataFrame)
 
         estimator = XGBClassifier(max_depth=2, n_estimators=2, random_state=100)
-        scale_pos_weight_vec = np.array([1.0])
+        scale_pos_weights = np.array([1.0])
 
         result = rule_grid_search_sequential(
             estimator,
             X_train,
             y_train,
-            scale_pos_weight_vec,
+            scale_pos_weights,
             sample_weights_df=weights_pl,  # Pass Polars DataFrame
         )
 
@@ -1313,7 +1354,7 @@ class TestFitExceptionSequential:
         y_train = pd.Series(np.random.randint(0, 2, 30))
 
         estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
-        scale_pos_weight_vec = np.array([1.0, 2.0])
+        scale_pos_weights = np.array([1.0, 2.0])
 
         # Monkeypatch fit to raise exception on first call
         original_fit = XGBClassifier.fit
@@ -1328,16 +1369,14 @@ class TestFitExceptionSequential:
 
         monkeypatch.setattr(XGBClassifier, "fit", mock_fit)
 
-        result = rule_grid_search_sequential(
-            estimator,
-            X_train,
-            y_train,
-            scale_pos_weight_vec,
-            sample_weights_df=None,
-        )
-
-        # Should succeed with second scale_pos_weight
-        assert isinstance(result, pl.DataFrame)
+        with pytest.raises(RuntimeError, match="Simulated fit failure in sequential"):
+            rule_grid_search_sequential(
+                estimator,
+                X_train,
+                y_train,
+                scale_pos_weights,
+                sample_weights_df=None,
+            )
 
 
 class TestNonNumericInputRaises:
@@ -1358,19 +1397,19 @@ class TestNonNumericInputRaises:
     def test_sequential_raises_on_object_dtype(self, estimator, X_train_object, y_train):
         with pytest.raises(ValueError, match="non-numeric data"):
             rule_grid_search_sequential(
-                estimator, X_train_object, y_train, scale_pos_weight_vec=[1.0]
+                estimator, X_train_object, y_train, scale_pos_weights=[1.0]
             )
 
     def test_parallel_weights_raises_on_object_dtype(self, estimator, X_train_object, y_train):
         with pytest.raises(ValueError, match="non-numeric data"):
             rule_grid_search_parallel_weights(
-                estimator, X_train_object, y_train, scale_pos_weight_vec=[1.0]
+                estimator, X_train_object, y_train, scale_pos_weights=[1.0]
             )
 
     def test_parallel_scales_raises_on_object_dtype(self, estimator, X_train_object, y_train):
         with pytest.raises(ValueError, match="non-numeric data"):
             rule_grid_search_parallel_scales(
-                estimator, X_train_object, y_train, scale_pos_weight_vec=[1.0]
+                estimator, X_train_object, y_train, scale_pos_weights=[1.0]
             )
 
 

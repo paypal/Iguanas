@@ -54,7 +54,7 @@ def _dispatch(fn, X: pl.Series | pl.DataFrame, **kwargs) -> pl.DataFrame | None:
     return pl.concat([results[0]] + [r.drop("Baseline") for r in results[1:]], how="horizontal")
 
 
-def generate_increasing_weight(
+def generate_increasing_weights(
     X: pl.Series | pl.DataFrame,
     powers: np.ndarray | None = None,
 ) -> pl.DataFrame:
@@ -77,24 +77,20 @@ def generate_increasing_weight(
     --------
     >>> import polars as pl
     >>> s = pl.Series("amount", [0.0, 10.0, 50.0, 100.0])
-    >>> df = generate_increasing_weight(s)
+    >>> df = generate_increasing_weights(s)
     >>> df.columns  # 'Baseline', '(1+x)^0.25__amount', ..., 'log(1+x)__amount'
     >>> # DataFrame input: each column processed independently
     >>> X = pl.DataFrame({"a": [1.0, 2.0, 3.0], "b": [4.0, 5.0, 6.0]})
-    >>> generate_increasing_weight(X).shape
+    >>> generate_increasing_weights(X).shape
     (3, ...)  # 1 Baseline + 5 power cols + 1 log col per feature, minus duplicate Baselines
     """
-    if (
-        out := _dispatch(
-            generate_increasing_weight, X, powers=powers
-        )
-    ) is not None:
+    if (out := _dispatch(generate_increasing_weights, X, powers=powers)) is not None:
         return out
     df, col_name, powers = _resolve(X, powers)
     return df.with_columns(_increasing_exprs(col_name, powers)).drop(col_name)
 
 
-def generate_decreasing_weight(
+def generate_decreasing_weights(
     X: pl.Series | pl.DataFrame,
     powers: np.ndarray | None = None,
 ) -> pl.DataFrame:
@@ -117,14 +113,10 @@ def generate_decreasing_weight(
     --------
     >>> import polars as pl
     >>> s = pl.Series("amount", [0.0, 10.0, 50.0, 100.0])
-    >>> df = generate_decreasing_weight(s)
+    >>> df = generate_decreasing_weights(s)
     >>> df.columns  # '1/(1+x)__amount', '1/(1+x)^0.25__amount', ..., '1/log(1+x)__amount'
     """
-    if (
-        out := _dispatch(
-            generate_decreasing_weight, X, powers=powers
-        )
-    ) is not None:
+    if (out := _dispatch(generate_decreasing_weights, X, powers=powers)) is not None:
         return out
     df, col_name, powers = _resolve(X, powers)
     return df.with_columns(
@@ -132,7 +124,7 @@ def generate_decreasing_weight(
     ).drop(col_name)
 
 
-def generate_all_weight(
+def generate_weights(
     X: pl.Series | pl.DataFrame,
     powers: np.ndarray | None = None,
 ) -> pl.DataFrame:
@@ -155,12 +147,10 @@ def generate_all_weight(
     --------
     >>> import polars as pl
     >>> s = pl.Series("amount", [0.0, 10.0, 50.0, 100.0])
-    >>> df = generate_all_weight(s)
+    >>> df = generate_weights(s)
     >>> # Columns include both (1+x)^p and 1/(1+x)^p families plus log variants
     """
-    if (
-        out := _dispatch(generate_all_weight, X, powers=powers)
-    ) is not None:
+    if (out := _dispatch(generate_weights, X, powers=powers)) is not None:
         return out
     df, col_name, powers = _resolve(X, powers)
     exprs = _increasing_exprs(col_name, powers)

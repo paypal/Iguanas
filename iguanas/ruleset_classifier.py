@@ -11,7 +11,7 @@ from xgboost import XGBClassifier
 
 from .rule_combination import combine_rules_greedy
 from .rule_evaluation import apply_and_filter_by_performance, apply_rules
-from .rule_generation import rule_grid_search_parallel_scales, rule_grid_search_parallel_weights
+from .rule_generation import rule_grid_search
 from .rule_selection import filter_correlated_rules
 
 _NUMERIC_DTYPES = (pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.Float32, pl.Float64)
@@ -27,10 +27,10 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     2. **Performance filtering**: rules that fail any condition in
        ``metric_thresholds`` are discarded.
     3. **Correlation filtering**: among rules that are correlated above
-       ``max_corr``, only the one with the highest ``opt_metric`` score is kept.
+       ``max_corr``, only the one with the highest ``ranking_metric`` score is kept.
     4. **Greedy combination**: starting from the single best rule, rules are
        added one at a time — each iteration picks the candidate that yields the
-       largest improvement in ``opt_metric`` when combined (via
+       largest improvement in ``ranking_metric`` when combined (via
        ``combine_operator``) with the already-selected rules. Addition stops
        when no candidate improves the metric by at least ``min_improvement`` or
        when ``max_rules`` rules have been selected.
@@ -42,9 +42,9 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     ----------
     estimator : XGBClassifier
         XGBoost classifier used for rule generation.
-    scale_pos_weight_vec : np.ndarray | list[float], default=np.array([1.0])
-        Vector of scale_pos_weight values swept during rule generation.
-    opt_metric : str, default="accuracy"
+    scale_pos_weights : np.ndarray | list[float], default=np.array([1.0])
+        Array of scale_pos_weight values swept during rule generation.
+    ranking_metric : str, default="accuracy"
         Metric used to rank and select candidate rules. Must be a column
         produced by compute_metrics (e.g. "f1", "precision", "recall").
     max_rules : int, default=10
@@ -62,15 +62,16 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     combine_operator : str, default="or"
         Boolean operator used to combine selected rules: "or" or "and".
     min_improvement : float, default=0.01
-        Minimum improvement in opt_metric required to add a new rule to the
+        Minimum improvement in ranking_metric required to add a new rule to the
         combined ruleset during greedy selection.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     estimator: XGBClassifier
-    scale_pos_weight_vec: np.ndarray | list[float] = Field(default_factory=lambda: np.array([1.0]))
-    opt_metric: str = "accuracy"
+    scale_pos_weights: np.ndarray | list[float] = Field(default_factory=lambda: np.array([1.0]))
+    sample_weights_df: pl.DataFrame | None = None
+    ranking_metric: str = "accuracy"
     max_rules: int = Field(default=10, gt=0)
     metric_thresholds: list[dict[str, Any]] | None = None
     metric_weights: pl.Series | None = None
@@ -105,9 +106,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
             raise ValueError(f"combine_operator must be 'or' or 'and', got '{v}'")
         return v
 
-    def fit(
-        self, X: pl.DataFrame, y: pl.Series, sample_weights_df: pl.DataFrame | None = None
-    ) -> RulesetClassifier:
+    def fit(self, X: pl.DataFrame, y: pl.Series) -> RulesetClassifier:
         """Generate, filter, and select rules from training data.
 
         Parameters
@@ -116,9 +115,6 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
             Feature DataFrame. Only numeric columns are used for rule generation.
         y : pl.Series
             Binary target series.
-        sample_weights_df : pl.DataFrame | None, default=None
-            Optional DataFrame of sample weights with a single column. If provided,
-            weights are used during rule generation.
         Returns
         -------
         RulesetClassifier
@@ -127,32 +123,23 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         if self.metric_thresholds is None:
             self.metric_thresholds = [{"name": "accuracy", "operator": ">=", "value": 0.5}]
         self._feature_cols_ = [c for c, dt in X.schema.items() if dt in _NUMERIC_DTYPES]
-        if len(self.scale_pos_weight_vec) > sample_weights_df.shape[1] if sample_weights_df is not None else 0:
-            rules_df = rule_grid_search_parallel_scales(
-                self.estimator,
-                X[self._feature_cols_],
-                y,
-                scale_pos_weight_vec=self.scale_pos_weight_vec,
-                sample_weights_df=sample_weights_df,
-            )
-        else:
-            rules_df = rule_grid_search_parallel_weights(
-                self.estimator,
-                X[self._feature_cols_],
-                y,
-                scale_pos_weight_vec=self.scale_pos_weight_vec,
-                sample_weights_df=sample_weights_df,
-            )
+        rules_df = rule_grid_search(
+            self.estimator,
+            X[self._feature_cols_],
+            y,
+            scale_pos_weights=self.scale_pos_weights,
+            sample_weights_df=self.sample_weights_df,
+        )
         rules = rules_df["rule"].to_list()
         R, M = apply_and_filter_by_performance(
             X[self._feature_cols_],
             y,
             rules,
             metric_thresholds=self.metric_thresholds,
-            sort_by=self.opt_metric,
+            ranking_metric=self.ranking_metric,
         )
         candidate_rules = M["rule"].to_list()
-        importance = dict(zip(M["rule"], M[self.opt_metric], strict=False))
+        importance = dict(zip(M["rule"], M[self.ranking_metric], strict=False))
         candidate_rules = filter_correlated_rules(
             R[candidate_rules],
             importance=importance,
@@ -161,7 +148,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         R_greedy = combine_rules_greedy(
             R[candidate_rules],
             y,
-            metric=self.opt_metric,
+            metric=self.ranking_metric,
             max_rules=self.max_rules,
             min_improvement=self.min_improvement,
             weights=self.metric_weights,

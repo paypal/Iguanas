@@ -495,7 +495,7 @@ class TestSelectBestRulePerColumnCombination:
             "rule": ['(X["a"] > 1)', '(X["a"] > 2)', '(X["b"] < 3)'],
             "precision": [0.95, 0.98, 0.96],
         })
-        result = select_best_rule_per_column_combination(metrics, sort_by="precision")
+        result = select_best_rule_per_column_combination(metrics, ranking_metric="precision")
         assert '(X["a"] > 2)' in result
         assert '(X["b"] < 3)' in result
         assert len(result) == 2
@@ -506,11 +506,11 @@ class TestSelectBestRulePerColumnCombination:
         with pytest.raises(ValueError, match="must contain a 'rule' column"):
             select_best_rule_per_column_combination(metrics)
 
-    def test_missing_sort_by_raises(self):
-        """ValueError when sort_by column is absent (line 270-271)."""
+    def test_missing_ranking_metric_raises(self):
+        """ValueError when ranking_metric column is absent (line 270-271)."""
         metrics = pl.DataFrame({"rule": ['(X["a"] > 1)'], "precision": [0.9]})
         with pytest.raises(ValueError, match="not found in metrics columns"):
-            select_best_rule_per_column_combination(metrics, sort_by="recall")
+            select_best_rule_per_column_combination(metrics, ranking_metric="recall")
 
 
 class TestFilterCorrelatedRulesColIRemoval:

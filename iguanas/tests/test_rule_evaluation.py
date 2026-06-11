@@ -121,7 +121,7 @@ class TestApplyAndFilterByPerformance:
         # Should return empty results
         assert len(metrics) == 0
 
-    def test_custom_sort_by(self):
+    def test_custom_ranking_metric(self):
         """Test sorting by different metrics."""
         X = pl.DataFrame(
             {"age": [25, 30, 35, 40, 45, 50], "income": [30000, 40000, 50000, 60000, 70000, 80000]}
@@ -137,7 +137,7 @@ class TestApplyAndFilterByPerformance:
                 {"name": "precision", "operator": ">=", "value": 0.4},
                 {"name": "recall", "operator": ">=", "value": 0.4},
             ],
-            sort_by="recall",
+            ranking_metric="recall",
         )
 
         # Check that results are sorted by recall in descending order
@@ -282,7 +282,7 @@ class TestSelectDiverseTopRules:
         )
 
         R_filtered, metrics_filtered, rules = select_diverse_top_rules(
-            R_test, metrics_test, max_corr=0.5, sort_by="precision"
+            R_test, metrics_test, max_corr=0.5, ranking_metric="precision"
         )
 
         # Verify sorting by precision
@@ -487,7 +487,7 @@ class TestApplyFilterAndDeduplicateRules:
         # With low correlation threshold, should filter out similar rules
         assert isinstance(selected_rules, list)
 
-    def test_custom_sort_by(self):
+    def test_custom_ranking_metric(self):
         """Test sorting by different metric."""
         X = pl.DataFrame(
             {
@@ -506,7 +506,7 @@ class TestApplyFilterAndDeduplicateRules:
                 {"name": "precision", "operator": ">=", "value": 0.3},
                 {"name": "recall", "operator": ">=", "value": 0.3},
             ],
-            sort_by="recall",
+            ranking_metric="recall",
         )
 
         # Check that results are sorted by recall

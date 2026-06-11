@@ -58,7 +58,7 @@ Quick Start
     import numpy as np
     from xgboost import XGBClassifier
 
-    from iguanas.weight_transformations import generate_all_weight
+    from iguanas.weight_transformations import generate_weights
     from iguanas.rule_generation import rule_grid_search_parallel_weights
     from iguanas.rule_evaluation import apply_filter_and_deduplicate_rules
 
@@ -70,15 +70,15 @@ Quick Start
     y_train = pl.Series([0, 1, 0, 1, 0, 1, 1, 0])
 
     # 2. Generate sample weight transformations
-    weights = generate_all_weight(X_train["income"])
+    weights = generate_weights(X_train["income"])
 
     # 3. Run a parallel grid search to extract rules
     estimator = XGBClassifier(max_depth=2, n_estimators=5, random_state=42)
-    scale_pos_weight_vec = np.logspace(0, 1, 5)
+    scale_pos_weights = np.logspace(0, 1, 5)
 
     rules_df = rule_grid_search_parallel_weights(
         estimator, X_train, y_train,
-        scale_pos_weight_vec=scale_pos_weight_vec,
+        scale_pos_weights=scale_pos_weights,
         weights_train_vec=weights,
         n_jobs=-1,
     )

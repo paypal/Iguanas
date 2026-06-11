@@ -7,20 +7,20 @@ Weight Transformations
 Functions
 =========
 
-generate_increasing_weight
+generate_increasing_weights
 ---------------------------
 
-.. autofunction:: generate_increasing_weight
+.. autofunction:: generate_increasing_weights
 
-generate_decreasing_weight
+generate_decreasing_weights
 ---------------------------
 
-.. autofunction:: generate_decreasing_weight
+.. autofunction:: generate_decreasing_weights
 
-generate_all_weight
+generate_weights
 --------------------
 
-.. autofunction:: generate_all_weight
+.. autofunction:: generate_weights
 
 select_uncorrelated_weights
 ----------------------------
