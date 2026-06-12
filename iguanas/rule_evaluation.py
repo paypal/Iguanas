@@ -78,8 +78,8 @@ def apply_and_filter_by_performance(
     y: pl.Series,
     rules: list[str],
     weight_column: str | None = None,
-    metrics_threshold: list[dict[str, Any]] | None = None,
-    sort_by: str = "precision",
+    metric_thresholds: list[dict[str, Any]] | None = None,
+    ranking_metric: str = "precision",
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
     """Evaluate rules on a dataset split and filter by performance thresholds.
 
@@ -98,7 +98,7 @@ def apply_and_filter_by_performance(
     weight_column : str | None, default=None
         Name of column in X to use as sample weights for metric computation.
         If None, all samples are weighted equally.
-    metrics_threshold : list[dict[str, Any]], default=[precision >= 0.2, recall >= 0.2]
+    metric_thresholds : list[dict[str, Any]], default=[{"name": "accuracy", "operator": ">=", "value": 0.5}]
         List of threshold dicts, each with keys:
 
         - ``"name"``: metric column name (e.g. ``"precision"``, ``"recall"``, ``"f1"``).
@@ -106,7 +106,7 @@ def apply_and_filter_by_performance(
         - ``"value"``: numeric threshold.
 
         All conditions are combined with AND. Rules failing any condition are dropped.
-    sort_by : str, default="precision"
+    ranking_metric : str, default="precision"
         Metric name to sort results by (descending order).
         Must be a valid column name from compute_metrics output.
 
@@ -116,7 +116,7 @@ def apply_and_filter_by_performance(
         Boolean DataFrame containing only rules that meet all threshold criteria.
         Columns are rule expressions, rows are samples.
     metrics_split : pl.DataFrame
-        Performance metrics for the filtered rules, sorted by `sort_by`.
+        Performance metrics for the filtered rules, sorted by `ranking_metric`.
         Contains columns like 'rule', 'precision', 'recall', 'f1', etc.
 
     Examples
@@ -124,9 +124,8 @@ def apply_and_filter_by_performance(
     >>> X = pl.DataFrame({"age": [25, 30, 35, 40], "income": [50000, 60000, 70000, 80000]})
     >>> y = pl.Series([0, 0, 1, 1])
     >>> rules = ['(X["age"] >= 30)', '(X["income"] > 55000)']
-    >>> thresholds = [{"name": "precision", "operator": ">=", "value": 0.5},
-    ...               {"name": "recall",    "operator": ">=", "value": 0.5}]
-    >>> R, metrics = apply_and_filter_by_performance(X, y, rules, metrics_threshold=thresholds)
+    >>> metric_thresholds = [{"name": "accuracy", "operator": ">=", "value": 0.5}]
+    >>> R, metrics = apply_and_filter_by_performance(X, y, rules, metric_thresholds=metric_thresholds)
     >>> metrics[['rule', 'precision', 'recall']]
 
     See Also
@@ -134,20 +133,19 @@ def apply_and_filter_by_performance(
     apply_rules : Evaluate rule expressions on a DataFrame
     compute_metrics : Compute performance metrics for rule predictions
     """
-    if metrics_threshold is None:
-        metrics_threshold = [
-            {"name": "precision", "operator": ">=", "value": 0.2},
-            {"name": "recall", "operator": ">=", "value": 0.2},
-        ]
+    if metric_thresholds is None:
+        metric_thresholds = [{"name": "accuracy", "operator": ">=", "value": 0.5}]
     if not rules:
         return pl.DataFrame(), pl.DataFrame()
     R_split = apply_rules(X, rules)
     weights = X[weight_column] if weight_column is not None else None
-    metrics_split = compute_metrics(R_split, y, weights=weights).sort(sort_by, descending=True)
+    metrics_split = compute_metrics(R_split, y, weights=weights).sort(
+        ranking_metric, descending=True
+    )
 
     filter_expr = reduce(
         lambda acc, t: acc & getattr(pl.col(t["name"]), _OPS[t["operator"]])(t["value"]),
-        metrics_threshold,
+        metric_thresholds,
         pl.lit(True),
     )
     metrics_split = metrics_split.filter(filter_expr)
@@ -162,7 +160,7 @@ def select_diverse_top_rules(
     max_corr: float = 0.8,
     importance_metric: str = "f0.5",
     top_n: int | None = None,
-    sort_by: str = "f1",
+    ranking_metric: str = "f1",
 ) -> tuple[pl.DataFrame, pl.DataFrame, list[str]]:
     """Select top performing rules while removing highly correlated duplicates.
 
@@ -176,7 +174,7 @@ def select_diverse_top_rules(
         Boolean DataFrame with rule predictions (columns are rules, rows are samples).
     metrics : pl.DataFrame
         Performance metrics for the rules in R.
-        Must contain columns 'rule', importance_metric, and sort_by metric.
+        Must contain columns 'rule', importance_metric, and ranking_metric metric.
     max_corr : float, default=0.8
         Maximum correlation threshold. Rule pairs with correlation > max_corr
         are considered too similar, and only the more important one is kept.
@@ -184,9 +182,9 @@ def select_diverse_top_rules(
         Metric name to use for determining rule importance when filtering
         correlated rules. Higher values indicate more important rules.
     top_n : int | None, default=None
-        If specified, limits selection to top N rules by sort_by metric
+        If specified, limits selection to top N rules by ranking_metric metric
         before filtering correlations. If None, considers all rules.
-    sort_by : str, default="f1"
+    ranking_metric : str, default="f1"
         Metric name to sort and rank rules by (descending order) before
         applying correlation filtering.
 
@@ -226,20 +224,20 @@ def select_diverse_top_rules(
         return pl.DataFrame(), pl.DataFrame(), []
 
     # Sort and optionally limit to top N
-    metrics_sorted = metrics.sort(sort_by, descending=True)
+    metrics_sorted = metrics.sort(ranking_metric, descending=True)
     if top_n is not None:
         metrics_sorted = metrics_sorted[:top_n]
 
     # Filter correlated rules — returns list[str]
     importance_dict = dict(metrics_sorted[["rule", importance_metric]].rows())
-    rule_lst = filter_correlated_rules(
+    selected_rules = filter_correlated_rules(
         R[metrics_sorted["rule"].to_list()], max_corr=max_corr, importance=importance_dict
     )
-    R_filtered = R[rule_lst] if rule_lst else pl.DataFrame()
+    R_filtered = R[selected_rules] if selected_rules else pl.DataFrame()
 
-    print(f"Number of uncorrelated rules: {len(rule_lst)}")
+    print(f"Number of uncorrelated rules: {len(selected_rules)}")
 
-    return R_filtered, metrics_sorted.filter(pl.col("rule").is_in(rule_lst)), rule_lst
+    return R_filtered, metrics_sorted.filter(pl.col("rule").is_in(selected_rules)), selected_rules
 
 
 def apply_filter_and_deduplicate_rules(
@@ -247,10 +245,10 @@ def apply_filter_and_deduplicate_rules(
     y: pl.Series,
     rules: list[str] | pl.DataFrame,
     weight_column: str | None = None,
-    metrics_threshold: list[dict[str, Any]] | None = None,
+    metric_thresholds: list[dict[str, Any]] | None = None,
     top_n_rules: int | None = None,
     max_corr: float = 0.8,
-    sort_by: str = "precision",
+    ranking_metric: str = "precision",
 ) -> tuple[pl.DataFrame, pl.DataFrame, list[str]]:
     """Complete pipeline to evaluate and filter rules on a dataset.
 
@@ -269,16 +267,16 @@ def apply_filter_and_deduplicate_rules(
         Either a list of rule expressions as strings, or a DataFrame with a 'rule' column.
     weight_column : str | None, default=None
         Name of weight column in X. If None, unweighted metrics are computed.
-    metrics_threshold : list[dict[str, Any]], default=[precision >= 0.2, recall >= 0.2]
+    metric_thresholds : list[dict[str, Any]], default=[precision >= 0.2, recall >= 0.2]
         List of threshold dicts forwarded to :func:`apply_and_filter_by_performance`.
         Each dict must have keys ``"name"``, ``"operator"``, and ``"value"``.
         All conditions are combined with AND.
     top_n_rules : int | None, default=None
-        Maximum number of rules to keep after sorting by sort_by metric.
+        Maximum number of rules to keep after sorting by ranking_metric metric.
         Applied before correlation filtering. If None, keeps all rules that pass thresholds.
     max_corr : float, default=0.8
         Maximum correlation threshold for filtering similar rules.
-    sort_by : str, default="precision"
+    ranking_metric : str, default="precision"
         Metric name to sort results by (descending order).
 
     Returns
@@ -301,7 +299,7 @@ def apply_filter_and_deduplicate_rules(
     >>> thresholds = [{"name": "precision", "operator": ">=", "value": 0.5},
     ...               {"name": "recall",    "operator": ">=", "value": 0.5}]
     >>> R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
-    ...     X, y, rules, metrics_threshold=thresholds, top_n_rules=10
+    ...     X, y, rules, metric_thresholds=thresholds, top_n_rules=10
     ... )
     >>> print(f"Selected {len(selected_rules)} rules")
     >>> metrics[['rule', 'precision', 'recall', 'f1']]
@@ -318,8 +316,8 @@ def apply_filter_and_deduplicate_rules(
     apply_and_filter_by_performance : Evaluate rules on a single data split
     select_diverse_top_rules : Select top rules while removing correlations
     """
-    if metrics_threshold is None:
-        metrics_threshold = [
+    if metric_thresholds is None:
+        metric_thresholds = [
             {"name": "precision", "operator": ">=", "value": 0.2},
             {"name": "recall", "operator": ">=", "value": 0.2},
         ]
@@ -329,12 +327,12 @@ def apply_filter_and_deduplicate_rules(
 
     # Evaluate and filter by thresholds
     R, metrics = apply_and_filter_by_performance(
-        X, y, rules, weight_column, metrics_threshold, sort_by
+        X, y, rules, weight_column, metric_thresholds, ranking_metric
     )
 
     # Select top uncorrelated rules
     R, metrics, selected_rules = select_diverse_top_rules(
-        R, metrics, max_corr=max_corr, top_n=top_n_rules, sort_by=sort_by
+        R, metrics, max_corr=max_corr, top_n=top_n_rules, ranking_metric=ranking_metric
     )
 
     return R, metrics, selected_rules

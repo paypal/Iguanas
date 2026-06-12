@@ -2,6 +2,7 @@ import numpy as np
 import polars as pl
 import pytest
 
+import iguanas.weight_transformations as wt
 from iguanas.weight_transformations import (
     _DEFAULT_POWERS,
     EPS,
@@ -10,9 +11,10 @@ from iguanas.weight_transformations import (
     _increasing_exprs,
     _power_label,
     _resolve,
-    generate_all_weight,
-    generate_decreasing_weight,
-    generate_increasing_weight,
+    generate_weights,
+    generate_decreasing_weights,
+    generate_increasing_weights,
+    select_uncorrelated_weights,
 )
 
 
@@ -75,19 +77,19 @@ class TestResolve:
 
 class TestDispatch:
     def test_series_returns_none(self, series):
-        result = _dispatch(generate_increasing_weight, series)
+        result = _dispatch(generate_increasing_weights, series)
         assert result is None
 
     def test_dataframe_returns_dataframe(self, dataframe):
-        result = _dispatch(generate_increasing_weight, dataframe)
+        result = _dispatch(generate_increasing_weights, dataframe)
         assert isinstance(result, pl.DataFrame)
 
     def test_dataframe_baseline_appears_once(self, dataframe):
-        result = _dispatch(generate_increasing_weight, dataframe)
+        result = _dispatch(generate_increasing_weights, dataframe)
         assert result.columns.count("Baseline") == 1
 
     def test_dataframe_both_column_suffixes_present(self, dataframe):
-        result = _dispatch(generate_increasing_weight, dataframe)
+        result = _dispatch(generate_increasing_weights, dataframe)
         assert any(c.endswith("__a") for c in result.columns)
         assert any(c.endswith("__b") for c in result.columns)
 
@@ -124,13 +126,6 @@ class TestIncreasingExprs:
         result = df.with_columns(exprs).drop(col)
         assert "(1+x)^0.25__x" in result.columns
 
-    def test_with_quantile_adds_clipped_columns(self, series):
-        qval = float(series.quantile(0.9))
-        df, col, powers = _resolve(series, np.array([1.0]))
-        exprs = _increasing_exprs(col, powers, qval, 0.9)
-        result = df.with_columns(exprs).drop(col)
-        assert any("clipped_90th" in c for c in result.columns)
-
 
 class TestDecreasingExprs:
     def test_without_quantile_special_p1_label(self, series):
@@ -158,72 +153,56 @@ class TestDecreasingExprs:
         result = df.with_columns(exprs).drop(col)
         assert "1/log(1+x)__x" in result.columns
 
-    def test_with_quantile_adds_clipped_columns(self, series):
-        qval = float(series.quantile(0.9))
-        df, col, powers = _resolve(series, np.array([1.0]))
-        exprs = _decreasing_exprs(col, powers, qval, 0.9)
-        result = df.with_columns(exprs).drop(col)
-        assert any("clipped_90th" in c for c in result.columns)
-
 
 # ---------------------------------------------------------------------------
-# generate_increasing_weight
+# generate_increasing_weights
 # ---------------------------------------------------------------------------
 
 
 class TestGenerateIncreasingWeight:
     def test_series_returns_dataframe(self, series):
-        result = generate_increasing_weight(series)
+        result = generate_increasing_weights(series)
         assert isinstance(result, pl.DataFrame)
 
     def test_series_has_baseline(self, series):
-        result = generate_increasing_weight(series)
+        result = generate_increasing_weights(series)
         assert "Baseline" in result.columns
 
     def test_baseline_is_all_ones(self, series):
-        result = generate_increasing_weight(series)
+        result = generate_increasing_weights(series)
         assert result["Baseline"].to_list() == [1.0] * len(series)
 
     def test_default_column_count(self, series):
         # Baseline + 5 powers + log = 7
-        result = generate_increasing_weight(series)
+        result = generate_increasing_weights(series)
         assert result.shape[1] == 7
-
-    def test_with_quantile_column_count(self, series):
-        # Baseline + 5 powers + log + 5 clipped = 12
-        result = generate_increasing_weight(series, quantile_value=0.9)
-        assert result.shape[1] == 12
-
-    def test_with_quantile_clipped_column_names(self, series):
-        result = generate_increasing_weight(series, quantile_value=0.9)
-        assert any("clipped_90th" in c for c in result.columns)
 
     def test_custom_powers_column_count(self, series):
         # Baseline + 2 powers + log = 4
-        result = generate_increasing_weight(series, powers=np.array([1.0, 2.0]))
+        result = generate_increasing_weights(series, powers=np.array([1.0, 2.0]))
         assert result.shape[1] == 4
 
     def test_power1_column_values(self, series):
         # shifted: [0,1,2,3,4]; (1+x)^1 = [1,2,3,4,5]
-        result = generate_increasing_weight(series, powers=np.array([1.0]))
+        result = generate_increasing_weights(series, powers=np.array([1.0]))
         assert result["(1+x)__x"].to_list() == pytest.approx([1.0, 2.0, 3.0, 4.0, 5.0])
 
     def test_power2_column_values(self, series):
         # shifted: [0,1,2,3,4]; (1+x)^2 = [1,4,9,16,25]
-        result = generate_increasing_weight(series, powers=np.array([2.0]))
+        result = generate_increasing_weights(series, powers=np.array([2.0]))
         assert result["(1+x)^2__x"].to_list() == pytest.approx([1.0, 4.0, 9.0, 16.0, 25.0])
 
     def test_log_column_present(self, series):
-        result = generate_increasing_weight(series)
+        result = generate_increasing_weights(series)
         assert "log(1+x)__x" in result.columns
 
     def test_increasing_monotone(self, series):
-        result = generate_increasing_weight(series, powers=np.array([1.0]))
+        result = generate_increasing_weights(series, powers=np.array([1.0]))
         vals = result["(1+x)__x"].to_list()
         assert vals == sorted(vals)
 
     def test_dataframe_input(self, dataframe):
-        result = generate_increasing_weight(dataframe)
+        result = generate_increasing_weights(dataframe)
         assert isinstance(result, pl.DataFrame)
         assert result.columns.count("Baseline") == 1
         assert any(c.endswith("__a") for c in result.columns)
@@ -231,106 +210,273 @@ class TestGenerateIncreasingWeight:
 
     def test_dataframe_column_count(self, dataframe):
         # col "a": 7; col "b": 7 - 1 (Baseline dropped) = 6; total = 13
-        result = generate_increasing_weight(dataframe)
+        result = generate_increasing_weights(dataframe)
         assert result.shape[1] == 13
 
 
 # ---------------------------------------------------------------------------
-# generate_decreasing_weight
+# generate_decreasing_weights
 # ---------------------------------------------------------------------------
 
 
 class TestGenerateDecreasingWeight:
     def test_series_returns_dataframe(self, series):
-        result = generate_decreasing_weight(series)
+        result = generate_decreasing_weights(series)
         assert isinstance(result, pl.DataFrame)
 
     def test_series_has_baseline(self, series):
-        result = generate_decreasing_weight(series)
+        result = generate_decreasing_weights(series)
         assert "Baseline" in result.columns
 
     def test_baseline_is_all_ones(self, series):
-        result = generate_decreasing_weight(series)
+        result = generate_decreasing_weights(series)
         assert result["Baseline"].to_list() == [1.0] * len(series)
 
     def test_default_column_count(self, series):
         # Baseline + 5 reciprocal powers + 1/log = 7
-        result = generate_decreasing_weight(series)
+        result = generate_decreasing_weights(series)
         assert result.shape[1] == 7
-
-    def test_with_quantile_column_count(self, series):
-        result = generate_decreasing_weight(series, quantile_value=0.9)
-        assert result.shape[1] == 12
-
-    def test_with_quantile_clipped_column_names(self, series):
-        result = generate_decreasing_weight(series, quantile_value=0.9)
-        assert any("clipped_90th" in c for c in result.columns)
 
     def test_reciprocal_column_values(self, series):
         # shifted: [0,1,2,3,4]; 1/(1+x) = [1, 0.5, 1/3, 0.25, 0.2]
-        result = generate_decreasing_weight(series, powers=np.array([1.0]))
+        result = generate_decreasing_weights(series, powers=np.array([1.0]))
         expected = [1.0, 0.5, 1 / 3, 0.25, 0.2]
         assert result["1/(1+x)__x"].to_list() == pytest.approx(expected)
 
     def test_decreasing_monotone(self, series):
-        result = generate_decreasing_weight(series, powers=np.array([1.0]))
+        result = generate_decreasing_weights(series, powers=np.array([1.0]))
         vals = result["1/(1+x)__x"].to_list()
         assert vals == sorted(vals, reverse=True)
 
     def test_log_inverse_column_present(self, series):
-        result = generate_decreasing_weight(series)
+        result = generate_decreasing_weights(series)
         assert "1/log(1+x)__x" in result.columns
 
     def test_dataframe_input(self, dataframe):
-        result = generate_decreasing_weight(dataframe)
+        result = generate_decreasing_weights(dataframe)
         assert isinstance(result, pl.DataFrame)
         assert result.columns.count("Baseline") == 1
         assert any(c.endswith("__a") for c in result.columns)
         assert any(c.endswith("__b") for c in result.columns)
 
 
+class TestSelectUncorrelatedWeights:
+    @pytest.mark.parametrize(
+        "min_corr,max_corr",
+        [
+            (0.0, 0.5),
+            (0.5, 0.5),
+            (0.75, 0.25),
+        ],
+    )
+    def test_invalid_correlation_bounds_raises(self, min_corr, max_corr):
+        sample_weights = pl.DataFrame({"A": [1.0], "B": [1.0]})
+        importance = {"A": 1.0, "B": 2.0}
+
+        with pytest.raises(ValueError, match="min_corr and max_corr must satisfy"):
+            select_uncorrelated_weights(
+                sample_weights,
+                importance,
+                target_len=1,
+                min_corr=min_corr,
+                max_corr=max_corr,
+            )
+
+    def test_negative_target_len_raises(self):
+        sample_weights = pl.DataFrame({"A": [1.0], "B": [1.0]})
+        importance = {"A": 1.0, "B": 2.0}
+
+        with pytest.raises(ValueError, match="target_len must be non-negative"):
+            select_uncorrelated_weights(sample_weights, importance, target_len=-1)
+
+    def test_non_positive_step_raises(self):
+        sample_weights = pl.DataFrame({"A": [1.0], "B": [1.0]})
+        importance = {"A": 1.0, "B": 2.0}
+
+        with pytest.raises(ValueError, match="step must be positive"):
+            select_uncorrelated_weights(
+                sample_weights,
+                importance,
+                target_len=1,
+                step=0.0,
+            )
+
+    def test_returns_closest_filtered_set_for_target_len(self):
+        sample_weights = pl.DataFrame(
+            {
+                "A": [1.0, 0.8, 0.4],
+                "B": [0.8, 1.0, 0.7],
+                "C": [0.4, 0.7, 1.0],
+            }
+        )
+        importance = {"A": 1.0, "B": 2.0, "C": 3.0}
+
+        selected, corr_value = select_uncorrelated_weights(
+            sample_weights,
+            importance,
+            target_len=2,
+            min_corr=0.01,
+            max_corr=0.99,
+            step=0.01,
+        )
+
+        assert selected == ["B", "C"]
+        assert corr_value == pytest.approx(0.75)
+
+    def test_returns_next_closest_threshold_when_exact_target_is_impossible(self):
+        sample_weights = pl.DataFrame(
+            {
+                "A": [1.0, 0.9, 0.9],
+                "B": [0.9, 1.0, 0.9],
+                "C": [0.9, 0.9, 1.0],
+            }
+        )
+        importance = {"A": 1.0, "B": 2.0, "C": 3.0}
+
+        selected, corr_value = select_uncorrelated_weights(
+            sample_weights,
+            importance,
+            target_len=2,
+            min_corr=0.01,
+            max_corr=0.99,
+            step=0.01,
+        )
+
+        assert selected == ["A", "B", "C"]
+        assert corr_value == pytest.approx(0.90)
+
+    def test_returns_max_when_search_exhausts_without_exact_match(self, monkeypatch):
+        call_state = {"count": 0}
+
+        def fake_filter_correlated_rules(R, importance, max_corr, use_abs=False):
+            if call_state["count"] == 0:
+                call_state["count"] += 1
+                assert max_corr == 0.01
+                return ["A"]
+            if call_state["count"] == 1:
+                call_state["count"] += 1
+                assert pytest.approx(max_corr, rel=1e-8) == 0.99
+                return ["A", "B", "C"]
+            call_state["count"] += 1
+            return ["A"]
+
+        monkeypatch.setattr(wt, "filter_correlated_rules", fake_filter_correlated_rules)
+        selected, corr_value = select_uncorrelated_weights(
+            pl.DataFrame({"A": [0.0], "B": [0.0], "C": [0.0]}),
+            {"A": 1.0, "B": 2.0, "C": 3.0},
+            target_len=2,
+            min_corr=0.01,
+            max_corr=0.99,
+            step=0.01,
+        )
+
+        assert selected == ["A", "B", "C"]
+        assert corr_value == pytest.approx(0.99)
+
+    def test_returns_minimum_when_target_len_below_range(self):
+        sample_weights = pl.DataFrame(
+            {
+                "A": [1.0, 0.8, 0.4],
+                "B": [0.8, 1.0, 0.7],
+                "C": [0.4, 0.7, 1.0],
+            }
+        )
+        importance = {"A": 1.0, "B": 2.0, "C": 3.0}
+
+        selected, corr_value = select_uncorrelated_weights(
+            sample_weights,
+            importance,
+            target_len=1,
+            min_corr=0.01,
+            max_corr=0.99,
+            step=0.01,
+        )
+
+        assert selected == ["C"]
+        assert corr_value == pytest.approx(0.01)
+
+    def test_returns_maximum_when_target_len_above_range(self):
+        sample_weights = pl.DataFrame(
+            {
+                "A": [1.0, 0.8, 0.4],
+                "B": [0.8, 1.0, 0.7],
+                "C": [0.4, 0.7, 1.0],
+            }
+        )
+        importance = {"A": 1.0, "B": 2.0, "C": 3.0}
+
+        selected, corr_value = select_uncorrelated_weights(
+            sample_weights,
+            importance,
+            target_len=4,
+            min_corr=0.01,
+            max_corr=0.99,
+            step=0.01,
+        )
+
+        assert selected == ["A", "B", "C"]
+        assert corr_value == pytest.approx(0.99)
+
+    def test_use_abs_false_preserves_negative_correlations(self):
+        sample_weights = pl.DataFrame(
+            {
+                "A": [1.0, -0.95],
+                "B": [-0.95, 1.0],
+            }
+        )
+        importance = {"A": 1.0, "B": 2.0}
+
+        selected, corr_value = select_uncorrelated_weights(
+            sample_weights,
+            importance,
+            target_len=2,
+            min_corr=0.01,
+            max_corr=0.99,
+            step=0.01,
+            use_abs=False,
+        )
+
+        assert selected == ["A", "B"]
+        assert corr_value == pytest.approx(0.01)
+
+
 # ---------------------------------------------------------------------------
-# generate_all_weight
+# generate_weights
 # ---------------------------------------------------------------------------
 
 
 class TestGenerateAllWeight:
     def test_series_returns_dataframe(self, series):
-        result = generate_all_weight(series)
+        result = generate_weights(series)
         assert isinstance(result, pl.DataFrame)
 
     def test_series_has_baseline(self, series):
-        result = generate_all_weight(series)
+        result = generate_weights(series)
         assert "Baseline" in result.columns
 
     def test_default_column_count(self, series):
         # Baseline + 5 inc powers + log + 5 dec powers + 1/log = 13
-        result = generate_all_weight(series)
+        result = generate_weights(series)
         assert result.shape[1] == 13
 
-    def test_with_quantile_column_count(self, series):
-        # 13 + 5 inc clipped + 5 dec clipped = 23
-        result = generate_all_weight(series, quantile_value=0.9)
-        assert result.shape[1] == 23
-
     def test_contains_increasing_columns(self, series):
-        result = generate_all_weight(series)
+        result = generate_weights(series)
         assert "log(1+x)__x" in result.columns
 
     def test_contains_decreasing_columns(self, series):
-        result = generate_all_weight(series)
+        result = generate_weights(series)
         assert "1/log(1+x)__x" in result.columns
         assert "1/(1+x)__x" in result.columns
 
     def test_union_of_increasing_and_decreasing(self, series):
-        inc = generate_increasing_weight(series)
-        dec = generate_decreasing_weight(series)
-        all_ = generate_all_weight(series)
+        inc = generate_increasing_weights(series)
+        dec = generate_decreasing_weights(series)
+        all_ = generate_weights(series)
         expected_cols = set(inc.columns) | (set(dec.columns) - {"Baseline"})
         assert set(all_.columns) == expected_cols
 
     def test_dataframe_input(self, dataframe):
-        result = generate_all_weight(dataframe)
+        result = generate_weights(dataframe)
         assert isinstance(result, pl.DataFrame)
         assert result.columns.count("Baseline") == 1
         assert any(c.endswith("__a") for c in result.columns)

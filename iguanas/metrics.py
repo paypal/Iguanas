@@ -2,7 +2,7 @@ import polars as pl
 
 
 def compute_single_metric(
-    combined: pl.Series,
+    y_pred: pl.Series,
     y: pl.Series,
     metric: str,
     weights: pl.Series | None = None,
@@ -15,7 +15,7 @@ def compute_single_metric(
 
     Parameters
     ----------
-    combined : pl.Series
+    y_pred : pl.Series
         Boolean prediction series.
     y : pl.Series
         Boolean target series.
@@ -30,16 +30,16 @@ def compute_single_metric(
         The requested metric value.
     """
     y_bool = y.cast(pl.Boolean)
-    combined_bool = combined.cast(pl.Boolean)
+    y_pred_bool = y_pred.cast(pl.Boolean)
 
     if weights is not None:
-        TP = float(weights.filter(y_bool & combined_bool).sum())
-        FP = float(weights.filter(~y_bool & combined_bool).sum())
-        FN = float(weights.filter(y_bool & ~combined_bool).sum())
+        TP = float(weights.filter(y_bool & y_pred_bool).sum())
+        FP = float(weights.filter(~y_bool & y_pred_bool).sum())
+        FN = float(weights.filter(y_bool & ~y_pred_bool).sum())
     else:
-        TP = float((y_bool & combined_bool).sum())
-        FP = float((~y_bool & combined_bool).sum())
-        FN = float((y_bool & ~combined_bool).sum())
+        TP = float((y_bool & y_pred_bool).sum())
+        FP = float((~y_bool & y_pred_bool).sum())
+        FN = float((y_bool & ~y_pred_bool).sum())
 
     if metric == "precision":
         return TP / (TP + FP) if (TP + FP) > 0 else 0.0
@@ -47,9 +47,9 @@ def compute_single_metric(
         return TP / (TP + FN) if (TP + FN) > 0 else 0.0
     if metric == "accuracy":
         TN = (
-            float((~y_bool & ~combined_bool).sum())
+            float((~y_bool & ~y_pred_bool).sum())
             if weights is None
-            else float(weights.filter(~y_bool & ~combined_bool).sum())
+            else float(weights.filter(~y_bool & ~y_pred_bool).sum())
         )
         return (TP + TN) / (TP + TN + FP + FN) if (TP + TN + FP + FN) > 0 else 0.0
     if metric.startswith("f"):
@@ -65,7 +65,7 @@ def compute_single_metric(
 
 
 def compute_metrics(
-    R: pl.DataFrame,
+    R: pl.Series | pl.DataFrame,
     y: pl.Series,
     weights: pl.Series | None = None,
     betas: list[float] | None = None,
@@ -101,7 +101,7 @@ def compute_metrics(
         - flagged(%): Percentage of total flagged as positive
         - good_flagged(%): Percentage of negatives flagged as positive
         - f{b} for each b in *betas*: F-beta scores
-        - num_rules: Number of individual rules combined (1 for single rules)
+        - num_rules: Number of individual rules y_pred (1 for single rules)
 
         If weights is provided, additional columns with "_weight" suffix:
 
@@ -113,22 +113,24 @@ def compute_metrics(
     --------
     >>> import polars as pl
     >>> # Count-based metrics only
-    >>> metrics_X = compute_metrics(R, y, weights=None)
+    >>> metrics_df = compute_metrics(R, y, weights=None)
     >>>
     >>> # Both count and weighted metrics
-    >>> metrics_X = compute_metrics(R, y, weights=transaction_amounts)
+    >>> metrics_df = compute_metrics(R, y, weights=transaction_amounts)
     >>>
     >>> # Sort by TPVE3 to find best rules
-    >>> top_rules = metrics_X.sort("TPVE3", descending=True).head(10)
+    >>> top_rules = metrics_df.sort("TPVE3", descending=True).head(10)
     """
     if betas is None:
         betas = [0.25, 0.5, 1, 1.5, 2]
     if y.dtype != pl.Boolean:
         y = y.cast(pl.Boolean)
+    if isinstance(R, pl.Series):
+        R = R.to_frame()
     # Compute confusion matrix for all columns
     if weights is not None:
         # Both count and weighted metrics
-        metrics_X = pl.DataFrame(
+        metrics_df = pl.DataFrame(
             {
                 "rule": R.columns,
                 "TP": [(y & R[col]).sum() for col in R.columns],
@@ -143,7 +145,7 @@ def compute_metrics(
         )
     else:
         # Only count metrics
-        metrics_X = pl.DataFrame(
+        metrics_df = pl.DataFrame(
             {
                 "rule": R.columns,
                 "TP": [(y & R[col]).sum() for col in R.columns],
@@ -154,7 +156,7 @@ def compute_metrics(
         )
 
     # Step 1: Add basic metrics (precision, recall, and accuracy)
-    metrics_X = metrics_X.with_columns(
+    metrics_df = metrics_df.with_columns(
         [
             (pl.col("TP") / (pl.col("TP") + pl.col("FP"))).alias("precision"),
             (pl.col("TP") / (pl.col("TP") + pl.col("FN"))).alias("recall"),
@@ -188,7 +190,7 @@ def compute_metrics(
 
     if weights is not None:
         # First compute total_weight
-        metrics_X = metrics_X.with_columns(
+        metrics_df = metrics_df.with_columns(
             [
                 (
                     pl.col("TP_weight")
@@ -199,7 +201,7 @@ def compute_metrics(
             ]
         )
         # Then compute precision, recall, and accuracy using total_weight
-        metrics_X = metrics_X.with_columns(
+        metrics_df = metrics_df.with_columns(
             [
                 (pl.col("TP_weight") / (pl.col("TP_weight") + pl.col("FP_weight"))).alias(
                     "precision_weight"
@@ -226,6 +228,6 @@ def compute_metrics(
             ]
         )
 
-    metrics_X = metrics_X.with_columns(expressions)
+    metrics_df = metrics_df.with_columns(expressions)
 
-    return metrics_X
+    return metrics_df

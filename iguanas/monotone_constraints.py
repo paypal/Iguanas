@@ -19,7 +19,7 @@ def infer_monotone_constraints_from_correlations(X: pl.DataFrame, y: pl.Series) 
 
         - feature: Feature name
         - pearson_corr: Pearson correlation with target
-        - constraint: Constraint value (1 for positive, -1 for negative, 0 for no correlation)
+        - constraint: Constraint value (1 for positive constraint, -1 for negative constraint, 0 for no constraint)
     """
     # Add y as temporary column for efficient correlation computation
     X_temp = X.with_columns(y.alias("_target"))
@@ -65,7 +65,7 @@ def infer_monotone_constraints_from_stumps(
     pl.DataFrame
         DataFrame with columns:
         - feature: Feature name
-        - constraint: Constraint value (1 for increasing, -1 for decreasing, 0 for flat)
+        - constraint: Constraint value (1 for positive constraint, -1 for negative constraint, 0 for no constraint)
         - pred_at_min: Predicted probability at minimum feature value
         - pred_at_max: Predicted probability at maximum feature value
         - delta: Change in probability (pred_at_max - pred_at_min)

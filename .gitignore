@@ -13,7 +13,6 @@ Build
 ###################
 build/
 dist/
-docs/
 htmlcov/
 
 __cache__.py
@@ -91,9 +90,11 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 .tox/
 .coverage
+.coverage*
 .cache
 nosetests.xml
 coverage.xml
+.ruff_cache/
 
 # Translations
 *.mo
@@ -110,8 +111,6 @@ coverage.xml
 *.log
 *.pot
 
-# Sphinx documentation
-docs/_build/
 
 #Misc
 dev/

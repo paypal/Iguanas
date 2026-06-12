@@ -46,10 +46,10 @@ def simplify_rule(rule: str) -> str:
         return rule
 
     # Track column order based on first appearance
-    column_order = []
+    column_order: list[str] = []
 
     # Group conditions by column
-    column_conditions = {}
+    column_conditions: dict[str, list[tuple[str, str, float | None, str]]] = {}
     for full_match, col, op, val in matches:
         if col not in column_conditions:
             column_conditions[col] = []
@@ -62,7 +62,7 @@ def simplify_rule(rule: str) -> str:
             column_conditions[col].append((full_match, op, None, val.strip()))
 
     # Determine which conditions to remove
-    conditions_to_remove = set()
+    conditions_to_remove: set[str] = set()
 
     for _, conds in column_conditions.items():
         if len(conds) <= 1:
@@ -85,12 +85,13 @@ def simplify_rule(rule: str) -> str:
             # Find max value and keeper in single pass
             max_val = max(num_val for _, _, num_val, _ in greater_conds)
             # Among max values, prefer > over >=
-            keeper = None
+            keeper: tuple[str, str] | None = None
             for full, op, num_val, _ in greater_conds:
                 if num_val == max_val:
                     if keeper is None or (op == ">" and keeper[1] == ">="):
                         keeper = (full, op)
 
+            assert keeper is not None
             # Mark all others for removal (only iterate once)
             conditions_to_remove.update(
                 full for full, _, _, _ in greater_conds if full != keeper[0]
@@ -101,14 +102,17 @@ def simplify_rule(rule: str) -> str:
             # Find min value and keeper in single pass
             min_val = min(num_val for _, _, num_val, _ in less_conds)
             # Among min values, prefer < over <=
-            keeper = None
+            less_keeper: tuple[str, str] | None = None
             for full, op, num_val, _ in less_conds:
                 if num_val == min_val:
-                    if keeper is None or (op == "<" and keeper[1] == "<="):
-                        keeper = (full, op)
+                    if less_keeper is None or (op == "<" and less_keeper[1] == "<="):
+                        less_keeper = (full, op)
 
+            assert less_keeper is not None
             # Mark all others for removal (only iterate once)
-            conditions_to_remove.update(full for full, _, _, _ in less_conds if full != keeper[0])
+            conditions_to_remove.update(
+                full for full, _, _, _ in less_conds if full != less_keeper[0]
+            )
 
     result_conditions = [
         full

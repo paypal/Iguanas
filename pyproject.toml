@@ -18,7 +18,7 @@ maintainers = [
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.10"
-keywords = ["machine-learning", "rule generation", "data-science"]
+keywords = [ "data-science", "machine-learning", "rule generation"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -35,16 +35,13 @@ classifiers = [
 ]
 
 dependencies = [
-    "pandas>=2.0.0",
+    "pandas>=2.0.0",  # 2.0.0 needed for py3.10 compatibility
     "polars>=1.0.0",
-    "pydantic>=2.12.0",
     "pyarrow>=24.0.0",
-    "typing-extensions>=4.15.0",
-    "scikit-learn>=1.3.0",
+    "scikit-learn>=1.4.0",
+    "pydantic>=2.0.0",
     "xgboost>=3.2.0",
-    "lightgbm>=4.0.0",
     "joblib>=1.3.0",
-    "holidays>=0.92",
 ]
 
 [project.optional-dependencies]
@@ -53,13 +50,11 @@ dev = [
     "pytest-cov>=7.1.0",
     "ruff>=0.2.0",
     "mypy>=2.1.0",
-    "tox>=4.0.0",
     "nbsphinx>=0.9.0",
 ]
 notebook = [
     "ipykernel>=7.2.0",
     "jupyter>=1.0.0",
-    "matplotlib>=3.8.0",
 ]
 all = ["iguanas[dev,notebook]"]
 
@@ -132,7 +127,7 @@ addopts = [
 
 # MyPy type checker
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false

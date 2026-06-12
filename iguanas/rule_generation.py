@@ -254,7 +254,7 @@ def _train_rules_for_weight_transformation(
     estimator_params: dict[str, Any],
     X_train: pd.DataFrame | np.ndarray,
     y_train: pd.Series | np.ndarray,
-    scale_pos_weight_vec: np.ndarray,
+    scale_pos_weights: np.ndarray,
     all_features_constrained: bool,
     feature_names: list[str] | None = None,
 ) -> list[pd.DataFrame]:
@@ -266,14 +266,14 @@ def _train_rules_for_weight_transformation(
     Parameters
     ----------
     weights : pd.Series | np.ndarray
-        Weights for this transformation
+        Sample weights for this transformation
     estimator_params : dict
         XGBoost estimator parameters to reconstruct the model
     X_train : pd.DataFrame | np.ndarray
         Training features as numpy array (serializes faster than DataFrame for IPC).
     y_train : pd.Series | np.ndarray
         Training target as numpy array.
-    scale_pos_weight_vec : np.ndarray
+    scale_pos_weights : np.ndarray
         Array of scale_pos_weight values to try
     all_features_constrained : bool
         Whether to use monotone constraint-based extraction
@@ -287,7 +287,7 @@ def _train_rules_for_weight_transformation(
     list[pd.DataFrame]
         List of DataFrames with extracted rules
     """
-    rules_vec = []
+    rules_dfs = []
     transformation = weights.name if hasattr(weights, "name") else "Baseline"  # type: ignore
     weights_array = weights.values if hasattr(weights, "values") else weights  # type: ignore
 
@@ -299,7 +299,7 @@ def _train_rules_for_weight_transformation(
     else:
         X_fit = X_train
 
-    for scale_pos_weight in scale_pos_weight_vec:
+    for scale_pos_weight in scale_pos_weights:
         est = XGBClassifier(**estimator_params)
         est.scale_pos_weight = scale_pos_weight
         try:
@@ -314,15 +314,15 @@ def _train_rules_for_weight_transformation(
         rules_df = extract_rules(est, all_features_constrained, **params)
 
         if not rules_df.empty:
-            rules_vec.append(rules_df)
+            rules_dfs.append(rules_df)
 
-    return rules_vec
+    return rules_dfs
 
 
 def _train_rules_for_scale(
     scale_pos_weight: float,
     weights_np: np.ndarray,
-    weight_names: list[str],
+    weight_columns: list[str],
     estimator_params: dict[str, Any],
     X_train: np.ndarray,
     y_train: np.ndarray,
@@ -340,7 +340,7 @@ def _train_rules_for_scale(
         The scale_pos_weight value to use for this run.
     weights_np : np.ndarray
         2D array of shape (n_samples, n_transformations) containing all weight columns.
-    weight_names : list[str]
+    weight_columns : list[str]
         Names of the weight transformations (column labels for weights_np).
     estimator_params : dict
         XGBoost estimator parameters to reconstruct the model.
@@ -360,20 +360,17 @@ def _train_rules_for_scale(
         List of DataFrames with extracted rules, one entry per weight
         transformation that produced at least one rule.
     """
-    rules_vec = []
+    rules_dfs = []
 
     if feature_names is not None and isinstance(X_train, np.ndarray):
         X_fit: pd.DataFrame | np.ndarray = pd.DataFrame(X_train, columns=feature_names)
     else:
         X_fit = X_train
-    for i, name in enumerate(weight_names):
+    for i, name in enumerate(weight_columns):
         weights_array = weights_np[:, i]
         est = XGBClassifier(**estimator_params)
         est.set_params(scale_pos_weight=scale_pos_weight)
-        try:
-            est.fit(X_fit, y_train, sample_weight=weights_array)
-        except Exception:
-            continue
+        est.fit(X_fit, y_train, sample_weight=weights_array)
 
         params = {
             "transformation": name,
@@ -381,17 +378,119 @@ def _train_rules_for_scale(
         }
         rules_df = extract_rules(est, all_features_constrained, **params)
         if not rules_df.empty:
-            rules_vec.append(rules_df)
+            rules_dfs.append(rules_df)
 
-    return rules_vec
+    return rules_dfs
+
+
+def _setup_and_validate_grid_search(
+    X_train: pl.DataFrame | pd.DataFrame,
+    y_train: pl.Series | pd.Series,
+    scale_pos_weights: list[float] | np.ndarray,
+    sample_weights_df: pl.DataFrame | pd.DataFrame | None = None,
+    estimator: XGBClassifier | None = None,
+) -> tuple[np.ndarray, np.ndarray, list[str], pd.DataFrame, dict[str, Any], bool]:
+    """Validate inputs and prepare data for grid search functions.
+
+    Parameters
+    ----------
+    X_train : pl.DataFrame | pd.DataFrame
+        Training feature matrix.
+    y_train : pl.Series | pd.Series
+        Training target values.
+    scale_pos_weights : list[float] | np.ndarray
+        Array of scale_pos_weight values to try.
+    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None
+        DataFrame mapping transformation names to sample weight arrays.
+    estimator : XGBClassifier | None, default=None
+        Estimator to check for monotone constraints.
+
+    Returns
+    -------
+    tuple
+        (X_train_np, y_train_np, feature_names, sample_weights_df_pd,
+         estimator_params, all_features_constrained)
+    """
+    X_train_np = X_train.to_numpy()
+    y_train_np = y_train.to_numpy()
+    feature_names = list(X_train.columns)
+
+    if X_train_np.dtype == object:
+        raise ValueError(
+            "X_train contains non-numeric data. Please encode categorical features "
+            "numerically before using rule_grid_search_parallel_scales."
+        )
+
+    if len(scale_pos_weights) == 0:
+        raise ValueError("scale_pos_weights cannot be empty")
+
+    if sample_weights_df is None:
+        sample_weights_df_pd = pd.DataFrame({"Baseline": np.ones(len(X_train))})
+    elif isinstance(sample_weights_df, pl.DataFrame):
+        sample_weights_df_pd = sample_weights_df.to_pandas()
+    else:
+        sample_weights_df_pd = sample_weights_df
+
+    estimator_params = {}
+    all_features_constrained = False
+    if estimator is not None:
+        estimator_params = estimator.get_params()
+        estimator_params.pop("scale_pos_weight", None)
+        n_features = len(X_train.columns)
+        all_features_constrained = _check_all_features_have_monotone_constraints(
+            estimator, n_features
+        )
+
+    return (
+        X_train_np,
+        y_train_np,
+        feature_names,
+        sample_weights_df_pd,
+        estimator_params,
+        all_features_constrained,
+    )
+
+
+def _finalize_grid_search_results(
+    rules_dfs: list[pd.DataFrame],
+    verbose: int = 0,
+    context: str = "grid search",
+) -> pl.DataFrame:
+    """Concatenate, deduplicate, and convert rules to Polars DataFrame.
+
+    Parameters
+    ----------
+    rules_dfs : list[pd.DataFrame]
+        List of rule DataFrames to consolidate.
+    verbose : int, default=0
+        Verbosity level for output messages.
+    context : str, default="grid search"
+        Description of the search context for logging.
+
+    Returns
+    -------
+    pl.DataFrame
+        Deduplicated rules as a Polars DataFrame.
+    """
+    if rules_dfs:
+        final_X_pd = pd.concat(rules_dfs, ignore_index=True)
+        final_X = pl.from_pandas(final_X_pd)
+    else:
+        final_X = pl.DataFrame()
+
+    final_X = final_X.unique("rule") if final_X.height > 0 else final_X
+    if verbose > 0:
+        print(f"Extracted {len(final_X)} total rules from {context}")
+
+    return final_X
 
 
 def rule_grid_search_sequential(
     estimator: XGBClassifier,
     X_train: pl.DataFrame | pd.DataFrame,
     y_train: pl.Series | pd.Series,
-    scale_pos_weight_vec: list[float] | np.ndarray,
-    weights_train_vec: pl.DataFrame | pd.DataFrame | None = None,
+    scale_pos_weights: list[float] | np.ndarray,
+    sample_weights_df: pl.DataFrame | pd.DataFrame | None = None,
     verbose: int = 0,
 ) -> pl.DataFrame:
     """
@@ -410,9 +509,9 @@ def rule_grid_search_sequential(
         Training feature matrix.
     y_train : pl.Series | pd.Series
         Training target values.
-    scale_pos_weight_vec : list | np.ndarray
+    scale_pos_weights : list | np.ndarray
         Array of scale_pos_weight values to try.
-    weights_train_vec : pl.DataFrame | pd.DataFrame | None, default=None
+    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None
         DataFrame mapping transformation names to sample weight arrays.
         If None, uses baseline weights of 1.0 for all samples.
     verbose : int, default=0
@@ -424,73 +523,50 @@ def rule_grid_search_sequential(
         Same schema as :func:`rule_grid_search`: columns rule, tree,
         scale_pos_weight, transformation.
     """
-    X_train_np = X_train.to_numpy()
-    y_train_np = y_train.to_numpy()
-    feature_names = X_train.columns if isinstance(X_train, pl.DataFrame) else list(X_train.columns)
+    (
+        X_train_np,
+        y_train_np,
+        feature_names,
+        sample_weights_df_pd,
+        estimator_params,
+        all_features_constrained,
+    ) = _setup_and_validate_grid_search(
+        X_train, y_train, scale_pos_weights, sample_weights_df, estimator
+    )
 
-    if X_train_np.dtype == object:
-        raise ValueError(
-            "X_train contains non-numeric data. Please encode categorical features "
-            "numerically before using rule_grid_search_parallel_scales."
-        )
-
-    if len(scale_pos_weight_vec) == 0:
-        raise ValueError("scale_pos_weight_vec cannot be empty")
-
-    if weights_train_vec is None:
-        weights_train_vec_pd = pd.DataFrame({"Baseline": np.ones(len(X_train))})
-    elif isinstance(weights_train_vec, pl.DataFrame):
-        weights_train_vec_pd = weights_train_vec.to_pandas()
-    else:
-        weights_train_vec_pd = weights_train_vec
-
-    weight_names = list(weights_train_vec_pd.columns)
-    weights_np = weights_train_vec_pd.to_numpy()
-    estimator_params = estimator.get_params()
-    estimator_params.pop("scale_pos_weight", None)
-
-    n_features = len(X_train.columns)
-    all_features_constrained = _check_all_features_have_monotone_constraints(estimator, n_features)
+    weight_columns = list(sample_weights_df_pd.columns)
+    weights_np = sample_weights_df_pd.to_numpy()
 
     if verbose > 0:
         print(
-            f"Starting sequential rule grid search with {len(weight_names)} weight "
-            f"transformations and {len(scale_pos_weight_vec)} scale_pos_weight values "
-            f"({len(weight_names) * len(scale_pos_weight_vec)} total combinations)"
+            f"Starting sequential rule grid search with {len(weight_columns)} weight "
+            f"transformations and {len(scale_pos_weights)} scale_pos_weight values "
+            f"({len(weight_columns) * len(scale_pos_weights)} total combinations)"
         )
 
-    rules_vec = []
-    for scale_pos_weight in scale_pos_weight_vec:
+    rules_dfs = []
+    for scale_pos_weight in scale_pos_weights:
         results = _train_rules_for_scale(
             scale_pos_weight,
             weights_np,
-            weight_names,
+            weight_columns,
             estimator_params,
             X_train_np,
             y_train_np,
             all_features_constrained,
             feature_names=feature_names,
         )
-        rules_vec.extend(results)
+        rules_dfs.extend(results)
 
-    if rules_vec:
-        final_X = pl.from_pandas(pd.concat(rules_vec, ignore_index=True))
-    else:
-        final_X = pl.DataFrame()
-
-    final_X = final_X.unique("rule") if final_X.height > 0 else final_X
-    if verbose > 0:
-        print(f"Extracted {len(final_X)} total rules from sequential grid search")
-
-    return final_X
+    return _finalize_grid_search_results(rules_dfs, verbose, "sequential grid search")
 
 
 def rule_grid_search_parallel_weights(
     estimator: XGBClassifier,
     X_train: pl.DataFrame | pd.DataFrame,
     y_train: pl.Series | pd.Series,
-    scale_pos_weight_vec: list | np.ndarray,
-    weights_train_vec: pl.DataFrame | pd.DataFrame | None = None,
+    scale_pos_weights: list[float] | np.ndarray,
+    sample_weights_df: pl.DataFrame | pd.DataFrame | None = None,
     n_jobs: int = -1,
     verbose: int = 0,
 ) -> pl.DataFrame:
@@ -498,141 +574,11 @@ def rule_grid_search_parallel_weights(
     Perform grid search over sample weight transformations and scale_pos_weight values to find optimal rules.
 
     This function systematically trains XGBoost models with different combinations of:
-    - sample weight transformations (e.g., linear, power, logarithmic, clipped)
-    - scale_pos_weight values to handle class imbalance
+    - sample weights
+    - scale_pos_weight values
 
     For each combination, it extracts rules from the fitted models and returns them as a Polars DataFrame.
     The weight transformations loop is parallelized using joblib for improved performance.
-
-    Parameters
-    ----------
-    estimator : XGBClassifier
-        Base XGBoost classifier to use as a template for rule extraction. The estimator's
-        hyperparameters (except scale_pos_weight and sample_weight) will be used as defaults
-        for training multiple models during the grid search.
-    X_train : pl.DataFrame | pd.DataFrame | np.ndarray
-        Training feature matrix (without target column). Can be Polars/Pandas DataFrame or NumPy array.
-        NumPy arrays provide fastest serialization for parallel processing.
-    y_train : pl.Series | pd.Series | np.ndarray
-        Training target values
-    scale_pos_weight_vec : list | np.ndarray
-        Array of scale_pos_weight values to try
-    weights_train_vec : pl.DataFrame | pd.DataFrame | None, default=None
-        DataFrame mapping transformation names (columns) to sample weight arrays (rows).
-        If None, uses baseline weights of 1.0 for all samples.
-    n_jobs : int, default=-1
-        Number of parallel jobs to run. -1 means using all processors
-    verbose : int, default=0
-        Controls the verbosity level. Higher values show more information:
-
-        - 0: silent (no output)
-        - 1: progress information (start/end summary)
-        - >=2: detailed progress with live updates from joblib Parallel backend
-
-    Returns
-    -------
-    pl.DataFrame
-        DataFrame containing rule information and metrics for all combinations of
-        weight transformations and scale_pos_weight values. Each row includes:
-
-        - rule: str, the extracted rule as a string
-        - tree: int, the tree number from which the rule was extracted
-        - scale_pos_weight: float, the scale_pos_weight value used for this tree
-        - transformation: str, the name of the weight transformation used
-
-    Examples
-    --------
-    >>> weights_train = generate_sample_weight_transformations(X_train["amount"])
-    >>> scale_weights = np.logspace(0, np.log10(imbalance_ratio*2), 20)
-    >>> results = rule_grid_search(
-    ...     estimator, X_train, y_train,
-    ...     scale_weights, weights_train, n_jobs=-1, verbose=1
-    ... )
-    """
-    X_train_np = X_train.to_numpy()
-    y_train_np = y_train.to_numpy()
-    feature_names = X_train.columns if isinstance(X_train, pl.DataFrame) else list(X_train.columns)
-
-    if X_train_np.dtype == object:
-        raise ValueError(
-            "X_train contains non-numeric data. Please encode categorical features "
-            "numerically before using rule_grid_search_parallel_scales."
-        )
-
-    if len(scale_pos_weight_vec) == 0:
-        raise ValueError("scale_pos_weight_vec cannot be empty")
-
-    if weights_train_vec is None:
-        weights_train_vec_pd = pd.DataFrame({"Baseline": np.ones(len(X_train))})
-    elif isinstance(weights_train_vec, pl.DataFrame):
-        weights_train_vec_pd = weights_train_vec.to_pandas()
-    else:
-        weights_train_vec_pd = weights_train_vec
-
-    weight_columns = weights_train_vec_pd.columns
-    estimator_params = estimator.get_params()
-    estimator_params.pop("scale_pos_weight", None)
-
-    n_features = len(X_train.columns)
-    all_features_constrained = _check_all_features_have_monotone_constraints(estimator, n_features)
-
-    if verbose > 0:
-        print(
-            f"Starting rule grid search with {len(weight_columns)} weight transformations "
-            f"and {len(scale_pos_weight_vec)} scale_pos_weight values "
-            f"({len(weight_columns) * len(scale_pos_weight_vec)} total combinations)"
-        )
-
-    # Map verbose levels for joblib: 0=silent, 1=silent, 2+=detailed (10+)
-    joblib_verbose = 10 if verbose >= 2 else 0
-
-    results_nested = Parallel(n_jobs=n_jobs, backend="loky", verbose=joblib_verbose)(
-        delayed(_train_rules_for_weight_transformation)(
-            weights_train_vec_pd[name],
-            estimator_params,
-            X_train_np,
-            y_train_np,
-            scale_pos_weight_vec,
-            all_features_constrained,
-            feature_names,
-        )
-        for name in weight_columns
-    )
-
-    rules_vec = []
-    for sublist in results_nested:
-        if sublist is not None:
-            rules_vec.extend(sublist)
-
-    if rules_vec:
-        final_X_pd = pd.concat(rules_vec, ignore_index=True)
-        final_X = pl.from_pandas(final_X_pd)
-    else:
-        final_X = pl.DataFrame()
-
-    final_X = final_X.unique("rule") if final_X.height > 0 else final_X
-    if verbose > 0:
-        print(f"Extracted {len(final_X)} total rules from grid search")
-
-    return final_X
-
-
-def rule_grid_search_parallel_scales(
-    estimator: XGBClassifier,
-    X_train: pl.DataFrame | pd.DataFrame,
-    y_train: pl.Series | pd.Series,
-    scale_pos_weight_vec: list | np.ndarray,
-    weights_train_vec: pl.DataFrame | pd.DataFrame | None = None,
-    n_jobs: int = -1,
-    verbose: int = 0,
-) -> pl.DataFrame:
-    """
-    Perform grid search parallelised over scale_pos_weight values.
-
-    Identical behaviour to :func:`rule_grid_search_parallel_weights` but parallelises
-    over the ``scale_pos_weight_vec`` axis instead of the weight-transformation axis.
-    Prefer this variant when ``len(scale_pos_weight_vec) >= len(weights_train_vec.columns)``
-    so that workers are kept maximally busy.
 
     Parameters
     ----------
@@ -642,9 +588,9 @@ def rule_grid_search_parallel_scales(
         Training feature matrix.
     y_train : pl.Series | pd.Series
         Training target values.
-    scale_pos_weight_vec : list | np.ndarray
+    scale_pos_weights : list | np.ndarray
         Array of scale_pos_weight values to try. Parallelised across workers.
-    weights_train_vec : pl.DataFrame | pd.DataFrame | None, default=None
+    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None
         DataFrame mapping transformation names to sample weight arrays.
         If None, uses baseline weights of 1.0 for all samples.
     n_jobs : int, default=-1
@@ -659,72 +605,199 @@ def rule_grid_search_parallel_scales(
     Returns
     -------
     pl.DataFrame
-        Same schema as :func:`rule_grid_search_parallel_weights`: columns rule, tree,
+        Same schema as :func:`rule_grid_search`: columns rule, tree,
         scale_pos_weight, transformation.
+
+    Examples
+    --------
+    >>> weights_train = generate_sample_weight_transformations(X_train["amount"])
+    >>> scale_pos_weights = np.logspace(0, np.log10(imbalance_ratio*2), 20)
+    >>> results = rule_grid_search(
+    ...     estimator, X_train, y_train,
+    ...     scale_weights, weights_train, n_jobs=-1, verbose=1
+    ... )
     """
-    X_train_np = X_train.to_numpy()
-    y_train_np = y_train.to_numpy()
-    feature_names = X_train.columns if isinstance(X_train, pl.DataFrame) else list(X_train.columns)
+    (
+        X_train_np,
+        y_train_np,
+        feature_names,
+        sample_weights_df_pd,
+        estimator_params,
+        all_features_constrained,
+    ) = _setup_and_validate_grid_search(
+        X_train, y_train, scale_pos_weights, sample_weights_df, estimator
+    )
 
-    if X_train_np.dtype == object:
-        raise ValueError(
-            "X_train contains non-numeric data. Please encode categorical features "
-            "numerically before using rule_grid_search_parallel_scales."
-        )
-    if len(scale_pos_weight_vec) == 0:
-        raise ValueError("scale_pos_weight_vec cannot be empty")
-
-    if weights_train_vec is None:
-        weights_train_vec_pd = pd.DataFrame({"Baseline": np.ones(len(X_train))})
-    elif isinstance(weights_train_vec, pl.DataFrame):
-        weights_train_vec_pd = weights_train_vec.to_pandas()
-    else:
-        weights_train_vec_pd = weights_train_vec
-
-    weight_names = list(weights_train_vec_pd.columns)
-    weights_np = weights_train_vec_pd.to_numpy()
-    estimator_params = estimator.get_params()
-    estimator_params.pop("scale_pos_weight", None)
-
-    n_features = len(X_train.columns)
-    all_features_constrained = _check_all_features_have_monotone_constraints(estimator, n_features)
+    weight_columns = sample_weights_df_pd.columns
+    joblib_verbose = 10 if verbose >= 2 else 0
 
     if verbose > 0:
         print(
-            f"Starting parallel-scales rule grid search with {len(weight_names)} weight "
-            f"transformations and {len(scale_pos_weight_vec)} scale_pos_weight values "
-            f"({len(weight_names) * len(scale_pos_weight_vec)} total combinations)"
+            f"Starting rule grid search with {len(weight_columns)} weight transformations "
+            f"and {len(scale_pos_weights)} scale_pos_weight values "
+            f"({len(weight_columns) * len(scale_pos_weights)} total combinations)"
         )
 
+    results_nested = Parallel(n_jobs=n_jobs, backend="loky", verbose=joblib_verbose)(
+        delayed(_train_rules_for_weight_transformation)(
+            sample_weights_df_pd[name],
+            estimator_params,
+            X_train_np,
+            y_train_np,
+            scale_pos_weights,
+            all_features_constrained,
+            feature_names,
+        )
+        for name in weight_columns
+    )
+
+    rules_dfs = [rule_df for sublist in results_nested if sublist for rule_df in sublist]
+    return _finalize_grid_search_results(rules_dfs, verbose, "grid search")
+
+
+def rule_grid_search_parallel_scales(
+    estimator: XGBClassifier,
+    X_train: pl.DataFrame | pd.DataFrame,
+    y_train: pl.Series | pd.Series,
+    scale_pos_weights: list[float] | np.ndarray,
+    sample_weights_df: pl.DataFrame | pd.DataFrame | None = None,
+    n_jobs: int = -1,
+    verbose: int = 0,
+) -> pl.DataFrame:
+    """
+    Perform grid search parallelised over scale_pos_weight values.
+
+    This function systematically trains XGBoost models with different combinations of:
+    - sample weights
+    - scale_pos_weight values
+
+    For each combination, it extracts rules from the fitted models and returns them as a Polars DataFrame.
+    The weight transformations loop is parallelized using joblib for improved performance.
+
+    Parameters
+    ----------
+    estimator : XGBClassifier
+        Base XGBoost classifier to use as a template for rule extraction.
+    X_train : pl.DataFrame | pd.DataFrame
+        Training feature matrix.
+    y_train : pl.Series | pd.Series
+        Training target values.
+    scale_pos_weights : list | np.ndarray
+        Array of scale_pos_weight values to try. Parallelised across workers.
+    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None
+        DataFrame mapping transformation names to sample weight arrays.
+        If None, uses baseline weights of 1.0 for all samples.
+    n_jobs : int, default=-1
+        Number of parallel jobs to run. -1 means using all processors.
+    verbose : int, default=0
+        Controls the verbosity level:
+
+        - 0: silent (no output)
+        - 1: progress information (start/end summary)
+        - >=2: detailed progress with live updates from joblib Parallel backend
+
+    Returns
+    -------
+    pl.DataFrame
+        Same schema as :func:`rule_grid_search`: columns rule, tree,
+        scale_pos_weight, transformation.
+    """
+    (
+        X_train_np,
+        y_train_np,
+        feature_names,
+        sample_weights_df_pd,
+        estimator_params,
+        all_features_constrained,
+    ) = _setup_and_validate_grid_search(
+        X_train, y_train, scale_pos_weights, sample_weights_df, estimator
+    )
+
+    weight_columns = list(sample_weights_df_pd.columns)
+    weights_np = sample_weights_df_pd.to_numpy()
     joblib_verbose = 10 if verbose >= 2 else 0
+
+    if verbose > 0:
+        print(
+            f"Starting parallel-scales rule grid search with {len(weight_columns)} weight "
+            f"transformations and {len(scale_pos_weights)} scale_pos_weight values "
+            f"({len(weight_columns) * len(scale_pos_weights)} total combinations)"
+        )
 
     results_nested = Parallel(n_jobs=n_jobs, backend="loky", verbose=joblib_verbose)(
         delayed(_train_rules_for_scale)(
             scale_pos_weight,
             weights_np,
-            weight_names,
+            weight_columns,
             estimator_params,
             X_train_np,
             y_train_np,
             all_features_constrained,
             feature_names,
         )
-        for scale_pos_weight in scale_pos_weight_vec
+        for scale_pos_weight in scale_pos_weights
     )
 
-    rules_vec = []
-    for sublist in results_nested:
-        if sublist is not None:
-            rules_vec.extend(sublist)
+    rules_dfs = [rule_df for sublist in results_nested if sublist for rule_df in sublist]
+    return _finalize_grid_search_results(rules_dfs, verbose, "parallel-scales grid search")
 
-    if rules_vec:
-        final_X_pd = pd.concat(rules_vec, ignore_index=True)
-        final_X = pl.from_pandas(final_X_pd)
+
+def rule_grid_search(
+    estimator: XGBClassifier,
+    X_train: pl.DataFrame | pd.DataFrame,
+    y_train: pl.Series | pd.Series,
+    scale_pos_weights: list[float] | np.ndarray,
+    sample_weights_df: pl.DataFrame | pd.DataFrame | None = None,
+    n_jobs: int = -1,
+    verbose: int = 0,
+) -> pl.DataFrame:
+    """
+    Perform grid search parallelised over scale_pos_weight values or sample_weights to find optimal rules.
+
+    This function systematically trains XGBoost models with different combinations of:
+    - sample weights
+    - scale_pos_weight values
+
+    For each combination, it extracts rules from the fitted models and returns them as a Polars DataFrame.
+    The weight transformations loop is parallelized using joblib for improved performance.
+
+    Parameters
+    ----------
+    estimator : XGBClassifier
+        Base XGBoost classifier to use as a template for rule extraction.
+    X_train : pl.DataFrame | pd.DataFrame
+        Training feature matrix.
+    y_train : pl.Series | pd.Series
+        Training target values.
+    scale_pos_weights : list | np.ndarray
+        Array of scale_pos_weight values to try. Parallelised across workers.
+    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None
+        DataFrame mapping transformation names to sample weight arrays.
+        If None, uses baseline weights of 1.0 for all samples.
+    n_jobs : int, default=-1
+        Number of parallel jobs to run. -1 means using all processors.
+    verbose : int, default=0
+        Controls the verbosity level:
+
+        - 0: silent (no output)
+        - 1: progress information (start/end summary)
+        - >=2: detailed progress with live updates from joblib Parallel backend
+
+    Returns
+    -------
+    pl.DataFrame
+        Same schema as :func:`rule_grid_search`: columns rule, tree,
+        scale_pos_weight, transformation.
+    """
+    if (
+        len(scale_pos_weights) > len(sample_weights_df.columns)
+        if sample_weights_df is not None
+        else 1
+    ):
+        return rule_grid_search_parallel_scales(
+            estimator, X_train, y_train, scale_pos_weights, sample_weights_df, n_jobs, verbose
+        )
     else:
-        final_X = pl.DataFrame()
-
-    final_X = final_X.unique("rule") if final_X.height > 0 else final_X
-    if verbose > 0:
-        print(f"Extracted {len(final_X)} total rules from parallel-scales grid search")
-
-    return final_X
+        return rule_grid_search_parallel_weights(
+            estimator, X_train, y_train, scale_pos_weights, sample_weights_df, n_jobs, verbose
+        )

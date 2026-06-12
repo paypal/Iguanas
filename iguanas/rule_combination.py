@@ -2,16 +2,15 @@ import heapq
 import itertools
 
 import polars as pl
-from pydantic import PositiveInt
 
 from .metrics import compute_metrics, compute_single_metric
 
 
 def combine_rules_full_search(
     R: pl.DataFrame,
-    n: PositiveInt = 3,
-    max_combinations_per_n: PositiveInt = 200_000,
-    batch_size: PositiveInt = 50_000,
+    n: int = 3,
+    max_combinations_per_n: int = 200_000,
+    batch_size: int = 50_000,
     operator: str = "or",
 ) -> pl.DataFrame:
     """Combine rules using logical operations to create new composite rules.
@@ -28,7 +27,7 @@ def combine_rules_full_search(
         DataFrame containing rule columns to be combined. Each column should
         represent a boolean or binary rule evaluation. All columns will be
         used as candidate rules.
-    n : PositiveInt, default=3
+    n : int, default=3
         Maximum number of rules to combine. Generates all combinations from
         size 2 up to size n.
     max_combinations_per_n : int, default=250_000
@@ -242,7 +241,7 @@ def combine_rules_greedy(
         raise ValueError("rules list cannot be empty")
 
     selected_rules = []
-    history = {}
+    metric_history = {}
     remaining_rules = rules.copy()
     current_best_metric = float("-inf")
 
@@ -267,7 +266,7 @@ def combine_rules_greedy(
     current_best_metric = metrics_R[metric_to_use].item(best_idx)
     selected_rules.append(best_rule)
     remaining_rules.remove(best_rule)
-    history[0] = current_best_metric
+    metric_history[0] = current_best_metric
 
     # Iteratively add rules that improve the metric
     for iteration in range(1, max_rules):
@@ -312,7 +311,7 @@ def combine_rules_greedy(
         selected_rules.append(best_candidate)
         remaining_rules.remove(best_candidate)
         current_best_metric = best_candidate_metric
-        history[iteration] = current_best_metric
+        metric_history[iteration] = current_best_metric
 
     # Create final combined rule
     separator = " | " if operator == "or" else " & "
