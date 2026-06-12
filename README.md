@@ -1,6 +1,6 @@
 <picture align="center">
-  <source media="(prefers-color-scheme: dark)" srcset="https://paypal.github.io/iguanas/_images/IGUANAS_LOGO.png">
-  <img alt="Iguanas Logo" src="https://paypal.github.io/Iguanas/_images/IGUANAS_LOGO.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png">
+  <img alt="Iguanas Logo" src="https://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png">
 </picture>
 
 # Iguanas: A Lightning-Fast Rule Generation Python Library
@@ -10,13 +10,13 @@
 |:--|:-:|
 | Package | [![PyPI version](https://img.shields.io/pypi/v/iguanas)](https://pypi.org/project/iguanas/) [![Python versions](https://img.shields.io/pypi/pyversions/iguanas)](https://pypi.org/project/iguanas/) |
 | Quality | [![License](https://img.shields.io/github/license/paypal/iguanas)](https://github.com/paypal/iguanas/blob/main/LICENSE) [![Coverage](https://img.shields.io/codecov/c/github/paypal/iguanas)](https://codecov.io/gh/paypal/iguanas) |
-| Documentation | [![Documentation](https://img.shields.io/badge/docs-online-blue)](https://paypal.github.io/iguanas/) |
+| Documentation | [![Documentation](https://img.shields.io/badge/docs-online-blue)](https://paypal.github.io/Iguanas/) |
 | Code style | [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff) |
 | Downloads | [![Downloads](https://static.pepy.tech/badge/iguanas)](https://pepy.tech/project/iguanas) [![Downloads/Month](https://static.pepy.tech/badge/iguanas/month)](https://pepy.tech/project/iguanas) |
-| Community | [![GitHub Stars](https://img.shields.io/github/stars/paypal/iguanas?style=social)](https://github.com/paypal/iguanas) [![GitHub Forks](https://img.shields.io/github/forks/paypal/iguanas?style=social)](https://github.com/paypal/iguanas) [![Contributors](https://img.shields.io/github/contributors/paypal/iguanas)](https://github.com/paypal/iguanas/graphs/contributors) [![Last Commit](https://img.shields.io/github/last-commit/paypal/iguanas)](https://github.com/paypal/iguanas/commits/main) |
+| Community | [![GitHub Stars](https://img.shields.io/github/stars/paypal/Iguanas?style=social)](https://github.com/paypal/Iguanas) [![GitHub Forks](https://img.shields.io/github/forks/paypal/Iguanas?style=social)](https://github.com/paypal/Iguanas) [![Contributors](https://img.shields.io/github/contributors/paypal/Iguanas)](https://github.com/paypal/Iguanas/graphs/contributors) [![Last Commit](https://img.shields.io/github/last-commit/paypal/Iguanas)](https://github.com/paypal/Iguanas/commits/main) |
 
 
-📚 **[Full Documentation](https://paypal.github.io/iguanas/)**
+📚 **[Full Documentation](https://paypal.github.io/Iguanas/)**
 
 
 ## What is Iguanas?
@@ -47,8 +47,8 @@ Generate interpretable rules from labelled datasets using XGBoost tree extractio
 
 ### 📊 Metrics
 Compute classification performance metrics for rule predictions:
-- `compute_metrics` - Compute a full metrics table (precision, recall, F-beta, TP/FP/TN/FN, flagged %) for a set of rules
-- `compute_single_metric` - Compute a single scalar metric (precision, recall, accuracy, or F-beta) — optimised for hot-path evaluation
+- `compute_metrics` - Compute a full metrics table (accuracy, precision, recall, F-beta, TP/FP/TN/FN, flagged %) for a set of rules
+- `compute_single_metric` - Compute a single scalar metric (accuracy, precision, recall or F-beta) — optimised for hot-path evaluation
 
 ### 🔍 Rule Evaluation
 Evaluate rules on data and filter by performance:
@@ -91,9 +91,9 @@ Infer monotone constraints (±1) from decision stumps
 
 ### ⚖️ Sample Weight Transformations
 Generate sample weight schedules to steer rule learning:
-- `generate_increasing_weight` - Weights that increase with feature value (power, log families)
-- `generate_decreasing_weight` - Weights that decrease with feature value (reciprocal families)
-- `generate_all_weight` - Generate both increasing and decreasing weight schedules in one call
+- `generate_increasing_weights` - Weights that increase with feature value (power, log families)
+- `generate_decreasing_weights` - Weights that decrease with feature value (reciprocal families)
+- `generate_weights` - Generate both increasing and decreasing weight schedules in one call
 
 ## 🚀 Quick Start
 
@@ -102,7 +102,7 @@ import polars as pl
 import numpy as np
 from xgboost import XGBClassifier
 
-from iguanas.weight_transformations import generate_all_weight
+from iguanas.weight_transformations import generate_weights
 from iguanas.rule_generation import rule_grid_search_parallel_weights
 from iguanas.rule_evaluation import apply_filter_and_deduplicate_rules
 
@@ -114,15 +114,15 @@ X_train = pl.DataFrame({
 y_train = pl.Series([0, 1, 0, 1, 0, 1, 1, 0])
 
 # 2. Generate sample weight transformations
-weights = generate_all_weight(X_train["income"])
+weights = generate_weights(X_train["income"])
 
 # 3. Run a parallel grid search to extract rules
 estimator = XGBClassifier(max_depth=2, n_estimators=5, random_state=42)
-scale_pos_weight_vec = np.logspace(0, 1, 5)
+scale_pos_weights = np.logspace(0, 1, 5)
 
 rules_df = rule_grid_search_parallel_weights(
     estimator, X_train, y_train,
-    scale_pos_weight_vec=scale_pos_weight_vec,
+    scale_pos_weights=scale_pos_weights,
     weights_train_vec=weights,
     n_jobs=-1,
 )
@@ -130,7 +130,7 @@ rules_df = rule_grid_search_parallel_weights(
 # 4. Evaluate, filter, and deduplicate rules
 R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
     X_train, y_train, rules_df,
-    metrics_threshold=[
+    metric_thresholds=[
         {"name": "precision", "operator": ">=", "value": 0.6},
         {"name": "recall",    "operator": ">=", "value": 0.5},
     ],
