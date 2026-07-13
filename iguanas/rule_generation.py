@@ -638,7 +638,7 @@ def rule_grid_search_parallel_weights(
             f"({len(weight_columns) * len(scale_pos_weights)} total combinations)"
         )
 
-    results_nested = Parallel(n_jobs=n_jobs, backend="loky", verbose=joblib_verbose)(
+    results_nested = Parallel(n_jobs=n_jobs, backend="threading", verbose=joblib_verbose)(
         delayed(_train_rules_for_weight_transformation)(
             sample_weights_df_pd[name],
             estimator_params,
@@ -724,7 +724,7 @@ def rule_grid_search_parallel_scales(
             f"({len(weight_columns) * len(scale_pos_weights)} total combinations)"
         )
 
-    results_nested = Parallel(n_jobs=n_jobs, backend="loky", verbose=joblib_verbose)(
+    results_nested = Parallel(n_jobs=n_jobs, backend="threading", verbose=joblib_verbose)(
         delayed(_train_rules_for_scale)(
             scale_pos_weight,
             weights_np,

@@ -277,17 +277,17 @@ class TestSelectUncorrelatedWeights:
             select_uncorrelated_weights(
                 sample_weights,
                 importance,
-                target_len=1,
+                num_weights=1,
                 min_corr=min_corr,
                 max_corr=max_corr,
             )
 
-    def test_negative_target_len_raises(self):
+    def test_negative_num_weights_raises(self):
         sample_weights = pl.DataFrame({"A": [1.0], "B": [1.0]})
         importance = {"A": 1.0, "B": 2.0}
 
-        with pytest.raises(ValueError, match="target_len must be non-negative"):
-            select_uncorrelated_weights(sample_weights, importance, target_len=-1)
+        with pytest.raises(ValueError, match="num_weights must be non-negative"):
+            select_uncorrelated_weights(sample_weights, importance, num_weights=-1)
 
     def test_non_positive_step_raises(self):
         sample_weights = pl.DataFrame({"A": [1.0], "B": [1.0]})
@@ -297,11 +297,11 @@ class TestSelectUncorrelatedWeights:
             select_uncorrelated_weights(
                 sample_weights,
                 importance,
-                target_len=1,
+                num_weights=1,
                 step=0.0,
             )
 
-    def test_returns_closest_filtered_set_for_target_len(self):
+    def test_returns_closest_filtered_set_for_num_weights(self):
         sample_weights = pl.DataFrame(
             {
                 "A": [1.0, 0.8, 0.4],
@@ -314,7 +314,7 @@ class TestSelectUncorrelatedWeights:
         selected, corr_value = select_uncorrelated_weights(
             sample_weights,
             importance,
-            target_len=2,
+            num_weights=2,
             min_corr=0.01,
             max_corr=0.99,
             step=0.01,
@@ -336,7 +336,7 @@ class TestSelectUncorrelatedWeights:
         selected, corr_value = select_uncorrelated_weights(
             sample_weights,
             importance,
-            target_len=2,
+            num_weights=2,
             min_corr=0.01,
             max_corr=0.99,
             step=0.01,
@@ -364,7 +364,7 @@ class TestSelectUncorrelatedWeights:
         selected, corr_value = select_uncorrelated_weights(
             pl.DataFrame({"A": [0.0], "B": [0.0], "C": [0.0]}),
             {"A": 1.0, "B": 2.0, "C": 3.0},
-            target_len=2,
+            num_weights=2,
             min_corr=0.01,
             max_corr=0.99,
             step=0.01,
@@ -373,7 +373,7 @@ class TestSelectUncorrelatedWeights:
         assert selected == ["A", "B", "C"]
         assert corr_value == pytest.approx(0.99)
 
-    def test_returns_minimum_when_target_len_below_range(self):
+    def test_returns_minimum_when_num_weights_below_range(self):
         sample_weights = pl.DataFrame(
             {
                 "A": [1.0, 0.8, 0.4],
@@ -386,7 +386,7 @@ class TestSelectUncorrelatedWeights:
         selected, corr_value = select_uncorrelated_weights(
             sample_weights,
             importance,
-            target_len=1,
+            num_weights=1,
             min_corr=0.01,
             max_corr=0.99,
             step=0.01,
@@ -395,7 +395,7 @@ class TestSelectUncorrelatedWeights:
         assert selected == ["C"]
         assert corr_value == pytest.approx(0.01)
 
-    def test_returns_maximum_when_target_len_above_range(self):
+    def test_returns_maximum_when_num_weights_above_range(self):
         sample_weights = pl.DataFrame(
             {
                 "A": [1.0, 0.8, 0.4],
@@ -408,7 +408,7 @@ class TestSelectUncorrelatedWeights:
         selected, corr_value = select_uncorrelated_weights(
             sample_weights,
             importance,
-            target_len=4,
+            num_weights=4,
             min_corr=0.01,
             max_corr=0.99,
             step=0.01,
@@ -429,7 +429,7 @@ class TestSelectUncorrelatedWeights:
         selected, corr_value = select_uncorrelated_weights(
             sample_weights,
             importance,
-            target_len=2,
+            num_weights=2,
             min_corr=0.01,
             max_corr=0.99,
             step=0.01,
