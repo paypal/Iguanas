@@ -8,7 +8,6 @@ from xgboost import XGBClassifier
 
 from .rule_formatting import simplify_rule
 
-
 # ---------------------------------------------------------------------------
 # Booster-agnostic helpers
 # ---------------------------------------------------------------------------
@@ -98,11 +97,11 @@ def _get_monotone_constraints_dict(estimator: Any) -> dict[str, int]:
     booster_type = _detect_booster_type(estimator)
     constraints_raw = estimator.monotone_constraints
     if booster_type == "lightgbm":
-        if isinstance(constraints_raw, (list, tuple)):
+        if isinstance(constraints_raw, list | tuple):
             feat_names = estimator.booster_.feature_name()
             return {
                 name: int(c)
-                for name, c in zip(feat_names, constraints_raw)
+                for name, c in zip(feat_names, constraints_raw, strict=False)
                 if int(c) != 0
             }
         return dict(constraints_raw)  # type: ignore[arg-type]
@@ -349,7 +348,7 @@ def _check_all_features_have_monotone_constraints(
     booster_type = _detect_booster_type(estimator)
     if booster_type == "lightgbm":
         constraints = estimator.monotone_constraints
-        if isinstance(constraints, (list, tuple)):
+        if isinstance(constraints, list | tuple):
             return len(constraints) == n_features and all(int(c) != 0 for c in constraints)
         if isinstance(constraints, dict):
             return len(constraints) == n_features and all(c != 0 for c in constraints.values())

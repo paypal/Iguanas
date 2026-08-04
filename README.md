@@ -82,6 +82,8 @@ Inspect and report on rule sets:
 ### 🖊️ Rule Formatting
 Clean up rule expressions for display or logging:
 - `simplify_rule` - Simplify a rule expression by removing redundant conditions
+- `to_sql` - Convert a rule expression to a SQL `WHERE` clause fragment (bare column names, `AND`/`OR` operators)
+- `rule_to_sql` - Convert a rule expression to a SQL `WHERE` clause with an optional table alias
 
 ### 📐 Monotone Constraints
 Infer feature directionality to guide rule generation:
@@ -98,6 +100,7 @@ Generate sample weight schedules to steer rule learning:
 ### 🔁 Rule Cross-Validation
 Validate rule stability across held-out folds without re-generating rules:
 - `validate_rules_cv` - Evaluate rules across K folds and return per-metric mean, std, and min — flags overfitted rules by their high variance
+- `identify_unstable_rules` - Return the names of rules whose cross-validated metric variance exceeds a threshold
 
 ### 💬 Rule Explanation
 Inspect and explain individual rule predictions:
@@ -112,12 +115,16 @@ Store and compare named rule snapshots across experiments:
 
 ### 🚀 Deployment
 Export rules and score data efficiently at scale:
-- `rule_to_sql` - Convert a rule expression to a SQL `WHERE` clause (with optional table alias)
 - `apply_rules_lazy` - Evaluate rule expressions on a Polars `LazyFrame` for out-of-core scoring
 
 ### ⚖️ Fairness
 Audit rule performance across demographic subgroups:
 - `compute_subgroup_metrics` - Compute precision, recall, and all other metrics broken down by a protected attribute column
+- `compute_disparate_impact_ratio` - Compute the ratio of positive prediction rates between subgroups to surface disparate impact
+
+### 📈 Rule Monitoring
+Track rule performance drift between a reference period and a current period:
+- `compare_rule_metrics` - Compare per-rule metrics between two `compute_metrics` outputs and flag rules that have degraded beyond optional thresholds
 
 ## 🚀 Quick Start
 

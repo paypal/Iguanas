@@ -7,7 +7,6 @@ import polars as pl
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.exceptions import NotFittedError
-from xgboost import XGBClassifier
 
 from .rule_evaluation import apply_and_filter_by_performance, apply_rules
 from .rule_generation import rule_grid_search
