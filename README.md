@@ -95,6 +95,30 @@ Generate sample weight schedules to steer rule learning:
 - `generate_decreasing_weights` - Weights that decrease with feature value (reciprocal families)
 - `generate_weights` - Generate both increasing and decreasing weight schedules in one call
 
+### 🔁 Rule Cross-Validation
+Validate rule stability across held-out folds without re-generating rules:
+- `validate_rules_cv` - Evaluate rules across K folds and return per-metric mean, std, and min — flags overfitted rules by their high variance
+
+### 💬 Rule Explanation
+Inspect and explain individual rule predictions:
+- `verbalize_rule` - Convert a rule expression to a plain-English sentence
+- `compute_coverage_overlap` - Compute pairwise Jaccard overlap between rule predictions
+- `compute_counterfactual` - Find the minimal feature changes needed to un-flag a sample
+
+### 🗂️ Rule Registry
+Store and compare named rule snapshots across experiments:
+- `RuleRegistry` - Save, load, delete, and list named rule snapshots (with optional JSON persistence)
+- `filter_rule_pairs_by_overlap` - Return rule pairs whose Jaccard overlap falls within a `[min_overlap, max_overlap]` range (e.g. disjoint pairs, near-redundant pairs, or everything in between)
+
+### 🚀 Deployment
+Export rules and score data efficiently at scale:
+- `rule_to_sql` - Convert a rule expression to a SQL `WHERE` clause (with optional table alias)
+- `apply_rules_lazy` - Evaluate rule expressions on a Polars `LazyFrame` for out-of-core scoring
+
+### ⚖️ Fairness
+Audit rule performance across demographic subgroups:
+- `compute_subgroup_metrics` - Compute precision, recall, and all other metrics broken down by a protected attribute column
+
 ## 🚀 Quick Start
 
 ```python

@@ -4,6 +4,7 @@ from iguanas.rule_formatting import (
     # format_as_boolean_conditions,
     # decode_numeric_encodings,
     simplify_rule,
+    to_sql,
 )
 
 
@@ -570,3 +571,21 @@ class TestSimplifyRule:
 #         result = decode_numeric_encodings(rule, mapping)
 #         # Should remain unchanged when no categories match
 #         assert result == '(X["A"] > 10)'
+
+
+class TestToSql:
+    def test_and_operator(self):
+        result = to_sql('(X["age"] >= 30) & (X["income"] < 50000)')
+        assert result == "(age >= 30) AND (income < 50000)"
+
+    def test_or_operator(self):
+        result = to_sql('(X["score"] >= 0.8) | (X["flag"] == 1)')
+        assert result == "(score >= 0.8) OR (flag == 1)"
+
+    def test_single_condition(self):
+        assert to_sql('(X["age"] >= 30)') == "(age >= 30)"
+
+    def test_mixed_operators(self):
+        result = to_sql('(X["a"] > 1) & (X["b"] < 2) | (X["c"] == 3)')
+        assert "AND" in result and "OR" in result
+        assert 'X["' not in result

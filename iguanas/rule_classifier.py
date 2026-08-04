@@ -15,6 +15,21 @@ from .rule_generation import rule_grid_search
 _NUMERIC_DTYPES = (pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.Float32, pl.Float64)
 
 
+def _validate_metric_thresholds(
+    v: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]] | None:
+    """Validate that all threshold values are in the range [0, 1]."""
+    if v is None:
+        return v
+    for t in v:
+        val = t.get("value")
+        if val is not None and not (0.0 <= val <= 1.0):
+            raise ValueError(
+                f"metric_thresholds value {val!r} is out of range [0, 1] for threshold {t!r}"
+            )
+    return v
+
+
 class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     """Rule-based classifier that selects the single best rule.
 
@@ -49,7 +64,7 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    estimator: XGBClassifier
+    estimator: Any  # XGBClassifier, LGBMClassifier, or any sklearn-compatible tree classifier
     scale_pos_weights: list[float] | np.ndarray = Field(default_factory=lambda: np.array([1.0]))
     sample_weights_df: pl.DataFrame | None = None
     ranking_metric: str = "accuracy"
@@ -60,15 +75,7 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     def _check_metric_thresholds(
         cls, v: list[dict[str, Any]] | None
     ) -> list[dict[str, Any]] | None:
-        if v is None:
-            return v
-        for t in v:
-            val = t.get("value")
-            if val is not None and not (0.0 <= val <= 1.0):
-                raise ValueError(
-                    f"metric_thresholds value {val!r} is out of range [0, 1] for threshold {t!r}"
-                )
-        return v
+        return _validate_metric_thresholds(v)
 
     # Learned attributes (set by fit, not part of the model schema)
     _feature_cols_: list[str] = PrivateAttr(default_factory=list)
@@ -162,3 +169,41 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     def fit_predict(self, X: pl.DataFrame, y: pl.Series) -> pl.Series:
         """Fit classifier and return binary predictions on the same data."""
         return self.fit(X, y).predict(X)
+
+    def export(self) -> dict:
+        """Export the fitted rule and feature columns as a JSON-serializable dict.
+
+        Returns
+        -------
+        dict
+            Dict with keys ``"rule"`` (str) and ``"feature_cols"`` (list[str]).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier has not been fitted.
+        """
+        self._check_is_fitted()
+        return {"rule": self._best_rule_, "feature_cols": self._feature_cols_}
+
+    @classmethod
+    def from_export(cls, data: dict) -> RuleClassifier:
+        """Reconstruct a fitted classifier from an :meth:`export` dict.
+
+        The returned instance supports ``predict`` and ``predict_proba`` but
+        cannot be re-fitted without supplying an ``estimator``.
+
+        Parameters
+        ----------
+        data : dict
+            Dict produced by :meth:`export`.
+
+        Returns
+        -------
+        RuleClassifier
+            Fitted instance with ``_best_rule_`` and ``_feature_cols_`` set.
+        """
+        instance = cls(estimator=None)
+        instance._feature_cols_ = data["feature_cols"]
+        instance._best_rule_ = data["rule"]
+        return instance

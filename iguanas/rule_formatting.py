@@ -124,6 +124,40 @@ def simplify_rule(rule: str) -> str:
     return " & ".join(result_conditions)
 
 
+_X_ACCESSOR_PATTERN = re.compile(r'X\["([^"]+)"\]')
+
+
+def to_sql(rule: str) -> str:
+    """Convert a rule expression string to a SQL WHERE clause fragment.
+
+    Replaces ``X["col"]`` accessors with bare column names and converts
+    ``&`` / ``|`` to ``AND`` / ``OR``.
+
+    Parameters
+    ----------
+    rule : str
+        Rule string using ``X["col"]`` notation with ``&`` / ``|`` operators.
+
+    Returns
+    -------
+    str
+        SQL WHERE clause fragment with column names unquoted and boolean
+        operators uppercased.
+
+    Examples
+    --------
+    >>> to_sql('(X["age"] >= 30) & (X["income"] < 50000)')
+    '(age >= 30) AND (income < 50000)'
+
+    >>> to_sql('(X["score"] >= 0.8) | (X["flag"] == 1)')
+    '(score >= 0.8) OR (flag == 1)'
+    """
+    sql = _X_ACCESSOR_PATTERN.sub(r'\1', rule)
+    sql = re.sub(r'\s*&\s*', ' AND ', sql)
+    sql = re.sub(r'\s*\|\s*', ' OR ', sql)
+    return sql
+
+
 # def format_floats_as_integers(rule: str, int_columns: list[str]) -> str:
 #     """
 #     Convert float values to integers for specified columns in a rule string,
@@ -547,3 +581,54 @@ def simplify_rule(rule: str) -> str:
 
 #     result = _BOOL_PATTERN_Q.sub(convert_condition, rule)
 #     return result
+
+
+# SQL operator mapping: Python == becomes SQL =
+_SQL_OP_MAP: dict[str, str] = {"==": "="}
+
+
+def rule_to_sql(rule: str, table_alias: str | None = None) -> str:
+    """Convert a rule expression string to a SQL WHERE clause.
+
+    Translates Iguanas rule notation (``X["col"] op value``) into standard
+    SQL predicate syntax suitable for use in a ``WHERE`` or
+    ``CASE WHEN`` clause.
+
+    Parameters
+    ----------
+    rule : str
+        Rule expression using ``X["col"]`` notation with ``&`` / ``|``
+        operators, e.g. ``'(X["age"] > 30) & (X["income"] < 50000)'``.
+    table_alias : str | None, default=None
+        Optional table or CTE alias to prefix column references with.
+        For example, ``table_alias="t"`` turns ``age > 30`` into
+        ``t.age > 30``.
+
+    Returns
+    -------
+    str
+        SQL WHERE clause string.
+
+    Examples
+    --------
+    >>> rule_to_sql('(X["age"] > 30) & (X["income"] < 50000)')
+    '(age > 30.0) AND (income < 50000.0)'
+
+    >>> rule_to_sql('(X["age"] > 30) | (X["flag"] == 1)', table_alias="t")
+    '(t.age > 30.0) OR (t.flag = 1.0)'
+    """
+
+    def _cond_to_sql(m: re.Match) -> str:
+        feature, op, val = m.group(1), m.group(2), m.group(3).strip()
+        col_ref = f"{table_alias}.{feature}" if table_alias else feature
+        sql_op = _SQL_OP_MAP.get(op, op)
+        try:
+            val_sql = str(float(val))
+        except ValueError:
+            val_sql = f"'{val}'"
+        return f"({col_ref} {sql_op} {val_sql})"
+
+    sql = _COND_PATTERN.sub(_cond_to_sql, rule)
+    sql = re.sub(r"\s*&\s*", " AND ", sql)
+    sql = re.sub(r"\s*\|\s*", " OR ", sql)
+    return sql

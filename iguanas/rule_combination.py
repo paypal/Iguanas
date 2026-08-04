@@ -6,6 +6,11 @@ import polars as pl
 from .metrics import compute_metrics, compute_single_metric
 
 
+def _metric_col(metric: str, weights: pl.Series | None) -> str:
+    """Return the metric column name, appending ``'_weight'`` when weights are used."""
+    return f"{metric}_weight" if weights is not None else metric
+
+
 def combine_rules_full_search(
     R: pl.DataFrame,
     n: int = 3,
@@ -66,12 +71,7 @@ def combine_rules_full_search(
     # Step 1: Generate all combinations across all sizes from 2 to n
     all_combinations = []
     for combo_size in range(2, n + 1):
-        combos = list(itertools.combinations(rules, combo_size))
-
-        # Apply limit per combination size
-        if len(combos) > max_combinations_per_n:
-            combos = combos[:max_combinations_per_n]
-
+        combos = list(itertools.islice(itertools.combinations(rules, combo_size), max_combinations_per_n))
         all_combinations.extend(combos)
 
     if not all_combinations:
@@ -249,7 +249,7 @@ def combine_rules_greedy(
     metrics_R = compute_metrics(R.select(rules), y, weights)
 
     # Use weighted metric if weights are provided
-    metric_to_use = f"{metric}_weight" if weights is not None else metric
+    metric_to_use = _metric_col(metric, weights)
 
     if metric_to_use not in metrics_R.columns:
         raise ValueError(
@@ -268,6 +268,13 @@ def combine_rules_greedy(
     remaining_rules.remove(best_rule)
     metric_history[0] = current_best_metric
 
+    # Maintain the running combined Series incrementally to avoid rebuilding
+    # from scratch on every iteration (O(k) total ops instead of O(k²)).
+    if operator == "or":
+        current_combined = R[best_rule]
+    else:
+        current_combined = R[best_rule]
+
     # Iteratively add rules that improve the metric
     for iteration in range(1, max_rules):
         if not remaining_rules:
@@ -275,16 +282,6 @@ def combine_rules_greedy(
 
         best_candidate = None
         best_candidate_metric = current_best_metric
-
-        # Create current combined rule
-        if operator == "or":
-            current_combined = R[selected_rules[0]]
-            for rule in selected_rules[1:]:
-                current_combined = current_combined | R[rule]
-        else:  # 'and'
-            current_combined = R[selected_rules[0]]
-            for rule in selected_rules[1:]:
-                current_combined = current_combined & R[rule]
 
         # Try adding each remaining rule
         for candidate_rule in remaining_rules:
@@ -307,7 +304,11 @@ def combine_rules_greedy(
         if best_candidate is None or improvement < min_improvement:
             break
 
-        # Add the best candidate
+        # Add the best candidate and update the running combined Series
+        if operator == "or":
+            current_combined = current_combined | R[best_candidate]
+        else:
+            current_combined = current_combined & R[best_candidate]
         selected_rules.append(best_candidate)
         remaining_rules.remove(best_candidate)
         current_best_metric = best_candidate_metric
@@ -557,7 +558,7 @@ def combine_rules_a_star(
         raise ValueError("rules list cannot be empty")
 
     separator = " | " if operator == "or" else " & "
-    metric_to_use = f"{metric}_weight" if weights is not None else metric
+    metric_to_use = _metric_col(metric, weights)
 
     # Precompute metrics for all single rules (for heuristic calculation)
     single_rule_metrics = {}

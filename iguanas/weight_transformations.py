@@ -51,7 +51,7 @@ def _dispatch(fn, X: pl.Series | pl.DataFrame, **kwargs) -> pl.DataFrame | None:
     if not isinstance(X, pl.DataFrame):
         return None
     results = [fn(X[c], **kwargs) for c in X.columns]
-    return pl.concat([results[0]] + [r.drop("Baseline") for r in results[1:]], how="horizontal")
+    return pl.concat([results[0]] + [r.drop("Baseline") for r in results[1:]], how="horizontal_extend")
 
 
 def generate_increasing_weights(

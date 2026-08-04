@@ -100,11 +100,15 @@ What Can Iguanas Do?
 
 * ⚙️ :doc:`Rule Generation <api/rule_generation>` - Extract rules from XGBoost models with grid search
 * 📊 :doc:`Metrics <api/metrics>` - Precision, recall, F-beta, and weighted variants
-* 🔍 :doc:`Rule Evaluation <api/rule_evaluation>` - Evaluate, filter, and deduplicate rule sets
+* 🔍 :doc:`Rule Evaluation <api/rule_evaluation>` - Evaluate, filter, and deduplicate rule sets; lazy scoring via ``apply_rules_lazy``
+* 🔁 :doc:`Rule Cross-Validation <api/rule_cv>` - Validate rule stability across K folds (cv mean, std, min per metric)
 * 🔀 :doc:`Rule Combination <api/rule_combination>` - Combine rules with greedy, beam, and A* search
 * ✂️ :doc:`Rule Selection <api/rule_selection>` - Prune by feature overlap and correlation
 * 🔬 :doc:`Rule Analysis <api/rule_analysis>` - Inspect and report on rule structure
-* 🖊️ :doc:`Rule Formatting <api/rule_formatting>` - Simplify and clean rule expressions
+* 💬 :doc:`Rule Explanation <api/rule_explanation>` - Verbalize rules, compute coverage overlap, and generate counterfactual explanations
+* 🖊️ :doc:`Rule Formatting <api/rule_formatting>` - Simplify rules and export to SQL
+* ⚖️ :doc:`Rule Fairness <api/rule_fairness>` - Audit rule performance across demographic subgroups
+* 🗂️ :doc:`Rule Registry <api/rule_registry>` - Version-control rulesets and filter pairs by Jaccard overlap
 * 📐 :doc:`Monotone Constraints <api/monotone_constraints>` - Infer feature directionality
 * ⚖️ :doc:`Weight Transformations <api/weight_transformations>` - Generate sample weight schedules
 

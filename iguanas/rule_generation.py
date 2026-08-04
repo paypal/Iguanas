@@ -9,6 +9,110 @@ from xgboost import XGBClassifier
 from .rule_formatting import simplify_rule
 
 
+# ---------------------------------------------------------------------------
+# Booster-agnostic helpers
+# ---------------------------------------------------------------------------
+
+def _detect_booster_type(estimator: Any) -> str:
+    """Return ``"lightgbm"`` or ``"xgboost"`` based on the estimator's module."""
+    return "lightgbm" if type(estimator).__module__.startswith("lightgbm") else "xgboost"
+
+
+def _normalise_lgbm_tree_df(df: pd.DataFrame) -> pd.DataFrame:
+    """Map a single-tree LightGBM ``trees_to_dataframe()`` slice to the XGBoost schema.
+
+    After normalisation the tree can be passed unchanged to
+    :func:`extract_rule_by_max_gain` and
+    :func:`extract_rule_with_monotone_constraints`.
+
+    Column mapping
+    --------------
+    tree_index  → Tree
+    node_index  → ID   (string e.g. "0-S0", "0-L1")
+    position    → Node (0-based int, reset per-tree)
+    split_feature / "Leaf" → Feature
+    threshold   → Split (float; NaN for leaves)
+    left_child  → Yes  (condition-met child)
+    right_child → No   (condition-not-met child)
+    split_gain / value → Gain
+    count       → Cover
+
+    Notes
+    -----
+    Leaf nodes are identified by ``split_feature.isna()`` (LightGBM 4.x has no
+    ``node_type`` column; leaves simply have no split feature).
+
+    LightGBM uses ``<=`` for numeric splits; XGBoost uses ``<``.  Because tree
+    thresholds are chosen to minimise error on continuous features, the
+    distinction is irrelevant for practical rule strings, so the existing
+    ``<``/``>=`` operators in the extraction functions are reused unchanged.
+    """
+    df = df.reset_index(drop=True)
+    is_leaf = df["split_feature"].isna()  # leaves have no split feature
+    return pd.DataFrame(
+        {
+            "Tree":    df["tree_index"],
+            "Node":    df.index,                                          # sequential int per tree
+            "ID":      df["node_index"],                                  # e.g. "0-S0", "0-L1"
+            "Feature": df["split_feature"].where(~is_leaf, other="Leaf"),
+            "Split":   pd.to_numeric(df["threshold"], errors="coerce"),
+            "Yes":     df["left_child"],                                  # condition-met child
+            "No":      df["right_child"],                                 # condition-not-met child
+            # Leaf nodes: use raw prediction value; split nodes: information gain
+            "Gain":    df["split_gain"].where(~is_leaf, other=df["value"]),
+            "Cover":   df["count"],
+        }
+    )
+
+
+def _get_trees_dataframe(estimator: Any) -> pd.DataFrame:
+    """Call the correct ``trees_to_dataframe()`` for XGBoost or LightGBM.
+
+    XGBoost exposes it via ``estimator._Booster``;
+    LightGBM exposes it via ``estimator.booster_``.
+    """
+    if _detect_booster_type(estimator) == "lightgbm":
+        return estimator.booster_.trees_to_dataframe()
+    return estimator._Booster.trees_to_dataframe()
+
+
+def _get_monotone_constraints_dict(estimator: Any) -> dict[str, int]:
+    """Return a ``{feature: constraint}`` dict for XGBoost or LightGBM.
+
+    XGBoost stores constraints as a ``dict``; LightGBM stores them as a
+    ``list`` indexed by feature position.  This helper normalises both
+    formats to a single ``{feature_name: ±1}`` mapping so the rest of the
+    extraction code is booster-agnostic.
+
+    Parameters
+    ----------
+    estimator : XGBClassifier | LGBMClassifier
+        Fitted estimator with monotone constraints already verified to be
+        non-zero for every feature.
+
+    Returns
+    -------
+    dict[str, int]
+        Mapping from feature name to constraint value (``+1`` or ``-1``).
+    """
+    booster_type = _detect_booster_type(estimator)
+    constraints_raw = estimator.monotone_constraints
+    if booster_type == "lightgbm":
+        if isinstance(constraints_raw, (list, tuple)):
+            feat_names = estimator.booster_.feature_name()
+            return {
+                name: int(c)
+                for name, c in zip(feat_names, constraints_raw)
+                if int(c) != 0
+            }
+        return dict(constraints_raw)  # type: ignore[arg-type]
+    # XGBoost: already a dict
+    return constraints_raw  # type: ignore[return-value]
+
+
+# ---------------------------------------------------------------------------
+
+
 def extract_rule_by_max_gain(tree_X: pd.DataFrame) -> str:
     """Extract the rule path to the leaf with maximum gain using bottom-to-top approach.
 
@@ -164,43 +268,44 @@ def extract_rules(
     all_features_constrained: bool,
     **kwargs,
 ) -> pd.DataFrame:
-    """Generate metrics for rules extracted from XGBoost trees.
+    """Generate rules extracted from XGBoost or LightGBM trees.
 
     Parameters
     ----------
-    estimator : XGBClassifier
-        Fitted XGBoost classifier from which to extract rules.
+    estimator : XGBClassifier | LGBMClassifier
+        Fitted tree-based classifier. Both XGBoost and LightGBM are supported.
     all_features_constrained : bool
         If True, uses monotone constraint-based extraction (top-to-bottom).
         If False, uses max gain-based extraction (bottom-to-top).
     **kwargs : dict
-        Additional parameters for rule extraction and metric calculation
+        Additional metadata columns added to the output DataFrame
         (e.g., transformation name, scale_pos_weight value).
 
     Returns
     -------
     pd.DataFrame
-        DataFrame containing:
-        - rule: Extracted rule as a string
-        - tree: Tree number from which the rule was extracted
-        - scale_pos_weight: Scale_pos_weight value used for this tree
+        DataFrame with columns: ``rule``, ``tree``, and any ``kwargs`` columns.
     """
-    df = estimator._Booster.trees_to_dataframe()
+    booster_type = _detect_booster_type(estimator)
+    df = _get_trees_dataframe(estimator)
+    group_col = "tree_index" if booster_type == "lightgbm" else "Tree"
 
     rule_strings = []
     tree_ids = []
 
-    # Use groupby for efficient tree iteration
-    grouped = df.groupby("Tree", sort=False)
-
-    for tree_id, tree in grouped:
+    for tree_id, tree in df.groupby(group_col, sort=False):
         if tree.empty:
             continue
 
-        if all_features_constrained and isinstance(estimator.monotone_constraints, dict):
-            rule = extract_rule_with_monotone_constraints(
-                tree, monotone_constraints=estimator.monotone_constraints
-            )
+        # Normalise to the XGBoost canonical column schema
+        if booster_type == "lightgbm":
+            tree = _normalise_lgbm_tree_df(tree)
+        else:
+            tree = tree.reset_index(drop=True)
+
+        if all_features_constrained:
+            mc_dict = _get_monotone_constraints_dict(estimator)
+            rule = extract_rule_with_monotone_constraints(tree, mc_dict)
             rule = simplify_rule(rule)
         else:
             rule = extract_rule_by_max_gain(tree)
@@ -212,10 +317,8 @@ def extract_rules(
         rule_strings.append(rule)
         tree_ids.append(tree_id)
 
-    # Create single DataFrame at the end
     if rule_strings:
-        rules_data = {"rule": rule_strings, "tree": tree_ids}
-        # Add kwargs columns
+        rules_data: dict[str, Any] = {"rule": rule_strings, "tree": tree_ids}
         for key, value in kwargs.items():
             rules_data[key] = [value] * len(rule_strings)
         return pd.DataFrame(rules_data)
@@ -225,23 +328,33 @@ def extract_rules(
 def _check_all_features_have_monotone_constraints(
     estimator: XGBClassifier, n_features: int
 ) -> bool:
-    """
-    Check if all features have non-zero monotone constraints.
+    """Check if all features have non-zero monotone constraints.
+
+    Handles both XGBoost (``dict``) and LightGBM (``list``) constraint formats.
 
     Parameters
     ----------
-    estimator : XGBClassifier
-        The estimator to check
+    estimator : XGBClassifier | LGBMClassifier
+        The fitted estimator to inspect.
     n_features : int
-        Expected number of features
+        Expected number of features.
 
     Returns
     -------
     bool
-        True if all features have constraints of +1 or -1
+        True if all n_features features have constraints of +1 or -1.
     """
-    if not estimator.monotone_constraints:
+    if not getattr(estimator, "monotone_constraints", None):
         return False
+    booster_type = _detect_booster_type(estimator)
+    if booster_type == "lightgbm":
+        constraints = estimator.monotone_constraints
+        if isinstance(constraints, (list, tuple)):
+            return len(constraints) == n_features and all(int(c) != 0 for c in constraints)
+        if isinstance(constraints, dict):
+            return len(constraints) == n_features and all(c != 0 for c in constraints.values())
+        return False  # unknown constraint format
+    # XGBoost: monotone_constraints is a dict
     if not isinstance(estimator.monotone_constraints, dict):
         return False
     return len(estimator.monotone_constraints) == n_features and all(
@@ -257,6 +370,7 @@ def _train_rules_for_weight_transformation(
     scale_pos_weights: np.ndarray,
     all_features_constrained: bool,
     feature_names: list[str] | None = None,
+    estimator_class: type = XGBClassifier,
 ) -> list[pd.DataFrame]:
     """
     Process a single weight column across all scale_pos_weight values.
@@ -300,8 +414,9 @@ def _train_rules_for_weight_transformation(
         X_fit = X_train
 
     for scale_pos_weight in scale_pos_weights:
-        est = XGBClassifier(**estimator_params)
-        est.scale_pos_weight = scale_pos_weight
+        est = estimator_class(**estimator_params)
+        if estimator_params.get("objective") != "binary:hinge":
+            est.scale_pos_weight = scale_pos_weight
         try:
             _ = est.fit(X_fit, y_train, sample_weight=weights_array)
         except Exception:
@@ -328,6 +443,7 @@ def _train_rules_for_scale(
     y_train: np.ndarray,
     all_features_constrained: bool,
     feature_names: list[str] | None = None,
+    estimator_class: type = XGBClassifier,
 ) -> list[pd.DataFrame]:
     """
     Process all weight transformations for a single scale_pos_weight value.
@@ -368,8 +484,9 @@ def _train_rules_for_scale(
         X_fit = X_train
     for i, name in enumerate(weight_columns):
         weights_array = weights_np[:, i]
-        est = XGBClassifier(**estimator_params)
-        est.set_params(scale_pos_weight=scale_pos_weight)
+        est = estimator_class(**estimator_params)
+        if estimator_params.get("objective") != "binary:hinge":
+            est.set_params(scale_pos_weight=scale_pos_weight)
         est.fit(X_fit, y_train, sample_weight=weights_array)
 
         params = {
@@ -389,7 +506,7 @@ def _setup_and_validate_grid_search(
     scale_pos_weights: list[float] | np.ndarray,
     sample_weights_df: pl.DataFrame | pd.DataFrame | None = None,
     estimator: XGBClassifier | None = None,
-) -> tuple[np.ndarray, np.ndarray, list[str], pd.DataFrame, dict[str, Any], bool]:
+) -> tuple[np.ndarray, np.ndarray, list[str], pd.DataFrame, dict[str, Any], bool, type]:
     """Validate inputs and prepare data for grid search functions.
 
     Parameters
@@ -431,9 +548,11 @@ def _setup_and_validate_grid_search(
     else:
         sample_weights_df_pd = sample_weights_df
 
+    estimator_class: type = XGBClassifier
     estimator_params = {}
     all_features_constrained = False
     if estimator is not None:
+        estimator_class = type(estimator)
         estimator_params = estimator.get_params()
         estimator_params.pop("scale_pos_weight", None)
         n_features = len(X_train.columns)
@@ -448,6 +567,7 @@ def _setup_and_validate_grid_search(
         sample_weights_df_pd,
         estimator_params,
         all_features_constrained,
+        estimator_class,
     )
 
 
@@ -530,6 +650,7 @@ def rule_grid_search_sequential(
         sample_weights_df_pd,
         estimator_params,
         all_features_constrained,
+        estimator_class,
     ) = _setup_and_validate_grid_search(
         X_train, y_train, scale_pos_weights, sample_weights_df, estimator
     )
@@ -555,6 +676,7 @@ def rule_grid_search_sequential(
             y_train_np,
             all_features_constrained,
             feature_names=feature_names,
+            estimator_class=estimator_class,
         )
         rules_dfs.extend(results)
 
@@ -624,6 +746,7 @@ def rule_grid_search_parallel_weights(
         sample_weights_df_pd,
         estimator_params,
         all_features_constrained,
+        estimator_class,
     ) = _setup_and_validate_grid_search(
         X_train, y_train, scale_pos_weights, sample_weights_df, estimator
     )
@@ -647,6 +770,7 @@ def rule_grid_search_parallel_weights(
             scale_pos_weights,
             all_features_constrained,
             feature_names,
+            estimator_class,
         )
         for name in weight_columns
     )
@@ -709,6 +833,7 @@ def rule_grid_search_parallel_scales(
         sample_weights_df_pd,
         estimator_params,
         all_features_constrained,
+        estimator_class,
     ) = _setup_and_validate_grid_search(
         X_train, y_train, scale_pos_weights, sample_weights_df, estimator
     )
@@ -734,6 +859,7 @@ def rule_grid_search_parallel_scales(
             y_train_np,
             all_features_constrained,
             feature_names,
+            estimator_class,
         )
         for scale_pos_weight in scale_pos_weights
     )

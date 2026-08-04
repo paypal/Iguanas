@@ -1,4 +1,4 @@
-from functools import reduce
+from functools import lru_cache, reduce
 from typing import Any
 
 import polars as pl
@@ -16,6 +16,41 @@ _OPS: dict[str, str] = {
     "==": "__eq__",
     "!=": "__ne__",
 }
+
+
+
+
+class _LazyProxy:
+    """Translates ``X["col"]`` accesses into ``pl.col("col")`` expressions.
+
+    Used by :func:`_rule_to_expr` (and therefore :func:`apply_rules`) so that
+    rule strings written for eager DataFrames are compiled once to reusable
+    ``pl.Expr`` objects that can be applied to any DataFrame or LazyFrame.
+    """
+
+    def __getitem__(self, key: str) -> pl.Expr:
+        return pl.col(key)
+
+
+@lru_cache(maxsize=512)
+def _rule_to_expr(rule: str) -> pl.Expr:
+    """Compile a rule string to a Polars ``Expr``, caching the result.
+
+    The first call for a given rule string calls :pyfunc:`eval` to produce an
+    ``Expr``; subsequent calls for the same string return the cached object
+    directly, making repeated evaluation of the same rules fast.
+
+    Parameters
+    ----------
+    rule : str
+        Rule expression string using ``X["col"]`` notation.
+
+    Returns
+    -------
+    pl.Expr
+        Compiled and aliased Polars expression.
+    """
+    return eval(rule, {"pl": pl, "X": _LazyProxy()}).alias(rule)  # type: ignore[no-any-return]
 
 
 def apply_rules(X: pl.DataFrame, rules: list[str]) -> pl.DataFrame:
@@ -64,13 +99,50 @@ def apply_rules(X: pl.DataFrame, rules: list[str]) -> pl.DataFrame:
 
     Notes
     -----
-    Uses Python's `eval()` with a restricted namespace for security.
-    The namespace includes only `pl` (Polars) and `X` (the input DataFrame).
+    Rule strings are compiled to ``pl.Expr`` objects on the first call and
+    cached for subsequent calls, avoiding repeated ``eval()`` overhead.
     """
-    # Provide explicit namespace for eval to ensure cross-platform compatibility
-    namespace = {"pl": pl, "X": X}
-    exprs = [eval(rule, namespace).alias(rule) for rule in rules]
+    exprs = [_rule_to_expr(rule) for rule in rules]
     return X.with_columns(exprs).select(rules)
+
+
+def apply_rules_lazy(lf: pl.LazyFrame, rules: list[str]) -> pl.LazyFrame:
+    r"""Evaluate rule expressions on a LazyFrame to produce boolean predictions.
+
+    Functionally equivalent to :func:`apply_rules` but operates on a
+    ``pl.LazyFrame``, enabling out-of-core or query-plan-optimised scoring
+    without collecting the full dataset into memory.
+
+    Parameters
+    ----------
+    lf : pl.LazyFrame
+        Input LazyFrame. Must contain all columns referenced in ``rules``.
+    rules : list[str]
+        List of rule expression strings. Same format as :func:`apply_rules`,
+        e.g. ``'(X["age"] >= 30)'``.
+
+    Returns
+    -------
+    pl.LazyFrame
+        LazyFrame containing only the evaluated rule columns as boolean
+        values. Column names match the rule expression strings. Call
+        ``.collect()`` to materialise the result.
+
+    Examples
+    --------
+    >>> lf = pl.scan_parquet("transactions.parquet")
+    >>> rules = ['(X["amount"] > 1000)', '(X["age"] < 25)']
+    >>> R_lazy = apply_rules_lazy(lf, rules)
+    >>> R_lazy.collect()
+
+    See Also
+    --------
+    apply_rules : Eager equivalent for in-memory DataFrames.
+    """
+    if not rules:
+        return lf.select([])
+    exprs = [_rule_to_expr(rule) for rule in rules]
+    return lf.with_columns(exprs).select(rules)
 
 
 def apply_and_filter_by_performance(

@@ -6,6 +6,9 @@ from xgboost import XGBClassifier
 
 from iguanas.rule_generation import (
     _check_all_features_have_monotone_constraints,
+    _detect_booster_type,
+    _get_trees_dataframe,
+    _normalise_lgbm_tree_df,
     _train_rules_for_weight_transformation,
     _train_rules_for_scale,
     extract_rule_by_max_gain,
@@ -1454,6 +1457,178 @@ class TestPrivateRuleGenerationHelpers:
                 weights, params, X_np, y_np, [1.0], False, feature_names=None
             )
         assert result == []
+
+
+class TestLightGBMSupport:
+    """Tests covering the LightGBM code paths in rule_generation."""
+
+    @pytest.fixture
+    def lgbm_data(self):
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame(
+            {
+                "age":    list(range(20, 70)),
+                "income": list(range(10_000, 60_000, 1_000)),
+            }
+        )
+        y = pl.Series([0] * 25 + [1] * 25)
+        est = LGBMClassifier(n_estimators=5, max_depth=2, verbose=-1, random_state=0)
+        est.fit(X.to_pandas(), y.to_numpy())
+        return X, y, est
+
+    # ------------------------------------------------------------------
+    # _detect_booster_type
+    # ------------------------------------------------------------------
+
+    def test_detect_booster_type_returns_lightgbm(self):
+        from lightgbm import LGBMClassifier
+        assert _detect_booster_type(LGBMClassifier()) == "lightgbm"
+
+    def test_detect_booster_type_returns_xgboost(self):
+        assert _detect_booster_type(XGBClassifier()) == "xgboost"
+
+    # ------------------------------------------------------------------
+    # _normalise_lgbm_tree_df  (lines 47-49)
+    # ------------------------------------------------------------------
+
+    def test_normalise_lgbm_tree_df_schema(self):
+        df = pd.DataFrame(
+            {
+                "tree_index":    [0, 0, 0, 0, 0],
+                "node_index":    ["0-S0", "0-S1", "0-L0", "0-L1", "0-L2"],
+                # Leaves have NaN split_feature (no node_type column in LGBM 4.x)
+                "split_feature": ["age", "income", np.nan, np.nan, np.nan],
+                "threshold":     [35.0, 25000.0, np.nan, np.nan, np.nan],
+                "left_child":    ["0-S1", "0-L0", np.nan, np.nan, np.nan],
+                "right_child":   ["0-L1", "0-L2", np.nan, np.nan, np.nan],
+                "split_gain":    [5.0, 3.0, np.nan, np.nan, np.nan],
+                "value":         [None, None, 0.8, 0.3, -0.5],
+                "count":         [50, 25, 15, 10, 25],
+            }
+        )
+        result = _normalise_lgbm_tree_df(df)
+
+        assert set(result.columns) == {"Tree", "Node", "ID", "Feature", "Split", "Yes", "No", "Gain", "Cover"}
+        assert result["Feature"].tolist() == ["age", "income", "Leaf", "Leaf", "Leaf"]
+        assert result["ID"].tolist() == ["0-S0", "0-S1", "0-L0", "0-L1", "0-L2"]
+        # Split nodes keep split_gain; leaf nodes use value
+        assert result.loc[0, "Gain"] == pytest.approx(5.0)
+        assert result.loc[2, "Gain"] == pytest.approx(0.8)
+        # Node column is 0-based sequential
+        assert result["Node"].tolist() == [0, 1, 2, 3, 4]
+
+    # ------------------------------------------------------------------
+    # _get_trees_dataframe  (line 72)
+    # ------------------------------------------------------------------
+
+    def test_get_trees_dataframe_lgbm(self, lgbm_data):
+        _, _, est = lgbm_data
+        df = _get_trees_dataframe(est)
+        assert "tree_index" in df.columns
+        assert "node_index" in df.columns
+        assert len(df) > 0
+
+    # ------------------------------------------------------------------
+    # extract_rules with LightGBM  (line 265 + 272-280)
+    # ------------------------------------------------------------------
+
+    def test_extract_rules_lgbm_max_gain(self, lgbm_data):
+        """LightGBM path without monotone constraints (covers line 265)."""
+        _, _, est = lgbm_data
+        result = extract_rules(est, all_features_constrained=False)
+        assert isinstance(result, pd.DataFrame)
+        if len(result) > 0:
+            assert "rule" in result.columns
+            assert all('X["' in r for r in result["rule"])
+
+    def test_extract_rules_lgbm_with_list_constraints(self):
+        """LightGBM path with list monotone constraints (covers lines 272-280)."""
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame({"age": list(range(20, 70)), "income": list(range(10_000, 60_000, 1_000))})
+        y = pl.Series([0] * 25 + [1] * 25)
+        est = LGBMClassifier(
+            n_estimators=3, max_depth=2, verbose=-1, random_state=0,
+            monotone_constraints=[1, -1],
+        )
+        est.fit(X.to_pandas(), y.to_numpy())
+        result = extract_rules(est, all_features_constrained=True)
+        assert isinstance(result, pd.DataFrame)
+
+    def test_extract_rules_lgbm_with_dict_constraints(self):
+        """LightGBM path with dict monotone constraints (covers line 281)."""
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame({"age": list(range(20, 70)), "income": list(range(10_000, 60_000, 1_000))})
+        y = pl.Series([0] * 25 + [1] * 25)
+        est = LGBMClassifier(n_estimators=3, max_depth=2, verbose=-1, random_state=0)
+        est.fit(X.to_pandas(), y.to_numpy())
+        # Manually set dict-format constraints (exercises the else branch)
+        est.monotone_constraints = {"age": 1, "income": -1}
+        result = extract_rules(est, all_features_constrained=True)
+        assert isinstance(result, pd.DataFrame)
+
+    # ------------------------------------------------------------------
+    # _check_all_features_have_monotone_constraints  (lines 328-333)
+    # ------------------------------------------------------------------
+
+    def test_check_constraints_lgbm_list_all_nonzero(self):
+        """LightGBM list format, all constraints non-zero (covers 328-332)."""
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame({"a": [1, 2, 3, 4, 5], "b": [5, 4, 3, 2, 1]})
+        y = pl.Series([0, 0, 1, 1, 1])
+        est = LGBMClassifier(n_estimators=2, verbose=-1, monotone_constraints=[1, -1])
+        est.fit(X.to_pandas(), y.to_numpy())
+        assert _check_all_features_have_monotone_constraints(est, n_features=2) is True
+
+    def test_check_constraints_lgbm_list_with_zero(self):
+        """LightGBM list format with a zero constraint returns False."""
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame({"a": [1, 2, 3, 4, 5], "b": [5, 4, 3, 2, 1]})
+        y = pl.Series([0, 0, 1, 1, 1])
+        est = LGBMClassifier(n_estimators=2, verbose=-1, monotone_constraints=[1, 0])
+        est.fit(X.to_pandas(), y.to_numpy())
+        assert _check_all_features_have_monotone_constraints(est, n_features=2) is False
+
+    def test_check_constraints_lgbm_dict_format(self):
+        """LightGBM dict-format constraints (covers line 333)."""
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame({"a": [1, 2, 3, 4, 5], "b": [5, 4, 3, 2, 1]})
+        y = pl.Series([0, 0, 1, 1, 1])
+        est = LGBMClassifier(n_estimators=2, verbose=-1)
+        est.fit(X.to_pandas(), y.to_numpy())
+        est.monotone_constraints = {"a": 1, "b": -1}  # force dict format
+        assert _check_all_features_have_monotone_constraints(est, n_features=2) is True
+
+    def test_check_constraints_lgbm_unknown_format(self):
+        """Unknown constraint type returns False (covers the safety-net branch)."""
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame({"a": [1, 2, 3, 4, 5], "b": [5, 4, 3, 2, 1]})
+        y = pl.Series([0, 0, 1, 1, 1])
+        est = LGBMClassifier(n_estimators=2, verbose=-1)
+        est.fit(X.to_pandas(), y.to_numpy())
+        est.monotone_constraints = "unexpected_format"  # neither list nor dict
+        assert _check_all_features_have_monotone_constraints(est, n_features=2) is False
+
+    # ------------------------------------------------------------------
+    # End-to-end grid search with LightGBM
+    # ------------------------------------------------------------------
+
+    def test_rule_grid_search_lgbm_end_to_end(self, lgbm_data):
+        """rule_grid_search runs end-to-end with a LGBMClassifier."""
+        from lightgbm import LGBMClassifier
+
+        X, y, _ = lgbm_data
+        est = LGBMClassifier(n_estimators=3, max_depth=2, verbose=-1, random_state=0)
+        result = rule_grid_search(est, X, y, scale_pos_weights=np.array([1.0, 2.0]))
+        assert isinstance(result, pl.DataFrame)
+        if result.height > 0:
+            assert "rule" in result.columns
 
 
 if __name__ == "__main__":

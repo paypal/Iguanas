@@ -68,7 +68,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    estimator: XGBClassifier
+    estimator: Any  # XGBClassifier, LGBMClassifier, or any sklearn-compatible tree classifier
     scale_pos_weights: np.ndarray | list[float] = Field(default_factory=lambda: np.array([1.0]))
     sample_weights_df: pl.DataFrame | None = None
     ranking_metric: str = "accuracy"
@@ -130,6 +130,8 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
             scale_pos_weights=self.scale_pos_weights,
             sample_weights_df=self.sample_weights_df,
         )
+        if rules_df.is_empty():
+            return self
         rules = rules_df["rule"].to_list()
         R, M = apply_and_filter_by_performance(
             X[self._feature_cols_],
@@ -138,6 +140,8 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
             metric_thresholds=self.metric_thresholds,
             ranking_metric=self.ranking_metric,
         )
+        if M.is_empty():
+            return self
         candidate_rules = M["rule"].to_list()
         importance = dict(zip(M["rule"], M[self.ranking_metric], strict=False))
         candidate_rules = filter_correlated_rules(
@@ -218,3 +222,41 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     def fit_predict(self, X: pl.DataFrame, y: pl.Series) -> pl.Series:
         """Fit pipeline and return binary predictions on the same data."""
         return self.fit(X, y).predict(X)
+
+    def export(self) -> dict:
+        """Export the fitted ruleset and feature columns as a JSON-serializable dict.
+
+        Returns
+        -------
+        dict
+            Dict with keys ``"ruleset"`` (str) and ``"feature_cols"`` (list[str]).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier has not been fitted.
+        """
+        self._check_is_fitted()
+        return {"ruleset": self._best_ruleset_, "feature_cols": self._feature_cols_}
+
+    @classmethod
+    def from_export(cls, data: dict) -> RulesetClassifier:
+        """Reconstruct a fitted classifier from an :meth:`export` dict.
+
+        The returned instance supports ``predict`` and ``predict_proba`` but
+        cannot be re-fitted without supplying an ``estimator``.
+
+        Parameters
+        ----------
+        data : dict
+            Dict produced by :meth:`export`.
+
+        Returns
+        -------
+        RulesetClassifier
+            Fitted instance with ``_best_ruleset_`` and ``_feature_cols_`` set.
+        """
+        instance = cls(estimator=None)
+        instance._feature_cols_ = data["feature_cols"]
+        instance._best_ruleset_ = data["ruleset"]
+        return instance
