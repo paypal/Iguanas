@@ -190,15 +190,10 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         return R[self._best_ruleset_]
 
     def predict_proba(self, X: pl.DataFrame) -> pl.Series:
-        """Predict rule-coverage probability for each sample.
+        """Predict probability using the combined ruleset.
 
-        Probability is a piecewise-linear function of the number of selected
-        rules that fire for each sample:
-
-        - 0 rules fired  → 0.0
-        - 1 rule fired   → 0.5
-        - all rules fired → 1.0
-        - between 1 and all: linearly interpolated in [0.5, 1.0]
+        - Ruleset fires  → 1.0
+        - Ruleset does not fire → 0.0
 
         Parameters
         ----------
@@ -208,7 +203,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         Returns
         -------
         pl.Series
-            Float64 series named "proba" with values in [0.0, 1.0].
+            Float64 series with values in {0.0, 1.0}.
         """
         self._check_is_fitted()
         if not self._best_ruleset_:

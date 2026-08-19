@@ -486,7 +486,10 @@ def _train_rules_for_scale(
         est = estimator_class(**estimator_params)
         if estimator_params.get("objective") != "binary:hinge":
             est.set_params(scale_pos_weight=scale_pos_weight)
-        est.fit(X_fit, y_train, sample_weight=weights_array)
+        try:
+            est.fit(X_fit, y_train, sample_weight=weights_array)
+        except Exception:
+            continue
 
         params = {
             "transformation": name,

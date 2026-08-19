@@ -99,8 +99,8 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
 
         rules = rule_grid_search(
             self.estimator,
-            X[self._feature_cols_].to_pandas(),
-            y.to_pandas(),
+            X[self._feature_cols_],
+            y,
             scale_pos_weights=self.scale_pos_weights,
             sample_weights_df=self.sample_weights_df,
         )
@@ -161,7 +161,7 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         Returns
         -------
         pl.Series
-            Float64 series named "proba" with values in {0.0, 1.0}.
+            Float64 series named after the best rule with values in {0.0, 1.0}.
         """
         return self.predict(X).cast(pl.Float64)
 

@@ -23,6 +23,7 @@ Complete reference for all Iguanas functions, organized by module.
    api/rule_classifier
    api/ruleset_classifier
    api/rule_monitoring
+   api/onnx_converter
 
 .. toctree::
    :maxdepth: 1

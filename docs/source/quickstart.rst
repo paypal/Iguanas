@@ -67,11 +67,11 @@ Understanding the API
 Iguanas is organized into modular components that work together in a typical workflow:
 
 **1. Rule Generation** (:doc:`api/rule_generation`)
-   Generate rules from your data using XGBoost decision trees:
+   Generate rules from your data using XGBoost or LightGBM decision trees:
    
-   - ``rule_grid_search()``: Parallelized grid search over weight transformations
-   - ``extract_rules()``: Extract rules from fitted XGBoost models
-   - ``extract_rule_by_max_gain()``: Extract single rule by maximum gain
+   - ``rule_grid_search()``: Parallelized grid search over weight transformations and scale_pos_weight values
+   - ``extract_rules()``: Extract rules from a fitted XGBoost/LightGBM model
+   - ``extract_rule_by_max_gain()``: Extract the highest-gain rule path from a single tree
 
 **2. Rule Evaluation** (:doc:`api/rule_evaluation`)
    Apply rules to data and evaluate their performance:
@@ -109,26 +109,65 @@ Iguanas is organized into modular components that work together in a typical wor
 **7. Rule Formatting** (:doc:`api/rule_formatting`)
    Transform and simplify rules:
    
-   - ``simplify_rule()``: Remove redundant conditions
-   - ``format_floats_as_integers()``: Convert float thresholds to integers
-   - ``add_missing_value_conditions()``: Handle missing values
-   - Decoder functions for encoded features
+   - ``simplify_rule()``: Remove redundant conditions (e.g. duplicate bounds on the same feature)
+   - ``rule_to_sql()``: Convert a rule expression to a SQL ``WHERE`` clause with an optional table alias
 
 **8. Utilities**
    Supporting utilities for rule generation:
    
-   - :doc:`api/weight_transformations`: Generate sample weight transformations
-   - :doc:`api/monotone_constraints`: Infer monotone constraints for XGBoost
+   - :doc:`api/weight_transformations`: Generate and select sample weight schedules (``generate_weights``, ``select_uncorrelated_weights``)
+   - :doc:`api/monotone_constraints`: Infer monotone constraints for XGBoost/LightGBM
 
+**9. Rule Cross-Validation** (:doc:`api/rule_cv`)
+   Validate rule stability across held-out folds:
+   
+   - ``validate_rules_cv()``: Evaluate rules on K folds and return per-metric mean, std, and min
+   - ``identify_unstable_rules()``: Flag rules with high cross-fold variance
 
+**10. Rule Explanation** (:doc:`api/rule_explanation`)
+   Interpret and explain individual rule predictions:
+   
+   - ``verbalize_rule()``: Convert a rule expression to plain English
+   - ``compute_coverage_overlap()``: Compute pairwise Jaccard overlap between rule predictions
+   - ``compute_counterfactual()``: Find the minimal feature changes to un-flag a sample
+
+**11. Rule Fairness** (:doc:`api/rule_fairness`)
+   Audit rule performance across demographic subgroups:
+   
+   - ``compute_subgroup_metrics()``: Per-subgroup precision, recall, and all other metrics
+   - ``compute_disparate_impact_ratio()``: Surface disparate impact relative to a reference group
+
+**12. Rule Monitoring** (:doc:`api/rule_monitoring`)
+   Track rule performance drift over time:
+   
+   - ``compare_rule_metrics()``: Compare per-rule metrics between a reference and current period; flag degraded rules
+
+**13. Rule Registry** (:doc:`api/rule_registry`)
+   Version-control rulesets across experiments:
+   
+   - ``RuleRegistry``: Save, load, delete, and compare named rule snapshots (JSON persistence)
+   - ``filter_rule_pairs_by_overlap()``: Filter rule pairs by Jaccard overlap range
+
+**14. Classifiers** (:doc:`api/rule_classifier`)
+   scikit-learn compatible end-to-end pipelines:
+   
+   - ``RuleClassifier``: Fit → generate → filter → select single best rule
+   - ``RulesetClassifier``: Fit → generate → filter → correlate → greedily combine rules
+
+**15. ONNX Export** (:doc:`api/onnx_converter`)
+   Deploy rules to any ONNX-compatible runtime:
+   
+   - ``rules_to_onnx()``: Convert rule strings to a portable ONNX binary classifier
 
 
 Next Steps
 ----------
 
-* Explore the :doc:`api/rule_generation` for generating rules from your data
-* Check out :doc:`api/rule_evaluation` for applying rules to data 
-* Check out :doc:`api/metrics` for evaluating the performance of rules
-* Learn about :doc:`api/rule_combination` for combining rules into ensembles
-* Dive into :doc:`api/rule_selection` for selecting the best rules based on performance metrics
+* Explore :doc:`api/rule_generation` for generating rules from your data
+* Check out :doc:`api/rule_evaluation` for applying and filtering rules
+* Check out :doc:`api/metrics` for evaluating rule performance
+* Learn about :doc:`api/rule_combination` for combining rules
+* Dive into :doc:`api/rule_selection` for deduplicating rule sets
+* See :doc:`api/rule_classifier` for the scikit-learn compatible pipeline
+* See :doc:`api/onnx_converter` for exporting rules to ONNX
 * Browse the :doc:`api_reference` for complete API documentation

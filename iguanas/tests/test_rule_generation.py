@@ -1343,10 +1343,10 @@ class TestPandasWeightsSequential:
 
 
 class TestFitExceptionSequential:
-    """Test to cover lines 562-564 - fit exception in sequential version."""
+    """Test that _train_rules_for_scale silently skips failed fits (consistent with parallel variant)."""
 
     def test_fit_exception_sequential(self, monkeypatch):
-        """Test lines 562-564: when fit raises exception in sequential processing."""
+        """When fit raises an exception, the combination is skipped and the search continues."""
         np.random.seed(42)
         X_train = pd.DataFrame(
             {
@@ -1359,7 +1359,6 @@ class TestFitExceptionSequential:
         estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
         scale_pos_weights = np.array([1.0, 2.0])
 
-        # Monkeypatch fit to raise exception on first call
         original_fit = XGBClassifier.fit
 
         def mock_fit(self, X, y, sample_weight=None):
@@ -1372,14 +1371,15 @@ class TestFitExceptionSequential:
 
         monkeypatch.setattr(XGBClassifier, "fit", mock_fit)
 
-        with pytest.raises(RuntimeError, match="Simulated fit failure in sequential"):
-            rule_grid_search_sequential(
-                estimator,
-                X_train,
-                y_train,
-                scale_pos_weights,
-                sample_weights_df=None,
-            )
+        # Should NOT raise — the failed fit is skipped and remaining combinations run
+        result = rule_grid_search_sequential(
+            estimator,
+            X_train,
+            y_train,
+            scale_pos_weights,
+            sample_weights_df=None,
+        )
+        assert isinstance(result, pl.DataFrame)
 
 
 class TestNonNumericInputRaises:
