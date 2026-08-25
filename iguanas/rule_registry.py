@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 import json
 from datetime import UTC, datetime
 from pathlib import Path
@@ -133,7 +134,7 @@ class RuleRegistry:
         self,
         name_a: str,
         name_b: str,
-        metric_cols: list[str] | None = None,
+        metric_cols: builtins.list[str] | None = None,
     ) -> pl.DataFrame:
         """Compare saved metrics of two snapshots side by side.
 

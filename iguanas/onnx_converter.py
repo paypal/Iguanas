@@ -64,7 +64,7 @@ def rules_to_onnx(
         raise ValueError("rules must not be empty")
     elif isinstance(rules, list) and not rules:
         raise ValueError("rules must not be empty")
-    elif not isinstance(rules, (str, list)):
+    elif not isinstance(rules, str | list):
         raise TypeError("rules must be a string or a list of strings")
 
     if isinstance(rules, str):
@@ -126,7 +126,7 @@ def rules_to_onnx(
 
 def _collect_features(node: ast.expr, feature_index: dict[str, int]) -> None:
     """First-pass traversal: register every X["col"] column name."""
-    if isinstance(node, ast.BinOp) and isinstance(node.op, (ast.BitAnd, ast.BitOr)):
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitAnd | ast.BitOr):
         _collect_features(node.left, feature_index)
         _collect_features(node.right, feature_index)
     elif isinstance(node, ast.Compare) and isinstance(node.left, ast.Subscript):
@@ -168,7 +168,7 @@ class _BuildCtx:
 
     def visit(self, node: ast.expr) -> str:
         """Emit ONNX nodes for *node* and return the output tensor name."""
-        if isinstance(node, ast.BinOp) and isinstance(node.op, (ast.BitAnd, ast.BitOr)):
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitAnd | ast.BitOr):
             return self._visit_binop(node)
         if isinstance(node, ast.Compare):
             return self._visit_compare(node)
@@ -186,9 +186,14 @@ class _BuildCtx:
         col = _subscript_col(node.left)
         op = node.ops[0]
         comparator = node.comparators[0]
-        if isinstance(comparator, ast.Constant):
+        if isinstance(comparator, ast.Constant) and isinstance(comparator.value, int | float):
             threshold = float(comparator.value)
-        elif isinstance(comparator, ast.UnaryOp) and isinstance(comparator.op, ast.USub) and isinstance(comparator.operand, ast.Constant):
+        elif (
+            isinstance(comparator, ast.UnaryOp)
+            and isinstance(comparator.op, ast.USub)
+            and isinstance(comparator.operand, ast.Constant)
+            and isinstance(comparator.operand.value, int | float)
+        ):
             threshold = -float(comparator.operand.value)
         else:
             raise ValueError(

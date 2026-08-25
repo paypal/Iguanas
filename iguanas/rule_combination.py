@@ -581,7 +581,7 @@ def combine_rules_a_star(
         # Evaluate metric
         test_R = pl.DataFrame({"test_rule": combined})
         test_metrics = compute_metrics(test_R, y, weights)
-        metric_value = test_metrics[metric_to_use].item(0)
+        metric_value = float(test_metrics[metric_to_use].item(0))
 
         combination_cache[rule_tuple] = metric_value
         return metric_value

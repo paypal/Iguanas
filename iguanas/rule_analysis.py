@@ -1,6 +1,7 @@
 import ast
 import re
 from collections import deque
+from typing import Any, cast
 
 import polars as pl
 
@@ -38,7 +39,7 @@ def parse_conditions(expr: str) -> dict:
         and ``"right"``. Leaf nodes are plain strings.
     """
     tree = ast.parse(_to_py(expr), mode="eval")
-    return _convert(tree.body)
+    return cast(dict, _convert(tree.body))
 
 
 def _convert(node):
@@ -56,7 +57,7 @@ def _convert(node):
     return ast.unparse(node)
 
 
-def parse_levels(expr: str) -> list[dict]:
+def parse_levels(expr: str) -> list[dict[str, Any] | list[dict[str, Any]]]:
     """Parse a boolean expression level by level using BFS.
 
     Assigns a hierarchical dot-notation index to each sub-expression so the
@@ -86,12 +87,12 @@ def parse_levels(expr: str) -> list[dict]:
     """
     tree = ast.parse(_to_py(expr), mode="eval")
 
-    levels = []
+    levels: list[dict[str, Any] | list[dict[str, Any]]] = []
     # queue items: (ast_node, parent_index_string)
     queue = deque([(tree.body, "")])
 
     while queue:
-        next_queue = deque()
+        next_queue: deque[tuple[ast.expr, str]] = deque()
         level_entries = []
 
         for node, parent_idx in queue:
@@ -112,7 +113,7 @@ def parse_levels(expr: str) -> list[dict]:
     return levels
 
 
-def rebuild_from_levels(levels: list[dict]) -> str:
+def rebuild_from_levels(levels: list[dict[str, Any] | list[dict[str, Any]]]) -> str:
     """Rebuild the original boolean expression from ``parse_levels`` output.
 
     Processes levels bottom-up: the deepest compound sub-expressions are

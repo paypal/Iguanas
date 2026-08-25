@@ -37,8 +37,10 @@ jobs:
     - name: Lint with ruff
       run: ruff check iguanas/
 
-    # - name: Type check with mypy
-    #   run: mypy iguanas/
+    - name: Type check with mypy
+      run: |
+        pip install mypy
+        mypy iguanas/
 
   test:
     runs-on: ${{ matrix.os }}

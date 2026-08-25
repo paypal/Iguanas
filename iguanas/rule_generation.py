@@ -106,7 +106,7 @@ def _get_monotone_constraints_dict(estimator: Any) -> dict[str, int]:
             }
         return dict(constraints_raw)  # type: ignore[arg-type]
     # XGBoost: already a dict
-    return constraints_raw  # type: ignore[return-value]
+    return constraints_raw  # type: ignore[return-value,no-any-return]
 
 
 # ---------------------------------------------------------------------------

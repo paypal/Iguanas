@@ -164,6 +164,12 @@ Track rule performance drift between a reference period and a current period:
 
 ## 🚀 Quick Start
 
+> [!IMPORTANT]
+> Iguanas expects clean, numeric data. Before passing data to any Iguanas function:
+> - **Impute missing values** — use [`sklearn.impute`](https://scikit-learn.org/stable/modules/impute.html), [`feature_engine.imputation`](https://feature-engine.trainindata.com/en/latest/user_guide/imputation/index.html), or [`gators.imputers`](https://paypal.github.io/gators/api/imputers.html)
+> - **Encode categorical features** — use [`sklearn.preprocessing`](https://scikit-learn.org/stable/modules/preprocessing.html), [`feature_engine.encoding`](https://feature-engine.trainindata.com/en/latest/user_guide/encoding/index.html), or [`gators.encoders`](https://paypal.github.io/gators/api/encoders.html)
+> - **Clean your data** — remove or correct invalid values, outliers, and duplicate rows before rule generation
+
 ```python
 import polars as pl
 import numpy as np
