@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import builtins
 import json
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 from pathlib import Path
 from typing import Any
 
@@ -72,7 +72,7 @@ class RuleRegistry:
             "rules": rules,
             "metrics": metrics.to_dicts() if metrics is not None else None,
             "metadata": metadata or {},
-            "saved_at": datetime.now(tz=UTC).isoformat(),
+            "saved_at": datetime.now(tz=timezone.utc).isoformat(),
         }
         if self._path is not None:
             self._dump_to_disk()
