@@ -70,7 +70,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -e ".[dev,onnx]"
+        pip install -e ".[dev,onnx,lightgbm]"
 
     - name: Run tests with coverage
       run: |
