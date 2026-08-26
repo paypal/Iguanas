@@ -1,8 +1,4 @@
 
-.. image:: _static/IGUANAS_LOGO.png
-   :align: center
-   :alt: Iguanas Logo
-
 .. toctree::
    :maxdepth: 2
    :caption: Getting Started
@@ -79,14 +75,14 @@ Quick Start
     rules_df = rule_grid_search_parallel_weights(
         estimator, X_train, y_train,
         scale_pos_weights=scale_pos_weights,
-        weights_train_vec=weights,
+        sample_weights_df=weights,
         n_jobs=-1,
     )
 
     # 4. Evaluate, filter, and deduplicate rules
     R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
         X_train, y_train, rules_df,
-        metrics_threshold=[
+        metric_thresholds=[
             {"name": "precision", "operator": ">=", "value": 0.6},
             {"name": "recall",    "operator": ">=", "value": 0.5},
         ],
@@ -98,15 +94,22 @@ Quick Start
 What Can Iguanas Do?
 ====================
 
-* ⚙️ :doc:`Rule Generation <api/rule_generation>` - Extract rules from XGBoost models with grid search
-* 📊 :doc:`Metrics <api/metrics>` - Precision, recall, F-beta, and weighted variants
-* 🔍 :doc:`Rule Evaluation <api/rule_evaluation>` - Evaluate, filter, and deduplicate rule sets
+* ⚙️ :doc:`Rule Generation <api/rule_generation>` - Extract rules from XGBoost/LightGBM models with grid search
+* 📊 :doc:`Metrics <api/metrics>` - Precision, recall, F-beta, MCC, and weighted variants
+* 🔍 :doc:`Rule Evaluation <api/rule_evaluation>` - Evaluate, filter, and deduplicate rule sets; lazy scoring via ``apply_rules_lazy``
+* 🔁 :doc:`Rule Cross-Validation <api/rule_cv>` - Validate rule stability across K folds (cv mean, std, min per metric)
 * 🔀 :doc:`Rule Combination <api/rule_combination>` - Combine rules with greedy, beam, and A* search
 * ✂️ :doc:`Rule Selection <api/rule_selection>` - Prune by feature overlap and correlation
 * 🔬 :doc:`Rule Analysis <api/rule_analysis>` - Inspect and report on rule structure
-* 🖊️ :doc:`Rule Formatting <api/rule_formatting>` - Simplify and clean rule expressions
+* 💬 :doc:`Rule Explanation <api/rule_explanation>` - Verbalize rules, compute coverage overlap, and generate counterfactual explanations
+* 🖊️ :doc:`Rule Formatting <api/rule_formatting>` - Simplify rules, export to SQL, and reverse encoded-feature rules (e.g. from gators) back to the original columns
+* ⚖️ :doc:`Rule Fairness <api/rule_fairness>` - Audit rule performance across demographic subgroups
+* 🗂️ :doc:`Rule Registry <api/rule_registry>` - Version-control rulesets and filter pairs by Jaccard overlap
+* 📈 :doc:`Rule Monitoring <api/rule_monitoring>` - Track per-rule metric drift between reference and current periods
+* 🤖 :doc:`Classifiers <api/rule_classifier>` - scikit-learn compatible ``RuleClassifier`` and ``RulesetClassifier``
+* 📦 :doc:`ONNX Export <api/onnx_converter>` - Convert rules to portable ONNX models for any runtime
 * 📐 :doc:`Monotone Constraints <api/monotone_constraints>` - Infer feature directionality
-* ⚖️ :doc:`Weight Transformations <api/weight_transformations>` - Generate sample weight schedules
+* 🔧 :doc:`Weight Transformations <api/weight_transformations>` - Generate and select sample weight schedules
 
 Use Cases
 =========

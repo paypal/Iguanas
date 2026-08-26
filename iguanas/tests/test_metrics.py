@@ -327,3 +327,36 @@ class TestComputeSingleMetric:
         weights = pl.Series([2.0, 1.0, 1.0, 1.0])
         result = compute_single_metric(combined, y, "accuracy", weights=weights)
         assert result == pytest.approx(1.0)
+
+    def test_mcc_no_weights(self):
+        # TP=2, FP=0, TN=2, FN=0 → MCC = (2*2-0*0)/sqrt(2*2*2*2) = 1.0
+        combined = pl.Series([True, True, False, False])
+        y = pl.Series([True, True, False, False])
+        result = compute_single_metric(combined, y, "mcc")
+        assert result == pytest.approx(1.0)
+
+    def test_mcc_with_weights(self):
+        combined = pl.Series([True, True, False, False])
+        y = pl.Series([True, True, False, False])
+        weights = pl.Series([1.0, 1.0, 1.0, 1.0])
+        result = compute_single_metric(combined, y, "mcc", weights=weights)
+        assert result == pytest.approx(1.0)
+
+    def test_mcc_zero_denom_returns_zero(self):
+        # All predictions positive, all targets positive → TN=FP=0 → denom=0
+        combined = pl.Series([True, True, True])
+        y = pl.Series([True, True, True])
+        result = compute_single_metric(combined, y, "mcc")
+        assert result == 0.0
+
+
+class TestComputeMetricsSeries:
+    def test_series_input_is_converted_to_frame(self):
+        """compute_metrics accepts a pl.Series (single rule) and converts it internally."""
+        y_pred = pl.Series("my_rule", [True, True, False, False])
+        y = pl.Series([True, False, True, False])
+        result = compute_metrics(y_pred, y)
+        assert result.shape[0] == 1
+        assert result["rule"][0] == "my_rule"
+        assert "precision" in result.columns
+        assert "recall" in result.columns

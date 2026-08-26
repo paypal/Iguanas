@@ -1,3 +1,6 @@
+from collections.abc import Callable
+from typing import Any
+
 import numpy as np
 import polars as pl
 
@@ -46,12 +49,16 @@ def _resolve(
     return pl.DataFrame({col_name: X - X.min()}), col_name, powers
 
 
-def _dispatch(fn, X: pl.Series | pl.DataFrame, **kwargs) -> pl.DataFrame | None:
+def _dispatch(
+    fn: Callable[..., pl.DataFrame], X: pl.Series | pl.DataFrame, **kwargs: Any
+) -> pl.DataFrame | None:
     """Handle pl.DataFrame input by applying fn per column and concatenating."""
     if not isinstance(X, pl.DataFrame):
         return None
     results = [fn(X[c], **kwargs) for c in X.columns]
-    return pl.concat([results[0]] + [r.drop("Baseline") for r in results[1:]], how="horizontal")
+    return pl.concat(
+        [results[0]] + [r.drop("Baseline") for r in results[1:]], how="horizontal_extend"
+    )
 
 
 def generate_increasing_weights(
@@ -161,7 +168,7 @@ def generate_weights(
 def select_uncorrelated_weights(
     sample_weights_df: pl.DataFrame,
     importance: dict[str, float],
-    target_len: int,
+    num_weights: int,
     min_corr: float = 0.01,
     max_corr: float = 0.99,
     step: float = 0.01,
@@ -173,7 +180,7 @@ def select_uncorrelated_weights(
     (discretised by ``step``) using binary search. For each candidate threshold
     it calls :func:`iguanas.rule_selection.filter_correlated_rules` with
     ``max_corr`` set to the candidate value and returns the first filtered list
-    whose length is ``>= target_len``.
+    whose length is ``>= num_weights``.
 
     Parameters
     ----------
@@ -181,7 +188,7 @@ def select_uncorrelated_weights(
         DataFrame containing candidate weight series (columns are weight names).
     importance : dict[str, float]
         Mapping from rule/weight name to importance score used by the filter.
-    target_len : int
+    num_weights : int
         Desired number of selected rules (must be non-negative).
     min_corr : float, default=0.01
         Minimum correlation threshold to consider (lower bound of search).
@@ -201,7 +208,7 @@ def select_uncorrelated_weights(
 
     Notes
     -----
-    If ``target_len`` is below the minimum achievable length at ``min_corr``,
+    If ``num_weights`` is below the minimum achievable length at ``min_corr``,
     the minimum result is returned. If it is above the maximum achievable length
     at ``max_corr``, the maximum result is returned. The search discretises
     thresholds as ``i * step`` where ``i`` ranges between ``round(min_corr/step)``
@@ -213,8 +220,8 @@ def select_uncorrelated_weights(
     >>> df = pl.DataFrame({"w1": [0.1, 0.2], "w2": [0.0, 0.3]})
     >>> selected, corr = select_uncorrelated_weights(df, {"w1": 1.0, "w2": 0.5}, 1)
     """
-    if target_len < 0:
-        raise ValueError("target_len must be non-negative")
+    if num_weights < 0:
+        raise ValueError("num_weights must be non-negative")
     if not 0 < min_corr < max_corr < 1.0:
         raise ValueError("min_corr and max_corr must satisfy 0 < min_corr < max_corr < 1.0")
     if step <= 0:
@@ -236,9 +243,9 @@ def select_uncorrelated_weights(
     min_len, min_filtered, min_corr_value = compute_filtered(min_step)
     max_len, max_filtered, max_corr_value = compute_filtered(max_step)
 
-    if target_len <= min_len:
+    if num_weights <= min_len:
         return min_filtered, min_corr_value
-    if target_len >= max_len:
+    if num_weights >= max_len:
         return max_filtered, max_corr_value
 
     lo = min_step
@@ -247,9 +254,9 @@ def select_uncorrelated_weights(
         mid = (lo + hi) // 2
         cur_len, cur_filtered, cur_corr_value = compute_filtered(mid)
 
-        if cur_len == target_len:
+        if cur_len == num_weights:
             return cur_filtered, cur_corr_value
-        if cur_len < target_len:
+        if cur_len < num_weights:
             lo = mid + 1
         else:
             hi = mid - 1

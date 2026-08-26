@@ -52,6 +52,14 @@ def compute_single_metric(
             else float(weights.filter(~y_bool & ~y_pred_bool).sum())
         )
         return (TP + TN) / (TP + TN + FP + FN) if (TP + TN + FP + FN) > 0 else 0.0
+    if metric == "mcc":
+        TN = (
+            float((~y_bool & ~y_pred_bool).sum())
+            if weights is None
+            else float(weights.filter(~y_bool & ~y_pred_bool).sum())
+        )
+        denom = ((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)) ** 0.5
+        return (TP * TN - FP * FN) / denom if denom > 0 else 0.0
     if metric.startswith("f"):
         beta = float(metric[1:])
         precision = TP / (TP + FP) if (TP + FP) > 0 else 0.0
@@ -60,7 +68,7 @@ def compute_single_metric(
         return (1 + beta**2) * precision * recall / denom if denom > 0 else 0.0
     raise ValueError(
         f"Unsupported metric '{metric}'. Must be 'precision', 'recall', "
-        f"'accuracy', or an F-beta score (f<number>)."
+        f"'accuracy', 'mcc', or an F-beta score (f<number>)."
     )
 
 
@@ -184,6 +192,24 @@ def compute_metrics(
             ).alias(f"f{b:g}")
             for b in betas
         ],
+        pl.when(
+            (pl.col("TP") + pl.col("FP"))
+            * (pl.col("TP") + pl.col("FN"))
+            * (pl.col("TN") + pl.col("FP"))
+            * (pl.col("TN") + pl.col("FN"))
+            == 0
+        )
+        .then(pl.lit(0.0))
+        .otherwise(
+            (pl.col("TP") * pl.col("TN") - pl.col("FP") * pl.col("FN")).cast(pl.Float64)
+            / (
+                (pl.col("TP") + pl.col("FP"))
+                * (pl.col("TP") + pl.col("FN"))
+                * (pl.col("TN") + pl.col("FP"))
+                * (pl.col("TN") + pl.col("FN"))
+            ).cast(pl.Float64).sqrt()
+        )
+        .alias("mcc"),
         # Number of rules
         (pl.col("rule").str.count_matches(r"\) \| \(") + 1).alias("num_rules"),
     ]
@@ -225,6 +251,24 @@ def compute_metrics(
                     ).alias(f"f{b:g}_weight")
                     for b in betas
                 ],
+                pl.when(
+                    (pl.col("TP_weight") + pl.col("FP_weight"))
+                    * (pl.col("TP_weight") + pl.col("FN_weight"))
+                    * (pl.col("TN_weight") + pl.col("FP_weight"))
+                    * (pl.col("TN_weight") + pl.col("FN_weight"))
+                    == 0
+                )
+                .then(pl.lit(0.0))
+                .otherwise(
+                    (pl.col("TP_weight") * pl.col("TN_weight") - pl.col("FP_weight") * pl.col("FN_weight")).cast(pl.Float64)
+                    / (
+                        (pl.col("TP_weight") + pl.col("FP_weight"))
+                        * (pl.col("TP_weight") + pl.col("FN_weight"))
+                        * (pl.col("TN_weight") + pl.col("FP_weight"))
+                        * (pl.col("TN_weight") + pl.col("FN_weight"))
+                    ).cast(pl.Float64).sqrt()
+                )
+                .alias("mcc_weight"),
             ]
         )
 

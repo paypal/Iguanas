@@ -80,8 +80,24 @@ Inspect and report on rule sets:
 - `rebuild_from_levels` - Reconstruct a rule string from a level representation
 
 ### 🖊️ Rule Formatting
-Clean up rule expressions for display or logging:
+Clean up rule expressions for display or logging, and reverse encoded-feature
+rules (e.g. from a gators preprocessing pipeline) back to the original columns:
 - `simplify_rule` - Simplify a rule expression by removing redundant conditions
+- `rule_to_sql` - Convert a rule expression to a SQL `WHERE` clause with an optional table alias
+- `format_floats_as_integers` - Convert float thresholds to integers for given columns
+- `add_missing_value_conditions` - Append an `is_null()` clause to conditions implicitly satisfied by an imputed value
+- `decode_string_imputation` - Convert an equality on a string-imputed placeholder into `is_null()`
+- `decode_numeric_encodings` - Reverse a numeric category encoding (WOE, count, ordinal, target, ...) back to category labels
+- `format_as_boolean_conditions` - Convert True/False-like condition values to Python booleans
+- `decode_onehot_encodings` - Reverse a one-hot encoding back to a categorical condition
+- `decode_null_indicators` - Convert null-indicator binary columns to `is_null()` conditions
+- `decode_discretized_bins` - Reverse a discretizer's bin index back to a threshold on the original column
+- `decode_scaled_thresholds` - Reverse a monotonic numeric scaling (standardisation, log1p, Box-Cox, ...) back to the original threshold
+- `quote_string_values` - Wrap bare (unquoted) condition values in double quotes
+- `round_thresholds` - Round numeric thresholds to a fixed number of decimal places
+- `drop_null_clauses` - Strip `is_null()` clauses added for always-imputed columns
+- `drop_not_null_conditions` - Drop standalone not-null conditions for given columns
+- `prettify_rules` - Apply an ordered list of rule-string transformations to a list of rules
 
 ### 📐 Monotone Constraints
 Infer feature directionality to guide rule generation:
@@ -94,8 +110,80 @@ Generate sample weight schedules to steer rule learning:
 - `generate_increasing_weights` - Weights that increase with feature value (power, log families)
 - `generate_decreasing_weights` - Weights that decrease with feature value (reciprocal families)
 - `generate_weights` - Generate both increasing and decreasing weight schedules in one call
+- `select_uncorrelated_weights` - Select a diverse subset of weight columns by searching for a correlation threshold that yields approximately `num_weights` uncorrelated columns
+
+### 🔁 Rule Cross-Validation
+Validate rule stability across held-out folds without re-generating rules:
+- `validate_rules_cv` - Evaluate rules across K folds and return per-metric mean, std, and min — flags overfitted rules by their high variance
+- `identify_unstable_rules` - Return the names of rules whose cross-validated metric variance exceeds a threshold
+
+### 💬 Rule Explanation
+Inspect and explain individual rule predictions:
+- `verbalize_rule` - Convert a rule expression to a plain-English sentence
+- `compute_coverage_overlap` - Compute pairwise Jaccard overlap between rule predictions
+- `compute_counterfactual` - Find the minimal feature changes needed to un-flag a sample
+
+### 🗂️ Rule Registry
+Store and compare named rule snapshots across experiments:
+- `RuleRegistry` - Save, load, delete, and list named rule snapshots (with optional JSON persistence)
+- `filter_rule_pairs_by_overlap` - Return rule pairs whose Jaccard overlap falls within a `[min_overlap, max_overlap]` range (e.g. disjoint pairs, near-redundant pairs, or everything in between)
+
+### 🚀 Deployment
+Export rules and score data efficiently at scale:
+- `apply_rules_lazy` - Evaluate rule expressions on a Polars `LazyFrame` for out-of-core scoring
+- `rules_to_onnx` - Convert rule strings to a portable ONNX binary classifier (servable by any ONNX-compatible runtime)
+
+### 📤 ONNX Export
+Convert any fitted rule or ruleset into a self-contained ONNX model (requires the `onnx` extra: `pip install "iguanas[onnx]"`):
+
+```python
+import numpy as np
+from iguanas.onnx_converter import rules_to_onnx
+import onnxruntime as ort
+
+# From a fitted RuleClassifier / RulesetClassifier
+export = clf.export()  # {"rule": "...", "feature_cols": [...]}
+model = rules_to_onnx(export["rule"])  # single rule string
+
+# Or pass a list of rules (OR'd together)
+model = rules_to_onnx(
+    ['(X["age"] >= 30.0) & (X["income"] > 50000.0)',
+     '(X["credit_score"] >= 720.0)'],
+    dtype="f32",  # or "f64" for double precision
+)
+
+# Score with onnxruntime
+sess = ort.InferenceSession(model.SerializeToString())
+X = np.array([[35.0, 60000.0, 700.0],
+              [25.0, 30000.0, 640.0]], dtype=np.float32)
+predictions = sess.run(None, {"X": X})[0]  # int64 array: [1, 0]
+
+# Feature ordering is stored in model metadata
+feature_map = {p.key: p.value for p in model.metadata_props}
+# {"feature_0": "age", "feature_1": "income", "feature_2": "credit_score"}
+```
+
+The exported model has:
+- **Input** `X`: `[N, num_features]` tensor (float32 or float64)
+- **Output** `prediction`: `[N]` int64 tensor (0 or 1)
+- **Metadata**: feature-name-to-column-index mapping in `metadata_props`
+
+### ⚖️ Fairness
+Audit rule performance across demographic subgroups:
+- `compute_subgroup_metrics` - Compute precision, recall, and all other metrics broken down by a protected attribute column
+- `compute_disparate_impact_ratio` - Compute the ratio of positive prediction rates between subgroups to surface disparate impact
+
+### 📈 Rule Monitoring
+Track rule performance drift between a reference period and a current period:
+- `compare_rule_metrics` - Compare per-rule metrics between two `compute_metrics` outputs and flag rules that have degraded beyond optional thresholds
 
 ## 🚀 Quick Start
+
+> [!IMPORTANT]
+> Iguanas expects clean, numeric data. Before passing data to any Iguanas function:
+> - **Impute missing values** — use [`sklearn.impute`](https://scikit-learn.org/stable/modules/impute.html), [`feature_engine.imputation`](https://feature-engine.trainindata.com/en/latest/user_guide/imputation/index.html), or [`gators.imputers`](https://paypal.github.io/gators/api/imputers.html)
+> - **Encode categorical features** — use [`sklearn.preprocessing`](https://scikit-learn.org/stable/modules/preprocessing.html), [`feature_engine.encoding`](https://feature-engine.trainindata.com/en/latest/user_guide/encoding/index.html), or [`gators.encoders`](https://paypal.github.io/gators/api/encoders.html)
+> - **Clean your data** — remove or correct invalid values, outliers, and duplicate rows before rule generation
 
 ```python
 import polars as pl
@@ -123,7 +211,7 @@ scale_pos_weights = np.logspace(0, 1, 5)
 rules_df = rule_grid_search_parallel_weights(
     estimator, X_train, y_train,
     scale_pos_weights=scale_pos_weights,
-    weights_train_vec=weights,
+    sample_weights_df=weights,
     n_jobs=-1,
 )
 

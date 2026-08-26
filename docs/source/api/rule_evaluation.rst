@@ -12,6 +12,11 @@ apply_rules
 
 .. autofunction:: apply_rules
 
+apply_rules_lazy
+----------------
+
+.. autofunction:: apply_rules_lazy
+
 apply_and_filter_by_performance
 --------------------------------
 

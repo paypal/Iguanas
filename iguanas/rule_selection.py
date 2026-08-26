@@ -141,7 +141,7 @@ def filter_rules_by_feature_overlap(
 
 
 def filter_correlated_rules(
-    R: pl.DataFrame, importance: dict, max_corr: float = 0.95, use_abs: bool = True
+    R: pl.DataFrame, importance: dict[str, float], max_corr: float = 0.95, use_abs: bool = True
 ) -> list[str]:
     """Filter highly correlated columns, keeping only the most important.
 
