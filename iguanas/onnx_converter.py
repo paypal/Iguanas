@@ -16,6 +16,10 @@ _DTYPE_MAP: dict[str, tuple[int, type]] = {
 # Equal=19). Kept at 21 (rather than the latest schema revision) since that is
 # the newest opset officially released and supported by onnxruntime.
 _OPSET = 21
+# IR version paired with opset 21 (onnx 1.16.x). Pinned explicitly so the
+# model's IR version doesn't drift with whichever onnx package is installed
+# and outrun what onnxruntime supports.
+_IR_VERSION = 10
 
 _CMP_OPS: dict[type, str] = {
     ast.GtE: "GreaterOrEqual",
@@ -110,7 +114,9 @@ def rules_to_onnx(
         initializer=ctx.initializers,
     )
 
-    model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", _OPSET)])
+    model = helper.make_model(
+        graph, opset_imports=[helper.make_opsetid("", _OPSET)], ir_version=_IR_VERSION
+    )
 
     for feat_name, idx in feature_index.items():
         entry = model.metadata_props.add()
