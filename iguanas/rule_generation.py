@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -104,9 +104,9 @@ def _get_monotone_constraints_dict(estimator: Any) -> dict[str, int]:
                 for name, c in zip(feat_names, constraints_raw, strict=False)
                 if int(c) != 0
             }
-        return dict(constraints_raw)  # type: ignore[arg-type]
+        return cast(dict[str, int], dict(constraints_raw))
     # XGBoost: already a dict
-    return constraints_raw  # type: ignore[return-value,no-any-return]
+    return cast(dict[str, int], constraints_raw)
 
 
 # ---------------------------------------------------------------------------
@@ -140,7 +140,7 @@ def extract_rule_by_max_gain(tree_X: pd.DataFrame) -> str:
 
     # Find best leaf by gain
     best_idx = leaves["Gain"].idxmax()
-    best_leaf_node = int(leaves.loc[best_idx, "Node"])  # type: ignore
+    best_leaf_node = int(leaves.loc[best_idx, "Node"])
 
     # Index by ID for O(1) lookups
     tree_X = tree_X.set_index("ID")
@@ -265,7 +265,7 @@ def extract_rule_with_monotone_constraints(
 def extract_rules(
     estimator: XGBClassifier,
     all_features_constrained: bool,
-    **kwargs,
+    **kwargs: Any,
 ) -> pd.DataFrame:
     """Generate rules extracted from XGBoost or LightGBM trees.
 
@@ -401,8 +401,8 @@ def _train_rules_for_weight_transformation(
         List of DataFrames with extracted rules
     """
     rules_dfs = []
-    transformation = weights.name if hasattr(weights, "name") else "Baseline"  # type: ignore
-    weights_array = weights.values if hasattr(weights, "values") else weights  # type: ignore
+    transformation = weights.name if hasattr(weights, "name") else "Baseline"
+    weights_array = weights.values if hasattr(weights, "values") else weights
 
     # Reconstruct DataFrame from numpy + names so XGBoost preserves feature names
     # in the booster (needed for monotone-constraint extraction and readable rules).

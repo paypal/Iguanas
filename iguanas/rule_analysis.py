@@ -23,7 +23,7 @@ def _node_to_str(node: ast.AST) -> str:
     return re.sub(r"\sand\s", " & ", re.sub(r"\sor\s", " | ", s))
 
 
-def parse_conditions(expr: str) -> dict:
+def parse_conditions(expr: str) -> dict[str, Any]:
     """Parse a boolean expression string into a nested dict tree.
 
     Parameters
@@ -39,10 +39,10 @@ def parse_conditions(expr: str) -> dict:
         and ``"right"``. Leaf nodes are plain strings.
     """
     tree = ast.parse(_to_py(expr), mode="eval")
-    return cast(dict, _convert(tree.body))
+    return cast(dict[str, Any], _convert(tree.body))
 
 
-def _convert(node):
+def _convert(node: ast.AST) -> Any:
     if isinstance(node, ast.BoolOp):
         op = "&" if isinstance(node.op, ast.And) else "|"
         values = [_convert(v) for v in node.values]

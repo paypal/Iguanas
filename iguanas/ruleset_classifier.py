@@ -16,7 +16,7 @@ from .rule_selection import filter_correlated_rules
 _NUMERIC_DTYPES = (pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.Float32, pl.Float64)
 
 
-class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
+class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):  # type: ignore[misc]
     """End-to-end rule-based classification pipeline.
 
     The best ruleset is selected through the following steps:
@@ -217,7 +217,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         """Fit pipeline and return binary predictions on the same data."""
         return self.fit(X, y).predict(X)
 
-    def export(self) -> dict:
+    def export(self) -> dict[str, Any]:
         """Export the fitted ruleset and feature columns as a JSON-serializable dict.
 
         Returns
@@ -234,7 +234,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         return {"ruleset": self._best_ruleset_, "feature_cols": self._feature_cols_}
 
     @classmethod
-    def from_export(cls, data: dict) -> RulesetClassifier:
+    def from_export(cls, data: dict[str, Any]) -> RulesetClassifier:
         """Reconstruct a fitted classifier from an :meth:`export` dict.
 
         The returned instance supports ``predict`` and ``predict_proba`` but

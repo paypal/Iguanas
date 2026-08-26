@@ -42,7 +42,7 @@ def verbalize_rule(rule: str) -> str:
     'score is at least 0.8 OR flag is equal to 1'
     """
 
-    def _cond_to_words(m: re.Match) -> str:
+    def _cond_to_words(m: re.Match[str]) -> str:
         feature, op, val = m.group(1), m.group(2), m.group(3).strip()
         op_word = _OP_TO_WORDS.get(op, op)
         return f"{feature} is {op_word} {val}"

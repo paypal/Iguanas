@@ -29,7 +29,7 @@ def _validate_metric_thresholds(
     return v
 
 
-class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
+class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):  # type: ignore[misc]
     """Rule-based classifier that selects the single best rule.
 
     The best rule is selected through the following steps:
@@ -169,7 +169,7 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         """Fit classifier and return binary predictions on the same data."""
         return self.fit(X, y).predict(X)
 
-    def export(self) -> dict:
+    def export(self) -> dict[str, Any]:
         """Export the fitted rule and feature columns as a JSON-serializable dict.
 
         Returns
@@ -186,7 +186,7 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         return {"rule": self._best_rule_, "feature_cols": self._feature_cols_}
 
     @classmethod
-    def from_export(cls, data: dict) -> RuleClassifier:
+    def from_export(cls, data: dict[str, Any]) -> RuleClassifier:
         """Reconstruct a fitted classifier from an :meth:`export` dict.
 
         The returned instance supports ``predict`` and ``predict_proba`` but

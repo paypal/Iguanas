@@ -1,4 +1,4 @@
-from typing import cast
+from typing import Any, Callable
 
 import numpy as np
 import polars as pl
@@ -48,14 +48,15 @@ def _resolve(
     return pl.DataFrame({col_name: X - X.min()}), col_name, powers
 
 
-def _dispatch(fn, X: pl.Series | pl.DataFrame, **kwargs) -> pl.DataFrame | None:
+def _dispatch(
+    fn: Callable[..., pl.DataFrame], X: pl.Series | pl.DataFrame, **kwargs: Any
+) -> pl.DataFrame | None:
     """Handle pl.DataFrame input by applying fn per column and concatenating."""
     if not isinstance(X, pl.DataFrame):
         return None
     results = [fn(X[c], **kwargs) for c in X.columns]
-    return cast(
-        pl.DataFrame,
-        pl.concat([results[0]] + [r.drop("Baseline") for r in results[1:]], how="horizontal_extend"),
+    return pl.concat(
+        [results[0]] + [r.drop("Baseline") for r in results[1:]], how="horizontal_extend"
     )
 
 
