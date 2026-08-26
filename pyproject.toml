@@ -60,7 +60,7 @@ lightgbm = [
     "lightgbm>=4.0.0",
 ]
 onnx = [
-    "onnx>=1.14.0",
+    "onnx>=1.14.0,<1.19",
     "onnxruntime>=1.16.0",
 ]
 all = ["iguanas[dev,notebook,lightgbm,onnx]"]
