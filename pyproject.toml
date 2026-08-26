@@ -60,8 +60,8 @@ lightgbm = [
     "lightgbm>=4.0.0",
 ]
 onnx = [
-    "onnx>=1.14.0,<1.19",
-    "onnxruntime>=1.16.0",
+    "onnx>=1.16.0",  # 1.16.0 is the first version that defines opset 21 (used by onnx_converter.py)
+    "onnxruntime>=1.18.0",  # 1.18.0 is the first version that officially supports opset 21
 ]
 all = ["iguanas[dev,notebook,lightgbm,onnx]"]
 

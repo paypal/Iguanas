@@ -13,8 +13,9 @@ _DTYPE_MAP: dict[str, tuple[int, type]] = {
 }
 
 # Minimum opset that covers all operators used (GreaterOrEqual/LessOrEqual=16,
-# Equal=19, Cast/Squeeze=25).
-_OPSET = 25
+# Equal=19). Kept at 21 (rather than the latest schema revision) since that is
+# the newest opset officially released and supported by onnxruntime.
+_OPSET = 21
 
 _CMP_OPS: dict[type, str] = {
     ast.GtE: "GreaterOrEqual",
