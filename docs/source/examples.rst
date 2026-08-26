@@ -33,3 +33,7 @@ and rare category encoding.
 * With feature engineering, the best F1 score from rules done on engineered features is 0.78:
 
 :doc:`View Notebook <examples/titanic_survival_example_with_preprocessing>`
+
+* With feature engineering and ONNX export, the best F1 score from rules done on engineered features is 0.78:
+
+:doc:`View Notebook <examples/titanic_survival_example_with_preprocessing_with_onnx_model>`

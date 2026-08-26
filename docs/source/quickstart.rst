@@ -107,10 +107,18 @@ Iguanas is organized into modular components that work together in a typical wor
    - ``generate_rule_performance_report()``: Metrics at rule, component, and condition levels
 
 **7. Rule Formatting** (:doc:`api/rule_formatting`)
-   Transform and simplify rules:
-   
+   Transform and simplify rules, and reverse encoded-feature rules (e.g. from a
+   gators preprocessing pipeline) back to the original columns:
+
    - ``simplify_rule()``: Remove redundant conditions (e.g. duplicate bounds on the same feature)
    - ``rule_to_sql()``: Convert a rule expression to a SQL ``WHERE`` clause with an optional table alias
+   - ``decode_numeric_encodings()``, ``decode_onehot_encodings()``, ``decode_string_imputation()``,
+     ``decode_discretized_bins()``, ``decode_scaled_thresholds()``, ``decode_null_indicators()``: Reverse
+     encoder/imputer/discretizer/scaler outputs back to conditions on the original columns
+   - ``add_missing_value_conditions()``, ``format_floats_as_integers()``, ``format_as_boolean_conditions()``,
+     ``quote_string_values()``, ``round_thresholds()``: Normalise condition values for readability
+   - ``drop_null_clauses()``, ``drop_not_null_conditions()``: Remove redundant is-null clauses
+   - ``prettify_rules()``: Chain any of the above into a single rule-cleanup pipeline
 
 **8. Utilities**
    Supporting utilities for rule generation:

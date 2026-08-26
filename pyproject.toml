@@ -59,7 +59,11 @@ notebook = [
 lightgbm = [
     "lightgbm>=4.0.0",
 ]
-all = ["iguanas[dev,notebook,lightgbm]"]
+onnx = [
+    "onnx>=1.14.0",
+    "onnxruntime>=1.16.0",
+]
+all = ["iguanas[dev,notebook,lightgbm,onnx]"]
 
 [project.urls]
 Homepage = "https://github.com/paypal/iguanas"

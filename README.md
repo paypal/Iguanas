@@ -80,9 +80,24 @@ Inspect and report on rule sets:
 - `rebuild_from_levels` - Reconstruct a rule string from a level representation
 
 ### 🖊️ Rule Formatting
-Clean up rule expressions for display or logging:
+Clean up rule expressions for display or logging, and reverse encoded-feature
+rules (e.g. from a gators preprocessing pipeline) back to the original columns:
 - `simplify_rule` - Simplify a rule expression by removing redundant conditions
 - `rule_to_sql` - Convert a rule expression to a SQL `WHERE` clause with an optional table alias
+- `format_floats_as_integers` - Convert float thresholds to integers for given columns
+- `add_missing_value_conditions` - Append an `is_null()` clause to conditions implicitly satisfied by an imputed value
+- `decode_string_imputation` - Convert an equality on a string-imputed placeholder into `is_null()`
+- `decode_numeric_encodings` - Reverse a numeric category encoding (WOE, count, ordinal, target, ...) back to category labels
+- `format_as_boolean_conditions` - Convert True/False-like condition values to Python booleans
+- `decode_onehot_encodings` - Reverse a one-hot encoding back to a categorical condition
+- `decode_null_indicators` - Convert null-indicator binary columns to `is_null()` conditions
+- `decode_discretized_bins` - Reverse a discretizer's bin index back to a threshold on the original column
+- `decode_scaled_thresholds` - Reverse a monotonic numeric scaling (standardisation, log1p, Box-Cox, ...) back to the original threshold
+- `quote_string_values` - Wrap bare (unquoted) condition values in double quotes
+- `round_thresholds` - Round numeric thresholds to a fixed number of decimal places
+- `drop_null_clauses` - Strip `is_null()` clauses added for always-imputed columns
+- `drop_not_null_conditions` - Drop standalone not-null conditions for given columns
+- `prettify_rules` - Apply an ordered list of rule-string transformations to a list of rules
 
 ### 📐 Monotone Constraints
 Infer feature directionality to guide rule generation:
@@ -119,7 +134,7 @@ Export rules and score data efficiently at scale:
 - `rules_to_onnx` - Convert rule strings to a portable ONNX binary classifier (servable by any ONNX-compatible runtime)
 
 ### 📤 ONNX Export
-Convert any fitted rule or ruleset into a self-contained ONNX model:
+Convert any fitted rule or ruleset into a self-contained ONNX model (requires the `onnx` extra: `pip install "iguanas[onnx]"`):
 
 ```python
 import numpy as np

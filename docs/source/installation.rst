@@ -72,12 +72,22 @@ Notebook extras:
 * **ipykernel** - For running Jupyter kernels
 * **jupyter** - For interactive notebook development
 
+LightGBM extras:
+
+* **lightgbm** - For rule generation using LightGBM instead of XGBoost
+
+ONNX extras:
+
+* **onnx** - For converting fitted rules/rulesets to a portable ONNX model (``rules_to_onnx``)
+* **onnxruntime** - For scoring exported ONNX models
+
 Install optional extras from source (editable):
 
 .. code-block:: bash
 
     pip install -e ".[dev]"
     pip install -e ".[notebook]"
+    pip install -e ".[onnx]"
     pip install -e ".[all]"
 
 Install optional extras from PyPI:
@@ -86,4 +96,5 @@ Install optional extras from PyPI:
 
     pip install "iguanas[dev]"
     pip install "iguanas[notebook]"
+    pip install "iguanas[onnx]"
     pip install "iguanas[all]"

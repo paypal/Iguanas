@@ -102,7 +102,7 @@ What Can Iguanas Do?
 * ✂️ :doc:`Rule Selection <api/rule_selection>` - Prune by feature overlap and correlation
 * 🔬 :doc:`Rule Analysis <api/rule_analysis>` - Inspect and report on rule structure
 * 💬 :doc:`Rule Explanation <api/rule_explanation>` - Verbalize rules, compute coverage overlap, and generate counterfactual explanations
-* 🖊️ :doc:`Rule Formatting <api/rule_formatting>` - Simplify rules and export to SQL
+* 🖊️ :doc:`Rule Formatting <api/rule_formatting>` - Simplify rules, export to SQL, and reverse encoded-feature rules (e.g. from gators) back to the original columns
 * ⚖️ :doc:`Rule Fairness <api/rule_fairness>` - Audit rule performance across demographic subgroups
 * 🗂️ :doc:`Rule Registry <api/rule_registry>` - Version-control rulesets and filter pairs by Jaccard overlap
 * 📈 :doc:`Rule Monitoring <api/rule_monitoring>` - Track per-rule metric drift between reference and current periods
