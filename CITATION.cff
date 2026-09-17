@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Iguanas: A Python library for generating, evaluating and selecting interpretable decision rules"
+abstract: >-
+  Iguanas is a Python library for building rule-based classifiers. It covers
+  rule generation from gradient-boosted tree decision paths, rule evaluation
+  and filtering, rule-set composition under user-specified constraints, and
+  export to ONNX for deployment.
+type: software
+license: Apache-2.0
+repository-code: "https://github.com/paypal/Iguanas"
+url: "https://paypal.github.io/Iguanas/"
+version: 1.3.1
+authors:
+  - family-names: Poli
+    given-names: Charles
+    affiliation: "PayPal, Inc."
+    email: cpoli@paypal.com
+  - family-names: Laidler
+    given-names: James
+  - family-names: Seligar
+    given-names: Shreekanthadatta
+    affiliation: "PayPal, Inc."
+keywords:
+  - interpretable machine learning
+  - rule-based classification
+  - imbalanced classification
+  - python
+  - polars
