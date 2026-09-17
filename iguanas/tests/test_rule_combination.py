@@ -1,12 +1,17 @@
+import itertools
+import random
+
 import pytest
 import polars as pl
 
+from iguanas.metrics import compute_single_metric
 from iguanas.rule_combination import (
     combine_rules_full_search,
     combine_rules_cumulative,
     combine_rules_greedy,
     combine_rules_beam_search,
     combine_rules_a_star,
+    combine_rules_budgeted,
 )
 
 
@@ -936,7 +941,7 @@ class TestCombineRulesAStar:
         R = pl.DataFrame({"rule_A": [True, False]})
         y = pl.Series("target", [True, False])
 
-        with pytest.raises(ValueError, match="Metric .* not found"):
+        with pytest.raises(ValueError, match="Unsupported metric"):
             combine_rules_a_star(R, y, metric="nonexistent_metric")
 
     def test_result_columns_are_boolean(self):
@@ -1330,3 +1335,325 @@ class TestCombineRulesAStar:
                 R, y, metric=metric_name, max_rules=2, operator="or", return_top_k=3
             )
             assert result.shape[1] >= 1
+
+
+class TestCombineRulesBudgeted:
+    """Budgeted maximum coverage: maximise positives caught within an alert budget."""
+
+    @staticmethod
+    def _problem():
+        """1000 rows, 50 positives. Three disjoint precise rules plus a broad one."""
+        n = 1000
+
+        def col(indices):
+            v = [False] * n
+            for i in indices:
+                v[i] = True
+            return v
+
+        y = pl.Series("y", [True] * 50 + [False] * 950)
+        R = pl.DataFrame(
+            {
+                "r1": col(list(range(0, 15)) + list(range(50, 55))),
+                "r2": col(list(range(15, 30)) + list(range(55, 60))),
+                "r3": col(list(range(30, 45)) + list(range(60, 65))),
+                "broad": col(list(range(0, 600))),
+            }
+        )
+        return R, y
+
+    def test_stacks_complementary_rules_within_budget(self):
+        R, y = self._problem()
+        out = combine_rules_budgeted(R, y, max_alert_rate=0.06, max_rules=3)
+        fired = out.to_series(0)
+
+        assert out.columns == ["(r1) | (r2) | (r3)"]
+        assert fired.sum() / len(fired) <= 0.06
+        assert (y & fired).sum() / y.sum() == pytest.approx(0.9)
+
+    def test_never_exceeds_the_budget(self):
+        R, y = self._problem()
+        for budget in (0.005, 0.02, 0.04, 0.06, 0.5):
+            out = combine_rules_budgeted(R, y, max_alert_rate=budget, max_rules=4)
+            if out.is_empty():
+                continue
+            fired = out.to_series(0)
+            assert fired.sum() / len(fired) <= budget + 1e-12
+
+    def test_rejects_a_broad_rule_that_would_breach_the_budget(self):
+        R, y = self._problem()
+        out = combine_rules_budgeted(R, y, max_alert_rate=0.06, max_rules=4)
+        assert "broad" not in out.columns[0]
+
+    def test_a_looser_budget_never_catches_fewer_positives(self):
+        R, y = self._problem()
+        caught = []
+        for budget in (0.02, 0.04, 0.06):
+            out = combine_rules_budgeted(R, y, max_alert_rate=budget, max_rules=4)
+            fired = out.to_series(0)
+            caught.append((y & fired).sum())
+        assert caught == sorted(caught)
+
+    def test_returns_empty_when_nothing_fits(self):
+        R, y = self._problem()
+        assert combine_rules_budgeted(R, y, max_alert_rate=0.001).is_empty()
+
+    def test_respects_max_rules(self):
+        R, y = self._problem()
+        out = combine_rules_budgeted(R, y, max_alert_rate=0.5, max_rules=2)
+        assert out.columns[0].count("|") + 1 <= 2
+
+    def test_weighted_budget_counts_weight_not_rows(self):
+        y = pl.Series("y", [True, True, False, False])
+        R = pl.DataFrame({"cheap": [True, False, False, False]})
+        weights = pl.Series("w", [1.0, 1.0, 1.0, 97.0])
+
+        # 'cheap' covers 1 of 100 total weight, so it fits a 5% weighted budget.
+        out = combine_rules_budgeted(R, y, max_alert_rate=0.05, weights=weights)
+        assert out.columns == ["cheap"]
+
+    @pytest.mark.parametrize("bad", [0.0, -0.1, 1.5])
+    def test_invalid_budget_raises(self, bad):
+        R, y = self._problem()
+        with pytest.raises(ValueError, match="max_alert_rate"):
+            combine_rules_budgeted(R, y, max_alert_rate=bad)
+
+    def test_empty_rules_raises(self):
+        with pytest.raises(ValueError, match="rules list cannot be empty"):
+            combine_rules_budgeted(pl.DataFrame(), pl.Series("y", [True]), 0.5)
+
+
+def _brute_force_best(R, y, metric, max_rules, operator):
+    """Exhaustively score every rule subset up to max_rules and return the best."""
+    cols = R.columns
+    best = float("-inf")
+    for size in range(1, max_rules + 1):
+        for subset in itertools.combinations(cols, size):
+            combined = R[subset[0]]
+            for name in subset[1:]:
+                combined = combined | R[name] if operator == "or" else combined & R[name]
+            best = max(best, compute_single_metric(combined, y, metric))
+    return best
+
+
+def _random_problem(seed, n_rows=60, n_rules=7):
+    rng = random.Random(seed)
+    R = pl.DataFrame(
+        {
+            f"rule_{i}": [rng.random() < rng.uniform(0.1, 0.6) for _ in range(n_rows)]
+            for i in range(n_rules)
+        }
+    )
+    y = pl.Series("target", [rng.random() < 0.3 for _ in range(n_rows)])
+    return R, y
+
+
+class TestAStarOptimality:
+    """The branch-and-bound must match exhaustive enumeration exactly."""
+
+    @pytest.mark.parametrize("seed", range(12))
+    @pytest.mark.parametrize("metric", ["f1", "precision", "recall", "accuracy", "f0.5"])
+    @pytest.mark.parametrize("operator", ["or", "and"])
+    def test_matches_exhaustive_search(self, seed, metric, operator):
+        R, y = _random_problem(seed)
+        if y.sum() == 0 or y.sum() == len(y):
+            pytest.skip("degenerate target")
+
+        expected = _brute_force_best(R, y, metric, max_rules=3, operator=operator)
+        result = combine_rules_a_star(
+            R, y, metric=metric, max_rules=3, operator=operator, return_top_k=1
+        )
+        actual = compute_single_metric(result.to_series(0), y, metric)
+
+        assert actual == pytest.approx(expected, abs=1e-12)
+
+    def test_top_k_is_the_true_top_k(self):
+        R, y = _random_problem(seed=99)
+        max_rules, k = 3, 5
+
+        scored = []
+        for size in range(1, max_rules + 1):
+            for subset in itertools.combinations(R.columns, size):
+                combined = R[subset[0]]
+                for name in subset[1:]:
+                    combined = combined | R[name]
+                scored.append(compute_single_metric(combined, y, "f1"))
+        expected = sorted(scored, reverse=True)[:k]
+
+        result = combine_rules_a_star(R, y, metric="f1", max_rules=max_rules, return_top_k=k)
+        actual = [compute_single_metric(result.to_series(i), y, "f1") for i in range(k)]
+
+        assert actual == pytest.approx(expected, abs=1e-12)
+
+    def test_recovers_optimum_that_needs_a_worse_intermediate(self):
+        """Regression: the optimum is only reachable via a non-improving parent.
+
+        Under OR, adding a rule dilutes precision before a later rule restores
+        it. Hill-climbing (the pre-v1.4 ``min_improvement=0.0`` default) cannot
+        cross that valley; exact search must.
+        """
+        R = pl.DataFrame(
+            {
+                "a": [True, True, False, False, False, False],
+                "b": [False, False, True, True, True, False],
+                "c": [False, False, False, False, False, True],
+            }
+        )
+        y = pl.Series("target", [True, True, False, False, False, True])
+
+        expected = _brute_force_best(R, y, "f1", max_rules=3, operator="or")
+        exact = combine_rules_a_star(R, y, metric="f1", max_rules=3, return_top_k=1)
+        assert compute_single_metric(exact.to_series(0), y, "f1") == pytest.approx(expected)
+
+        hill_climb = combine_rules_a_star(
+            R, y, metric="f1", max_rules=3, return_top_k=1, min_improvement=0.0
+        )
+        assert compute_single_metric(hill_climb.to_series(0), y, "f1") <= expected
+
+    def test_bound_prunes_and_reports_exactness(self):
+        R, y = _random_problem(seed=7, n_rules=9)
+        _, diagnostics = combine_rules_a_star(
+            R, y, metric="f1", max_rules=4, return_top_k=1, return_diagnostics=True
+        )
+
+        assert diagnostics["exact"] is True
+        assert diagnostics["bound_is_tight"] is True
+        assert diagnostics["nodes_pruned"] > 0
+        assert diagnostics["nodes_expanded"] < 2**9
+
+    def test_min_improvement_is_reported_as_inexact(self):
+        R, y = _random_problem(seed=3)
+        _, diagnostics = combine_rules_a_star(
+            R, y, metric="f1", min_improvement=0.01, return_diagnostics=True
+        )
+        assert diagnostics["exact"] is False
+
+    def test_mcc_has_no_tight_bound_but_stays_exact(self):
+        R, y = _random_problem(seed=11, n_rules=5)
+        result, diagnostics = combine_rules_a_star(
+            R, y, metric="mcc", max_rules=2, return_top_k=1, return_diagnostics=True
+        )
+        expected = _brute_force_best(R, y, "mcc", max_rules=2, operator="or")
+
+        assert diagnostics["bound_is_tight"] is False
+        assert diagnostics["exact"] is True
+        assert compute_single_metric(result.to_series(0), y, "mcc") == pytest.approx(expected)
+
+
+class TestAStarAlertBudget:
+    """Exact budgeted search: the counterpart of the greedy approximation."""
+
+    @staticmethod
+    def _brute_force_budgeted(R, y, metric, max_rules, budget):
+        """Best feasible subset by exhaustive enumeration."""
+        best = float("-inf")
+        n = len(y)
+        for size in range(1, max_rules + 1):
+            for subset in itertools.combinations(R.columns, size):
+                combined = R[subset[0]]
+                for name in subset[1:]:
+                    combined = combined | R[name]
+                if combined.sum() / n > budget:
+                    continue
+                best = max(best, compute_single_metric(combined, y, metric))
+        return best
+
+    @pytest.mark.parametrize("seed", range(6))
+    @pytest.mark.parametrize("budget", [0.1, 0.3, 0.6])
+    def test_matches_exhaustive_feasible_search(self, seed, budget):
+        R, y = _random_problem(seed, n_rows=50, n_rules=6)
+        expected = self._brute_force_budgeted(R, y, "f1", 3, budget)
+        result = combine_rules_a_star(
+            R, y, metric="f1", max_rules=3, return_top_k=1, max_alert_rate=budget
+        )
+        if expected == float("-inf"):
+            assert result.is_empty() or result.width == 0
+            return
+        actual = compute_single_metric(result.to_series(0), y, "f1")
+        assert actual == pytest.approx(expected, abs=1e-12)
+
+    @pytest.mark.parametrize("budget", [0.05, 0.2, 0.5])
+    def test_never_exceeds_the_budget(self, budget):
+        R, y = _random_problem(seed=3, n_rows=80, n_rules=7)
+        result = combine_rules_a_star(
+            R, y, metric="f1", max_rules=4, return_top_k=5, max_alert_rate=budget
+        )
+        for i in range(result.width):
+            fired = result.to_series(i)
+            assert fired.sum() / len(fired) <= budget + 1e-12
+
+    def test_budget_prunes_rather_than_costs(self):
+        """Coverage is monotone under OR, so the constraint shrinks the search."""
+        R, y = _random_problem(seed=5, n_rules=9)
+        _, wide = combine_rules_a_star(
+            R, y, metric="f1", max_rules=4, return_top_k=1, return_diagnostics=True
+        )
+        _, tight = combine_rules_a_star(
+            R,
+            y,
+            metric="f1",
+            max_rules=4,
+            return_top_k=1,
+            max_alert_rate=0.1,
+            return_diagnostics=True,
+        )
+        assert tight["nodes_expanded"] <= wide["nodes_expanded"]
+
+    def test_beats_or_matches_the_greedy_approximation(self):
+        """Exact search can only improve on budgeted greedy's 1-1/e guarantee."""
+        R, y = _random_problem(seed=11, n_rows=120, n_rules=8)
+        budget = 0.6
+        greedy = combine_rules_budgeted(R, y, max_alert_rate=budget, max_rules=4)
+        exact = combine_rules_a_star(
+            R, y, metric="f1", max_rules=4, return_top_k=1, max_alert_rate=budget
+        )
+        greedy_score = (
+            compute_single_metric(greedy.to_series(0), y, "f1") if not greedy.is_empty() else 0.0
+        )
+        exact_score = (
+            compute_single_metric(exact.to_series(0), y, "f1") if not exact.is_empty() else 0.0
+        )
+        assert exact_score >= greedy_score - 1e-12
+
+    @pytest.mark.parametrize("bad", [0.0, -0.2, 1.5])
+    def test_invalid_budget_raises(self, bad):
+        R, y = _random_problem(seed=1, n_rows=20, n_rules=3)
+        with pytest.raises(ValueError, match="max_alert_rate"):
+            combine_rules_a_star(R, y, max_alert_rate=bad)
+
+
+class TestAStarFairnessConstraint:
+
+    def test_constraint_excludes_disparate_combinations(self):
+        R = pl.DataFrame(
+            {
+                "biased": [True, True, True, True, False, False, False, False],
+                "even": [True, False, True, False, True, False, True, False],
+            }
+        )
+        y = pl.Series("target", [True, True, False, True, True, False, True, True])
+        protected = pl.Series("group", ["a", "a", "a", "a", "b", "b", "b", "b"])
+
+        unconstrained = combine_rules_a_star(R, y, metric="recall", max_rules=1, return_top_k=2)
+        assert "biased" in unconstrained.columns
+
+        constrained = combine_rules_a_star(
+            R,
+            y,
+            metric="recall",
+            max_rules=1,
+            return_top_k=2,
+            protected=protected,
+            reference_group="a",
+            min_dir=0.8,
+        )
+        assert "biased" not in constrained.columns
+
+    def test_unknown_reference_group_raises(self):
+        R, y = _random_problem(seed=5, n_rows=10, n_rules=3)
+        protected = pl.Series("group", ["a"] * 5 + ["b"] * 5)
+
+        with pytest.raises(ValueError, match="not present in protected"):
+            combine_rules_a_star(
+                R, y, protected=protected, reference_group="z", min_dir=0.8
+            )

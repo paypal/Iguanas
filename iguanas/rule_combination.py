@@ -176,6 +176,116 @@ def combine_rules_cumulative(
     )
 
 
+def combine_rules_budgeted(
+    R: pl.DataFrame,
+    y: pl.Series,
+    max_alert_rate: float,
+    max_rules: int = 5,
+    weights: pl.Series | None = None,
+) -> pl.DataFrame:
+    """Build the OR-ruleset that catches the most positives within an alert budget.
+
+    Operational rule systems are constrained by review capacity, not by F1: only
+    a fixed fraction of the population can be flagged. This selects a disjunction
+    maximising recall subject to that constraint, which is the *budgeted maximum
+    coverage* problem. The greedy rule below is its standard
+    ``1 - 1/e`` approximation.
+
+    This differs from :func:`combine_rules_greedy` in what it optimises. Greedy
+    metric maximisation ignores coverage, so under OR it tends to keep widening
+    the ruleset until it flags far more than the budget permits; here a candidate
+    is simply infeasible once the union breaches the budget.
+
+    Parameters
+    ----------
+    R : pl.DataFrame
+        DataFrame containing boolean rule columns. All columns are candidates.
+    y : pl.Series
+        Boolean target series indicating true labels.
+    max_alert_rate : float
+        Maximum fraction of the population the ruleset may flag, in (0, 1].
+        With *weights*, this is a fraction of total weight rather than of rows.
+    max_rules : int, default=5
+        Maximum number of rules in the returned disjunction.
+    weights : pl.Series | None, default=None
+        Optional sample weights. When given, both the budget and the positives
+        caught are measured in weight rather than row counts.
+
+    Returns
+    -------
+    pl.DataFrame
+        Single boolean column named by the combined rule expression. Empty when
+        no single rule fits within the budget.
+
+    Raises
+    ------
+    ValueError
+        If *max_alert_rate* is outside (0, 1], or R has no columns.
+
+    Examples
+    --------
+    >>> import polars as pl
+    >>> R = pl.DataFrame({"a": [True, False, False], "b": [False, True, False]})
+    >>> y = pl.Series([True, True, False])
+    >>> ruleset = combine_rules_budgeted(R, y, max_alert_rate=0.7)
+
+    Notes
+    -----
+    Coverage is monotone under OR, so a rule that breaches the budget can never
+    be rescued by adding more rules. Each step therefore takes the feasible rule
+    with the greatest *marginal* gain in positives caught, breaking ties toward
+    the cheaper rule, and stops as soon as nothing feasible adds a positive.
+    """
+    if not 0.0 < max_alert_rate <= 1.0:
+        raise ValueError(f"max_alert_rate must be in (0, 1], got {max_alert_rate}")
+    rules = R.columns
+    if not rules:
+        raise ValueError("rules list cannot be empty")
+
+    y_bool = y.cast(pl.Boolean)
+    cols = [R[r].cast(pl.Boolean) for r in rules]
+    total = float(len(y_bool)) if weights is None else float(weights.sum())
+    budget = max_alert_rate * total
+
+    def mass(mask: pl.Series) -> float:
+        return float(mask.sum()) if weights is None else float(weights.filter(mask).sum())
+
+    covered = pl.repeat(False, R.height, eager=True)
+    chosen: list[int] = []
+    caught = 0.0
+
+    while len(chosen) < max_rules:
+        best: tuple[tuple[float, float], int, pl.Series, float] | None = None
+        for j in range(len(rules)):
+            if j in chosen:
+                continue
+            union = covered | cols[j]
+            cost = mass(union)
+            if cost > budget:
+                continue
+            gain = mass(y_bool & union) - caught
+            if gain <= 0:
+                continue
+            key = (gain, -cost)
+            if best is None or key > best[0]:
+                best = (key, j, union, cost)
+        if best is None:
+            break
+        (gain, _), j, union, _ = best
+        chosen.append(j)
+        covered = union
+        caught += gain
+
+    if not chosen:
+        return pl.DataFrame()
+
+    if len(chosen) == 1:
+        expression = rules[chosen[0]]
+    else:
+        expression = " | ".join(f"({rules[j]})" for j in chosen)
+    return pl.DataFrame({expression: covered})
+
+
 def combine_rules_greedy(
     R: pl.DataFrame,
     y: pl.Series,
@@ -330,7 +440,9 @@ def combine_rules_beam_search(
 
     Maintains beam_width best partial combinations at each depth level,
     exploring a broader set of combinations than greedy search while
-    remaining more efficient than exhaustive search.
+    evaluating far fewer than exhaustive enumeration. Like greedy search this
+    is a heuristic: it offers no optimality guarantee. Use
+    :func:`combine_rules_a_star` when the top-k must be provably optimal.
 
     Parameters
     ----------
@@ -465,49 +577,82 @@ def combine_rules_a_star(
     max_rules: int = 5,
     operator: str = "or",
     weights: pl.Series | None = None,
-    min_improvement: float = 0.0,
+    min_improvement: float | None = None,
     return_top_k: int = 10,
-) -> pl.DataFrame:
-    """Find top rule combinations using A* search algorithm.
+    protected: pl.Series | None = None,
+    reference_group: object | None = None,
+    min_dir: float | None = None,
+    max_alert_rate: float | None = None,
+    return_diagnostics: bool = False,
+) -> pl.DataFrame | tuple[pl.DataFrame, dict]:
+    """Find the top rule combinations by best-first branch-and-bound search.
 
-    Uses A* to efficiently explore the space of rule combinations, finding
-    optimal or near-optimal combinations by balancing actual performance (g)
-    with estimated potential (h). More thorough than greedy or beam search
-    when finding the globally best combination is important.
+    Searches the space of rule subsets of size 1..``max_rules`` and returns the
+    ``return_top_k`` best-scoring combinations. Unlike greedy or beam search,
+    this returns a *provably* optimal top-k under the conditions in Notes.
 
-    A* Cost Function:
-        - g(n): Negative metric value (better metrics = lower cost)
-        - h(n): Optimistic estimate of best possible improvement from remaining rules
-        - f(n): g(n) + h(n) (total estimated cost)
+    Search formulation
+    ------------------
+    Nodes are rule *subsets*; children extend a subset by one rule. Each node
+    carries an **upper bound** on the metric attainable by any descendant. The
+    frontier is ordered by that bound (best-first), and a node is discarded when
+    its bound cannot beat the current k-th best incumbent. Search stops as soon
+    as the best remaining bound falls below the k-th incumbent, at which point
+    no unexplored subset can enter the top-k.
 
     Parameters
     ----------
     R : pl.DataFrame
-        DataFrame containing boolean rule columns. All columns will be
-        used as candidate rules.
+        DataFrame containing boolean rule columns. All columns are candidates.
     y : pl.Series
         Boolean target series indicating true labels.
     metric : str, default="f1"
-        Performance metric to optimize. Must be a column name produced by
-        compute_metrics (e.g., "f1", "accuracy", "precision", "recall").
+        Metric to maximise: "precision", "recall", "accuracy", "mcc", or an
+        F-beta score ("f1", "f0.5", "f2", ...).
     max_rules : int, default=5
         Maximum number of rules in a combination.
     operator : str, default="or"
         Boolean operator for combining rules: 'or' or 'and'.
     weights : pl.Series | None, default=None
         Optional sample weights for weighted metric computation.
-    min_improvement : float, default=0.0
-        Minimum metric improvement required over parent combination to
-        expand a node. Acts as a pruning criterion.
+    min_improvement : float | None, default=None
+        If set, a child is discarded unless it improves on its parent by at
+        least this much. This is a *heuristic* filter that *forfeits the
+        optimality guarantee* (the best subset may only be reachable through a
+        temporarily worse ancestor -- under OR-composition, adding a rule
+        typically lowers precision before later rules raise recall). Leave as
+        None for exact search.
     return_top_k : int, default=10
-        Number of top combinations to return. Set to 1 for single best.
+        Number of top combinations to return. Set to 1 for the single best.
+    protected : pl.Series | None, default=None
+        Optional protected-attribute series used to enforce a fairness
+        constraint on returned combinations.
+    reference_group : object | None, default=None
+        Value of *protected* to treat as the reference group. Defaults to the
+        most frequent value.
+    min_dir : float | None, default=None
+        Minimum acceptable disparate impact ratio. When set (together with
+        *protected*), a combination is only admitted to the results if its DIR
+        is at least this value; 0.8 corresponds to the "four-fifths rule".
+        Search remains exact over the feasible set.
+    max_alert_rate : float | None, default=None
+        If set, only combinations flagging at most this fraction of the
+        population are admitted. This makes the search the *exact* counterpart
+        of :func:`combine_rules_budgeted`, whose greedy rule is a ``1 - 1/e``
+        approximation, so the two together measure the approximation gap.
+    return_diagnostics : bool, default=False
+        If True, return ``(results, diagnostics)`` where diagnostics reports
+        node counts and whether the optimality guarantee held.
 
     Returns
     -------
     pl.DataFrame
-        DataFrame containing columns for the top rule combinations found.
-        Each column represents one combination, with the column name showing
-        the combined rule expression. Ordered by metric value (best first).
+        One column per returned combination, named by the combined rule
+        expression, ordered best-first.
+    dict
+        Only when *return_diagnostics* is True. Keys: ``nodes_expanded``,
+        ``nodes_pruned``, ``combinations_evaluated``, ``bounds_computed``,
+        ``exact``, ``bound_is_tight``.
 
     Examples
     --------
@@ -516,206 +661,276 @@ def combine_rules_a_star(
     ...                   "rule_B": [False, True, True],
     ...                   "rule_C": [True, True, False]})
     >>> y = pl.Series([True, True, False])
-    >>> # Find single best combination
     >>> best = combine_rules_a_star(R, y, metric="f1", return_top_k=1)
-    >>> # Find top 5 combinations
-    >>> top_5 = combine_rules_a_star(R, y, metric="f1", return_top_k=5)
+    >>> top_5, diag = combine_rules_a_star(R, y, return_top_k=5,
+    ...                                    return_diagnostics=True)
 
     Raises
     ------
     ValueError
-        If operator is not 'or' or 'and', or if metric column not found.
+        If operator is not 'or' or 'and', or the metric is unsupported.
 
     Notes
     -----
-    A* is guaranteed to find the optimal solution if the heuristic is admissible
-    (never overestimates the true cost). The heuristic used here estimates the
-    best possible improvement from remaining rules, which is optimistic and
-    thus admissible.
+    **Optimality.** The returned top-k is exact when ``min_improvement`` is None
+    and the metric admits a non-trivial bound (see below). Exactness holds over
+    the feasible set when a fairness constraint is active.
+
+    **Why a bound rather than an A\\* heuristic.** Metric value is a property of
+    a *state*, not a sum of edge costs, so classical A\\* ``f = g + h`` does not
+    apply: there is no additive path cost to decompose. This routine is
+    therefore a best-first branch-and-bound, which is the correct formulation
+    for maximising a non-additive set function. The public name is retained for
+    backwards compatibility.
+
+    **Admissibility.** Under OR-composition, coverage is monotonically
+    non-decreasing in the rule set: TP and FP can only grow and FN can only
+    shrink. Writing ``P`` for total positive mass and ``k`` for the remaining
+    slots, an attainable-TP upper bound follows from the union bound,
+    ``TP_max = TP + (sum of the k largest per-rule new-TP masses)``, clipped at
+    ``P``, while ``FP`` is bounded below by its current value. Every metric
+    below is non-decreasing in TP and non-increasing in FP, so evaluating it at
+    ``(TP_max, FP_min)`` maximises it over the reachable region and never
+    understates what a descendant can achieve:
+
+    - ``recall = TP / P``
+    - ``precision = TP / (TP + FP)``
+    - ``accuracy = (TP + (N - P) - FP) / N``
+    - ``f_beta = (1 + b^2) TP / (TP + b^2 P + FP)``
+
+    The F-beta identity uses ``FN = P - TP`` to eliminate FN, which is what
+    makes the bound monotone in only two quantities. Under AND-composition the
+    monotonicity reverses -- coverage shrinks, so TP is bounded above by its
+    current value and FP is bounded below by subtracting the k largest
+    per-rule FP removals -- and the same four expressions apply.
+
+    ``mcc`` has no non-trivial bound implemented and falls back to 1.0. That is
+    admissible, so the result is still exact, but no pruning occurs and the
+    search degenerates to exhaustive enumeration.
+
+    **Alert budget.** Under OR the constraint is *monotone*: coverage only grows,
+    so a node already over budget can never be rescued and its entire subtree is
+    discarded -- the constraint makes the search cheaper, not more expensive. It
+    also tightens the bound, since any rows a descendant adds consume the
+    remaining capacity, capping attainable TP at ``budget - coverage``. Under AND
+    coverage shrinks, so an over-budget node may still have feasible descendants;
+    there it is excluded from the results but still expanded.
+
+    **Prior behaviour.** Before v1.4 this function ordered the frontier by
+    ``-mean(best remaining single-rule metrics)``, which is *not* admissible:
+    for disjoint rules under OR the achievable recall gain is the *sum* of
+    per-rule gains, so a mean understates it and the optimum could be ordered
+    away. It also defaulted to ``min_improvement=0.0``, discarding every
+    non-improving child, which reduced the search to hill-climbing. Both are
+    fixed here; ``min_improvement`` now defaults to None.
     """
     if operator not in ["or", "and"]:
         raise ValueError(f"operator must be 'or' or 'and', got '{operator}'")
+    if max_alert_rate is not None and not 0.0 < max_alert_rate <= 1.0:
+        raise ValueError(f"max_alert_rate must be in (0, 1], got {max_alert_rate}")
 
     rules = R.columns
     if not rules:
         raise ValueError("rules list cannot be empty")
 
     separator = " | " if operator == "or" else " & "
-    metric_to_use = _metric_col(metric, weights)
+    n_rules = len(rules)
+    rule_cols = [R[r].cast(pl.Boolean) for r in rules]
 
-    # Precompute metrics for all single rules (for heuristic calculation)
-    single_rule_metrics = {}
-    metrics_R = compute_metrics(R, y, weights)
+    y_bool = y.cast(pl.Boolean)
+    w = weights
+    if w is None:
+        total_mass = float(len(y_bool))
+        positive_mass = float(y_bool.sum())
+    else:
+        total_mass = float(w.sum())
+        positive_mass = float(w.filter(y_bool).sum())
+    negative_mass = total_mass - positive_mass
 
-    if metric_to_use not in metrics_R.columns:
-        raise ValueError(
-            f"Metric '{metric_to_use}' not found in computed metrics. "
-            f"Available metrics: {list(metrics_R.columns)}"
+    # Fail fast on an unsupported metric rather than deep inside the search.
+    compute_single_metric(rule_cols[0], y_bool, metric, w)
+
+    def _is_fbeta(name: str) -> bool:
+        if len(name) < 2 or not name.startswith("f"):
+            return False
+        try:
+            float(name[1:])
+        except ValueError:
+            return False
+        return True
+
+    has_bound = metric in ("precision", "recall", "accuracy") or _is_fbeta(metric)
+    budget = None if max_alert_rate is None else max_alert_rate * total_mass
+
+    def _mass(mask: pl.Series) -> float:
+        return float(mask.sum()) if w is None else float(w.filter(mask).sum())
+
+    def _confusion(pred: pl.Series) -> tuple[float, float]:
+        return _mass(y_bool & pred), _mass(~y_bool & pred)
+
+    def _metric_ceiling(tp_max: float, fp_min: float) -> float:
+        """Metric evaluated at the corner of the reachable (TP, FP) region.
+
+        Every metric below is non-decreasing in TP and non-increasing in FP, so
+        this maximises it over the region and is a valid upper bound.
+        """
+        if metric == "recall":
+            return tp_max / positive_mass if positive_mass > 0 else 0.0
+        if metric == "precision":
+            denom = tp_max + fp_min
+            return tp_max / denom if denom > 0 else 0.0
+        if metric == "accuracy":
+            return (tp_max + negative_mass - fp_min) / total_mass if total_mass > 0 else 0.0
+        if _is_fbeta(metric):
+            b2 = float(metric[1:]) ** 2
+            denom = tp_max + b2 * positive_mass + fp_min
+            return (1.0 + b2) * tp_max / denom if denom > 0 else 0.0
+        return 1.0  # no non-trivial bound (e.g. mcc): admissible, but no pruning
+
+    def _upper_bound(
+        pred: pl.Series, tp: float, fp: float, remaining: range, slots: int
+    ) -> float:
+        """Upper bound on the metric over every descendant of this node."""
+        if slots <= 0 or not remaining:
+            return _metric_ceiling(tp, fp)
+        if operator == "or":
+            # Coverage only grows: FP is floored at its current value, and the
+            # union bound caps the TP mass the remaining slots can still add.
+            gains = sorted(
+                (_mass(y_bool & rule_cols[j] & ~pred) for j in remaining), reverse=True
+            )
+            addable = sum(gains[:slots])
+            if budget is not None:
+                # Rows a descendant adds consume the remaining alert capacity,
+                # so attainable TP cannot exceed what the budget still allows.
+                addable = min(addable, max(0.0, budget - (tp + fp)))
+            return _metric_ceiling(min(positive_mass, tp + addable), fp)
+        # Coverage only shrinks: TP is capped at its current value and FP can
+        # fall by at most the sum of the largest per-rule FP removals.
+        drops = sorted((_mass(~y_bool & pred & ~rule_cols[j]) for j in remaining), reverse=True)
+        return _metric_ceiling(tp, max(0.0, fp - sum(drops[:slots])))
+
+    group_masks: dict[object, pl.Series] = {}
+    dir_threshold: float | None = None
+    if protected is not None and min_dir is not None:
+        dir_threshold = min_dir
+        if reference_group is None:
+            reference_group = protected.value_counts(sort=True).row(0)[0]
+        group_masks = {g: (protected == g) for g in protected.unique().to_list()}
+        if reference_group not in group_masks:
+            raise ValueError(f"reference_group {reference_group!r} not present in protected")
+
+    def _subgroup_metric(pred: pl.Series, mask: pl.Series) -> float:
+        return compute_single_metric(
+            pred.filter(mask),
+            y_bool.filter(mask),
+            metric,
+            None if w is None else w.filter(mask),
         )
 
-    # Build a rule→row-index map for O(1) lookups instead of O(n) list.index()
-    rule_to_idx = {rule: idx for idx, rule in enumerate(rules)}
-    for rule in rules:
-        single_rule_metrics[rule] = metrics_R[metric_to_use].item(rule_to_idx[rule])
+    def _dir_ok(pred: pl.Series) -> bool:
+        if dir_threshold is None:
+            return True
+        reference = _subgroup_metric(pred, group_masks[reference_group])
+        if reference <= 0:
+            return False
+        return all(
+            _subgroup_metric(pred, mask) / reference >= dir_threshold
+            for group, mask in group_masks.items()
+            if group != reference_group
+        )
 
-    # Cache for computed combinations to avoid redundant evaluations
-    combination_cache: dict[tuple[str, ...], float] = {}
+    def _within_budget(tp: float, fp: float) -> bool:
+        return budget is None or (tp + fp) <= budget
 
-    def compute_combination_metric(rule_list: list[str]) -> float:
-        """Compute metric for a combination, using cache if available."""
-        rule_tuple = tuple(sorted(rule_list))
-
-        if rule_tuple in combination_cache:
-            return combination_cache[rule_tuple]
-
-        # Compute combined rule
-        if operator == "or":
-            combined = R[rule_list[0]]
-            for r in rule_list[1:]:
-                combined = combined | R[r]
-        else:  # 'and'
-            combined = R[rule_list[0]]
-            for r in rule_list[1:]:
-                combined = combined & R[r]
-
-        # Evaluate metric
-        test_R = pl.DataFrame({"test_rule": combined})
-        test_metrics = compute_metrics(test_R, y, weights)
-        metric_value = float(test_metrics[metric_to_use].item(0))
-
-        combination_cache[rule_tuple] = metric_value
-        return metric_value
-
-    def heuristic(rule_list: list[str], current_metric: float) -> float:
-        """
-        Admissible heuristic: optimistic estimate of improvement potential.
-
-        Estimates the best possible improvement by assuming we can achieve
-        the maximum single-rule improvement for each remaining slot.
-        """
-        remaining_rules = [r for r in rules if r not in rule_list]
-        if not remaining_rules:
-            return 0.0
-
-        # Get the best metrics from remaining rules
-        remaining_metrics = [single_rule_metrics[r] for r in remaining_rules]
-        remaining_metrics.sort(reverse=True)
-
-        # Optimistic: assume we can improve by the best remaining rule's metric
-        # This is optimistic because actual combination might not achieve this
-        slots_left = max_rules - len(rule_list)
-
-        if slots_left <= 0:
-            return 0.0
-
-        # Take top metrics for remaining slots (optimistic estimate)
-        best_remaining = remaining_metrics[:slots_left]
-        estimated_improvement = sum(best_remaining) / len(best_remaining) if best_remaining else 0.0
-
-        # Return negative (since we want to maximize metric = minimize negative metric)
-        return -estimated_improvement
-
-    # Priority queue: (f_score, counter, g_score, rule_list, rule_expr)
-    # Counter ensures FIFO for equal f_scores
     counter = 0
-    open_set: list[tuple[float, int, float, list[str], str]] = []
+    nodes_expanded = 0
+    nodes_pruned = 0
+    combinations_evaluated = 0
+    bounds_computed = 0
 
-    # Initialize with all single rules
-    for rule in rules:
-        metric_value = single_rule_metrics[rule]
-        g_score = -metric_value  # Negative because we minimize cost
-        h_score = heuristic([rule], metric_value)
-        f_score = g_score + h_score
+    # Frontier ordered by upper bound, descending (negated for heapq).
+    frontier: list[tuple[float, int, tuple[int, ...]]] = []
+    node_state: dict[tuple[int, ...], tuple[pl.Series, float, float, float]] = {}
+    # Incumbent top-k as a min-heap, so incumbents[0] is the one to beat.
+    incumbents: list[tuple[float, int, tuple[int, ...]]] = []
 
-        heapq.heappush(open_set, (f_score, counter, g_score, [rule], rule))
+    def _threshold() -> float:
+        return incumbents[0][0] if len(incumbents) >= return_top_k else float("-inf")
+
+    def _offer(idx_tuple: tuple[int, ...], pred: pl.Series, tp: float, fp: float, value: float):
+        """Bound the node and admit it to the frontier unless it cannot compete."""
+        nonlocal counter, nodes_pruned, bounds_computed
+        # Under OR the budget is monotone, so an over-budget node's whole subtree
+        # is unreachable and can be discarded outright.
+        if operator == "or" and not _within_budget(tp, fp):
+            nodes_pruned += 1
+            return
+        remaining = range(idx_tuple[-1] + 1, n_rules)
+        bound = _upper_bound(pred, tp, fp, remaining, max_rules - len(idx_tuple))
+        bounds_computed += 1
+        if bound <= _threshold():
+            nodes_pruned += 1
+            return
+        node_state[idx_tuple] = (pred, tp, fp, value)
+        heapq.heappush(frontier, (-bound, counter, idx_tuple))
         counter += 1
 
-    # Track completed combinations (at max depth or promising ones)
-    completed_combinations: list[tuple[float, list[str], str]] = []
+    for i in range(n_rules):
+        pred = rule_cols[i]
+        tp, fp = _confusion(pred)
+        combinations_evaluated += 1
+        _offer((i,), pred, tp, fp, compute_single_metric(pred, y_bool, metric, w))
 
-    # Track explored states to avoid redundant exploration
-    explored: set[tuple[str, ...]] = set()
+    while frontier:
+        neg_bound, _, idx_tuple = heapq.heappop(frontier)
+        # The frontier is bound-ordered, so once the best remaining bound cannot
+        # beat the k-th incumbent, no unexplored subset ever will.
+        if -neg_bound <= _threshold():
+            break
+        pred, tp, fp, value = node_state.pop(idx_tuple)
+        nodes_expanded += 1
 
-    # A* main loop
-    while open_set:
-        f_score, _, g_score, rule_list, rule_expr = heapq.heappop(open_set)
-
-        # Skip if already explored this combination
-        rule_tuple = tuple(sorted(rule_list))
-        if rule_tuple in explored:
-            continue
-        explored.add(rule_tuple)
-
-        current_metric = -g_score  # Convert back to positive metric
-
-        # If at max depth, save as completed
-        if len(rule_list) >= max_rules:
-            completed_combinations.append((current_metric, rule_list[:], rule_expr))
-            continue
-
-        # Also save current state as a potential solution
-        completed_combinations.append((current_metric, rule_list[:], rule_expr))
-
-        # Expand node: try adding each remaining rule
-        for candidate_rule in rules:
-            if candidate_rule in rule_list:
-                continue
-
-            # Create new combination
-            new_rule_list = rule_list + [candidate_rule]
-            new_rule_tuple = tuple(sorted(new_rule_list))
-
-            # Skip if already explored
-            if new_rule_tuple in explored:
-                continue
-
-            # Compute metric for new combination
-            new_metric = compute_combination_metric(new_rule_list)
-
-            # Check improvement threshold
-            improvement = new_metric - current_metric
-            if improvement < min_improvement:
-                continue
-
-            # Compute costs
-            new_g_score = -new_metric
-            new_h_score = heuristic(new_rule_list, new_metric)
-            new_f_score = new_g_score + new_h_score
-
-            # Create expression
-            new_expr = separator.join(f"({r})" for r in new_rule_list)
-
-            # Add to open set
-            heapq.heappush(open_set, (new_f_score, counter, new_g_score, new_rule_list, new_expr))
+        if _within_budget(tp, fp) and _dir_ok(pred):
+            heapq.heappush(incumbents, (value, counter, idx_tuple))
             counter += 1
+            if len(incumbents) > return_top_k:
+                heapq.heappop(incumbents)
 
-    # Sort completed combinations by metric (descending)
-    completed_combinations.sort(key=lambda x: x[0], reverse=True)
+        if len(idx_tuple) >= max_rules:
+            continue
 
-    # Remove duplicates while preserving order
-    seen = set()
-    unique_combinations = []
-    for metric_val, rule_list, rule_expr in completed_combinations:
-        rule_tuple = tuple(sorted(rule_list))
-        if rule_tuple not in seen:
-            seen.add(rule_tuple)
-            unique_combinations.append((metric_val, rule_list, rule_expr))
-            if len(unique_combinations) >= return_top_k:
-                break
+        # Children only ever append a higher index, so each subset is reached once.
+        for j in range(idx_tuple[-1] + 1, n_rules):
+            child_pred = (pred | rule_cols[j]) if operator == "or" else (pred & rule_cols[j])
+            child_value = compute_single_metric(child_pred, y_bool, metric, w)
+            combinations_evaluated += 1
+            if min_improvement is not None and child_value - value < min_improvement:
+                nodes_pruned += 1
+                continue
+            child_tp, child_fp = _confusion(child_pred)
+            _offer((*idx_tuple, j), child_pred, child_tp, child_fp, child_value)
 
-    # Build result DataFrame
-    result_dict = {}
-    for _, rule_list, rule_expr in unique_combinations:
-        # Compute the combined rule
-        if operator == "or":
-            combined = R[rule_list[0]]
-            for r in rule_list[1:]:
-                combined = combined | R[r]
-        else:  # 'and'
-            combined = R[rule_list[0]]
-            for r in rule_list[1:]:
-                combined = combined & R[r]
+    result_dict: dict[str, pl.Series] = {}
+    for _, _, idx_tuple in sorted(incumbents, key=lambda item: item[0], reverse=True):
+        combined = rule_cols[idx_tuple[0]]
+        for j in idx_tuple[1:]:
+            combined = (combined | rule_cols[j]) if operator == "or" else (combined & rule_cols[j])
+        if len(idx_tuple) == 1:
+            expr = rules[idx_tuple[0]]
+        else:
+            expr = separator.join(f"({rules[j]})" for j in idx_tuple)
+        result_dict[expr] = combined
 
-        result_dict[rule_expr] = combined
+    results = pl.DataFrame(result_dict)
+    if not return_diagnostics:
+        return results
+    return results, {
+        "nodes_expanded": nodes_expanded,
+        "nodes_pruned": nodes_pruned,
+        "combinations_evaluated": combinations_evaluated,
+        "bounds_computed": bounds_computed,
+        "exact": min_improvement is None,
+        "bound_is_tight": has_bound,
+    }
 
-    return pl.DataFrame(result_dict)
