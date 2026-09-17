@@ -4,10 +4,25 @@ from __future__ import annotations
 import ast
 
 import numpy as np
-import onnxruntime as ort
 import pytest
 
-from iguanas.onnx_converter import _BuildCtx, _subscript_col, rules_to_onnx, _DTYPE_MAP
+# onnx and onnxruntime are optional dependencies, so skip this whole module
+# rather than failing collection when they are absent. Install them with
+# pip install "iguanas[onnx]".
+pytest.importorskip(
+    "onnx", reason='requires the optional onnx extra: pip install "iguanas[onnx]"'
+)
+ort = pytest.importorskip(
+    "onnxruntime",
+    reason='requires the optional onnx extra: pip install "iguanas[onnx]"',
+)
+
+from iguanas.onnx_converter import (  # noqa: E402 - after importorskip guard
+    _BuildCtx,
+    _DTYPE_MAP,
+    _subscript_col,
+    rules_to_onnx,
+)
 
 
 def _run(model, X: np.ndarray) -> np.ndarray:

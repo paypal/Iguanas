@@ -1,4 +1,17 @@
-"""Convert Iguanas rule strings to an ONNX binary classifier model."""
+"""Convert Iguanas rule strings to an ONNX binary classifier model.
+
+Rules are parsed with :mod:`ast` — never :func:`eval` — and translated into
+a static ONNX computation graph of comparison and boolean operators. Only a
+fixed whitelist of AST node types is accepted; anything else raises
+``ValueError``. Consequently the exported model contains no Python code and
+scoring it executes no Python, which makes this the recommended deployment
+path for environments where :func:`~iguanas.rule_evaluation.apply_rules` (which
+compiles rule strings with ``eval()``) is unacceptable.
+
+Note that parsing itself is safe, but the *export* step still reads the rule
+string, so a malformed or unsupported rule is rejected rather than silently
+mistranslated.
+"""
 from __future__ import annotations
 
 import ast
@@ -64,6 +77,25 @@ def rules_to_onnx(
     ValueError
         If ``rules`` is empty, ``dtype`` is not ``"f32"`` or ``"f64"``, or
         a rule string is syntactically invalid or uses unsupported node types.
+
+    Notes
+    -----
+    **Security.** This conversion parses each rule with :mod:`ast` and emits
+    a static ONNX graph; it never calls :func:`eval`, and the resulting model
+    executes no Python at scoring time. Only a whitelist of AST nodes
+    (subscripted column access, numeric-literal comparisons, and ``&``/``|``)
+    is accepted — anything else raises ``ValueError`` rather than being
+    executed. This makes ONNX export the recommended production deployment
+    path, in contrast to
+    :func:`~iguanas.rule_evaluation.apply_rules`, which compiles rule strings
+    with ``eval()`` and therefore requires trusted rule sources.
+
+    See Also
+    --------
+    iguanas.rule_evaluation.apply_rules : In-process evaluation via ``eval()``;
+        requires trusted rule strings.
+    iguanas.rule_evaluation.apply_rules_lazy : Lazy in-process evaluation, same
+        ``eval()`` caveat.
     """
     if isinstance(rules, str) and not rules:
         raise ValueError("rules must not be empty")
