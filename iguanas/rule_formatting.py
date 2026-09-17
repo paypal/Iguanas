@@ -333,7 +333,7 @@ def add_missing_value_conditions(rule: str, mapping: dict[str, float]) -> str:
     Examples
     --------
     >>> add_missing_value_conditions('(X["a"] < 1)', {"a": 0})
-    '(X["a"] < 1 | X["a"].is_null())'
+    '((X["a"] < 1) | X["a"].is_null())'
     """
     _OPS = {
         ">=": lambda a, b: a >= b,
@@ -354,7 +354,10 @@ def add_missing_value_conditions(rule: str, mapping: dict[str, float]) -> str:
             return m.group(0)
         if not _OPS[op](mapping[col], threshold):
             return m.group(0)
-        return f'(X["{col}"] {op} {val} | X["{col}"].is_null())'
+        # Parenthesize the comparison: Python's `|` binds tighter than `>=`/`<`/etc.,
+        # so without these parens `col >= val | col.is_null()` would parse as
+        # `col >= (val | col.is_null())` - a bitor between a float and a bool expr.
+        return f'((X["{col}"] {op} {val}) | X["{col}"].is_null())'
 
     return _COND_PATTERN.sub(_convert, rule)
 

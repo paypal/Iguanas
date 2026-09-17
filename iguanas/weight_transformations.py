@@ -57,7 +57,7 @@ def _dispatch(
         return None
     results = [fn(X[c], **kwargs) for c in X.columns]
     return pl.concat(
-        [results[0]] + [r.drop("Baseline") for r in results[1:]], how="horizontal_extend"
+        [results[0]] + [r.drop("Baseline") for r in results[1:]], how="horizontal"
     )
 
 

@@ -210,7 +210,7 @@ class TestAddNullConditions:
         result = add_missing_value_conditions(rule, mapping)
         assert (
             result
-            == '(X["a"] < 1 | X["a"].is_null()) & (X["b"] >= 3) & (X["c"] > 10 | X["c"].is_null())'
+            == '((X["a"] < 1) | X["a"].is_null()) & (X["b"] >= 3) & ((X["c"] > 10) | X["c"].is_null())'
         )
 
     def test_single_quotes(self):
@@ -218,14 +218,14 @@ class TestAddNullConditions:
         mapping = {"a": 0}
         rule = "(X['a'] < 1)"
         result = add_missing_value_conditions(rule, mapping)
-        assert result == '(X["a"] < 1 | X["a"].is_null())'
+        assert result == '((X["a"] < 1) | X["a"].is_null())'
 
     def test_greater_equal_condition_satisfied(self):
         """Test >= condition satisfied by nan value."""
         mapping = {"a": 5}
         rule = '(X["a"] >= 3)'
         result = add_missing_value_conditions(rule, mapping)
-        assert result == '(X["a"] >= 3 | X["a"].is_null())'
+        assert result == '((X["a"] >= 3) | X["a"].is_null())'
 
     def test_greater_equal_condition_not_satisfied(self):
         """Test >= condition not satisfied by nan value."""
@@ -239,42 +239,42 @@ class TestAddNullConditions:
         mapping = {"a": 5}
         rule = '(X["a"] > 3)'
         result = add_missing_value_conditions(rule, mapping)
-        assert result == '(X["a"] > 3 | X["a"].is_null())'
+        assert result == '((X["a"] > 3) | X["a"].is_null())'
 
     def test_less_equal_condition_satisfied(self):
         """Test <= condition satisfied by nan value."""
         mapping = {"a": 5}
         rule = '(X["a"] <= 10)'
         result = add_missing_value_conditions(rule, mapping)
-        assert result == '(X["a"] <= 10 | X["a"].is_null())'
+        assert result == '((X["a"] <= 10) | X["a"].is_null())'
 
     def test_less_condition_satisfied(self):
         """Test < condition satisfied by nan value."""
         mapping = {"a": 5}
         rule = '(X["a"] < 10)'
         result = add_missing_value_conditions(rule, mapping)
-        assert result == '(X["a"] < 10 | X["a"].is_null())'
+        assert result == '((X["a"] < 10) | X["a"].is_null())'
 
     def test_equality_condition_satisfied(self):
         """Test == condition satisfied by nan value."""
         mapping = {"a": 0}
         rule = '(X["a"] == 0)'
         result = add_missing_value_conditions(rule, mapping)
-        assert result == '(X["a"] == 0 | X["a"].is_null())'
+        assert result == '((X["a"] == 0) | X["a"].is_null())'
 
     def test_not_equal_condition_satisfied(self):
         """Test != condition satisfied by nan value."""
         mapping = {"a": 0}
         rule = '(X["a"] != 5)'
         result = add_missing_value_conditions(rule, mapping)
-        assert result == '(X["a"] != 5 | X["a"].is_null())'
+        assert result == '((X["a"] != 5) | X["a"].is_null())'
 
     def test_multiple_conditions_mixed(self):
         """Test multiple conditions with some satisfied and some not."""
         mapping = {"a": 5, "b": 10}
         rule = '(X["a"] <= 10) & (X["b"] > 5)'
         result = add_missing_value_conditions(rule, mapping)
-        assert result == '(X["a"] <= 10 | X["a"].is_null()) & (X["b"] > 5 | X["b"].is_null())'
+        assert result == '((X["a"] <= 10) | X["a"].is_null()) & ((X["b"] > 5) | X["b"].is_null())'
 
     def test_empty_mapping(self):
         """Test with empty mapping."""
@@ -287,21 +287,21 @@ class TestAddNullConditions:
         mapping = {"a": 0}
         rule = '(X["a"] < 1) & (X["b"] < 5)'
         result = add_missing_value_conditions(rule, mapping)
-        assert result == '(X["a"] < 1 | X["a"].is_null()) & (X["b"] < 5)'
+        assert result == '((X["a"] < 1) | X["a"].is_null()) & (X["b"] < 5)'
 
     def test_non_numeric_value_unchanged(self):
         """Test non-numeric comparison is unchanged."""
         mapping = {"a": 0, "name": "test"}
         rule = '(X["a"] < 1) & (X["name"] == "John")'
         result = add_missing_value_conditions(rule, mapping)
-        assert result == '(X["a"] < 1 | X["a"].is_null()) & (X["name"] == "John")'
+        assert result == '((X["a"] < 1) | X["a"].is_null()) & (X["name"] == "John")'
 
     def test_float_nan_values(self):
         """Test with float nan replacement values."""
         mapping = {"a": 0.5, "b": 1.5}
         rule = '(X["a"] < 1) & (X["b"] >= 1)'
         result = add_missing_value_conditions(rule, mapping)
-        assert result == '(X["a"] < 1 | X["a"].is_null()) & (X["b"] >= 1 | X["b"].is_null())'
+        assert result == '((X["a"] < 1) | X["a"].is_null()) & ((X["b"] >= 1) | X["b"].is_null())'
 
 
 class TestDecodeNumericConditions:
