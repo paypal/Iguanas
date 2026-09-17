@@ -1,0 +1,5 @@
+# Benchmark run artefacts and the OpenML fetch cache are reproducible outputs,
+# not source. Keep manifests out of git; regenerate with `python -m benchmarks.run`.
+.cache/
+results/
+seedrun/

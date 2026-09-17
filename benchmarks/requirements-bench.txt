@@ -1,0 +1,13 @@
+# Benchmark-only dependencies. Deliberately NOT in pyproject.toml: none of
+# these are needed to use the iguanas package itself.
+#
+#   python -m pip install -r benchmarks/requirements-bench.txt
+#
+# Every one of these is optional at runtime. A missing package produces an
+# "unavailable" row in baseline_availability.csv; it never aborts a run.
+
+imodels>=1.4.0          # RuleFit, SkopeRules, BayesianRuleList, FIGS, CORELS
+wittgenstein>=0.3.2     # RIPPER
+scikit-posthocs>=0.9.0  # Nemenyi post-hoc (harness falls back to its own CD table)
+openml>=0.14.0          # optional richer OpenML metadata; fetching uses sklearn
+pyarrow>=14.0.0         # parquet export alongside CSV
