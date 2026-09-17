@@ -1,4 +1,54 @@
+import re
+
 import polars as pl
+
+# Default shrinkage strength for the m-estimate. Larger values pull the estimate
+# of a low-coverage rule further toward the base rate.
+M_ESTIMATE_M = 10.0
+
+_COVERAGE_METRICS = frozenset({"lift", "wracc", "laplace", "m_estimate"})
+
+# A rule references each feature as X["col"] / X['col'], once per condition.
+_FEATURE_REF_PATTERN = r"""X\[["'][^"']+["']\]"""
+
+
+def count_conditions(rule: str) -> int:
+    """Number of atomic conditions in a rule expression.
+
+    Complexity is measured in conditions rather than rules: a 3-rule disjunction
+    with 12 conditions is not simpler than a 5-rule one with 8.
+
+    Parameters
+    ----------
+    rule : str
+        Rule expression, e.g. ``'(X["a"] > 1) & (X["b"] <= 2)'``.
+
+    Returns
+    -------
+    int
+        Condition count. Zero for a string that references no features, which is
+        what a plain rule *name* such as ``"rule_A"`` will yield.
+
+    Examples
+    --------
+    >>> count_conditions('(X["a"] > 1) & (X["b"] <= 2)')
+    2
+    """
+    return len(re.findall(_FEATURE_REF_PATTERN, rule))
+
+
+def count_features(rule: str) -> int:
+    """Number of *distinct* features a rule expression references.
+
+    Two conditions on the same feature (a range) are easier to read than two
+    conditions on different features, so this complements :func:`count_conditions`.
+
+    Examples
+    --------
+    >>> count_features('(X["a"] > 1) & (X["a"] < 5)')
+    1
+    """
+    return len(set(re.findall(_FEATURE_REF_PATTERN, rule)))
 
 
 def compute_single_metric(
@@ -20,7 +70,9 @@ def compute_single_metric(
     y : pl.Series
         Boolean target series.
     metric : str
-        Metric name: "precision", "recall", "accuracy", or an F-beta score (f<number>).
+        Metric name: "precision", "recall", "accuracy", "mcc", an F-beta score
+        (f<number>), or one of the coverage-aware rule metrics "lift", "wracc",
+        "laplace" and "m_estimate".
     weights : pl.Series | None, default=None
         Optional sample weights. When provided, all counts use weighted sums.
 
@@ -60,6 +112,22 @@ def compute_single_metric(
         )
         denom = ((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)) ** 0.5
         return (TP * TN - FP * FN) / denom if denom > 0 else 0.0
+    if metric in _COVERAGE_METRICS:
+        total = float(len(y_bool)) if weights is None else float(weights.sum())
+        covered = TP + FP
+        positives = TP + FN
+        if metric == "laplace":
+            return (TP + 1.0) / (covered + 2.0)
+        if total <= 0:
+            return 0.0
+        base_rate = positives / total
+        if metric == "m_estimate":
+            return (TP + M_ESTIMATE_M * base_rate) / (covered + M_ESTIMATE_M)
+        if metric == "wracc":
+            return TP / total - (covered * positives) / (total * total)
+        if covered <= 0 or base_rate <= 0:
+            return 0.0
+        return (TP / covered) / base_rate
     if metric.startswith("f"):
         beta = float(metric[1:])
         precision = TP / (TP + FP) if (TP + FP) > 0 else 0.0
@@ -68,7 +136,8 @@ def compute_single_metric(
         return (1 + beta**2) * precision * recall / denom if denom > 0 else 0.0
     raise ValueError(
         f"Unsupported metric '{metric}'. Must be 'precision', 'recall', "
-        f"'accuracy', 'mcc', or an F-beta score (f<number>)."
+        f"'accuracy', 'mcc', an F-beta score (f<number>), or one of "
+        f"{sorted(_COVERAGE_METRICS)}."
     )
 
 
@@ -77,6 +146,7 @@ def compute_metrics(
     y: pl.Series,
     weights: pl.Series | None = None,
     betas: list[float] | None = None,
+    m: float = M_ESTIMATE_M,
 ) -> pl.DataFrame:
     """Compute comprehensive performance metrics for all rule columns.
 
@@ -97,6 +167,9 @@ def compute_metrics(
     betas : list[float], default=[0.25, 0.5, 1, 1.5, 2]
         F-beta values to compute. Each value ``b`` produces a column named
         ``f{b}`` (and ``f{b}_weight`` when *weights* is provided).
+    m : float, default=10.0
+        Shrinkage strength for the ``m_estimate`` column. Larger values pull
+        low-coverage rules further toward the base rate.
 
     Returns
     -------
@@ -109,7 +182,13 @@ def compute_metrics(
         - flagged(%): Percentage of total flagged as positive
         - good_flagged(%): Percentage of negatives flagged as positive
         - f{b} for each b in *betas*: F-beta scores
+        - lift: precision divided by the base rate
+        - wracc: weighted relative accuracy, ``coverage * (precision - base_rate)``
+        - laplace: ``(TP + 1) / (TP + FP + 2)``
+        - m_estimate: precision shrunk toward the base rate by *m*
         - num_rules: Number of individual rules y_pred (1 for single rules)
+        - num_conditions: Atomic conditions in the rule expression
+        - num_features: Distinct features the rule expression references
 
         If weights is provided, additional columns with "_weight" suffix:
 
@@ -212,7 +291,42 @@ def compute_metrics(
         .alias("mcc"),
         # Number of rules
         (pl.col("rule").str.count_matches(r"\) \| \(") + 1).alias("num_rules"),
+        # Complexity. Counted from the rule string, so these are 0 when columns
+        # carry plain names rather than rule expressions.
+        pl.col("rule").str.count_matches(_FEATURE_REF_PATTERN).alias("num_conditions"),
+        pl.col("rule")
+        .str.extract_all(_FEATURE_REF_PATTERN)
+        .list.unique()
+        .list.len()
+        .alias("num_features"),
     ]
+
+    # Coverage-aware rule quality metrics. Unlike precision these cannot be gamed
+    # by a rule firing on a handful of rows, and unlike recall they are not
+    # maximised by flagging everything.
+    n_expr = (pl.col("TP") + pl.col("FP") + pl.col("TN") + pl.col("FN")).cast(pl.Float64)
+    covered_expr = (pl.col("TP") + pl.col("FP")).cast(pl.Float64)
+    positives_expr = (pl.col("TP") + pl.col("FN")).cast(pl.Float64)
+    tp_expr = pl.col("TP").cast(pl.Float64)
+    expressions.extend(
+        [
+            pl.when((covered_expr <= 0) | (positives_expr <= 0) | (n_expr <= 0))
+            .then(pl.lit(0.0))
+            .otherwise((tp_expr / covered_expr) / (positives_expr / n_expr))
+            .alias("lift"),
+            pl.when(n_expr <= 0)
+            .then(pl.lit(0.0))
+            .otherwise(tp_expr / n_expr - (covered_expr * positives_expr) / (n_expr * n_expr))
+            .alias("wracc"),
+            ((tp_expr + 1.0) / (covered_expr + 2.0)).alias("laplace"),
+            pl.when(n_expr <= 0)
+            .then(pl.lit(0.0))
+            .otherwise(
+                (tp_expr + m * (positives_expr / n_expr)) / (covered_expr + m)
+            )
+            .alias("m_estimate"),
+        ]
+    )
 
     if weights is not None:
         # First compute total_weight
@@ -269,6 +383,23 @@ def compute_metrics(
                     ).cast(pl.Float64).sqrt()
                 )
                 .alias("mcc_weight"),
+            ]
+        )
+        n_w = pl.col("total_weight").cast(pl.Float64)
+        covered_w = (pl.col("TP_weight") + pl.col("FP_weight")).cast(pl.Float64)
+        positives_w = (pl.col("TP_weight") + pl.col("FN_weight")).cast(pl.Float64)
+        tp_w = pl.col("TP_weight").cast(pl.Float64)
+        # laplace/m_estimate smooth *counts*, so they have no weighted analogue.
+        expressions.extend(
+            [
+                pl.when((covered_w <= 0) | (positives_w <= 0) | (n_w <= 0))
+                .then(pl.lit(0.0))
+                .otherwise((tp_w / covered_w) / (positives_w / n_w))
+                .alias("lift_weight"),
+                pl.when(n_w <= 0)
+                .then(pl.lit(0.0))
+                .otherwise(tp_w / n_w - (covered_w * positives_w) / (n_w * n_w))
+                .alias("wracc_weight"),
             ]
         )
 

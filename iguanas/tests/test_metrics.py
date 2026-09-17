@@ -1,7 +1,12 @@
 import polars as pl
 import pytest
 
-from iguanas.metrics import compute_metrics, compute_single_metric
+from iguanas.metrics import (
+    compute_metrics,
+    compute_single_metric,
+    count_conditions,
+    count_features,
+)
 
 
 class TestComputeMetrics:
@@ -360,3 +365,121 @@ class TestComputeMetricsSeries:
         assert result["rule"][0] == "my_rule"
         assert "precision" in result.columns
         assert "recall" in result.columns
+
+
+class TestCoverageAwareMetrics:
+    """lift, wracc, laplace and m_estimate: 100 rows, 10 positives."""
+
+    @staticmethod
+    def _problem():
+        y = pl.Series("y", [True] * 10 + [False] * 90)
+        R = pl.DataFrame(
+            {
+                "tiny_perfect": [True] * 3 + [False] * 97,
+                "broad_useless": [True] * 100,
+                "good": [True] * 8 + [False] * 2 + [True] * 10 + [False] * 80,
+            }
+        )
+        return R, y
+
+    def test_known_values(self):
+        R, y = self._problem()
+        m = compute_metrics(R, y).sort("rule")
+        by_rule = {row["rule"]: row for row in m.to_dicts()}
+
+        # base rate 0.10; tiny_perfect covers 3 rows, all positive
+        assert by_rule["tiny_perfect"]["lift"] == pytest.approx(10.0)
+        assert by_rule["tiny_perfect"]["wracc"] == pytest.approx(3 / 100 - (3 * 10) / 10_000)
+        assert by_rule["tiny_perfect"]["laplace"] == pytest.approx(4 / 5)
+        assert by_rule["good"]["lift"] == pytest.approx(40 / 9)
+        assert by_rule["good"]["wracc"] == pytest.approx(8 / 100 - (18 * 10) / 10_000)
+
+    def test_wracc_demotes_a_tiny_perfect_rule(self):
+        """Precision ranks a 3-row rule first; WRAcc must not."""
+        R, y = self._problem()
+        m = compute_metrics(R, y)
+        by_rule = {row["rule"]: row for row in m.to_dicts()}
+
+        assert by_rule["tiny_perfect"]["precision"] > by_rule["good"]["precision"]
+        assert by_rule["tiny_perfect"]["wracc"] < by_rule["good"]["wracc"]
+
+    def test_flag_everything_scores_zero(self):
+        R, y = self._problem()
+        by_rule = {row["rule"]: row for row in compute_metrics(R, y).to_dicts()}
+
+        assert by_rule["broad_useless"]["wracc"] == pytest.approx(0.0)
+        assert by_rule["broad_useless"]["lift"] == pytest.approx(1.0)
+
+    def test_m_estimate_shrinks_low_coverage_toward_base_rate(self):
+        R, y = self._problem()
+        by_rule = {row["rule"]: row for row in compute_metrics(R, y).to_dicts()}
+
+        # precision 1.0 but only 3 rows -> pulled far down toward the 0.1 base rate
+        assert by_rule["tiny_perfect"]["m_estimate"] < 0.5
+        assert by_rule["tiny_perfect"]["m_estimate"] > 0.1
+
+    @pytest.mark.parametrize("metric", ["lift", "wracc", "laplace", "m_estimate"])
+    def test_scalar_path_matches_frame_path(self, metric):
+        R, y = self._problem()
+        frame = compute_metrics(R, y)[metric].to_list()
+        scalar = [compute_single_metric(R[c], y, metric) for c in R.columns]
+        assert scalar == pytest.approx(frame)
+
+    @pytest.mark.parametrize("metric", ["lift", "wracc"])
+    def test_weighted_variants_present(self, metric):
+        R, y = self._problem()
+        weights = pl.Series("w", [1.0] * 100)
+        m = compute_metrics(R, y, weights=weights)
+        assert f"{metric}_weight" in m.columns
+        assert m[f"{metric}_weight"].to_list() == pytest.approx(m[metric].to_list())
+
+    def test_empty_rule_is_safe(self):
+        y = pl.Series("y", [True, False, True])
+        R = pl.DataFrame({"never": [False, False, False]})
+        row = compute_metrics(R, y).to_dicts()[0]
+
+        assert row["lift"] == pytest.approx(0.0)
+        assert row["wracc"] == pytest.approx(0.0)
+        assert row["laplace"] == pytest.approx(0.5)
+
+
+class TestComplexityMetrics:
+    """Complexity is counted in conditions and distinct features."""
+
+    @pytest.mark.parametrize(
+        "rule, conditions, features",
+        [
+            ('(X["a"] > 1)', 1, 1),
+            ('(X["a"] > 1) & (X["b"] <= 2)', 2, 2),
+            ('(X["a"] > 1) & (X["a"] < 5)', 2, 1),
+            ("(X['a'] > 1) | (X['b'] > 2) | (X['c'] > 3)", 3, 3),
+            ("rule_A", 0, 0),
+            ("", 0, 0),
+        ],
+    )
+    def test_counts(self, rule, conditions, features):
+        assert count_conditions(rule) == conditions
+        assert count_features(rule) == features
+
+    def test_columns_match_helper_functions(self):
+        y = pl.Series("y", [True, False, True, False])
+        rules = {
+            '(X["a"] > 1)': [True, False, True, False],
+            '(X["a"] > 1) & (X["a"] < 5)': [True, False, False, False],
+            '(X["a"] > 1) | (X["b"] > 2)': [True, True, True, False],
+        }
+        R = pl.DataFrame(rules)
+        m = compute_metrics(R, y)
+
+        assert m["num_conditions"].to_list() == [count_conditions(r) for r in rules]
+        assert m["num_features"].to_list() == [count_features(r) for r in rules]
+
+    def test_a_wider_disjunction_is_more_complex(self):
+        y = pl.Series("y", [True, False])
+        narrow = '(X["a"] > 1)'
+        wide = '(X["a"] > 1) | (X["b"] > 2) | (X["c"] > 3)'
+        R = pl.DataFrame({narrow: [True, False], wide: [True, True]})
+        m = compute_metrics(R, y)
+
+        assert m["num_conditions"].to_list() == [1, 3]
+        assert m["num_features"].to_list() == [1, 3]
