@@ -19,11 +19,22 @@ def validate_rules_cv(
 ) -> pl.DataFrame:
     """Evaluate rule stability across K folds.
 
-    Validates already-generated rules on K held-out folds without re-generating
-    them. For each fold the rules are evaluated on the validation split, and the
+    Validates already-generated rules on K folds without re-generating them.
+    For each fold the rules are evaluated on the validation split, and the
     mean, standard deviation, and minimum of each requested metric across folds
     are returned. Rules with a high ``{metric}_cv_std`` or a low
     ``{metric}_cv_min`` are likely over-fitted to the training data.
+
+    .. warning::
+
+       **The folds are not truly held out, and the reported statistics are
+       optimistically biased.** This function does not generate rules; it takes
+       rules that were already produced from the *entire* dataset and then
+       re-scores them on subsets of that same dataset. Every validation fold
+       was therefore part of the data used to choose the rules' features and
+       thresholds. ``{metric}_cv_mean``, ``{metric}_cv_std`` and
+       ``{metric}_cv_min`` must **not** be reported as out-of-sample or
+       generalisation estimates. See Notes for an unbiased protocol.
 
     Parameters
     ----------
@@ -71,13 +82,33 @@ def validate_rules_cv(
 
     Notes
     -----
-    The CV stability scores carry an optimism bias: because ``rules`` are
-    generated from the full dataset *before* ``validate_rules_cv`` is called,
-    the held-out folds were already seen during rule extraction.  The
-    reported ``{metric}_cv_min`` and ``{metric}_cv_std`` are therefore a
-    lower bound on overfitting, not a true out-of-sample estimate.  Use
-    them to flag unstable rules rather than to estimate deployment
-    performance.
+    **Optimism bias.** The intended usage is: generate rules on ``X``/``y``,
+    then call this function on the same ``X``/``y``. Rule selection has
+    therefore already seen every fold, which leaks information into each
+    "validation" split. The consequences are:
+
+    - ``{metric}_cv_mean`` is inflated relative to true held-out performance.
+    - ``{metric}_cv_std`` is deflated and ``{metric}_cv_min`` is inflated, so
+      the numbers understate how badly a rule can degrade on genuinely unseen
+      data. They are a *lower bound* on overfitting, not a measure of it.
+    - A rule that looks stable here can still fail out of sample; a rule that
+      looks unstable here is almost certainly unstable.
+
+    Use these statistics as a *relative* screen to rank and discard fragile
+    rules within a candidate set — never as an estimate of deployment
+    performance, and never as a headline result.
+
+    For an unbiased estimate, use a nested protocol in which rule generation
+    happens strictly inside the training split of each outer fold:
+
+    1. Split the data into outer folds (or a single held-out test set).
+    2. For each outer fold, run the full pipeline — weight transformations,
+       grid search, filtering, deduplication — on the training portion only.
+    3. Evaluate the resulting rules on the outer fold, which no step of the
+       pipeline has seen.
+    4. Aggregate across outer folds.
+
+    Only step 3 yields a defensible generalisation estimate.
 
     See Also
     --------
@@ -139,6 +170,15 @@ def identify_unstable_rules(
     Filters the output of :func:`validate_rules_cv` to surface rules that are
     likely over-fitted (high variance across folds) or simply weak (low mean
     metric).
+
+    .. warning::
+
+       Inherits the optimism bias of :func:`validate_rules_cv`: the folds were
+       already seen during rule generation, so ``{metric}_cv_std`` is deflated
+       and ``{metric}_cv_mean`` inflated. This function is therefore a
+       one-sided screen — rules it flags are genuinely unstable, but rules it
+       does **not** flag are not thereby shown to generalise. Absence from the
+       returned set is not evidence of stability.
 
     Parameters
     ----------

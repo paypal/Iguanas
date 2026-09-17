@@ -48,19 +48,19 @@ git clone https://github.com/paypal/Iguanas.git
 pip install -e .
 ```
 
-Then install the `dev` extras:
+To run the full test suite you need every optional dependency, which the `all`
+extra installs in one step:
 
 ```bash
-pip install .[dev]
+pip install -e ".[all]"
 ```
 
-If contributing to a module that utilises Spark, you need to install the `spark` extras:
+`all` pulls in `dev` (pytest, pytest-cov, ruff, mypy), `notebook`, `lightgbm`
+and `onnx`. If you only need the test and lint tooling, `pip install -e ".[dev]"`
+is enough — the LightGBM and ONNX test modules will then skip themselves rather
+than fail.
 
-```bash
-pip install .[spark]
-```
-
-Once Iguanas has been installed in the virtual environment, create a jupyter kernel using the command:
+If you want to run the example notebooks, create a Jupyter kernel:
 
 ```bash
 python -m ipykernel install --user --name iguanas_dev
@@ -68,22 +68,49 @@ python -m ipykernel install --user --name iguanas_dev
 
 ## Testing
 
-You can run all unit, docstring and notebook tests for the **Spark and non-Spark modules** using the command:
+Run the full suite from the repository root:
 
 ```bash
-sh <path-to-Iguanas-repo>/run_all_tests.sh iguanas_dev
+pytest
 ```
 
-You can run the tests for the **non-Spark modules only** using the command:
+Coverage reporting is enabled by default via `pyproject.toml`. To run without it:
 
 ```bash
-sh <path-to-Iguanas-repo>/run_tests_non_spark.sh iguanas_dev
+pytest --no-cov
 ```
 
-You can run the tests for the **Spark modules only** using the command:
+To run a single module, or a single test:
 
 ```bash
-sh <path-to-Iguanas-repo>/run_tests_spark.sh iguanas_dev
+pytest iguanas/tests/test_rule_generation.py
+pytest iguanas/tests/test_rule_generation.py::TestLightGBMSupport -v
+```
+
+With all extras installed the suite is fully green. Without them you will see
+skips rather than failures, and the skip message names the extra to install:
+
+```
+SKIPPED iguanas/tests/test_onnx_converter.py: requires the optional onnx extra: pip install "iguanas[onnx]"
+```
+
+Linting and type checking:
+
+```bash
+ruff check iguanas
+mypy iguanas
+```
+
+### Benchmarks
+
+The `benchmarks/` directory holds a separate harness that compares Iguanas
+against external rule learners over a registry of public datasets. It has its
+own requirements file and is not part of the unit test suite:
+
+```bash
+pip install -r benchmarks/requirements-bench.txt
+pytest benchmarks/tests
+python -m benchmarks.run --smoke
 ```
 
 ## Submitting a change

@@ -3,7 +3,7 @@
   <img alt="Iguanas Logo" src="https://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png">
 </picture>
 
-# Iguanas: A Lightning-Fast Rule Generation Python Library
+# Iguanas: A Rule Generation and Evaluation Python Library
 
 
 | | |
@@ -21,26 +21,34 @@
 
 ## What is Iguanas?
 
-Iguanas is a library built on top of Polars, designed to streamline the entire rule-based system development workflow — from raw data to production-ready rules — leveraging **Polars' blazing-fast multi-core processing**.
+Iguanas is a library built on top of Polars, designed to streamline the entire rule-based system development workflow — from raw data to production-ready rules.
 
-Built by the PSP Data Team at PayPal, Iguanas makes rule generation, evaluation, and selection both **faster and simpler**.
+Built by the PSP Data Team at PayPal, Iguanas makes rule generation, evaluation, and selection **simpler**, with a single-node execution model that uses multi-threading where it helps.
 
 ## ⚡ Key Features
 
-- **🚀 Lightning Fast**: Built on Polars for multi-core parallel processing
+- **⚙️ Vectorised evaluation**: Rules are compiled once to Polars expressions (cached) and applied as columnar, multi-threaded operations
+- **🧵 Thread-parallel grid search**: Grid search over weight transformations and `scale_pos_weight` values is parallelised on a single machine via joblib's threading backend
 - **🎯 End-to-End**: Generate, evaluate, combine, and select rules in one library
-- **📦 Production Ready**: Lightweight rule strings that deploy anywhere
-- **🔧 Flexible**: Sequential and parallel grid search strategies
+- **📦 Production Ready**: Lightweight rule strings that deploy anywhere, plus ONNX export for runtimes that must not execute Python
+- **🔧 Flexible**: Sequential and thread-parallel grid search strategies
 - **🔗 Composable**: Chain generation → evaluation → selection with a few function calls
 - **🎓 Easy to Learn**: Simple functional API with clear, consistent signatures
+
+> **Scope of parallelism.** Iguanas runs on a single node. Grid search uses
+> `joblib.Parallel` with the `"threading"` backend, and rule evaluation uses
+> Polars' internal multi-threading. There is no multiprocessing, no distributed
+> or cluster execution (no Dask, Ray or Spark), and no GPU code path. No
+> published benchmark accompanies this release, so no throughput or speed-up
+> figure is claimed.
 
 ## 🛠️ What Can Iguanas Do?
 
 ### ⚙️ Rule Generation
-Generate interpretable rules from labelled datasets using XGBoost tree extraction:
-- `rule_grid_search_sequential` - Single-process grid search over weight transformations and scale_pos_weight values
-- `rule_grid_search_parallel_weights` - Parallel grid search parallelised over weight transformations
-- `rule_grid_search_parallel_scales` - Parallel grid search parallelised over scale_pos_weight values
+Extract interpretable rules from labelled datasets by reading decision paths out of fitted XGBoost/LightGBM trees (standard decision-path extraction — the distinctive parts are the monotone-constraint-guided traversal and the weight/`scale_pos_weight` steering that drives rule diversity):
+- `rule_grid_search_sequential` - Single-threaded grid search over weight transformations and scale_pos_weight values
+- `rule_grid_search_parallel_weights` - Thread-parallel grid search, parallelised over weight transformations
+- `rule_grid_search_parallel_scales` - Thread-parallel grid search, parallelised over scale_pos_weight values
 - `extract_rules` - Extract rules from a fitted XGBoost model (with optional monotone constraints)
 - `extract_rule_by_max_gain` - Extract the highest-gain rule path from a single tree
 - `extract_rule_with_monotone_constraints` - Extract a rule path respecting monotone constraints
@@ -56,6 +64,13 @@ Evaluate rules on data and filter by performance:
 - `apply_and_filter_by_performance` - Evaluate rules and filter by user-defined metric thresholds
 - `select_diverse_top_rules` - Select top-performing rules while removing highly correlated duplicates
 - `apply_filter_and_deduplicate_rules` - Complete end-to-end pipeline: evaluate → filter → deduplicate
+
+> ⚠️ **Security:** `apply_rules` and `apply_rules_lazy` compile rule strings with
+> Python's `eval()`. Only pass rules that come from a trusted source — generated
+> by Iguanas, loaded from a trusted store, or reviewed by a human — never rules
+> derived from untrusted user input. For deployment where provenance cannot be
+> guaranteed, use `rules_to_onnx` instead: it parses rules with `ast` and emits a
+> static graph, so scoring executes no Python.
 
 ### 🔀 Rule Combination
 Combine individual rules into compound rules to improve performance:
@@ -113,9 +128,16 @@ Generate sample weight schedules to steer rule learning:
 - `select_uncorrelated_weights` - Select a diverse subset of weight columns by searching for a correlation threshold that yields approximately `num_weights` uncorrelated columns
 
 ### 🔁 Rule Cross-Validation
-Validate rule stability across held-out folds without re-generating rules:
-- `validate_rules_cv` - Evaluate rules across K folds and return per-metric mean, std, and min — flags overfitted rules by their high variance
+Check rule stability across folds without re-generating rules:
+- `validate_rules_cv` - Evaluate rules across K folds and return per-metric mean, std, and min — flags rules whose performance is unstable across folds
 - `identify_unstable_rules` - Return the names of rules whose cross-validated metric variance exceeds a threshold
+
+> ⚠️ **Optimism bias:** rules are generated on the full dataset *before* being
+> passed to `validate_rules_cv`, so the folds are not truly held out. The
+> reported cv std/min are optimistic and must not be quoted as out-of-sample
+> performance. Use them only as a relative screen for fragile rules; for an
+> unbiased estimate, run the full generation pipeline inside each outer fold of
+> a nested cross-validation.
 
 ### 💬 Rule Explanation
 Inspect and explain individual rule predictions:
@@ -124,14 +146,14 @@ Inspect and explain individual rule predictions:
 - `compute_counterfactual` - Find the minimal feature changes needed to un-flag a sample
 
 ### 🗂️ Rule Registry
-Store and compare named rule snapshots across experiments:
+Store and compare named rule snapshots across experiments (keyed by name — saving the same name overwrites; there is no revision history):
 - `RuleRegistry` - Save, load, delete, and list named rule snapshots (with optional JSON persistence)
 - `filter_rule_pairs_by_overlap` - Return rule pairs whose Jaccard overlap falls within a `[min_overlap, max_overlap]` range (e.g. disjoint pairs, near-redundant pairs, or everything in between)
 
 ### 🚀 Deployment
-Export rules and score data efficiently at scale:
-- `apply_rules_lazy` - Evaluate rule expressions on a Polars `LazyFrame` for out-of-core scoring
-- `rules_to_onnx` - Convert rule strings to a portable ONNX binary classifier (servable by any ONNX-compatible runtime)
+Export rules and score data:
+- `apply_rules_lazy` - Evaluate rule expressions on a Polars `LazyFrame` for out-of-core scoring (uses `eval()`; see the security note above)
+- `rules_to_onnx` - Convert rule strings to a portable ONNX binary classifier (servable by any ONNX-compatible runtime; parses with `ast`, executes no Python at scoring time)
 
 ### 📤 ONNX Export
 Convert any fitted rule or ruleset into a self-contained ONNX model (requires the `onnx` extra: `pip install "iguanas[onnx]"`):
@@ -169,12 +191,12 @@ The exported model has:
 - **Metadata**: feature-name-to-column-index mapping in `metadata_props`
 
 ### ⚖️ Fairness
-Audit rule performance across demographic subgroups:
+Post-hoc bias measurement across demographic subgroups. Fairness is *measured*, not optimised — Iguanas has no fairness-aware generation or selection:
 - `compute_subgroup_metrics` - Compute precision, recall, and all other metrics broken down by a protected attribute column
-- `compute_disparate_impact_ratio` - Compute the ratio of positive prediction rates between subgroups to surface disparate impact
+- `compute_disparate_impact_ratio` - Compute the ratio of positive prediction rates between subgroups to surface disparate impact (a screening heuristic, not a statistical test)
 
 ### 📈 Rule Monitoring
-Track rule performance drift between a reference period and a current period:
+Performance-degradation monitoring between a reference period and a current period. This is a threshold on metric deltas, **not** statistical drift detection (no KS test, PSI, or JS divergence), and it requires labels for both periods:
 - `compare_rule_metrics` - Compare per-rule metrics between two `compute_metrics` outputs and flag rules that have degraded beyond optional thresholds
 
 ## 🚀 Quick Start
@@ -236,13 +258,33 @@ Requires Python 3.10 or higher.
 pip install iguanas
 ```
 
+Optional extras:
+
+```bash
+pip install "iguanas[lightgbm]"   # LightGBM as an alternative rule generator
+pip install "iguanas[onnx]"       # ONNX export of rules and rule sets
+pip install "iguanas[all]"        # everything, including dev and notebook tooling
+```
+
 Or install from source:
 
 ```bash
 git clone https://github.com/paypal/iguanas.git
 cd iguanas
-pip install -e .    # Install in editable/development mode
+pip install -e ".[all]"    # editable install with every optional dependency
 ```
+
+### Running the tests
+
+```bash
+pip install -e ".[all]"
+pytest
+```
+
+This runs the whole suite. Installing only `[dev]` also works — the LightGBM and
+ONNX test modules skip themselves when their optional dependency is absent, and
+the skip message names the extra to install. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for linting, type checking and benchmarks.
 
 ## 📚 Documentation
 
@@ -252,7 +294,7 @@ For detailed documentation, tutorials, and API reference, visit:
 
 ## 🎯 Use Cases
 
-Iguanas is perfect for:
+Iguanas is intended for:
 
 - **Fraud Detection** - Generate high-precision rules to flag suspicious transactions
 - **Risk Scoring** - Build interpretable rule sets for credit or operational risk

@@ -69,14 +69,14 @@ Iguanas is organized into modular components that work together in a typical wor
 **1. Rule Generation** (:doc:`api/rule_generation`)
    Generate rules from your data using XGBoost or LightGBM decision trees:
    
-   - ``rule_grid_search()``: Parallelized grid search over weight transformations and scale_pos_weight values
+   - ``rule_grid_search()``: Thread-parallel grid search over weight transformations and scale_pos_weight values (single node; joblib ``"threading"`` backend)
    - ``extract_rules()``: Extract rules from a fitted XGBoost/LightGBM model
    - ``extract_rule_by_max_gain()``: Extract the highest-gain rule path from a single tree
 
 **2. Rule Evaluation** (:doc:`api/rule_evaluation`)
    Apply rules to data and evaluate their performance:
    
-   - ``apply_rules()``: Evaluate rule expressions on DataFrames
+   - ``apply_rules()``: Evaluate rule expressions on DataFrames (compiles rules with ``eval()`` — use trusted rule sources only)
    - ``apply_and_filter_by_performance()``: Filter rules by precision/recall thresholds
    - ``select_diverse_top_rules()``: Select top performing non-correlated rules
 
@@ -127,10 +127,19 @@ Iguanas is organized into modular components that work together in a typical wor
    - :doc:`api/monotone_constraints`: Infer monotone constraints for XGBoost/LightGBM
 
 **9. Rule Cross-Validation** (:doc:`api/rule_cv`)
-   Validate rule stability across held-out folds:
+   Check rule stability across folds:
    
    - ``validate_rules_cv()``: Evaluate rules on K folds and return per-metric mean, std, and min
    - ``identify_unstable_rules()``: Flag rules with high cross-fold variance
+
+   .. warning::
+
+      Rules are generated on the full dataset before being passed to
+      ``validate_rules_cv()``, so the folds are not truly held out and the
+      reported cv std/min are optimistically biased. Treat them as a relative
+      screen for fragile rules, not as an out-of-sample estimate; use a nested
+      protocol (full pipeline inside each outer training split) for unbiased
+      numbers.
 
 **10. Rule Explanation** (:doc:`api/rule_explanation`)
    Interpret and explain individual rule predictions:
@@ -140,18 +149,22 @@ Iguanas is organized into modular components that work together in a typical wor
    - ``compute_counterfactual()``: Find the minimal feature changes to un-flag a sample
 
 **11. Rule Fairness** (:doc:`api/rule_fairness`)
-   Audit rule performance across demographic subgroups:
+   Post-hoc bias measurement across demographic subgroups. Fairness is measured,
+   not optimised — nothing here changes how rules are generated or selected:
    
    - ``compute_subgroup_metrics()``: Per-subgroup precision, recall, and all other metrics
-   - ``compute_disparate_impact_ratio()``: Surface disparate impact relative to a reference group
+   - ``compute_disparate_impact_ratio()``: Surface disparate impact relative to a reference group (screening heuristic, not a statistical test)
 
 **12. Rule Monitoring** (:doc:`api/rule_monitoring`)
-   Track rule performance drift over time:
+   Flag per-rule performance degradation between two labelled periods. This is a
+   threshold on metric deltas, not statistical drift detection (no KS test, PSI,
+   or JS divergence):
    
    - ``compare_rule_metrics()``: Compare per-rule metrics between a reference and current period; flag degraded rules
 
 **13. Rule Registry** (:doc:`api/rule_registry`)
-   Version-control rulesets across experiments:
+   Store and compare named ruleset snapshots across experiments (keyed by name;
+   no revision history):
    
    - ``RuleRegistry``: Save, load, delete, and compare named rule snapshots (JSON persistence)
    - ``filter_rule_pairs_by_overlap()``: Filter rule pairs by Jaccard overlap range
@@ -163,7 +176,9 @@ Iguanas is organized into modular components that work together in a typical wor
    - ``RulesetClassifier``: Fit → generate → filter → correlate → greedily combine rules
 
 **15. ONNX Export** (:doc:`api/onnx_converter`)
-   Deploy rules to any ONNX-compatible runtime:
+   Deploy rules to any ONNX-compatible runtime. Rules are parsed with ``ast``
+   and emitted as a static graph, so scoring executes no Python — the
+   recommended production path:
    
    - ``rules_to_onnx()``: Convert rule strings to a portable ONNX binary classifier
 

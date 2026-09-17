@@ -1,3 +1,35 @@
+"""Extract interpretable rules from fitted XGBoost / LightGBM models.
+
+The generation step itself is standard decision-path extraction: a gradient
+boosted model is fitted, and a root-to-leaf path from each tree is serialised
+into a rule string. This is a well-established technique, not a new
+rule-induction algorithm, and no claim of optimality or completeness is made
+over the space of possible rules — the rules returned are exactly those the
+booster happened to build.
+
+Two aspects shape *which* path is taken and *how diverse* the resulting rule
+set is:
+
+- **Monotone-constraint-guided traversal.** When every feature carries a
+  monotone constraint of +1 or -1, :func:`extract_rule_with_monotone_constraints`
+  walks root-to-leaf choosing the branch implied by each feature's constraint
+  direction, rather than following the highest-gain leaf. This yields rules
+  whose conditions all point in the business-expected direction. Otherwise
+  :func:`extract_rule_by_max_gain` traces back from the maximum-gain leaf.
+- **Sample-weight and ``scale_pos_weight`` steering.** The grid search refits
+  the booster across a grid of sample-weight schedules and ``scale_pos_weight``
+  values. Each combination reshapes the loss surface, so different splits win
+  and different rules are extracted; the grid is a diversity mechanism, not a
+  hyperparameter optimiser — results are pooled and deduplicated, not ranked.
+
+Execution model
+---------------
+The grid search runs on a single node. Parallelism is provided by
+:class:`joblib.Parallel` with the ``"threading"`` backend, so speed-up comes
+from the booster releasing the GIL during fitting. There is no multiprocessing,
+no cluster/distributed execution (no Dask, Ray or Spark), and no GPU-specific
+code path; scale is bounded by one machine's cores and memory.
+"""
 from typing import Any, cast
 
 import numpy as np
@@ -616,12 +648,12 @@ def rule_grid_search_sequential(
     verbose: int = 0,
 ) -> pl.DataFrame:
     """
-    Sequential (single-process) variant of rule_grid_search.
+    Sequential (single-threaded) variant of rule_grid_search.
 
-    Identical behaviour to :func:`rule_grid_search` but runs in a single process
-    without joblib parallelism. Useful for debugging, environments where
-    multiprocessing is unavailable, or small workloads where process-spawn
-    overhead outweighs the benefit of parallelism.
+    Identical behaviour to :func:`rule_grid_search` but runs the grid in a
+    plain loop without joblib. Useful for debugging, for deterministic
+    profiling, or for small workloads where the thread-dispatch overhead
+    outweighs the benefit of parallelism.
 
     Parameters
     ----------
@@ -695,14 +727,18 @@ def rule_grid_search_parallel_weights(
     verbose: int = 0,
 ) -> pl.DataFrame:
     """
-    Perform grid search over sample weight transformations and scale_pos_weight values to find optimal rules.
+    Grid search over sample weight transformations and scale_pos_weight values, parallelised over weight transformations.
 
     This function systematically trains XGBoost models with different combinations of:
     - sample weights
     - scale_pos_weight values
 
     For each combination, it extracts rules from the fitted models and returns them as a Polars DataFrame.
-    The weight transformations loop is parallelized using joblib for improved performance.
+    The results from all combinations are pooled and deduplicated; the grid is a
+    mechanism for producing a diverse candidate set, not a search for a single
+    "best" configuration, and no optimality over the space of rules is claimed.
+    The weight-transformation loop is parallelised with :class:`joblib.Parallel`
+    using the ``"threading"`` backend — single-node, thread-parallel only.
 
     Parameters
     ----------
@@ -713,12 +749,13 @@ def rule_grid_search_parallel_weights(
     y_train : pl.Series | pd.Series
         Training target values.
     scale_pos_weights : list | np.ndarray
-        Array of scale_pos_weight values to try. Parallelised across workers.
+        Array of scale_pos_weight values to try. Iterated sequentially within
+        each worker thread.
     sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None
         DataFrame mapping transformation names to sample weight arrays.
         If None, uses baseline weights of 1.0 for all samples.
     n_jobs : int, default=-1
-        Number of parallel jobs to run. -1 means using all processors.
+        Number of joblib worker threads. -1 means one per available core.
     verbose : int, default=0
         Controls the verbosity level:
 
@@ -791,14 +828,18 @@ def rule_grid_search_parallel_scales(
     verbose: int = 0,
 ) -> pl.DataFrame:
     """
-    Perform grid search parallelised over scale_pos_weight values.
+    Grid search parallelised over scale_pos_weight values.
 
     This function systematically trains XGBoost models with different combinations of:
     - sample weights
     - scale_pos_weight values
 
     For each combination, it extracts rules from the fitted models and returns them as a Polars DataFrame.
-    The weight transformations loop is parallelized using joblib for improved performance.
+    The results from all combinations are pooled and deduplicated; the grid is a
+    mechanism for producing a diverse candidate set, not a search for a single
+    "best" configuration, and no optimality over the space of rules is claimed.
+    The scale_pos_weight loop is parallelised with :class:`joblib.Parallel`
+    using the ``"threading"`` backend — single-node, thread-parallel only.
 
     Parameters
     ----------
@@ -809,12 +850,12 @@ def rule_grid_search_parallel_scales(
     y_train : pl.Series | pd.Series
         Training target values.
     scale_pos_weights : list | np.ndarray
-        Array of scale_pos_weight values to try. Parallelised across workers.
+        Array of scale_pos_weight values to try. Distributed across worker threads.
     sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None
         DataFrame mapping transformation names to sample weight arrays.
         If None, uses baseline weights of 1.0 for all samples.
     n_jobs : int, default=-1
-        Number of parallel jobs to run. -1 means using all processors.
+        Number of joblib worker threads. -1 means one per available core.
     verbose : int, default=0
         Controls the verbosity level:
 
@@ -880,14 +921,22 @@ def rule_grid_search(
     verbose: int = 0,
 ) -> pl.DataFrame:
     """
-    Perform grid search parallelised over scale_pos_weight values or sample_weights to find optimal rules.
+    Grid search over scale_pos_weight values and sample weight transformations.
+
+    Dispatches to :func:`rule_grid_search_parallel_scales` or
+    :func:`rule_grid_search_parallel_weights` depending on which axis of the
+    grid is larger, so that the parallelised loop is the longer one.
 
     This function systematically trains XGBoost models with different combinations of:
     - sample weights
     - scale_pos_weight values
 
     For each combination, it extracts rules from the fitted models and returns them as a Polars DataFrame.
-    The weight transformations loop is parallelized using joblib for improved performance.
+    The results from all combinations are pooled and deduplicated; the grid is a
+    mechanism for producing a diverse candidate set, not a search for a single
+    "best" configuration, and no optimality over the space of rules is claimed.
+    Parallelism is :class:`joblib.Parallel` with the ``"threading"`` backend —
+    single-node, thread-parallel only.
 
     Parameters
     ----------
@@ -898,12 +947,12 @@ def rule_grid_search(
     y_train : pl.Series | pd.Series
         Training target values.
     scale_pos_weights : list | np.ndarray
-        Array of scale_pos_weight values to try. Parallelised across workers.
+        Array of scale_pos_weight values to try.
     sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None
         DataFrame mapping transformation names to sample weight arrays.
         If None, uses baseline weights of 1.0 for all samples.
     n_jobs : int, default=-1
-        Number of parallel jobs to run. -1 means using all processors.
+        Number of joblib worker threads. -1 means one per available core.
     verbose : int, default=0
         Controls the verbosity level:
 

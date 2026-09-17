@@ -1,3 +1,17 @@
+"""Performance-degradation monitoring for deployed rules.
+
+Compares two :func:`~iguanas.metrics.compute_metrics` snapshots — a reference
+period and a current period — and reports the per-rule change in each shared
+metric, flagging rules whose metric fell by more than a user-supplied
+threshold.
+
+This is threshold-based degradation monitoring on supervised metrics, not
+statistical drift detection. No distributional test is performed: there is no
+Kolmogorov-Smirnov test, no Population Stability Index, no Jensen-Shannon or
+KL divergence, no change-point detection, and no significance testing. Both
+snapshots must already contain labels, so this cannot detect covariate shift
+on unlabelled production data.
+"""
 from __future__ import annotations
 
 import polars as pl
@@ -19,11 +33,11 @@ def compare_rule_metrics(
     curr_metrics: pl.DataFrame,
     thresholds: dict[str, float] | None = None,
 ) -> pl.DataFrame:
-    """Compare rule metrics between a reference period and a current period.
+    """Flag per-rule performance degradation between two periods.
 
     Takes two :func:`~iguanas.metrics.compute_metrics` outputs and returns the
     per-rule delta for every shared metric column, together with a boolean flag
-    indicating whether the rule has degraded beyond an optional threshold.
+    indicating whether the metric dropped by more than an optional threshold.
 
     Parameters
     ----------
@@ -49,6 +63,30 @@ def compare_rule_metrics(
         - ``{metric}_curr`` — metric value in the current period
         - ``{metric}_delta`` — ``curr - ref`` (negative means degradation)
         - ``{metric}_degraded`` — ``True`` when the drop exceeds the threshold
+
+    Notes
+    -----
+    What this does: an inner join on ``rule``, an arithmetic difference per
+    shared metric column, and a comparison of that difference against a fixed
+    threshold.
+
+    What this does **not** do:
+
+    - It is not a statistical drift test. No Kolmogorov-Smirnov test,
+      Population Stability Index, Jensen-Shannon/KL divergence, or
+      change-point detection is computed.
+    - It performs no significance testing and returns no p-value or
+      confidence interval, so a flagged drop may be sampling noise —
+      particularly for low-volume rules. Inspect the ``TP``/``FP`` counts in
+      the source metric tables before acting on a flag.
+    - It compares *supervised* metrics only, so both periods must be labelled.
+      It cannot detect feature or covariate shift on unlabelled data.
+    - It compares exactly two snapshots. There is no trend estimation over a
+      series of periods.
+    - Rules absent from either input are silently dropped by the inner join.
+
+    Choosing ``thresholds`` is a judgement call: with the default (``None``)
+    every negative delta is flagged, including a one-sample fluctuation.
 
     Examples
     --------

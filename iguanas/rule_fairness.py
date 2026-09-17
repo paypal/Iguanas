@@ -1,3 +1,20 @@
+"""Post-hoc fairness auditing for already-generated rules.
+
+This module provides *measurement* only. It computes standard performance
+metrics broken down by the levels of a protected attribute
+(:func:`compute_subgroup_metrics`) and the ratio of those metrics against a
+reference group (:func:`compute_disparate_impact_ratio`).
+
+Fairness is measured, not optimised. Iguanas contains no fairness-aware rule
+generation, no fairness-constrained selection, and no bias-mitigation step:
+nothing in this module feeds back into how rules are learned or chosen. The
+functions here are a bias-measurement report to be read by a human, who must
+decide what — if anything — to do about the disparities it surfaces.
+
+The metrics computed are descriptive statistics on the supplied sample. No
+statistical significance test, confidence interval, or hypothesis test is
+performed, so small subgroups can produce unstable ratios.
+"""
 from __future__ import annotations
 
 import polars as pl
@@ -15,9 +32,10 @@ def compute_subgroup_metrics(
     """Compute rule performance metrics broken down by a protected attribute.
 
     Evaluates each rule's precision, recall, and other metrics within every
-    subgroup defined by the unique values of ``group_col``.  Useful for
-    detecting disparate impact — e.g. a rule that has high precision overall
-    but systematically mis-fires on a particular demographic group.
+    subgroup defined by the unique values of ``group_col``.  This is a
+    post-hoc audit: it surfaces performance disparities — e.g. a rule that has
+    high precision overall but systematically mis-fires on a particular
+    demographic group — but does not change the rules in any way.
 
     Parameters
     ----------
@@ -49,6 +67,14 @@ def compute_subgroup_metrics(
 
         Sorted by ``group`` then ``rule``.  Returns an empty DataFrame if
         ``R`` is empty.
+
+    Notes
+    -----
+    Descriptive measurement only. The returned numbers are raw per-subgroup
+    metrics on the supplied sample: no statistical test, confidence interval,
+    or minimum-subgroup-size check is applied, and no rule is modified,
+    reweighted, or filtered as a result. Groups with few samples can therefore
+    show large apparent disparities from sampling noise alone.
 
     Examples
     --------
@@ -107,8 +133,9 @@ def compute_disparate_impact_ratio(
 
         \\text{DIR} = \\frac{\\text{metric}_{\\text{group}}}{\\text{metric}_{\\text{reference}}}
 
-    A ratio below **0.8** (the "four-fifths rule") typically signals
-    potentially disparate impact under US EEOC guidelines.
+    A ratio below **0.8** (the "four-fifths rule") is a conventional screening
+    threshold associated with US EEOC guidance. It is a heuristic flag for
+    human review, not a statistical test and not a legal determination.
 
     Parameters
     ----------
@@ -133,6 +160,14 @@ def compute_disparate_impact_ratio(
           when reference metric is zero or null.
 
         Sorted by ``rule`` then ``disparate_impact_ratio`` ascending.
+
+    Notes
+    -----
+    This is a post-hoc audit metric. Computing it does not alter, reweight, or
+    filter any rule — Iguanas performs no fairness-aware generation or
+    selection. The ratio is a point estimate with no confidence interval and no
+    significance test, so it should be interpreted alongside ``group_size``
+    from :func:`compute_subgroup_metrics`.
 
     Examples
     --------

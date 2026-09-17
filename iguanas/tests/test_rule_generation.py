@@ -1,8 +1,12 @@
+import importlib.util
+
 import numpy as np
 import pandas as pd
 import polars as pl
 import pytest
 from xgboost import XGBClassifier
+
+_HAS_LIGHTGBM = importlib.util.find_spec("lightgbm") is not None
 
 from iguanas.rule_generation import (
     _check_all_features_have_monotone_constraints,
@@ -1460,7 +1464,17 @@ class TestPrivateRuleGenerationHelpers:
 
 
 class TestLightGBMSupport:
-    """Tests covering the LightGBM code paths in rule_generation."""
+    """Tests covering the LightGBM code paths in rule_generation.
+
+    LightGBM is an optional dependency, so this whole class is skipped when it
+    is not installed rather than failing. Install it with
+    ``pip install "iguanas[lightgbm]"``.
+    """
+
+    pytestmark = pytest.mark.skipif(
+        not _HAS_LIGHTGBM,
+        reason='requires the optional lightgbm extra: pip install "iguanas[lightgbm]"',
+    )
 
     @pytest.fixture
     def lgbm_data(self):

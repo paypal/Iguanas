@@ -10,11 +10,16 @@ import polars as pl
 
 
 class RuleRegistry:
-    """Store, version, and compare named rule snapshots.
+    """Store, retrieve, and compare named rule snapshots.
 
     Each snapshot records the rule list, optional metrics, optional metadata,
     and a UTC timestamp.  The registry can be persisted to/from a JSON file
     for cross-session use, or kept in-memory only.
+
+    Versioning is by user-supplied name only: snapshots are keyed by ``name``
+    and :meth:`save` overwrites an existing entry with the same name. There is
+    no revision history, no content hashing, and no rollback — callers who want
+    a history must supply distinct names (e.g. ``"v1"``, ``"v2"``).
 
     Parameters
     ----------

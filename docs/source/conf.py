@@ -40,7 +40,7 @@ exclude_patterns: list[str] = []
 html_baseurl = "https://paypal.github.io/Iguanas/"
 
 # SEO-optimized title and description
-html_title = "Iguanas - Lightning Fast Rule generation with Polars"
+html_title = "Iguanas - Rule Generation and Evaluation with Polars"
 html_short_title = "Iguanas"
 
 # Sitemap configuration
@@ -51,7 +51,7 @@ ogp_site_url = "https://paypal.github.io/Iguanas/"
 ogp_image = "https://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png"
 ogp_description_length = 160
 ogp_type = "website"
-ogp_site_name = "Iguanas - Lightning Fast Rule generation with Polars"
+ogp_site_name = "Iguanas - Rule Generation and Evaluation with Polars"
 ogp_custom_meta_tags = [
     '<meta name="description" content="High-performance rule generation library with sklearn-compatible API." />',
     '<meta name="keywords" content="data science, machine learning, rule generation, python, polars, sklearn" />',
