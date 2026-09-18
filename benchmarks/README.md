@@ -154,7 +154,6 @@ supplies a 6% positive rate so the smoke run exercises the imbalanced path.
 
 | Name | Source | Notes |
 | --- | --- | --- |
-| `decision_tree` | scikit-learn | CART pruned along its `ccp_alpha` path; `target_conditions` gives a complexity-matched comparison |
 | `gbm_ceiling` | xgboost | Accuracy ceiling, not an interpretable model |
 | `rulefit` | imodels | |
 | `skope_rules` | imodels | |

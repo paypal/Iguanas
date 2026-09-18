@@ -23,13 +23,20 @@ class RuleGenerationConfig:
     baselines on *trees* would therefore starve the candidate pool by an order of
     magnitude, so the grid is sized to match on candidate rules instead; trees
     fitted is recorded separately as the compute measure.
+
+    Defaults are matched-capacity, no-grid settings: a single fit at the
+    class_weight='balanced' equivalent (see
+    :meth:`IguanasAdapter._scale_pos_weights`), ``n_estimators=100`` and
+    ``max_depth=4``, so model capacity is not a confound when comparing against
+    ``gbm_ceiling`` (same n_estimators/max_depth/balanced scale_pos_weight) or
+    the imodels baselines (same n_estimators/tree_size where supported).
     """
 
-    n_scale_pos_weights: int = 8
-    n_weight_transformations: int = 6
+    n_scale_pos_weights: int = 1
+    n_weight_transformations: int = 0
     weight_feature_mode: str = "variance"
     n_weight_features: int = 5
-    n_estimators: int = 25
+    n_estimators: int = 100
     max_depth: int = 4
     learning_rate: float = 0.3
     use_weight_steering: bool = True
@@ -47,8 +54,8 @@ class SelectionConfig:
     rule set overshoot any alert budget.
     """
 
-    min_precision: float = 0.5
-    min_recall: float = 0.05
+    min_precision: float = 0.3
+    min_recall: float = 0.15
     max_conditions_per_rule: int = 4
     top_n_rules: int = 150
     max_candidate_rules: int | None = None
@@ -89,7 +96,6 @@ class ExperimentConfig:
     fit_timeout_s: float = 900.0
     max_rows: int = 60_000
     baselines: tuple[str, ...] = (
-        "decision_tree",
         "gbm_ceiling",
         "rulefit",
         "skope_rules",
@@ -117,9 +123,9 @@ SMOKE_CONFIG = ExperimentConfig(
     fit_timeout_s=120.0,
     max_rows=4_000,
     generation=RuleGenerationConfig(
-        n_scale_pos_weights=6,
-        n_weight_transformations=4,
-        n_estimators=15,
+        n_scale_pos_weights=1,
+        n_weight_transformations=0,
+        n_estimators=100,
         max_depth=4,
     ),
     selection=SelectionConfig(top_n_rules=80, full_search_depth=2),

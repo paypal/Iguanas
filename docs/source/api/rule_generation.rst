@@ -7,10 +7,10 @@ Rule Generation
 Functions
 =========
 
-extract_rule_by_max_gain
+extract_max_gain_rule
 -------------------------
 
-.. autofunction:: extract_rule_by_max_gain
+.. autofunction:: extract_max_gain_rule
 
 extract_rule_with_monotone_constraints
 ---------------------------------------

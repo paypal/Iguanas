@@ -15,6 +15,9 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.14"]
     steps:
     - name: Checkout code
       uses: actions/checkout@v5

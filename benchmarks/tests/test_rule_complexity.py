@@ -49,7 +49,7 @@ class TestMaxConditionsPerRule:
         X_trans = pre.transform(ds.X)
         y = ds.y
 
-        models = ["decision_tree", "gbm_ceiling", "rulefit", "skope_rules", "figs"]
+        models = ["gbm_ceiling", "rulefit", "skope_rules", "figs"]
         for name in models:
             b = make_baseline(name, SMOKE_CONFIG, 0)
             b.fit_generate(X_trans, y)

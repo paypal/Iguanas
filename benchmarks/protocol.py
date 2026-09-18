@@ -399,6 +399,7 @@ def run_fold(
         "n_test": int(len(split.test)),
         "positive_rate_test": float(np.mean(fold.y_test)),
         "complexity_conditions": int(model.complexity()),
+        "chosen_rule": getattr(model, "_chosen", "") or "",
         "generate_seconds": generate_elapsed,
         "select_seconds": select_watch.seconds,
         "score_seconds": score_watch.seconds,

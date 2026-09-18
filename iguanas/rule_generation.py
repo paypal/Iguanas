@@ -14,8 +14,11 @@ set is:
   monotone constraint of +1 or -1, :func:`extract_rule_with_monotone_constraints`
   walks root-to-leaf choosing the branch implied by each feature's constraint
   direction, rather than following the highest-gain leaf. This yields rules
-  whose conditions all point in the business-expected direction. Otherwise
-  :func:`extract_rule_by_max_gain` traces back from the maximum-gain leaf.
+  whose conditions all point in the business-expected direction. Otherwise,
+  ``leaf_selection`` picks between :func:`extract_max_gain_rule` (one rule per
+  tree, the single highest-gain leaf) and :func:`extract_positive_gain_rules`
+  (zero or more rules per tree, one for every leaf that favours the positive
+  class).
 - **Sample-weight and ``scale_pos_weight`` steering.** The grid search refits
   the booster across a grid of sample-weight schedules and ``scale_pos_weight``
   values. Each combination reshapes the loss surface, so different splits win
@@ -53,7 +56,7 @@ def _normalise_lgbm_tree_df(df: pd.DataFrame) -> pd.DataFrame:
     """Map a single-tree LightGBM ``trees_to_dataframe()`` slice to the XGBoost schema.
 
     After normalisation the tree can be passed unchanged to
-    :func:`extract_rule_by_max_gain` and
+    :func:`extract_max_gain_rule` and
     :func:`extract_rule_with_monotone_constraints`.
 
     Column mapping
@@ -144,7 +147,7 @@ def _get_monotone_constraints_dict(estimator: Any) -> dict[str, int]:
 # ---------------------------------------------------------------------------
 
 
-def extract_rule_by_max_gain(tree_X: pd.DataFrame) -> str:
+def extract_max_gain_rule(tree_X: pd.DataFrame) -> str:
     """Extract the rule path to the leaf with maximum gain using bottom-to-top approach.
 
     Finds the leaf node with highest gain value and traces back to the root node,
@@ -219,6 +222,54 @@ def extract_rule_by_max_gain(tree_X: pd.DataFrame) -> str:
 
     conditions.reverse()
     return " & ".join(conditions) if conditions else ""
+
+
+def extract_positive_gain_rules(tree_X: pd.DataFrame) -> list[str]:
+    """Extract every root-to-leaf path whose leaf favours the positive class.
+
+    Unlike :func:`extract_max_gain_rule`, which returns only the single
+    highest-gain leaf per tree, this walks the tree top-to-bottom once and
+    collects every leaf whose value is positive -- so a single tree can
+    contribute zero, one, or several rules, mirroring how a boosted ensemble's
+    positive-leaf paths are pooled when treated as a flat disjunctive rule set.
+
+    Parameters
+    ----------
+    tree_X : pd.DataFrame
+        Output from estimator._Booster.trees_to_dataframe() filtered for a
+        single tree. Required columns: Node, ID, Feature, Split, Yes, No, Gain.
+
+    Returns
+    -------
+    list[str]
+        Rule strings in format (X["feat1"] >= Split1) & (X["feat2"] < Split2),
+        one per qualifying leaf. Empty list if the tree has no positive leaf.
+    """
+    if tree_X.empty:
+        return []
+
+    tree_X = tree_X.set_index("ID")
+    root_rows = tree_X[tree_X["Node"] == 0]
+    if root_rows.empty:
+        return []
+    root_id = root_rows.index[0]
+
+    rules: list[str] = []
+
+    def walk(node_id: Any, path: list[str]) -> None:
+        if node_id not in tree_X.index:
+            return
+        row = tree_X.loc[node_id]
+        if row["Feature"] == "Leaf":
+            if pd.notna(row["Gain"]) and float(row["Gain"]) > 0 and path:
+                rules.append(" & ".join(path))
+            return
+        feature, split = row["Feature"], round(row["Split"], 5)
+        walk(row["Yes"], [*path, f'(X["{feature}"] < {split})'])
+        walk(row["No"], [*path, f'(X["{feature}"] >= {split})'])
+
+    walk(root_id, [])
+    return rules
 
 
 def extract_rule_with_monotone_constraints(
@@ -297,6 +348,7 @@ def extract_rule_with_monotone_constraints(
 def extract_rules(
     estimator: XGBClassifier,
     all_features_constrained: bool,
+    leaf_selection: str = "max_gain",
     **kwargs: Any,
 ) -> pd.DataFrame:
     """Generate rules extracted from XGBoost or LightGBM trees.
@@ -306,8 +358,17 @@ def extract_rules(
     estimator : XGBClassifier | LGBMClassifier
         Fitted tree-based classifier. Both XGBoost and LightGBM are supported.
     all_features_constrained : bool
-        If True, uses monotone constraint-based extraction (top-to-bottom).
-        If False, uses max gain-based extraction (bottom-to-top).
+        If True, uses monotone constraint-based extraction (top-to-bottom),
+        which always yields one rule per tree; ``leaf_selection`` is ignored.
+        If False, ``leaf_selection`` picks the extraction strategy.
+    leaf_selection : {"max_gain", "all_positive"}, default="max_gain"
+        Strategy used when ``all_features_constrained`` is False:
+
+        - ``"max_gain"``: one rule per tree, the single highest-gain leaf
+          (see :func:`extract_max_gain_rule`).
+        - ``"all_positive"``: zero or more rules per tree, one for every leaf
+          whose value favours the positive class (see
+          :func:`extract_positive_gain_rules`).
     **kwargs : dict
         Additional metadata columns added to the output DataFrame
         (e.g., transformation name, scale_pos_weight value).
@@ -316,7 +377,17 @@ def extract_rules(
     -------
     pd.DataFrame
         DataFrame with columns: ``rule``, ``tree``, and any ``kwargs`` columns.
+
+    Raises
+    ------
+    ValueError
+        If ``leaf_selection`` is not ``"max_gain"`` or ``"all_positive"``.
     """
+    if leaf_selection not in ("max_gain", "all_positive"):
+        raise ValueError(
+            f"leaf_selection must be 'max_gain' or 'all_positive', got {leaf_selection!r}"
+        )
+
     booster_type = _detect_booster_type(estimator)
     df = _get_trees_dataframe(estimator)
     group_col = "tree_index" if booster_type == "lightgbm" else "Tree"
@@ -337,16 +408,20 @@ def extract_rules(
         if all_features_constrained:
             mc_dict = _get_monotone_constraints_dict(estimator)
             rule = extract_rule_with_monotone_constraints(tree, mc_dict)
-            rule = simplify_rule(rule)
+            rules_for_tree = [simplify_rule(rule)] if rule else []
+        elif leaf_selection == "all_positive":
+            rules_for_tree = [
+                simplified
+                for rule in extract_positive_gain_rules(tree)
+                if (simplified := simplify_rule(rule))
+            ]
         else:
-            rule = extract_rule_by_max_gain(tree)
-            rule = simplify_rule(rule)
+            rule = extract_max_gain_rule(tree)
+            rules_for_tree = [simplify_rule(rule)] if rule else []
 
-        if not rule:
-            continue
-
-        rule_strings.append(rule)
-        tree_ids.append(tree_id)
+        for rule in rules_for_tree:
+            rule_strings.append(rule)
+            tree_ids.append(tree_id)
 
     if rule_strings:
         rules_data: dict[str, Any] = {"rule": rule_strings, "tree": tree_ids}
@@ -402,6 +477,7 @@ def _train_rules_for_weight_transformation(
     all_features_constrained: bool,
     feature_names: list[str] | None = None,
     estimator_class: type = XGBClassifier,
+    leaf_selection: str = "max_gain",
 ) -> list[pd.DataFrame]:
     """
     Process a single weight column across all scale_pos_weight values.
@@ -426,6 +502,8 @@ def _train_rules_for_weight_transformation(
         Original column names for X_train. When provided and X_train is a numpy
         array, a DataFrame is reconstructed inside the worker so that XGBoost
         preserves feature names (required for monotone-constraint rule extraction).
+    leaf_selection : {"max_gain", "all_positive"}, default="max_gain"
+        Forwarded to :func:`extract_rules`; ignored when all_features_constrained.
 
     Returns
     -------
@@ -457,7 +535,7 @@ def _train_rules_for_weight_transformation(
             "transformation": transformation,
             "scale_pos_weight": scale_pos_weight,
         }
-        rules_df = extract_rules(est, all_features_constrained, **params)
+        rules_df = extract_rules(est, all_features_constrained, leaf_selection, **params)
 
         if not rules_df.empty:
             rules_dfs.append(rules_df)
@@ -475,6 +553,7 @@ def _train_rules_for_scale(
     all_features_constrained: bool,
     feature_names: list[str] | None = None,
     estimator_class: type = XGBClassifier,
+    leaf_selection: str = "max_gain",
 ) -> list[pd.DataFrame]:
     """
     Process all weight transformations for a single scale_pos_weight value.
@@ -500,6 +579,8 @@ def _train_rules_for_scale(
     feature_names : list[str] | None, default=None
         Original column names for X_train. When provided, a DataFrame is
         reconstructed so that XGBoost preserves feature names.
+    leaf_selection : {"max_gain", "all_positive"}, default="max_gain"
+        Forwarded to :func:`extract_rules`; ignored when all_features_constrained.
 
     Returns
     -------
@@ -527,7 +608,7 @@ def _train_rules_for_scale(
             "transformation": name,
             "scale_pos_weight": scale_pos_weight,
         }
-        rules_df = extract_rules(est, all_features_constrained, **params)
+        rules_df = extract_rules(est, all_features_constrained, leaf_selection, **params)
         if not rules_df.empty:
             rules_dfs.append(rules_df)
 
@@ -646,6 +727,7 @@ def rule_grid_search_sequential(
     scale_pos_weights: list[float] | np.ndarray,
     sample_weights_df: pl.DataFrame | pd.DataFrame | None = None,
     verbose: int = 0,
+    leaf_selection: str = "max_gain",
 ) -> pl.DataFrame:
     """
     Sequential (single-threaded) variant of rule_grid_search.
@@ -670,6 +752,10 @@ def rule_grid_search_sequential(
         If None, uses baseline weights of 1.0 for all samples.
     verbose : int, default=0
         Controls verbosity. 0 = silent, 1 = summary.
+    leaf_selection : {"max_gain", "all_positive"}, default="max_gain"
+        Forwarded to :func:`extract_rules` for every unconstrained tree; see
+        that function for what each option does. Ignored for trees where every
+        feature carries a monotone constraint.
 
     Returns
     -------
@@ -711,6 +797,7 @@ def rule_grid_search_sequential(
             all_features_constrained,
             feature_names=feature_names,
             estimator_class=estimator_class,
+            leaf_selection=leaf_selection,
         )
         rules_dfs.extend(results)
 
@@ -725,6 +812,7 @@ def rule_grid_search_parallel_weights(
     sample_weights_df: pl.DataFrame | pd.DataFrame | None = None,
     n_jobs: int = -1,
     verbose: int = 0,
+    leaf_selection: str = "max_gain",
 ) -> pl.DataFrame:
     """
     Grid search over sample weight transformations and scale_pos_weight values, parallelised over weight transformations.
@@ -810,6 +898,7 @@ def rule_grid_search_parallel_weights(
             all_features_constrained,
             feature_names,
             estimator_class,
+            leaf_selection,
         )
         for name in weight_columns
     )
@@ -826,6 +915,7 @@ def rule_grid_search_parallel_scales(
     sample_weights_df: pl.DataFrame | pd.DataFrame | None = None,
     n_jobs: int = -1,
     verbose: int = 0,
+    leaf_selection: str = "max_gain",
 ) -> pl.DataFrame:
     """
     Grid search parallelised over scale_pos_weight values.
@@ -903,6 +993,7 @@ def rule_grid_search_parallel_scales(
             all_features_constrained,
             feature_names,
             estimator_class,
+            leaf_selection,
         )
         for scale_pos_weight in scale_pos_weights
     )
@@ -919,6 +1010,7 @@ def rule_grid_search(
     sample_weights_df: pl.DataFrame | pd.DataFrame | None = None,
     n_jobs: int = -1,
     verbose: int = 0,
+    leaf_selection: str = "max_gain",
 ) -> pl.DataFrame:
     """
     Grid search over scale_pos_weight values and sample weight transformations.
@@ -959,6 +1051,8 @@ def rule_grid_search(
         - 0: silent (no output)
         - 1: progress information (start/end summary)
         - >=2: detailed progress with live updates from joblib Parallel backend
+    leaf_selection : {"max_gain", "all_positive"}, default="max_gain"
+        Forwarded to :func:`extract_rules` for every unconstrained tree.
 
     Returns
     -------
@@ -972,9 +1066,11 @@ def rule_grid_search(
         else 1
     ):
         return rule_grid_search_parallel_scales(
-            estimator, X_train, y_train, scale_pos_weights, sample_weights_df, n_jobs, verbose
+            estimator, X_train, y_train, scale_pos_weights, sample_weights_df, n_jobs, verbose,
+            leaf_selection,
         )
     else:
         return rule_grid_search_parallel_weights(
-            estimator, X_train, y_train, scale_pos_weights, sample_weights_df, n_jobs, verbose
+            estimator, X_train, y_train, scale_pos_weights, sample_weights_df, n_jobs, verbose,
+            leaf_selection,
         )

@@ -50,7 +50,7 @@ Extract interpretable rules from labelled datasets by reading decision paths out
 - `rule_grid_search_parallel_weights` - Thread-parallel grid search, parallelised over weight transformations
 - `rule_grid_search_parallel_scales` - Thread-parallel grid search, parallelised over scale_pos_weight values
 - `extract_rules` - Extract rules from a fitted XGBoost model (with optional monotone constraints)
-- `extract_rule_by_max_gain` - Extract the highest-gain rule path from a single tree
+- `extract_max_gain_rule` - Extract the highest-gain rule path from a single tree
 - `extract_rule_with_monotone_constraints` - Extract a rule path respecting monotone constraints
 
 ### 📊 Metrics
@@ -309,11 +309,11 @@ Iguanas powers rule-based systems at:
 
 ## 🤝 Contributing
 
-We welcome contributions! Please check out our [contributing guidelines](https://github.com/paypal/iguanas/blob/master/CONTRIBUTING.md).
+We welcome contributions! Please check out our [contributing guidelines](https://github.com/paypal/iguanas/blob/main/CONTRIBUTING.md).
 
 ## 📄 License
 
-Iguanas is licensed under the Apache License 2.0. See [LICENSE](https://github.com/paypal/iguanas/blob/master/LICENSE) file for details.
+Iguanas is licensed under the Apache License 2.0. See [LICENSE](https://github.com/paypal/iguanas/blob/main/LICENSE) file for details.
 
 ## 🙏 Credits
 

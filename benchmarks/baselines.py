@@ -194,64 +194,6 @@ class RuleSetMixin:
         return count_conditions(self._chosen) if self._chosen else 0
 
 
-class DecisionTreeBaseline(RuleSetMixin, _BaseBaseline):
-    """CART pruned along its cost-complexity path, tuned on the selection split.
-
-    ``target_conditions`` makes the comparison complexity-matched: the pruning
-    level whose condition count is closest to the target is chosen rather than
-    the one with the best selection metric.
-    """
-
-    name = "decision_tree"
-
-    def __init__(
-        self,
-        cfg: ExperimentConfig,
-        seed: int,
-        *,
-        target_conditions: int | None = None,
-        max_depth: int = 4,
-    ) -> None:
-        super().__init__(cfg, seed)
-        self.target_conditions = target_conditions
-        self.max_depth = max_depth
-        self._candidates: list[DecisionTreeClassifier] = []
-        self._model: DecisionTreeClassifier | None = None
-
-    def _new_tree(self, ccp_alpha: float) -> DecisionTreeClassifier:
-        return DecisionTreeClassifier(
-            max_depth=self.max_depth,
-            random_state=self.seed,
-            class_weight="balanced",
-            ccp_alpha=ccp_alpha,
-        )
-
-    def fit_generate(self, X: pl.DataFrame, y: np.ndarray) -> None:
-        X_pd, y_int = _to_pandas(X), y.astype(int)
-        path = self._new_tree(0.0).cost_complexity_pruning_path(X_pd, y_int)
-        alphas = np.unique(np.clip(path.ccp_alphas, 0.0, None))
-        if alphas.size > 12:
-            alphas = np.quantile(alphas, np.linspace(0.0, 1.0, 12))
-        self._candidates = []
-        for alpha in alphas:
-            tree = self._new_tree(float(alpha)).fit(X_pd, y_int)
-            if tree.tree_.node_count > 1:
-                self._candidates.append(tree)
-        if not self._candidates:
-            self._candidates = [self._new_tree(0.0).fit(X_pd, y_int)]
-        self._counters = Counters(trees_fitted=len(self._candidates) + 1)
-        # The unpruned tree yields the richest pool; pruning is a selection
-        # device for a scorer, and the shared budgeted stage plays that role now.
-        self._model = max(self._candidates, key=lambda t: t.tree_.node_count)
-        self._feature_names = list(X.columns)
-        self._remember_rules(X)
-
-    def _extract_rules(self) -> list[str]:
-        if self._model is None:
-            return []
-        return rules_from_sklearn_tree(self._model, self._feature_names)
-
-
 class GBMCeilingBaseline(RuleSetMixin, _BaseBaseline):
     """Boosted-tree paths: rule generation by boosting, with no steering.
 
@@ -259,12 +201,17 @@ class GBMCeilingBaseline(RuleSetMixin, _BaseBaseline):
     semantics it is instead a rule *generator* -- every root-to-leaf path whose
     leaf favours the positive class -- so it stays comparable with the others
     rather than being scored by a mechanism none of them have.
+
+    ``n_estimators``/``max_depth`` are matched to :class:`IguanasAdapter`'s
+    generation config, and ``scale_pos_weight`` is the class_weight='balanced'
+    equivalent, so this isolates extraction strategy (all positive leaves vs.
+    one max-gain rule per tree) from differences in model capacity.
     """
 
     name = "gbm_ceiling"
 
     def __init__(
-        self, cfg: ExperimentConfig, seed: int, *, n_estimators: int = 200
+        self, cfg: ExperimentConfig, seed: int, *, n_estimators: int = 100
     ) -> None:
         super().__init__(cfg, seed)
         self.n_estimators = n_estimators
@@ -277,7 +224,10 @@ class GBMCeilingBaseline(RuleSetMixin, _BaseBaseline):
         model = XGBClassifier(
             n_estimators=self.n_estimators,
             max_depth=4,
-            learning_rate=0.1,
+            # Matches IguanasAdapter's RuleGenerationConfig.learning_rate default,
+            # so the two fit under identical hyperparameters and any remaining
+            # difference is attributable to extraction strategy alone.
+            learning_rate=0.3,
             random_state=self.seed,
             n_jobs=self.cfg.generation.n_jobs,
             tree_method="hist",
@@ -308,6 +258,9 @@ class _ImodelsBaseline(RuleSetMixin, _BaseBaseline):
     needs_discretization = False
     num_bins = 8
     default_kwargs: dict[str, Any] = {}
+    # RuleFitClassifier.fit has no sample_weight parameter; only enable this
+    # for subclasses whose underlying estimator's fit() accepts it.
+    supports_sample_weight = False
 
     def __init__(self, cfg: ExperimentConfig, seed: int, **kwargs: Any) -> None:
         super().__init__(cfg, seed)
@@ -381,7 +334,10 @@ class _ImodelsBaseline(RuleSetMixin, _BaseBaseline):
         else:
             data, names = X_pd.to_numpy(), list(X_pd.columns)
         model = self._build()
-        model.fit(data, y.astype(int), feature_names=names)
+        fit_kwargs: dict[str, Any] = {"feature_names": names}
+        if self.supports_sample_weight:
+            fit_kwargs["sample_weight"] = _balanced_sample_weight(y)
+        model.fit(data, y.astype(int), **fit_kwargs)
         self._model = model
         self._feature_names = names
         self._remember_rules(X)
@@ -421,9 +377,31 @@ def _imodels_conditions(model: Any) -> int:
     return _count_conditions_in_text(str(model))
 
 
+def _balanced_sample_weight(y: np.ndarray) -> np.ndarray:
+    """sklearn's class_weight='balanced' formula, as per-row sample weights.
+
+    Needed because several imodels estimators (e.g. RuleFitClassifier) accept
+    neither a ``class_weight`` constructor argument nor ``sample_weight`` in
+    ``fit()``, so balancing has to be applied wherever it *is* supported
+    (:class:`SkopeRulesBaseline`) rather than uniformly.
+    """
+    y = y.astype(int)
+    classes, counts = np.unique(y, return_counts=True)
+    weight_by_class = {c: len(y) / (len(classes) * n) for c, n in zip(classes, counts, strict=True)}
+    return np.array([weight_by_class[v] for v in y], dtype=float)
+
+
 class RuleFitBaseline(_ImodelsBaseline):
     name = "rulefit"
     class_names = ("RuleFitClassifier",)
+    # Matches IguanasAdapter's n_estimators/max_depth; already imodels' own
+    # defaults, set explicitly so a future imodels release can't silently
+    # drift the comparison. RuleFitClassifier has no class_weight/sample_weight
+    # hook, so imbalance is not rebalanced here (see _balanced_sample_weight).
+    # cv=False: imodels' default cv=True refits an internal regularization-path
+    # search regardless of dataset size, dominating runtime; no other baseline
+    # tunes its own hyperparameters via internal CV, so this is also fairer.
+    default_kwargs = {"n_estimators": 100, "tree_size": 4, "cv": False}
 
     def _extract_rules(self) -> list[str]:
         return rules_from_rulefit(self._model, set(self._feature_names))
@@ -432,6 +410,12 @@ class RuleFitBaseline(_ImodelsBaseline):
 class SkopeRulesBaseline(_ImodelsBaseline):
     name = "skope_rules"
     class_names = ("SkopeRulesClassifier",)
+    # imodels defaults are n_estimators=10, max_depth=3; matched here to
+    # IguanasAdapter/GBMCeilingBaseline's n_estimators=100, max_depth=4.
+    default_kwargs = {"n_estimators": 100, "max_depth": 4}
+    # SkopeRulesClassifier.fit(sample_weight=...) exists, so it can be given
+    # the class_weight='balanced' equivalent unlike RuleFit.
+    supports_sample_weight = True
 
     def _extract_rules(self) -> list[str]:
         return rules_from_skope(self._model, set(self._feature_names))
@@ -443,7 +427,9 @@ class BRLBaseline(_ImodelsBaseline):
     needs_discretization = True
     # imodels defaults run 3 chains x 50k MCMC iterations, which dominates a run;
     # these are the smallest settings that still produce a non-trivial list.
-    default_kwargs = {"n_chains": 1, "max_iter": 1_000, "listlengthprior": 3}
+    # maxcardinality caps antecedent length (conditions per rule) at candidate
+    # mining time -- the imodels default is 2, tightened here to the shared 4.
+    default_kwargs = {"n_chains": 1, "max_iter": 1_000, "listlengthprior": 3, "maxcardinality": 4}
 
     def _extract_rules(self) -> list[str]:
         return rules_from_brl(self._model, set(self._feature_names))
@@ -464,6 +450,12 @@ class CorelsBaseline(_ImodelsBaseline):
     name = "corels"
     class_names = ("OptimalRuleListClassifier", "CorelsRuleListClassifier")
     needs_discretization = True
+    # `max_card` is the standalone `corels` package's antecedent-cardinality cap
+    # (default 2); not verified against imodels' own wrapper class, since
+    # neither is installed in this environment. `_build()` drops unaccepted
+    # kwargs via get_params(), so this is a no-op rather than an error if the
+    # resolved class uses a different name.
+    default_kwargs = {"max_card": 4}
 
     def _extract_rules(self) -> list[str]:
         return rules_from_brl(self._model, set(self._feature_names))
@@ -500,7 +492,6 @@ class RipperBaseline(RuleSetMixin, _BaseBaseline):
 BaselineFactory = Callable[[ExperimentConfig, int], Any]
 
 BASELINE_REGISTRY: dict[str, BaselineFactory] = {
-    "decision_tree": DecisionTreeBaseline,
     "gbm_ceiling": GBMCeilingBaseline,
     "rulefit": RuleFitBaseline,
     "skope_rules": SkopeRulesBaseline,

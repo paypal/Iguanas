@@ -73,8 +73,12 @@ class IguanasAdapter:
     def _scale_pos_weights(self, y: np.ndarray, n: int) -> np.ndarray:
         pos = float(np.count_nonzero(y))
         neg = float(len(y) - pos)
+        # n<=1 means no grid: the single value is the true balanced ratio
+        # (class_weight='balanced' equivalent), not the log-range's start point.
+        if n <= 1:
+            return np.array([neg / pos if pos else 1.0])
         ratio = max(2.0, neg / pos) if pos else 2.0
-        return np.logspace(0.0, math.log10(ratio), num=max(1, n))
+        return np.logspace(0.0, math.log10(ratio), num=n)
 
     def _sample_weights(self, X: pl.DataFrame, y: np.ndarray) -> pl.DataFrame | None:
         """Build weight schedules from variance or generation-split importance."""

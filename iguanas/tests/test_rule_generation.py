@@ -15,7 +15,8 @@ from iguanas.rule_generation import (
     _normalise_lgbm_tree_df,
     _train_rules_for_weight_transformation,
     _train_rules_for_scale,
-    extract_rule_by_max_gain,
+    extract_max_gain_rule,
+    extract_positive_gain_rules,
     extract_rule_with_monotone_constraints,
     extract_rules,
     rule_grid_search,
@@ -26,12 +27,12 @@ from iguanas.rule_generation import (
 
 
 class TestExtractRuleByMaxGain:
-    """Test cases for extract_rule_by_max_gain function."""
+    """Test cases for extract_max_gain_rule function."""
 
     def test_empty_dataframe(self):
         """Test that empty dataframe returns empty string."""
         tree_X = pd.DataFrame()
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         assert result == ""
 
     def test_no_leaves(self):
@@ -51,7 +52,7 @@ class TestExtractRuleByMaxGain:
                 "Category": [None, None],
             }
         )
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         assert result == ""
 
     def test_single_split_tree(self):
@@ -71,7 +72,7 @@ class TestExtractRuleByMaxGain:
                 "Category": [None, None, None],
             }
         )
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         # Should follow path to leaf with gain=0.8 (Node 2, which is "No" branch)
         assert result == '(X["amount"] >= 100.0)'
 
@@ -92,7 +93,7 @@ class TestExtractRuleByMaxGain:
                 "Category": [None, None, None, None, None],
             }
         )
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         # Should follow path to leaf with gain=1.2 (Node 4)
         # Path: 0 -> No (2 is leaf) or 0 -> Yes (1) -> No (4)
         # Node 4 is "No" branch of Node 1, which is "Yes" branch of Node 0
@@ -116,7 +117,7 @@ class TestExtractRuleByMaxGain:
                 "Category": [None, None, None],
             }
         )
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         assert "3.12346" in result
 
     def test_empty_node_rows(self):
@@ -137,9 +138,136 @@ class TestExtractRuleByMaxGain:
                 "Category": [None, None],
             }
         )
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         # Should return something, but may be incomplete
         assert isinstance(result, str)
+
+
+class TestExtractPositiveGainRules:
+    """Test cases for extract_positive_gain_rules function."""
+
+    def test_empty_dataframe(self):
+        """Test that an empty dataframe returns an empty list."""
+        tree_X = pd.DataFrame()
+        result = extract_positive_gain_rules(tree_X)
+        assert result == []
+
+    def test_no_root_node(self):
+        """Test that a tree with no Node==0 row returns an empty list."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [1, 2],
+                "ID": ["0-1", "0-2"],
+                "Feature": ["Leaf", "Leaf"],
+                "Split": [None, None],
+                "Yes": [None, None],
+                "No": [None, None],
+                "Gain": [0.5, 0.8],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert result == []
+
+    def test_single_leaf_tree_returns_no_rules(self):
+        """A tree that is a single leaf has an empty path, so no rule is emitted."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [0],
+                "ID": ["0-0"],
+                "Feature": ["Leaf"],
+                "Split": [None],
+                "Yes": [None],
+                "No": [None],
+                "Gain": [0.8],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert result == []
+
+    def test_single_split_one_positive_leaf(self):
+        """Only the leaf with positive gain should produce a rule."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [0, 1, 2],
+                "ID": ["0-0", "0-1", "0-2"],
+                "Feature": ["amount", "Leaf", "Leaf"],
+                "Split": [100.0, None, None],
+                "Yes": ["0-1", None, None],
+                "No": ["0-2", None, None],
+                "Gain": [0.5, -0.3, 0.8],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert result == ['(X["amount"] >= 100.0)']
+
+    def test_single_split_both_leaves_positive(self):
+        """Both leaves positive should produce two independent rules."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [0, 1, 2],
+                "ID": ["0-0", "0-1", "0-2"],
+                "Feature": ["amount", "Leaf", "Leaf"],
+                "Split": [100.0, None, None],
+                "Yes": ["0-1", None, None],
+                "No": ["0-2", None, None],
+                "Gain": [0.5, 0.3, 0.8],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert sorted(result) == sorted(
+            ['(X["amount"] < 100.0)', '(X["amount"] >= 100.0)']
+        )
+
+    def test_leaf_with_nan_gain_is_skipped(self):
+        """A leaf with a NaN gain must not be treated as positive."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [0, 1, 2],
+                "ID": ["0-0", "0-1", "0-2"],
+                "Feature": ["amount", "Leaf", "Leaf"],
+                "Split": [100.0, None, None],
+                "Yes": ["0-1", None, None],
+                "No": ["0-2", None, None],
+                "Gain": [0.5, np.nan, 0.8],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert result == ['(X["amount"] >= 100.0)']
+
+    def test_two_level_tree_multiple_positive_leaves(self):
+        """A deeper tree can contribute more than one rule."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [0, 1, 2, 3, 4],
+                "ID": ["0-0", "0-1", "0-2", "0-3", "0-4"],
+                "Feature": ["age", "income", "Leaf", "Leaf", "Leaf"],
+                "Split": [30.0, 50000.0, None, None, None],
+                "Yes": ["0-1", "0-3", None, None, None],
+                "No": ["0-2", "0-4", None, None, None],
+                "Gain": [1.5, 0.8, 0.2, 0.4, 1.2],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert len(result) == 3
+        assert '(X["age"] >= 30.0)' in result
+        assert '(X["age"] < 30.0) & (X["income"] < 50000.0)' in result
+        assert '(X["age"] < 30.0) & (X["income"] >= 50000.0)' in result
+
+    def test_missing_child_id_does_not_crash(self):
+        """A child ID absent from the tree should stop that branch, not raise."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [0, 1],
+                "ID": ["0-0", "0-1"],
+                "Feature": ["amount", "Leaf"],
+                "Split": [100.0, None],
+                "Yes": ["0-1", None],
+                "No": ["0-999", None],  # non-existent
+                "Gain": [0.5, 0.8],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert result == ['(X["amount"] < 100.0)']
 
 
 class TestExtractRuleWithMonotoneConstraints:
@@ -804,11 +932,47 @@ class TestExtractRules:
             assert result["transformation"].iloc[0] == "custom"
             assert result["scale_pos_weight"].iloc[0] == 2.5
 
+    def test_extract_rules_with_all_positive_leaf_selection(self):
+        """leaf_selection='all_positive' can yield more rows than 'max_gain'."""
+        np.random.seed(42)
+        X_train = pd.DataFrame(
+            {
+                "feature1": np.random.randn(200),
+                "feature2": np.random.randn(200),
+            }
+        )
+        y_train = pd.Series(np.random.randint(0, 2, 200))
+
+        estimator = XGBClassifier(max_depth=3, n_estimators=5, random_state=42)
+        estimator.fit(X_train, y_train)
+
+        result_max_gain = extract_rules(estimator, all_features_constrained=False)
+        result_all_positive = extract_rules(
+            estimator, all_features_constrained=False, leaf_selection="all_positive"
+        )
+
+        assert isinstance(result_all_positive, pd.DataFrame)
+        assert len(result_all_positive) >= len(result_max_gain)
+        if not result_all_positive.empty:
+            assert "rule" in result_all_positive.columns
+            assert "tree" in result_all_positive.columns
+
+    def test_extract_rules_invalid_leaf_selection_raises(self):
+        """An unknown leaf_selection value should raise ValueError."""
+        np.random.seed(42)
+        X_train = pd.DataFrame({"feature1": np.random.randn(20)})
+        y_train = pd.Series(np.random.randint(0, 2, 20))
+        estimator = XGBClassifier(max_depth=2, n_estimators=2, random_state=42)
+        estimator.fit(X_train, y_train)
+
+        with pytest.raises(ValueError, match="leaf_selection"):
+            extract_rules(estimator, all_features_constrained=False, leaf_selection="bogus")
+
 
 class TestExtractRuleEdgeCases:
     """Additional test cases for extract_rule functions to achieve better coverage."""
 
-    def test_extract_rule_by_max_gain_node_not_found(self):
+    def test_extract_max_gain_rule_node_not_found(self):
         """Test when best_leaf_node is not found in tree (line 51 coverage)."""
         # Create a malformed tree where Node doesn't match ID expectations
         tree_X = pd.DataFrame(
@@ -826,7 +990,7 @@ class TestExtractRuleEdgeCases:
                 "Category": [None, None],
             }
         )
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         # Should return empty string when node not found
         assert result == ""
 
@@ -1163,7 +1327,7 @@ class TestRuleGridSearchSequentialEmptyResults:
 
 
 class TestEmptyNodeRowsCoverage:
-    """Test to cover line 50 - empty node_rows in extract_rule_by_max_gain."""
+    """Test to cover line 50 - empty node_rows in extract_max_gain_rule."""
 
     def test_empty_node_rows_corrupted_data(self, monkeypatch):
         """Test line 50: when node filter returns empty due to corrupted node values."""
@@ -1197,7 +1361,7 @@ class TestEmptyNodeRowsCoverage:
 
         monkeypatch.setattr(pd.DataFrame, "set_index", mock_set_index)
 
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         # Should return empty string when node_rows is empty
         assert result == ""
 

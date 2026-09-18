@@ -71,7 +71,7 @@ Iguanas is organized into modular components that work together in a typical wor
    
    - ``rule_grid_search()``: Thread-parallel grid search over weight transformations and scale_pos_weight values (single node; joblib ``"threading"`` backend)
    - ``extract_rules()``: Extract rules from a fitted XGBoost/LightGBM model
-   - ``extract_rule_by_max_gain()``: Extract the highest-gain rule path from a single tree
+   - ``extract_max_gain_rule()``: Extract the highest-gain rule path from a single tree
 
 **2. Rule Evaluation** (:doc:`api/rule_evaluation`)
    Apply rules to data and evaluate their performance:

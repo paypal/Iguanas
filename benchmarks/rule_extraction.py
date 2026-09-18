@@ -91,7 +91,9 @@ def rules_from_brl(model: Any, columns: set[str] | None = None) -> list[str]:
 def rules_from_ripper(model: Any, columns: set[str] | None = None) -> list[str]:
     """Wittgenstein rules are ``feature=value`` conjunctions joined by ``^``.
 
-    A value may be a range (``2.0-3.0``), which becomes a pair of bounds.
+    A value may be a closed range (``"2.0 - 3.0"``, spaced) or an open-ended
+    bin (``"<2.0"``, ``">=3.0"``); both are bin labels wittgenstein assigns
+    when it discretises a continuous feature, not literal category values.
     """
     ruleset = getattr(model, "ruleset_", None)
     rules: list[str] = []
@@ -100,14 +102,19 @@ def rules_from_ripper(model: Any, columns: set[str] | None = None) -> list[str]:
         ok = True
         for cond in getattr(rule, "conds", []) or []:
             column = str(getattr(cond, "feature", ""))
-            value = str(getattr(cond, "val", ""))
+            value = str(getattr(cond, "val", "")).strip()
             if columns is not None and column not in columns:
                 ok = False
                 break
-            span = re.match(r"^(-?[\d.]+)-(-?[\d.]+)$", value)
+            span = re.match(r"^(-?[\d.]+)\s*-\s*(-?[\d.]+)$", value)
             if span:
                 lo, hi = span.group(1), span.group(2)
                 parts.append(f"({_quote(column)} >= {lo}) & ({_quote(column)} <= {hi})")
+                continue
+            open_ended = re.match(r"^(<=|>=|<|>)\s*(-?[\d.]+)$", value)
+            if open_ended:
+                op, bound = open_ended.group(1), open_ended.group(2)
+                parts.append(f"({_quote(column)} {op} {bound})")
                 continue
             try:
                 float(value)

@@ -22,7 +22,7 @@ import polars as pl
 from . import __version__
 from .ablations import run_ablations
 from .baselines import Unavailable, availability_report, make_baseline
-from .config import FULL_CONFIG, SMOKE_CONFIG, ExperimentConfig
+from .config import CACHE_DIR, FULL_CONFIG, SMOKE_CONFIG, ExperimentConfig
 from .datasets import REGISTRY, SMOKE, Dataset, DatasetLoadError, load_dataset, registry_table, verify_registry
 from .iguanas_adapter import IguanasAdapter
 from .protocol import FoldResult, make_nested_splits, prepare_fold, run_fold
@@ -143,12 +143,41 @@ def run_benchmark(
             continue
         if verbose:
             print(f"  {name}: finished in {time.perf_counter() - started:.1f}s", flush=True)
+            _print_dataset_summary(rows, name, cfg.primary_alert_rate)
         if checkpoint_dir is not None and rows:
             checkpoint_dir.mkdir(parents=True, exist_ok=True)
             pl.DataFrame(rows, infer_schema_length=None).write_csv(
                 checkpoint_dir / "raw_results.partial.csv"
             )
     return pl.DataFrame(rows, infer_schema_length=None), pl.DataFrame(dataset_meta)
+
+
+def _print_dataset_summary(
+    rows: list[dict[str, Any]], dataset_name: str, alert_rate: float
+) -> None:
+    """Per-model mean precision/recall/f1/complexity at one dataset, one budget."""
+    subset = [
+        r
+        for r in rows
+        if r["dataset"] == dataset_name
+        and r["status"] == "ok"
+        and r["target_alert_rate"] == alert_rate
+    ]
+    if not subset:
+        print(f"    (no successful runs for {dataset_name} at ar={alert_rate})")
+        return
+    by_model: dict[str, list[dict[str, Any]]] = {}
+    for r in subset:
+        by_model.setdefault(r["model"], []).append(r)
+    print(f"    --- {dataset_name} @ alert_rate={alert_rate} ---")
+    print(f"    {'model':<14} {'n':>3} {'precision':>10} {'recall':>8} {'f1':>8} {'conditions':>11}")
+    for model, rs in sorted(by_model.items(), key=lambda kv: -sum(x["test_f1"] for x in kv[1]) / len(kv[1])):
+        n = len(rs)
+        prec = sum(r["test_precision"] for r in rs) / n
+        rec = sum(r["test_recall"] for r in rs) / n
+        f1 = sum(r["test_f1"] for r in rs) / n
+        cond = sum(r["complexity_conditions"] for r in rs) / n
+        print(f"    {model:<14} {n:>3} {prec:>10.3f} {rec:>8.3f} {f1:>8.3f} {cond:>11.1f}")
 
 
 def _run_dataset(
@@ -228,11 +257,31 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--combine-operator", choices=("or", "and"), help="rule composition operator"
     )
+    parser.add_argument("--fit-timeout", type=float, help="per-model fit timeout in seconds")
+    parser.add_argument(
+        "--smallest-first",
+        action="store_true",
+        help="run smaller (cached-file-size) datasets before larger ones",
+    )
     parser.add_argument("--ablations", action="store_true", help="also run ablations")
     parser.add_argument("--verify-registry", action="store_true", help="probe every dataset")
     parser.add_argument("--out", type=Path, help="results directory override")
     parser.add_argument("--quiet", action="store_true")
     return parser.parse_args(argv)
+
+
+def _smallest_first(names: list[str]) -> list[str]:
+    """Order by cached parquet size (a proxy for row count); uncached names run last.
+
+    Useful for a first pass over the whole registry: small/fast datasets surface
+    failures quickly, and the slowest (largest) datasets don't block a checkpoint
+    dump for everything that ran before them.
+    """
+    def size(name: str) -> float:
+        matches = sorted(CACHE_DIR.glob(f"{name}__v*.parquet"))
+        return matches[0].stat().st_size if matches else float("inf")
+
+    return sorted(names, key=size)
 
 
 def _resolve(args: argparse.Namespace) -> tuple[ExperimentConfig, list[str], str]:
@@ -265,6 +314,8 @@ def _resolve(args: argparse.Namespace) -> tuple[ExperimentConfig, list[str], str
         replacements["selection"] = _replace(
             cfg.selection, combine_operator=args.combine_operator
         )
+    if args.fit_timeout is not None:
+        replacements["fit_timeout_s"] = args.fit_timeout
     if replacements:
         from dataclasses import replace
 
@@ -273,6 +324,8 @@ def _resolve(args: argparse.Namespace) -> tuple[ExperimentConfig, list[str], str
     unknown = [n for n in names if n not in REGISTRY]
     if unknown:
         raise SystemExit(f"unknown dataset(s): {unknown}")
+    if args.smallest_first:
+        names = _smallest_first(names)
     return cfg, names, mode
 
 
