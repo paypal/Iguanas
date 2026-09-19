@@ -46,11 +46,12 @@ pool. Candidates are scored with standard classification metrics and with
 coverage-aware rule-quality measures (lift, weighted relative accuracy, Laplace
 and m-estimate), then filtered on performance, feature overlap and pairwise
 correlation. A final rule set is composed from the surviving candidates by a
-choice of search strategies — greedy, cumulative, beam search, A\*, exhaustive,
-and a budgeted variant that constrains the fraction of the population the rule
-set may flag. Beyond the core pipeline, the library provides modules for rule
-fairness auditing, production monitoring, rule registries, and natural-language
-rule explanation.
+choice of search strategies — greedy, cumulative, beam search, exhaustive, a
+best-first branch-and-bound search that returns a provably optimal top-k under
+an admissible bound on the chosen metric, and a budgeted variant that
+constrains the fraction of the population the rule set may flag. Beyond the
+core pipeline, the library provides modules for rule fairness auditing,
+production monitoring, rule registries, and natural-language rule explanation.
 
 `Iguanas` compiles each rule once into a Polars [@polars] expression and
 caches it, so evaluation is columnar and multi-threaded. Grid
@@ -68,10 +69,10 @@ approved by a governance body, versioned, and audited when it misfires.
 
 Research software for rule learning is nevertheless fragmented. Individual
 algorithms are well served — `RuleFit` [@friedman2008], `SkopeRules` [@skope],
-certifiably optimal rule lists [@angelino2017] and sparse decision trees
+certifiably optimal rule lists [@angelino2017], sparse decision trees
 [@lin2020], and the `imodels` package [@singh2021], which collects many of
-these including FIGS [@tan2025]. But each
-implements a particular *induction* algorithm. Researchers who need the
+these including FIGS [@tan2025] — but each implements a particular
+*induction* algorithm. Researchers who need the
 surrounding workflow — produce a large and deliberately diverse candidate pool,
 score and de-duplicate it, select a subset under an explicit operating
 constraint, then audit and deploy the result — assemble it themselves, which

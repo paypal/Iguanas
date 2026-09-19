@@ -518,8 +518,11 @@ def combine_rules_beam_search(
     # Track all explored combinations to avoid duplicates
     all_candidates = beam.copy()
 
-    # Expand beam for each depth level
-    for _ in range(max_rules):
+    # Expand beam for each depth level. The initial beam already holds size-1
+    # combinations, so only max_rules - 1 more rules may be added to reach a
+    # combination of size max_rules (mirrors combine_rules_greedy's
+    # range(1, max_rules) after its own initial single-rule pick).
+    for _ in range(max_rules - 1):
         new_beam = []
 
         for rule_list, parent_metric, _, parent_series in beam:
@@ -587,9 +590,10 @@ def combine_rules_a_star(
 ) -> pl.DataFrame | tuple[pl.DataFrame, dict]:
     """Find the top rule combinations by best-first branch-and-bound search.
 
-    Searches the space of rule subsets of size 1..``max_rules`` and returns the
-    ``return_top_k`` best-scoring combinations. Unlike greedy or beam search,
-    this returns a *provably* optimal top-k under the conditions in Notes.
+    Searches the space of rule subsets containing between 1 and ``max_rules``
+    rules, and returns the ``return_top_k`` best-scoring combinations. Unlike
+    greedy or beam search, this returns a *provably* optimal top-k under the
+    conditions in Notes.
 
     Search formulation
     ------------------

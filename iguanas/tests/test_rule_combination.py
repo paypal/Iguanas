@@ -634,10 +634,10 @@ class TestCombineRulesBeamSearch:
             R, y, metric="f1", beam_width=3, max_rules=1, operator="or", return_top_k=10
         )
 
-        # max_rules=1 means 1 expansion step from singles: at most 2-rule combinations
+        # max_rules=1 means no expansion beyond the initial singles: only 1-rule combinations.
         for col in result.columns:
             num_rules = col.count("|") + 1
-            assert num_rules <= 2
+            assert num_rules <= 1
 
     def test_return_top_k_limits_output(self):
         """Test that return_top_k limits number of returned combinations."""

@@ -78,7 +78,7 @@ Combine individual rules into compound rules to improve performance:
 - `combine_rules_cumulative` - Incrementally combine rules with a running candidate
 - `combine_rules_greedy` - Greedy combination selecting the best pair at each step
 - `combine_rules_beam_search` - Beam search combination balancing quality and efficiency
-- `combine_rules_a_star` - A* search combination using a heuristic cost function
+- `combine_rules_a_star` - Exact best-first branch-and-bound search returning a provably optimal top-k combination
 
 ### ✂️ Rule Selection
 Deduplicate and prune rule sets:
