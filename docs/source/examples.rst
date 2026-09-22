@@ -9,6 +9,7 @@ This section contains end-to-end examples demonstrating how to generate optimize
 
    examples/titanic_survival_example
    examples/titanic_survival_example_with_preprocessing
+   examples/titanic_survival_example_with_preprocessing_with_onnx_model
    examples/titanic_survival_scikit-learn_api_example
 
 Overview

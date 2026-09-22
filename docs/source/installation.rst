@@ -54,7 +54,7 @@ Core dependencies (installed automatically):
 * **pandas** - DataFrame library for interoperability
 * **XGBoost** - For rule generation using gradient boosting models
 * **joblib** - For parallel processing during rule generation
-* **scikit-learn** - For model evaluation and metrics
+* **scikit-learn** - For model evaluation, metrics, and rule generation using RandomForestClassifier
 * **pydantic** - For data validation and settings management
 
 Optional dependencies for specific features:

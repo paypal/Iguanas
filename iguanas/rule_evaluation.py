@@ -416,6 +416,7 @@ def apply_filter_and_deduplicate_rules(
     Notes
     -----
     The function applies filtering in sequence:
+
     - Threshold filtering removes low-performing rules
     - Top-N selection limits the rule set size (optional)
     - Correlation filtering reduces redundancy by dropping rules whose

@@ -67,10 +67,10 @@ Understanding the API
 Iguanas is organized into modular components that work together in a typical workflow:
 
 **1. Rule Generation** (:doc:`api/rule_generation`)
-   Generate rules from your data using XGBoost or LightGBM decision trees:
+   Generate rules from your data using XGBoost, LightGBM or RandomForest decision trees:
    
    - ``rule_grid_search()``: Thread-parallel grid search over weight transformations and scale_pos_weight values (single node; joblib ``"threading"`` backend)
-   - ``extract_rules()``: Extract rules from a fitted XGBoost/LightGBM model
+   - ``extract_rules()``: Extract rules from a fitted XGBoost/LightGBM/RandomForest model
    - ``extract_max_gain_rule()``: Extract the highest-gain rule path from a single tree
 
 **2. Rule Evaluation** (:doc:`api/rule_evaluation`)
@@ -124,7 +124,7 @@ Iguanas is organized into modular components that work together in a typical wor
    Supporting utilities for rule generation:
    
    - :doc:`api/weight_transformations`: Generate and select sample weight schedules (``generate_weights``, ``select_uncorrelated_weights``)
-   - :doc:`api/monotone_constraints`: Infer monotone constraints for XGBoost/LightGBM
+   - :doc:`api/monotone_constraints`: Infer monotone constraints for XGBoost/LightGBM/RandomForest
 
 **9. Rule Cross-Validation** (:doc:`api/rule_cv`)
    Check rule stability across folds:
