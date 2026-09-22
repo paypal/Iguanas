@@ -539,3 +539,41 @@ class TestApplyFilterAndDeduplicateRules:
         assert len(selected_rules) <= 1
         if len(selected_rules) == 1:
             assert selected_rules[0] == '(X["age"] >= 35)'
+
+
+class TestCoverageBranches:
+    def test_apply_and_filter_empty_rules_returns_empty(self):
+        """apply_and_filter_by_performance with an empty rules list returns two empty DataFrames."""
+        from iguanas.rule_evaluation import apply_and_filter_by_performance
+
+        X = pl.DataFrame({"age": [25, 30]})
+        y = pl.Series([0, 1])
+        R, M = apply_and_filter_by_performance(X, y, rules=[])
+        assert R.is_empty()
+        assert M.is_empty()
+
+    def test_apply_filter_deduplicate_accepts_dataframe_rules(self):
+        """apply_filter_and_deduplicate_rules accepts a DataFrame with a 'rule' column."""
+        from iguanas.rule_evaluation import apply_filter_and_deduplicate_rules
+
+        X = pl.DataFrame({"age": [25, 30, 35, 40, 45, 50]})
+        y = pl.Series([0, 0, 0, 1, 1, 1])
+        rules_df = pl.DataFrame({"rule": ['(X["age"] >= 40)']})
+        R, M, selected = apply_filter_and_deduplicate_rules(
+            X, y, rules_df,
+            metric_thresholds=[{"name": "precision", "operator": ">=", "value": 0.3}],
+        )
+        assert isinstance(R, pl.DataFrame)
+        assert isinstance(M, pl.DataFrame)
+        assert isinstance(selected, list)
+
+    def test_apply_filter_deduplicate_default_metric_thresholds(self):
+        """apply_filter_and_deduplicate_rules uses default thresholds when none are provided."""
+        from iguanas.rule_evaluation import apply_filter_and_deduplicate_rules
+
+        X = pl.DataFrame({"age": [25, 30, 35, 40, 45, 50]})
+        y = pl.Series([0, 0, 0, 1, 1, 1])
+        rules = ['(X["age"] >= 40)']
+        # No metric_thresholds passed → hits the default assignment branch
+        R, M, selected = apply_filter_and_deduplicate_rules(X, y, rules)
+        assert isinstance(selected, list)

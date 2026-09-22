@@ -9,6 +9,9 @@
 .coverage
 *.pem
 
+####### pypi
+.pypirc
+
 Build
 ###################
 build/

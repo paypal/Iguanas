@@ -17,6 +17,11 @@ combine_rules_cumulative
 
 .. autofunction:: combine_rules_cumulative
 
+combine_rules_budgeted
+-----------------------
+
+.. autofunction:: combine_rules_budgeted
+
 combine_rules_greedy
 --------------------
 

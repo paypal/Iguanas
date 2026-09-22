@@ -7,7 +7,6 @@ import polars as pl
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.exceptions import NotFittedError
-from xgboost import XGBClassifier
 
 from .rule_combination import combine_rules_greedy
 from .rule_evaluation import apply_and_filter_by_performance, apply_rules
@@ -17,7 +16,7 @@ from .rule_selection import filter_correlated_rules
 _NUMERIC_DTYPES = (pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.Float32, pl.Float64)
 
 
-class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
+class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):  # type: ignore[misc]
     """End-to-end rule-based classification pipeline.
 
     The best ruleset is selected through the following steps:
@@ -68,7 +67,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    estimator: XGBClassifier
+    estimator: Any  # XGBClassifier, LGBMClassifier, or any sklearn-compatible tree classifier
     scale_pos_weights: np.ndarray | list[float] = Field(default_factory=lambda: np.array([1.0]))
     sample_weights_df: pl.DataFrame | None = None
     ranking_metric: str = "accuracy"
@@ -130,6 +129,8 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
             scale_pos_weights=self.scale_pos_weights,
             sample_weights_df=self.sample_weights_df,
         )
+        if rules_df.is_empty():
+            return self
         rules = rules_df["rule"].to_list()
         R, M = apply_and_filter_by_performance(
             X[self._feature_cols_],
@@ -138,6 +139,8 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
             metric_thresholds=self.metric_thresholds,
             ranking_metric=self.ranking_metric,
         )
+        if M.is_empty():
+            return self
         candidate_rules = M["rule"].to_list()
         importance = dict(zip(M["rule"], M[self.ranking_metric], strict=False))
         candidate_rules = filter_correlated_rules(
@@ -187,15 +190,10 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         return R[self._best_ruleset_]
 
     def predict_proba(self, X: pl.DataFrame) -> pl.Series:
-        """Predict rule-coverage probability for each sample.
+        """Predict probability using the combined ruleset.
 
-        Probability is a piecewise-linear function of the number of selected
-        rules that fire for each sample:
-
-        - 0 rules fired  → 0.0
-        - 1 rule fired   → 0.5
-        - all rules fired → 1.0
-        - between 1 and all: linearly interpolated in [0.5, 1.0]
+        - Ruleset fires  → 1.0
+        - Ruleset does not fire → 0.0
 
         Parameters
         ----------
@@ -205,7 +203,7 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         Returns
         -------
         pl.Series
-            Float64 series named "proba" with values in [0.0, 1.0].
+            Float64 series with values in {0.0, 1.0}.
         """
         self._check_is_fitted()
         if not self._best_ruleset_:
@@ -218,3 +216,41 @@ class RulesetClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     def fit_predict(self, X: pl.DataFrame, y: pl.Series) -> pl.Series:
         """Fit pipeline and return binary predictions on the same data."""
         return self.fit(X, y).predict(X)
+
+    def export(self) -> dict[str, Any]:
+        """Export the fitted ruleset and feature columns as a JSON-serializable dict.
+
+        Returns
+        -------
+        dict
+            Dict with keys ``"ruleset"`` (str) and ``"feature_cols"`` (list[str]).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier has not been fitted.
+        """
+        self._check_is_fitted()
+        return {"ruleset": self._best_ruleset_, "feature_cols": self._feature_cols_}
+
+    @classmethod
+    def from_export(cls, data: dict[str, Any]) -> RulesetClassifier:
+        """Reconstruct a fitted classifier from an :meth:`export` dict.
+
+        The returned instance supports ``predict`` and ``predict_proba`` but
+        cannot be re-fitted without supplying an ``estimator``.
+
+        Parameters
+        ----------
+        data : dict
+            Dict produced by :meth:`export`.
+
+        Returns
+        -------
+        RulesetClassifier
+            Fitted instance with ``_best_ruleset_`` and ``_feature_cols_`` set.
+        """
+        instance = cls(estimator=None)
+        instance._feature_cols_ = data["feature_cols"]
+        instance._best_ruleset_ = data["ruleset"]
+        return instance

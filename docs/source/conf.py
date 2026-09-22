@@ -9,13 +9,15 @@ import sys
 
 sys.path.insert(0, os.path.abspath("../../"))
 
+from iguanas import __version__  # noqa: E402 - after sys.path setup above
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "iguanas"
-copyright = "Mozilla Public License (MPL) 2.0"
-author = "Charles Poli"
-release = "1.0.x"
+copyright = "Apache License 2.0"
+author = "Charles Poli, Shreekanthadatta Seligar, James Laidler"
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -40,7 +42,7 @@ exclude_patterns: list[str] = []
 html_baseurl = "https://paypal.github.io/Iguanas/"
 
 # SEO-optimized title and description
-html_title = "Iguanas - Lightning Fast Rule generation with Polars"
+html_title = "Iguanas - Rule Generation and Evaluation with Polars"
 html_short_title = "Iguanas"
 
 # Sitemap configuration
@@ -51,7 +53,7 @@ ogp_site_url = "https://paypal.github.io/Iguanas/"
 ogp_image = "https://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png"
 ogp_description_length = 160
 ogp_type = "website"
-ogp_site_name = "Iguanas - Lightning Fast Rule generation with Polars"
+ogp_site_name = "Iguanas - Rule Generation and Evaluation with Polars"
 ogp_custom_meta_tags = [
     '<meta name="description" content="High-performance rule generation library with sklearn-compatible API." />',
     '<meta name="keywords" content="data science, machine learning, rule generation, python, polars, sklearn" />',
@@ -304,3 +306,33 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/docs/", None),
     "sklearn": ("https://scikit-learn.org/stable/", None),
 }
+
+# polars, xgboost and pydantic have no intersphinx inventory wired in above, and
+# NumPy-style ", default=X" in a parameter's type line gets parsed by Napoleon
+# as a chained type rather than plain text - both produce spurious py:class
+# targets (module-prefixed types, literal defaults like numbers/True/False/dict
+# openers, and bare third-party class names with no matching intersphinx
+# mapping). These never surface in the default (non-nitpicky) build because of
+# suppress_warnings above; this only matters if nitpicky mode is ever enabled.
+nitpick_ignore_regex = [
+    ("py:class", r"^(pl|pd|np|polars|pandas|numpy|xgboost|joblib|onnx|pydantic|annotated_types)\..*"),
+    ("py:class", r"^default=.*"),
+    ("py:class", r"^-?\d+(\.\d+)?$"),
+    ("py:class", r"^(True|False|None)$"),
+    ("py:class", r"^[\{\"].*"),
+]
+nitpick_ignore = [
+    ("py:class", "XGBClassifier"),
+    ("py:class", "LGBMClassifier"),
+    ("py:class", "RandomForestClassifier"),
+    ("py:class", "PositiveInt"),
+    ("py:class", "Path"),
+    ("py:class", "optional"),
+    ("py:class", "precision >= 0.2"),
+    ("py:class", "recall >= 0.2"),
+    ("py:exc", "NotFittedError"),
+    ("py:mod", "iguanas.metrics"),
+    # Resolves fine everywhere else it's referenced in this same module; this
+    # one instance is a Sphinx cross-reference quirk, not a broken docstring.
+    ("py:func", "extract_positive_gain_rules"),
+]

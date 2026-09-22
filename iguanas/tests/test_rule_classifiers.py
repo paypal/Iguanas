@@ -3,9 +3,10 @@ import polars as pl
 import pytest
 from pydantic import ValidationError
 from sklearn.exceptions import NotFittedError
+from unittest.mock import patch
 from xgboost import XGBClassifier
 
-from iguanas.rule_classifier import RuleClassifier
+from iguanas.rule_classifier import RuleClassifier, _validate_metric_thresholds
 from iguanas.ruleset_classifier import RulesetClassifier
 
 
@@ -561,3 +562,103 @@ class TestRulesetClassifierFitPredict:
         clf.fit(X, y)
 
         assert captured["sample_weights_df"] is None
+
+
+class TestRuleClassifierCoverageBranches:
+    """Tests targeting previously uncovered branches."""
+
+    def test_validator_raises_for_out_of_range_value(self):
+        """Validation helper raises ValueError directly when value is out of [0, 1]."""
+        with pytest.raises(ValueError, match="out of range"):
+            _validate_metric_thresholds([{"name": "precision", "operator": ">=", "value": 1.5}])
+
+    def test_validator_returns_none_for_none_input(self):
+        """Validation helper returns None unchanged."""
+        assert _validate_metric_thresholds(None) is None
+
+    def test_fit_with_empty_rule_generation(self):
+        """When rule_grid_search returns an empty DataFrame, _best_rule_ is set to ''."""
+        estimator = XGBClassifier(n_estimators=2, max_depth=1, eval_metric="logloss", random_state=0)
+        clf = RuleClassifier(estimator=estimator, scale_pos_weights=[1.0])
+        X = pl.DataFrame({"age": [25, 30, 35]})
+        y = pl.Series([0, 1, 0])
+        empty_rules = pl.DataFrame({"rule": pl.Series([], dtype=pl.String)})
+        with patch("iguanas.rule_classifier.rule_grid_search", return_value=empty_rules):
+            clf.fit(X, y)
+        assert clf._best_rule_ == ""
+
+    def test_predict_with_empty_best_rule(self):
+        """predict() returns all-False when _best_rule_ is empty."""
+        estimator = XGBClassifier(n_estimators=2, max_depth=1, eval_metric="logloss", random_state=0)
+        clf = RuleClassifier(estimator=estimator, scale_pos_weights=[1.0])
+        X = pl.DataFrame({"age": [25, 30, 35]})
+        # Simulate a fitted-but-no-rule state
+        clf._feature_cols_ = ["age"]
+        clf._best_rule_ = ""
+        result = clf.predict(X)
+        assert result.dtype == pl.Boolean
+        assert result.to_list() == [False, False, False]
+
+
+class TestRuleClassifierExport:
+    def test_export_returns_rule_and_feature_cols(self):
+        clf = RuleClassifier(estimator=None)
+        clf._feature_cols_ = ["age", "income"]
+        clf._best_rule_ = '(X["age"] >= 30)'
+        result = clf.export()
+        assert result == {"rule": '(X["age"] >= 30)', "feature_cols": ["age", "income"]}
+
+    def test_export_raises_when_not_fitted(self):
+        with pytest.raises(NotFittedError):
+            RuleClassifier(estimator=None).export()
+
+    def test_from_export_predict(self):
+        data = {"rule": '(X["age"] >= 30)', "feature_cols": ["age"]}
+        clf = RuleClassifier.from_export(data)
+        assert clf._best_rule_ == '(X["age"] >= 30)'
+        assert clf._feature_cols_ == ["age"]
+        X = pl.DataFrame({"age": [25, 30, 35]})
+        assert clf.predict(X).to_list() == [False, True, True]
+
+
+class TestRulesetClassifierExport:
+    def test_export_returns_ruleset_and_feature_cols(self):
+        clf = RulesetClassifier(estimator=None)
+        clf._feature_cols_ = ["age"]
+        clf._best_ruleset_ = '(X["age"] >= 30)'
+        result = clf.export()
+        assert result == {"ruleset": '(X["age"] >= 30)', "feature_cols": ["age"]}
+
+    def test_export_raises_when_not_fitted(self):
+        with pytest.raises(NotFittedError):
+            RulesetClassifier(estimator=None).export()
+
+    def test_from_export_predict(self):
+        data = {"ruleset": '(X["age"] >= 30)', "feature_cols": ["age"]}
+        clf = RulesetClassifier.from_export(data)
+        assert clf._best_ruleset_ == '(X["age"] >= 30)'
+        X = pl.DataFrame({"age": [25, 30, 35]})
+        assert clf.predict(X).to_list() == [False, True, True]
+
+    def test_fit_empty_rule_generation_returns_early(self):
+        clf = RulesetClassifier(estimator=None)
+        empty = pl.DataFrame({"rule": pl.Series([], dtype=pl.String)})
+        with patch("iguanas.ruleset_classifier.rule_grid_search", return_value=empty):
+            X = pl.DataFrame({"age": [25, 30, 35]})
+            y = pl.Series([0, 1, 0])
+            clf._feature_cols_ = ["age"]  # bypass _check_is_fitted for fit
+            result = clf.fit(X, y)
+        assert result._best_ruleset_ == ""
+
+    def test_fit_all_rules_filtered_returns_early(self):
+        clf = RulesetClassifier(estimator=None)
+        rules_df = pl.DataFrame({"rule": ['(X["age"] >= 30)']})
+        empty_m = pl.DataFrame()
+        with patch("iguanas.ruleset_classifier.rule_grid_search", return_value=rules_df), \
+             patch("iguanas.ruleset_classifier.apply_and_filter_by_performance",
+                   return_value=(pl.DataFrame(), empty_m)):
+            X = pl.DataFrame({"age": [25, 30, 35]})
+            y = pl.Series([0, 1, 0])
+            clf._feature_cols_ = ["age"]
+            result = clf.fit(X, y)
+        assert result._best_ruleset_ == ""

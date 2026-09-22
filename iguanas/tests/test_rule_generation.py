@@ -1,14 +1,26 @@
+import importlib.util
+
 import numpy as np
 import pandas as pd
 import polars as pl
 import pytest
+from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 
+_HAS_LIGHTGBM = importlib.util.find_spec("lightgbm") is not None
+
 from iguanas.rule_generation import (
+    _apply_scale_pos_weight,
     _check_all_features_have_monotone_constraints,
+    _detect_booster_type,
+    _get_trees_dataframe,
+    _normalise_lgbm_tree_df,
+    _rf_tree_to_dataframe,
+    _setup_and_validate_grid_search,
     _train_rules_for_weight_transformation,
     _train_rules_for_scale,
-    extract_rule_by_max_gain,
+    extract_max_gain_rule,
+    extract_positive_gain_rules,
     extract_rule_with_monotone_constraints,
     extract_rules,
     rule_grid_search,
@@ -19,12 +31,12 @@ from iguanas.rule_generation import (
 
 
 class TestExtractRuleByMaxGain:
-    """Test cases for extract_rule_by_max_gain function."""
+    """Test cases for extract_max_gain_rule function."""
 
     def test_empty_dataframe(self):
         """Test that empty dataframe returns empty string."""
         tree_X = pd.DataFrame()
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         assert result == ""
 
     def test_no_leaves(self):
@@ -44,7 +56,7 @@ class TestExtractRuleByMaxGain:
                 "Category": [None, None],
             }
         )
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         assert result == ""
 
     def test_single_split_tree(self):
@@ -64,7 +76,7 @@ class TestExtractRuleByMaxGain:
                 "Category": [None, None, None],
             }
         )
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         # Should follow path to leaf with gain=0.8 (Node 2, which is "No" branch)
         assert result == '(X["amount"] >= 100.0)'
 
@@ -85,7 +97,7 @@ class TestExtractRuleByMaxGain:
                 "Category": [None, None, None, None, None],
             }
         )
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         # Should follow path to leaf with gain=1.2 (Node 4)
         # Path: 0 -> No (2 is leaf) or 0 -> Yes (1) -> No (4)
         # Node 4 is "No" branch of Node 1, which is "Yes" branch of Node 0
@@ -109,7 +121,7 @@ class TestExtractRuleByMaxGain:
                 "Category": [None, None, None],
             }
         )
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         assert "3.12346" in result
 
     def test_empty_node_rows(self):
@@ -130,9 +142,136 @@ class TestExtractRuleByMaxGain:
                 "Category": [None, None],
             }
         )
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         # Should return something, but may be incomplete
         assert isinstance(result, str)
+
+
+class TestExtractPositiveGainRules:
+    """Test cases for extract_positive_gain_rules function."""
+
+    def test_empty_dataframe(self):
+        """Test that an empty dataframe returns an empty list."""
+        tree_X = pd.DataFrame()
+        result = extract_positive_gain_rules(tree_X)
+        assert result == []
+
+    def test_no_root_node(self):
+        """Test that a tree with no Node==0 row returns an empty list."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [1, 2],
+                "ID": ["0-1", "0-2"],
+                "Feature": ["Leaf", "Leaf"],
+                "Split": [None, None],
+                "Yes": [None, None],
+                "No": [None, None],
+                "Gain": [0.5, 0.8],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert result == []
+
+    def test_single_leaf_tree_returns_no_rules(self):
+        """A tree that is a single leaf has an empty path, so no rule is emitted."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [0],
+                "ID": ["0-0"],
+                "Feature": ["Leaf"],
+                "Split": [None],
+                "Yes": [None],
+                "No": [None],
+                "Gain": [0.8],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert result == []
+
+    def test_single_split_one_positive_leaf(self):
+        """Only the leaf with positive gain should produce a rule."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [0, 1, 2],
+                "ID": ["0-0", "0-1", "0-2"],
+                "Feature": ["amount", "Leaf", "Leaf"],
+                "Split": [100.0, None, None],
+                "Yes": ["0-1", None, None],
+                "No": ["0-2", None, None],
+                "Gain": [0.5, -0.3, 0.8],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert result == ['(X["amount"] >= 100.0)']
+
+    def test_single_split_both_leaves_positive(self):
+        """Both leaves positive should produce two independent rules."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [0, 1, 2],
+                "ID": ["0-0", "0-1", "0-2"],
+                "Feature": ["amount", "Leaf", "Leaf"],
+                "Split": [100.0, None, None],
+                "Yes": ["0-1", None, None],
+                "No": ["0-2", None, None],
+                "Gain": [0.5, 0.3, 0.8],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert sorted(result) == sorted(
+            ['(X["amount"] < 100.0)', '(X["amount"] >= 100.0)']
+        )
+
+    def test_leaf_with_nan_gain_is_skipped(self):
+        """A leaf with a NaN gain must not be treated as positive."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [0, 1, 2],
+                "ID": ["0-0", "0-1", "0-2"],
+                "Feature": ["amount", "Leaf", "Leaf"],
+                "Split": [100.0, None, None],
+                "Yes": ["0-1", None, None],
+                "No": ["0-2", None, None],
+                "Gain": [0.5, np.nan, 0.8],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert result == ['(X["amount"] >= 100.0)']
+
+    def test_two_level_tree_multiple_positive_leaves(self):
+        """A deeper tree can contribute more than one rule."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [0, 1, 2, 3, 4],
+                "ID": ["0-0", "0-1", "0-2", "0-3", "0-4"],
+                "Feature": ["age", "income", "Leaf", "Leaf", "Leaf"],
+                "Split": [30.0, 50000.0, None, None, None],
+                "Yes": ["0-1", "0-3", None, None, None],
+                "No": ["0-2", "0-4", None, None, None],
+                "Gain": [1.5, 0.8, 0.2, 0.4, 1.2],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert len(result) == 3
+        assert '(X["age"] >= 30.0)' in result
+        assert '(X["age"] < 30.0) & (X["income"] < 50000.0)' in result
+        assert '(X["age"] < 30.0) & (X["income"] >= 50000.0)' in result
+
+    def test_missing_child_id_does_not_crash(self):
+        """A child ID absent from the tree should stop that branch, not raise."""
+        tree_X = pd.DataFrame(
+            {
+                "Node": [0, 1],
+                "ID": ["0-0", "0-1"],
+                "Feature": ["amount", "Leaf"],
+                "Split": [100.0, None],
+                "Yes": ["0-1", None],
+                "No": ["0-999", None],  # non-existent
+                "Gain": [0.5, 0.8],
+            }
+        )
+        result = extract_positive_gain_rules(tree_X)
+        assert result == ['(X["amount"] < 100.0)']
 
 
 class TestExtractRuleWithMonotoneConstraints:
@@ -797,11 +936,47 @@ class TestExtractRules:
             assert result["transformation"].iloc[0] == "custom"
             assert result["scale_pos_weight"].iloc[0] == 2.5
 
+    def test_extract_rules_with_all_positive_leaf_selection(self):
+        """leaf_selection='all_positive' can yield more rows than 'max_gain'."""
+        np.random.seed(42)
+        X_train = pd.DataFrame(
+            {
+                "feature1": np.random.randn(200),
+                "feature2": np.random.randn(200),
+            }
+        )
+        y_train = pd.Series(np.random.randint(0, 2, 200))
+
+        estimator = XGBClassifier(max_depth=3, n_estimators=5, random_state=42)
+        estimator.fit(X_train, y_train)
+
+        result_max_gain = extract_rules(estimator, all_features_constrained=False)
+        result_all_positive = extract_rules(
+            estimator, all_features_constrained=False, leaf_selection="all_positive"
+        )
+
+        assert isinstance(result_all_positive, pd.DataFrame)
+        assert len(result_all_positive) >= len(result_max_gain)
+        if not result_all_positive.empty:
+            assert "rule" in result_all_positive.columns
+            assert "tree" in result_all_positive.columns
+
+    def test_extract_rules_invalid_leaf_selection_raises(self):
+        """An unknown leaf_selection value should raise ValueError."""
+        np.random.seed(42)
+        X_train = pd.DataFrame({"feature1": np.random.randn(20)})
+        y_train = pd.Series(np.random.randint(0, 2, 20))
+        estimator = XGBClassifier(max_depth=2, n_estimators=2, random_state=42)
+        estimator.fit(X_train, y_train)
+
+        with pytest.raises(ValueError, match="leaf_selection"):
+            extract_rules(estimator, all_features_constrained=False, leaf_selection="bogus")
+
 
 class TestExtractRuleEdgeCases:
     """Additional test cases for extract_rule functions to achieve better coverage."""
 
-    def test_extract_rule_by_max_gain_node_not_found(self):
+    def test_extract_max_gain_rule_node_not_found(self):
         """Test when best_leaf_node is not found in tree (line 51 coverage)."""
         # Create a malformed tree where Node doesn't match ID expectations
         tree_X = pd.DataFrame(
@@ -819,7 +994,7 @@ class TestExtractRuleEdgeCases:
                 "Category": [None, None],
             }
         )
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         # Should return empty string when node not found
         assert result == ""
 
@@ -1156,7 +1331,7 @@ class TestRuleGridSearchSequentialEmptyResults:
 
 
 class TestEmptyNodeRowsCoverage:
-    """Test to cover line 50 - empty node_rows in extract_rule_by_max_gain."""
+    """Test to cover line 50 - empty node_rows in extract_max_gain_rule."""
 
     def test_empty_node_rows_corrupted_data(self, monkeypatch):
         """Test line 50: when node filter returns empty due to corrupted node values."""
@@ -1190,7 +1365,7 @@ class TestEmptyNodeRowsCoverage:
 
         monkeypatch.setattr(pd.DataFrame, "set_index", mock_set_index)
 
-        result = extract_rule_by_max_gain(tree_X)
+        result = extract_max_gain_rule(tree_X)
         # Should return empty string when node_rows is empty
         assert result == ""
 
@@ -1340,10 +1515,10 @@ class TestPandasWeightsSequential:
 
 
 class TestFitExceptionSequential:
-    """Test to cover lines 562-564 - fit exception in sequential version."""
+    """Test that _train_rules_for_scale silently skips failed fits (consistent with parallel variant)."""
 
     def test_fit_exception_sequential(self, monkeypatch):
-        """Test lines 562-564: when fit raises exception in sequential processing."""
+        """When fit raises an exception, the combination is skipped and the search continues."""
         np.random.seed(42)
         X_train = pd.DataFrame(
             {
@@ -1356,7 +1531,6 @@ class TestFitExceptionSequential:
         estimator = XGBClassifier(max_depth=1, n_estimators=1, random_state=42)
         scale_pos_weights = np.array([1.0, 2.0])
 
-        # Monkeypatch fit to raise exception on first call
         original_fit = XGBClassifier.fit
 
         def mock_fit(self, X, y, sample_weight=None):
@@ -1369,14 +1543,15 @@ class TestFitExceptionSequential:
 
         monkeypatch.setattr(XGBClassifier, "fit", mock_fit)
 
-        with pytest.raises(RuntimeError, match="Simulated fit failure in sequential"):
-            rule_grid_search_sequential(
-                estimator,
-                X_train,
-                y_train,
-                scale_pos_weights,
-                sample_weights_df=None,
-            )
+        # Should NOT raise — the failed fit is skipped and remaining combinations run
+        result = rule_grid_search_sequential(
+            estimator,
+            X_train,
+            y_train,
+            scale_pos_weights,
+            sample_weights_df=None,
+        )
+        assert isinstance(result, pl.DataFrame)
 
 
 class TestNonNumericInputRaises:
@@ -1454,6 +1629,347 @@ class TestPrivateRuleGenerationHelpers:
                 weights, params, X_np, y_np, [1.0], False, feature_names=None
             )
         assert result == []
+
+    def test_apply_scale_pos_weight_is_a_noop_for_binary_hinge(self):
+        """binary:hinge has no probability output, so scale_pos_weight steering
+        is skipped entirely rather than applied."""
+        est = XGBClassifier(objective="binary:hinge")
+        _apply_scale_pos_weight(est, 3.0, {"objective": "binary:hinge"})
+        assert est.scale_pos_weight is None
+
+    def test_setup_and_validate_grid_search_without_estimator(self):
+        """estimator=None keeps the XGBClassifier default and skips monotone-
+        constraint detection (all public callers always pass a real estimator,
+        so this path is only reachable by calling the helper directly)."""
+        X_train = pd.DataFrame({"a": [1.0, 2.0, 3.0], "b": [4.0, 5.0, 6.0]})
+        y_train = pd.Series([0, 1, 0])
+        result = _setup_and_validate_grid_search(X_train, y_train, [1.0], estimator=None)
+        (
+            _,
+            _,
+            _,
+            _,
+            estimator_params,
+            all_features_constrained,
+            estimator_class,
+        ) = result
+        assert estimator_class is XGBClassifier
+        assert estimator_params == {}
+        assert all_features_constrained is False
+
+
+class TestLightGBMSupport:
+    """Tests covering the LightGBM code paths in rule_generation.
+
+    LightGBM is an optional dependency, so this whole class is skipped when it
+    is not installed rather than failing. Install it with
+    ``pip install "iguanas[lightgbm]"``.
+    """
+
+    pytestmark = pytest.mark.skipif(
+        not _HAS_LIGHTGBM,
+        reason='requires the optional lightgbm extra: pip install "iguanas[lightgbm]"',
+    )
+
+    @pytest.fixture
+    def lgbm_data(self):
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame(
+            {
+                "age":    list(range(20, 70)),
+                "income": list(range(10_000, 60_000, 1_000)),
+            }
+        )
+        y = pl.Series([0] * 25 + [1] * 25)
+        est = LGBMClassifier(n_estimators=5, max_depth=2, verbose=-1, random_state=0)
+        est.fit(X.to_pandas(), y.to_numpy())
+        return X, y, est
+
+    # ------------------------------------------------------------------
+    # _detect_booster_type
+    # ------------------------------------------------------------------
+
+    def test_detect_booster_type_returns_lightgbm(self):
+        from lightgbm import LGBMClassifier
+        assert _detect_booster_type(LGBMClassifier()) == "lightgbm"
+
+    def test_detect_booster_type_returns_xgboost(self):
+        assert _detect_booster_type(XGBClassifier()) == "xgboost"
+
+    # ------------------------------------------------------------------
+    # _normalise_lgbm_tree_df  (lines 47-49)
+    # ------------------------------------------------------------------
+
+    def test_normalise_lgbm_tree_df_schema(self):
+        df = pd.DataFrame(
+            {
+                "tree_index":    [0, 0, 0, 0, 0],
+                "node_index":    ["0-S0", "0-S1", "0-L0", "0-L1", "0-L2"],
+                # Leaves have NaN split_feature (no node_type column in LGBM 4.x)
+                "split_feature": ["age", "income", np.nan, np.nan, np.nan],
+                "threshold":     [35.0, 25000.0, np.nan, np.nan, np.nan],
+                "left_child":    ["0-S1", "0-L0", np.nan, np.nan, np.nan],
+                "right_child":   ["0-L1", "0-L2", np.nan, np.nan, np.nan],
+                "split_gain":    [5.0, 3.0, np.nan, np.nan, np.nan],
+                "value":         [None, None, 0.8, 0.3, -0.5],
+                "count":         [50, 25, 15, 10, 25],
+            }
+        )
+        result = _normalise_lgbm_tree_df(df)
+
+        assert set(result.columns) == {"Tree", "Node", "ID", "Feature", "Split", "Yes", "No", "Gain", "Cover"}
+        assert result["Feature"].tolist() == ["age", "income", "Leaf", "Leaf", "Leaf"]
+        assert result["ID"].tolist() == ["0-S0", "0-S1", "0-L0", "0-L1", "0-L2"]
+        # Split nodes keep split_gain; leaf nodes use value
+        assert result.loc[0, "Gain"] == pytest.approx(5.0)
+        assert result.loc[2, "Gain"] == pytest.approx(0.8)
+        # Node column is 0-based sequential
+        assert result["Node"].tolist() == [0, 1, 2, 3, 4]
+
+    # ------------------------------------------------------------------
+    # _get_trees_dataframe  (line 72)
+    # ------------------------------------------------------------------
+
+    def test_get_trees_dataframe_lgbm(self, lgbm_data):
+        _, _, est = lgbm_data
+        df = _get_trees_dataframe(est)
+        assert "tree_index" in df.columns
+        assert "node_index" in df.columns
+        assert len(df) > 0
+
+    # ------------------------------------------------------------------
+    # extract_rules with LightGBM  (line 265 + 272-280)
+    # ------------------------------------------------------------------
+
+    def test_extract_rules_lgbm_max_gain(self, lgbm_data):
+        """LightGBM path without monotone constraints (covers line 265)."""
+        _, _, est = lgbm_data
+        result = extract_rules(est, all_features_constrained=False)
+        assert isinstance(result, pd.DataFrame)
+        if len(result) > 0:
+            assert "rule" in result.columns
+            assert all('X["' in r for r in result["rule"])
+
+    def test_extract_rules_lgbm_with_list_constraints(self):
+        """LightGBM path with list monotone constraints (covers lines 272-280)."""
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame({"age": list(range(20, 70)), "income": list(range(10_000, 60_000, 1_000))})
+        y = pl.Series([0] * 25 + [1] * 25)
+        est = LGBMClassifier(
+            n_estimators=3, max_depth=2, verbose=-1, random_state=0,
+            monotone_constraints=[1, -1],
+        )
+        est.fit(X.to_pandas(), y.to_numpy())
+        result = extract_rules(est, all_features_constrained=True)
+        assert isinstance(result, pd.DataFrame)
+
+    def test_extract_rules_lgbm_with_dict_constraints(self):
+        """LightGBM path with dict monotone constraints (covers line 281)."""
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame({"age": list(range(20, 70)), "income": list(range(10_000, 60_000, 1_000))})
+        y = pl.Series([0] * 25 + [1] * 25)
+        est = LGBMClassifier(n_estimators=3, max_depth=2, verbose=-1, random_state=0)
+        est.fit(X.to_pandas(), y.to_numpy())
+        # Manually set dict-format constraints (exercises the else branch)
+        est.monotone_constraints = {"age": 1, "income": -1}
+        result = extract_rules(est, all_features_constrained=True)
+        assert isinstance(result, pd.DataFrame)
+
+    # ------------------------------------------------------------------
+    # _check_all_features_have_monotone_constraints  (lines 328-333)
+    # ------------------------------------------------------------------
+
+    def test_check_constraints_lgbm_list_all_nonzero(self):
+        """LightGBM list format, all constraints non-zero (covers 328-332)."""
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame({"a": [1, 2, 3, 4, 5], "b": [5, 4, 3, 2, 1]})
+        y = pl.Series([0, 0, 1, 1, 1])
+        est = LGBMClassifier(n_estimators=2, verbose=-1, monotone_constraints=[1, -1])
+        est.fit(X.to_pandas(), y.to_numpy())
+        assert _check_all_features_have_monotone_constraints(est, n_features=2) is True
+
+    def test_check_constraints_lgbm_list_with_zero(self):
+        """LightGBM list format with a zero constraint returns False."""
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame({"a": [1, 2, 3, 4, 5], "b": [5, 4, 3, 2, 1]})
+        y = pl.Series([0, 0, 1, 1, 1])
+        est = LGBMClassifier(n_estimators=2, verbose=-1, monotone_constraints=[1, 0])
+        est.fit(X.to_pandas(), y.to_numpy())
+        assert _check_all_features_have_monotone_constraints(est, n_features=2) is False
+
+    def test_check_constraints_lgbm_dict_format(self):
+        """LightGBM dict-format constraints (covers line 333)."""
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame({"a": [1, 2, 3, 4, 5], "b": [5, 4, 3, 2, 1]})
+        y = pl.Series([0, 0, 1, 1, 1])
+        est = LGBMClassifier(n_estimators=2, verbose=-1)
+        est.fit(X.to_pandas(), y.to_numpy())
+        est.monotone_constraints = {"a": 1, "b": -1}  # force dict format
+        assert _check_all_features_have_monotone_constraints(est, n_features=2) is True
+
+    def test_check_constraints_lgbm_unknown_format(self):
+        """Unknown constraint type returns False (covers the safety-net branch)."""
+        from lightgbm import LGBMClassifier
+
+        X = pl.DataFrame({"a": [1, 2, 3, 4, 5], "b": [5, 4, 3, 2, 1]})
+        y = pl.Series([0, 0, 1, 1, 1])
+        est = LGBMClassifier(n_estimators=2, verbose=-1)
+        est.fit(X.to_pandas(), y.to_numpy())
+        est.monotone_constraints = "unexpected_format"  # neither list nor dict
+        assert _check_all_features_have_monotone_constraints(est, n_features=2) is False
+
+    # ------------------------------------------------------------------
+    # End-to-end grid search with LightGBM
+    # ------------------------------------------------------------------
+
+    def test_rule_grid_search_lgbm_end_to_end(self, lgbm_data):
+        """rule_grid_search runs end-to-end with a LGBMClassifier."""
+        from lightgbm import LGBMClassifier
+
+        X, y, _ = lgbm_data
+        est = LGBMClassifier(n_estimators=3, max_depth=2, verbose=-1, random_state=0)
+        result = rule_grid_search(est, X, y, scale_pos_weights=np.array([1.0, 2.0]))
+        assert isinstance(result, pl.DataFrame)
+        if result.height > 0:
+            assert "rule" in result.columns
+
+
+class TestRandomForestSupport:
+    """Tests covering the RandomForestClassifier code paths in rule_generation.
+
+    scikit-learn is a hard dependency, so unlike LightGBM this class always runs.
+    """
+
+    @pytest.fixture
+    def rf_data(self):
+        X = pl.DataFrame(
+            {
+                "age":    list(range(20, 70)),
+                "income": list(range(10_000, 60_000, 1_000)),
+            }
+        )
+        y = pl.Series([0] * 25 + [1] * 25)
+        est = RandomForestClassifier(n_estimators=5, max_depth=2, random_state=0)
+        est.fit(X.to_pandas(), y.to_numpy())
+        return X, y, est
+
+    # ------------------------------------------------------------------
+    # _detect_booster_type
+    # ------------------------------------------------------------------
+
+    def test_detect_booster_type_returns_randomforest(self):
+        assert _detect_booster_type(RandomForestClassifier()) == "randomforest"
+
+    # ------------------------------------------------------------------
+    # _rf_tree_to_dataframe
+    # ------------------------------------------------------------------
+
+    def test_rf_tree_to_dataframe_schema(self, rf_data):
+        _, _, est = rf_data
+        tree_df = _rf_tree_to_dataframe(0, est.estimators_[0].tree_, ["age", "income"])
+        assert set(tree_df.columns) == {
+            "Tree", "Node", "ID", "Feature", "Split", "Yes", "No", "Gain", "Cover",
+        }
+        # Root is node 0, IDs are "{tree}-{node}"
+        assert tree_df.loc[0, "ID"] == "0-0"
+        assert tree_df["Tree"].eq(0).all()
+        # Leaves have Feature == "Leaf" and no children
+        leaves = tree_df[tree_df["Feature"] == "Leaf"]
+        assert not leaves.empty
+        assert leaves["Yes"].isna().all()
+        assert leaves["No"].isna().all()
+        # Leaf Gain is a signed fraction in [-0.5, 0.5]
+        assert leaves["Gain"].between(-0.5, 0.5).all()
+
+    # ------------------------------------------------------------------
+    # _get_trees_dataframe
+    # ------------------------------------------------------------------
+
+    def test_get_trees_dataframe_rf(self, rf_data):
+        _, _, est = rf_data
+        df = _get_trees_dataframe(est)
+        assert set(df["Tree"].unique()) == set(range(5))  # n_estimators=5
+        assert "rule" not in df.columns
+
+    def test_get_trees_dataframe_rf_without_feature_names(self):
+        """Fitting on a plain numpy array falls back to generic f0, f1... names."""
+        X = np.random.RandomState(0).randn(40, 2)
+        y = np.array([0] * 20 + [1] * 20)
+        est = RandomForestClassifier(n_estimators=2, max_depth=2, random_state=0)
+        est.fit(X, y)
+        df = _get_trees_dataframe(est)
+        assert set(df.loc[df["Feature"] != "Leaf", "Feature"]).issubset({"f0", "f1"})
+
+    # ------------------------------------------------------------------
+    # extract_rules with RandomForest
+    # ------------------------------------------------------------------
+
+    def test_extract_rules_rf_max_gain(self, rf_data):
+        _, _, est = rf_data
+        result = extract_rules(est, all_features_constrained=False)
+        assert isinstance(result, pd.DataFrame)
+        if len(result) > 0:
+            assert "rule" in result.columns
+            assert all('X["' in r for r in result["rule"])
+
+    def test_extract_rules_rf_all_positive(self, rf_data):
+        _, _, est = rf_data
+        result = extract_rules(est, all_features_constrained=False, leaf_selection="all_positive")
+        assert isinstance(result, pd.DataFrame)
+
+    def test_extract_rules_rf_with_monotone_constraints(self):
+        X = pl.DataFrame({"age": list(range(20, 70)), "income": list(range(10_000, 60_000, 1_000))})
+        y = pl.Series([0] * 25 + [1] * 25)
+        est = RandomForestClassifier(
+            n_estimators=3, max_depth=2, random_state=0, monotonic_cst=[1, -1],
+        )
+        est.fit(X.to_pandas(), y.to_numpy())
+        result = extract_rules(est, all_features_constrained=True)
+        assert isinstance(result, pd.DataFrame)
+
+    # ------------------------------------------------------------------
+    # _check_all_features_have_monotone_constraints
+    # ------------------------------------------------------------------
+
+    def test_check_constraints_rf_all_nonzero(self):
+        est = RandomForestClassifier(n_estimators=2, monotonic_cst=[1, -1], random_state=0)
+        est.fit(pd.DataFrame({"a": [1, 2, 3, 4, 5], "b": [5, 4, 3, 2, 1]}), [0, 0, 1, 1, 1])
+        assert _check_all_features_have_monotone_constraints(est, n_features=2) is True
+
+    def test_check_constraints_rf_with_zero(self):
+        est = RandomForestClassifier(n_estimators=2, monotonic_cst=[1, 0], random_state=0)
+        est.fit(pd.DataFrame({"a": [1, 2, 3, 4, 5], "b": [5, 4, 3, 2, 1]}), [0, 0, 1, 1, 1])
+        assert _check_all_features_have_monotone_constraints(est, n_features=2) is False
+
+    def test_check_constraints_rf_none(self):
+        est = RandomForestClassifier(n_estimators=2, random_state=0)
+        est.fit(pd.DataFrame({"a": [1, 2, 3, 4, 5], "b": [5, 4, 3, 2, 1]}), [0, 0, 1, 1, 1])
+        assert _check_all_features_have_monotone_constraints(est, n_features=2) is False
+
+    # ------------------------------------------------------------------
+    # End-to-end grid search with RandomForest (scale_pos_weight -> class_weight)
+    # ------------------------------------------------------------------
+
+    def test_rule_grid_search_rf_end_to_end(self, rf_data):
+        X, y, _ = rf_data
+        est = RandomForestClassifier(n_estimators=3, max_depth=2, random_state=0)
+        result = rule_grid_search(est, X, y, scale_pos_weights=np.array([1.0, 3.0]))
+        assert isinstance(result, pl.DataFrame)
+        if result.height > 0:
+            assert "rule" in result.columns
+            assert set(result["scale_pos_weight"].unique().to_list()).issubset({1.0, 3.0})
+
+    def test_rule_grid_search_sequential_rf(self, rf_data):
+        X, y, _ = rf_data
+        est = RandomForestClassifier(n_estimators=3, max_depth=2, random_state=0)
+        result = rule_grid_search_sequential(est, X, y, scale_pos_weights=np.array([1.0, 2.0]))
+        assert isinstance(result, pl.DataFrame)
 
 
 if __name__ == "__main__":

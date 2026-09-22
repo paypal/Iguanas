@@ -7,7 +7,6 @@ import polars as pl
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.exceptions import NotFittedError
-from xgboost import XGBClassifier
 
 from .rule_evaluation import apply_and_filter_by_performance, apply_rules
 from .rule_generation import rule_grid_search
@@ -15,7 +14,22 @@ from .rule_generation import rule_grid_search
 _NUMERIC_DTYPES = (pl.Int8, pl.Int16, pl.Int32, pl.Int64, pl.Float32, pl.Float64)
 
 
-class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
+def _validate_metric_thresholds(
+    v: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]] | None:
+    """Validate that all threshold values are in the range [0, 1]."""
+    if v is None:
+        return v
+    for t in v:
+        val = t.get("value")
+        if val is not None and not (0.0 <= val <= 1.0):
+            raise ValueError(
+                f"metric_thresholds value {val!r} is out of range [0, 1] for threshold {t!r}"
+            )
+    return v
+
+
+class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):  # type: ignore[misc]
     """Rule-based classifier that selects the single best rule.
 
     The best rule is selected through the following steps:
@@ -49,7 +63,7 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    estimator: XGBClassifier
+    estimator: Any  # XGBClassifier, LGBMClassifier, or any sklearn-compatible tree classifier
     scale_pos_weights: list[float] | np.ndarray = Field(default_factory=lambda: np.array([1.0]))
     sample_weights_df: pl.DataFrame | None = None
     ranking_metric: str = "accuracy"
@@ -60,15 +74,7 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
     def _check_metric_thresholds(
         cls, v: list[dict[str, Any]] | None
     ) -> list[dict[str, Any]] | None:
-        if v is None:
-            return v
-        for t in v:
-            val = t.get("value")
-            if val is not None and not (0.0 <= val <= 1.0):
-                raise ValueError(
-                    f"metric_thresholds value {val!r} is out of range [0, 1] for threshold {t!r}"
-                )
-        return v
+        return _validate_metric_thresholds(v)
 
     # Learned attributes (set by fit, not part of the model schema)
     _feature_cols_: list[str] = PrivateAttr(default_factory=list)
@@ -93,8 +99,8 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
 
         rules = rule_grid_search(
             self.estimator,
-            X[self._feature_cols_].to_pandas(),
-            y.to_pandas(),
+            X[self._feature_cols_],
+            y,
             scale_pos_weights=self.scale_pos_weights,
             sample_weights_df=self.sample_weights_df,
         )
@@ -155,10 +161,48 @@ class RuleClassifier(BaseModel, BaseEstimator, ClassifierMixin):
         Returns
         -------
         pl.Series
-            Float64 series named "proba" with values in {0.0, 1.0}.
+            Float64 series named after the best rule with values in {0.0, 1.0}.
         """
         return self.predict(X).cast(pl.Float64)
 
     def fit_predict(self, X: pl.DataFrame, y: pl.Series) -> pl.Series:
         """Fit classifier and return binary predictions on the same data."""
         return self.fit(X, y).predict(X)
+
+    def export(self) -> dict[str, Any]:
+        """Export the fitted rule and feature columns as a JSON-serializable dict.
+
+        Returns
+        -------
+        dict
+            Dict with keys ``"rule"`` (str) and ``"feature_cols"`` (list[str]).
+
+        Raises
+        ------
+        NotFittedError
+            If the classifier has not been fitted.
+        """
+        self._check_is_fitted()
+        return {"rule": self._best_rule_, "feature_cols": self._feature_cols_}
+
+    @classmethod
+    def from_export(cls, data: dict[str, Any]) -> RuleClassifier:
+        """Reconstruct a fitted classifier from an :meth:`export` dict.
+
+        The returned instance supports ``predict`` and ``predict_proba`` but
+        cannot be re-fitted without supplying an ``estimator``.
+
+        Parameters
+        ----------
+        data : dict
+            Dict produced by :meth:`export`.
+
+        Returns
+        -------
+        RuleClassifier
+            Fitted instance with ``_best_rule_`` and ``_feature_cols_`` set.
+        """
+        instance = cls(estimator=None)
+        instance._feature_cols_ = data["feature_cols"]
+        instance._best_rule_ = data["rule"]
+        return instance

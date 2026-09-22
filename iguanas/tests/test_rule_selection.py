@@ -512,6 +512,16 @@ class TestSelectBestRulePerColumnCombination:
         with pytest.raises(ValueError, match="not found in metrics columns"):
             select_best_rule_per_column_combination(metrics, ranking_metric="recall")
 
+    def test_rule_with_no_feature_references_gets_its_own_group(self):
+        """A rule string matching no X[\"col\"] pattern is grouped under the
+        empty column combination rather than raising or being dropped."""
+        metrics = pl.DataFrame({
+            "rule": ['(X["a"] > 1)', "always_true"],
+            "precision": [0.95, 0.5],
+        })
+        result = select_best_rule_per_column_combination(metrics, ranking_metric="precision")
+        assert set(result) == {'(X["a"] > 1)', "always_true"}
+
 
 class TestFilterCorrelatedRulesColIRemoval:
     def test_col_i_removed_when_less_important(self):

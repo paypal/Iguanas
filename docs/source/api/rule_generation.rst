@@ -4,13 +4,18 @@ Rule Generation
 
 .. currentmodule:: iguanas.rule_generation
 
+Supported backends: ``XGBClassifier``, ``LGBMClassifier`` and scikit-learn's
+``RandomForestClassifier``. All three are converted to the same canonical
+per-node tree table before rule extraction, so every function below works
+unchanged regardless of which fitted estimator is passed in.
+
 Functions
 =========
 
-extract_rule_by_max_gain
+extract_max_gain_rule
 -------------------------
 
-.. autofunction:: extract_rule_by_max_gain
+.. autofunction:: extract_max_gain_rule
 
 extract_rule_with_monotone_constraints
 ---------------------------------------
