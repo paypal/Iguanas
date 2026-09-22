@@ -178,6 +178,7 @@ ignore = [
 [tool.coverage.run]
 source = ["iguanas"]
 omit = ["*/tests/*", "*/test_*.py"]
+branch = true
 
 [tool.coverage.report]
 exclude_lines = [

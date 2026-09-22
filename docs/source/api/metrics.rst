@@ -7,6 +7,16 @@ Metrics
 Functions
 =========
 
+count_conditions
+-----------------
+
+.. autofunction:: count_conditions
+
+count_features
+---------------
+
+.. autofunction:: count_features
+
 compute_single_metric
 ----------------------
 

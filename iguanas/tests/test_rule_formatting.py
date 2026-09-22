@@ -74,6 +74,13 @@ class TestSimplifyRule:
         result = simplify_rule(rule)
         assert result == '(X["a"] > 50)'
 
+    def test_tied_greater_conditions_keep_the_first(self):
+        """Two '>' conditions tied at the same max value: the first-seen keeper
+        is not replaced by the second (neither is '>=' being upgraded to '>')."""
+        rule = '(X["a"] > 100.0) & (X["a"] > 100) & (X["a"] < 5)'
+        result = simplify_rule(rule)
+        assert result == '(X["a"] > 100.0) & (X["a"] < 5)'
+
     def test_multiple_less_conditions(self):
         """Test that only lowest < threshold is kept."""
         rule = '(X["a"] < 100) & (X["a"] < 30) & (X["a"] < 50)'
@@ -541,6 +548,48 @@ class TestConvertToBool:
         rule = '(X["a"] == "False") & (X["b"] == "false") & (X["c"] == 0)'
         result = format_as_boolean_conditions(rule, ["a", "b", "c"])
         assert result == '(X["a"] == False) & (X["b"] == False) & (X["c"] == False)'
+
+    def test_ge_threshold_becomes_true(self):
+        """Test a >= threshold in (0, 1] unambiguously selects True."""
+        rule = '(X["flag"] >= 1.0)'
+        result = format_as_boolean_conditions(rule, ["flag"])
+        assert result == '(X["flag"] == True)'
+
+    def test_gt_threshold_becomes_true(self):
+        """Test a > threshold in [0, 1) unambiguously selects True."""
+        rule = '(X["flag"] > 0.0)'
+        result = format_as_boolean_conditions(rule, ["flag"])
+        assert result == '(X["flag"] == True)'
+
+    def test_lt_threshold_becomes_false(self):
+        """Test a < threshold in (0, 1] unambiguously selects False."""
+        rule = '(X["flag"] < 1.0)'
+        result = format_as_boolean_conditions(rule, ["flag"])
+        assert result == '(X["flag"] == False)'
+
+    def test_le_threshold_becomes_false(self):
+        """Test a <= threshold in [0, 1) unambiguously selects False."""
+        rule = '(X["flag"] <= 0.0)'
+        result = format_as_boolean_conditions(rule, ["flag"])
+        assert result == '(X["flag"] == False)'
+
+    def test_numeric_threshold_out_of_range_unchanged(self):
+        """A threshold outside (0, 1) doesn't unambiguously split 0.0/1.0."""
+        rule = '(X["flag"] >= 2.0)'
+        result = format_as_boolean_conditions(rule, ["flag"])
+        assert result == rule
+
+    def test_numeric_threshold_non_numeric_value_unchanged(self):
+        """A non-numeric value with a comparison operator is left untouched."""
+        rule = '(X["flag"] >= "abc")'
+        result = format_as_boolean_conditions(rule, ["flag"])
+        assert result == rule
+
+    def test_unrecognised_operator_unchanged(self):
+        """An operator that is neither ==/!= nor a threshold comparison is untouched."""
+        rule = '(X["flag"] <> 1)'
+        result = format_as_boolean_conditions(rule, ["flag"])
+        assert result == rule
 
 
 class TestConvertFloatToIntEdgeCases:

@@ -10,6 +10,9 @@ import warnings
 import signal
 import math
 import json
+import csv
+from collections import defaultdict
+from functools import partial
 from pathlib import Path
 from typing import Any
 
@@ -20,7 +23,9 @@ import numpy as np
 from gators.encoders import WOEEncoder
 from gators.imputers import NumericImputer
 from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier, XGBRFClassifier
+from lightgbm import LGBMClassifier
 
 from imodels import SkopeRulesClassifier
 
@@ -33,7 +38,7 @@ from iguanas.rule_combination import combine_rules_beam_search, combine_rules_gr
 from iguanas.rule_generation import rule_grid_search
 from iguanas.weight_transformations import generate_increasing_weights
 from iguanas.metrics import count_conditions
-from iguanas.rule_selection import filter_rules_by_feature_overlap
+from iguanas.rule_selection import filter_rules_by_feature_overlap, filter_correlated_rules
 from benchmarks.rule_extraction import rules_from_xgboost, rules_from_skope
 
 # Rule pools are expensive to regenerate (26 XGBoost fits per dataset for the
@@ -76,6 +81,11 @@ SEED_RUN_SKIP_DATASETS = {"aps_failure", "creditcard"}
 MODELS = [
     "iguanas_xgb_all_positive",
     "iguanas_xgb_all_positive_weight_grid",
+    "iguanas_lgbm_all_positive",
+    "iguanas_lgbm_all_positive_weight_grid",
+    "iguanas_lgbm_rf_all_positive",
+    "iguanas_rf_all_positive",
+    "iguanas_rf_all_positive_weight_grid",
     "skope_rules",
     "skope_rules_weight_grid",
 ]
@@ -88,6 +98,10 @@ IGUANAS_VARIANTS = {
     "iguanas_xgb_all_positive": (XGBClassifier, "all_positive"),
     "iguanas_xgbrf_max_gain": (XGBRFClassifier, "max_gain"),
     "iguanas_xgbrf_all_positive": (XGBRFClassifier, "all_positive"),
+    "iguanas_lgbm_max_gain": (LGBMClassifier, "max_gain"),
+    "iguanas_lgbm_all_positive": (LGBMClassifier, "all_positive"),
+    "iguanas_rf_max_gain": (RandomForestClassifier, "max_gain"),
+    "iguanas_rf_all_positive": (RandomForestClassifier, "all_positive"),
 }
 
 
@@ -168,32 +182,54 @@ def _generate_skope_pool_weight_grid(X_train, y_train, seed: int = 0) -> list[st
 
 
 def _generate_iguanas_pool(
-    estimator_class, leaf_selection: str, X_train, y_train, *, weight_grid: bool = False, seed: int = 0
+    estimator_class, leaf_selection: str, X_train, y_train, *, weight_grid: bool = False, seed: int = 0,
+    extra_kwargs: dict | None = None,
 ) -> list[str]:
     """Fit a single balanced-scale_pos_weight model and extract its rule pool.
 
     Mirrors IguanasAdapter's matched-capacity defaults (n_estimators=100,
     max_depth=4, single balanced scale_pos_weight, no weight-transformation
     grid) so only estimator_class and leaf_selection vary between variants.
+    extra_kwargs (e.g. boosting_type='rf' + bagging params for LightGBM's
+    Random Forest mode) are merged in last, overriding any defaults above.
     """
     pos = float(np.count_nonzero(y_train))
     neg = float(len(y_train) - pos)
     scale = (neg / pos) if pos else 1.0
-    kwargs = dict(
-        n_estimators=100,
-        max_depth=4,
-        random_state=seed,
-        tree_method="hist",
-        verbosity=0,
-        n_jobs=1,
-    )
-    if estimator_class is XGBClassifier:
-        # Matches RuleGenerationConfig.learning_rate; XGBRFClassifier keeps its
-        # own bagging-appropriate default instead.
-        kwargs["learning_rate"] = 0.3
+    if estimator_class is LGBMClassifier:
+        # LightGBM has no tree_method/verbosity kwargs; verbose=-1 is its
+        # equivalent silence flag.
+        kwargs = dict(n_estimators=100, max_depth=4, random_state=seed, verbose=-1, n_jobs=1)
+    elif estimator_class is RandomForestClassifier:
+        # No tree_method/verbosity/learning_rate -- plain sklearn RF kwargs.
+        # class_weight-based scale_pos_weight steering is handled inside
+        # rule_grid_search's _apply_scale_pos_weight, not here.
+        kwargs = dict(n_estimators=100, max_depth=4, random_state=seed, n_jobs=1)
+    else:
+        kwargs = dict(
+            n_estimators=100,
+            max_depth=4,
+            random_state=seed,
+            tree_method="hist",
+            verbosity=0,
+            n_jobs=1,
+        )
+        if estimator_class is XGBClassifier:
+            # Matches RuleGenerationConfig.learning_rate; XGBRFClassifier keeps its
+            # own bagging-appropriate default instead.
+            kwargs["learning_rate"] = 0.3
+    if extra_kwargs:
+        kwargs.update(extra_kwargs)
     estimator = estimator_class(**kwargs)
+    # The feature-ranking step inside the weight grid always uses XGBClassifier
+    # (see _top_feature_weight_grid), independent of estimator_class above, so
+    # its kwargs must stay XGBoost-shaped even when the main model is LightGBM.
+    ranker_kwargs = dict(
+        n_estimators=100, max_depth=4, random_state=seed, tree_method="hist",
+        verbosity=0, n_jobs=1, learning_rate=0.3,
+    )
     sample_weights_df = (
-        _top_feature_weight_grid(X_train, y_train, kwargs, scale) if weight_grid else None
+        _top_feature_weight_grid(X_train, y_train, ranker_kwargs, scale) if weight_grid else None
     )
     rules_df = rule_grid_search(
         estimator,
@@ -212,6 +248,26 @@ def _pool_and_frame(name: str, X_train, y_train, seed: int = 0):
     if name == "iguanas_xgb_all_positive_weight_grid":
         pool = _generate_iguanas_pool(
             XGBClassifier, "all_positive", X_train, y_train, weight_grid=True, seed=seed
+        )
+        return pool, lambda X: X
+    if name == "iguanas_lgbm_all_positive_weight_grid":
+        pool = _generate_iguanas_pool(
+            LGBMClassifier, "all_positive", X_train, y_train, weight_grid=True, seed=seed
+        )
+        return pool, lambda X: X
+    if name == "iguanas_lgbm_rf_all_positive":
+        # LightGBM's Random Forest boosting mode: each tree is fit on an
+        # independent bootstrap/feature sample rather than sequential
+        # boosting -- the true structural analog to XGBRFClassifier and to
+        # SkopeRules' own bagged-tree generator.
+        pool = _generate_iguanas_pool(
+            LGBMClassifier, "all_positive", X_train, y_train, seed=seed,
+            extra_kwargs={"boosting_type": "rf", "bagging_fraction": 0.8, "bagging_freq": 1, "feature_fraction": 0.8},
+        )
+        return pool, lambda X: X
+    if name == "iguanas_rf_all_positive_weight_grid":
+        pool = _generate_iguanas_pool(
+            RandomForestClassifier, "all_positive", X_train, y_train, weight_grid=True, seed=seed
         )
         return pool, lambda X: X
     if name == "skope_rules_weight_grid":
@@ -292,7 +348,7 @@ def _pool_and_frame_cached(dataset_name: str, model_name: str, X_train, y_train,
     return pool, frame_or_reason
 
 
-def _diversify_pool(metrics: pl.DataFrame) -> list[str]:
+def _diversify_pool(R_train: pl.DataFrame, metrics: pl.DataFrame) -> list[str]:
     """Shrink a quality-filtered candidate pool to DIVERSIFY_TARGET_MAX rules,
     to reduce the combiner's "researcher degrees of freedom" on a single split.
 
@@ -300,6 +356,8 @@ def _diversify_pool(metrics: pl.DataFrame) -> list[str]:
     overlapping cluster), escalating min_difference until the survivor count
     drops to DIVERSIFY_TARGET_MAX or below, then keeps the top DIVERSIFY_TARGET_MAX
     by MCC. Pools already at or below the target are returned unchanged.
+    R_train is unused here (kept only so this has the same signature as
+    _correlation_filter_pool, allowing either to be passed as diversify_fn).
     """
     if metrics.height <= DIVERSIFY_TARGET_MAX:
         return metrics["rule"].to_list()
@@ -313,16 +371,32 @@ def _diversify_pool(metrics: pl.DataFrame) -> list[str]:
     return rules[:DIVERSIFY_TARGET_MAX]
 
 
-def _evaluate_dataset(name: str, seed: int, combiner) -> None:
-    """Generate -> filter (quality + <=4 conditions) -> combine -> evaluate,
-    for one dataset/seed, printing one line per model. combiner is
-    combine_rules_greedy or combine_rules_beam_search.
+def _correlation_filter_pool(
+    R_train: pl.DataFrame, metrics: pl.DataFrame, max_corr: float = 0.8
+) -> list[str]:
+    """Alternative to _diversify_pool: drop pairwise rule-prediction correlations
+    above max_corr, keeping the higher-MCC rule in each pair (filter_correlated_rules).
+    Unlike _diversify_pool, this has no target pool size -- it only removes rules
+    that are redundant by correlation, however many survive.
     """
+    importance = dict(zip(metrics["rule"].to_list(), metrics["mcc"].to_list(), strict=True))
+    return filter_correlated_rules(R_train.select(metrics["rule"].to_list()), importance, max_corr=max_corr)
+
+
+def _evaluate_dataset(name: str, seed: int, combiner, diversify_fn=_diversify_pool) -> dict[str, dict[str, float]]:
+    """Generate -> filter (quality + <=4 conditions) -> combine -> evaluate,
+    for one dataset/seed, printing one line per model and returning each
+    model's test-split {"mcc": ..., "f1": ...} (models that fail/time out/have
+    no rules are omitted from the returned dict). combiner is
+    combine_rules_greedy or combine_rules_beam_search. diversify_fn is
+    _diversify_pool or _correlation_filter_pool, both (R_train, metrics) -> list[str].
+    """
+    results: dict[str, dict[str, float]] = {}
     try:
         dataset = load_dataset(name, max_rows=FULL_CONFIG.max_rows, seed=seed)
     except Exception as exc:
         print(f"  [skip] {name}: {type(exc).__name__}: {exc}")
-        return
+        return results
 
     idx_train, idx_test = train_test_split(
         range(dataset.X.height), test_size=0.3, random_state=seed, stratify=dataset.y
@@ -368,7 +442,7 @@ def _evaluate_dataset(name: str, seed: int, combiner) -> None:
                 if metrics.is_empty():
                     print(f"    {model_name:<14} no rule could be evaluated")
                     continue
-                diversified = _diversify_pool(metrics)
+                diversified = diversify_fn(R_train, metrics)
                 R_train = R_train.select(diversified)
                 combined = combiner(R_train, y_train_series, metric="mcc", min_improvement=0.01)
                 rule_expr = combined.columns[0]
@@ -390,10 +464,12 @@ def _evaluate_dataset(name: str, seed: int, combiner) -> None:
                     f"    {model_name:<14} pool={len(pool):>5} filtered={R_train.width:>5} "
                     f"selected={n_selected} mcc={mcc:.3f} f1={f1:.3f} precision={precision:.3f} recall={recall:.3f}"
                 )
+                results[model_name] = {"mcc": mcc, "f1": f1}
         except _FitTimeout:
             print(f"    {model_name:<14} TIMEOUT after {FIT_TIMEOUT_SECONDS}s; continuing")
         except Exception as exc:
             print(f"    {model_name:<14} FAILED: {type(exc).__name__}: {exc}")
+    return results
 
 
 def run() -> None:
@@ -414,6 +490,158 @@ def run_seeds(seeds: tuple[int, ...] = (0, 1, 2, 3, 4)) -> None:
             continue
         for seed in seeds:
             _evaluate_dataset(name, seed=seed, combiner=combine_rules_greedy)
+
+
+def compare_lgbm(seeds: tuple[int, ...] = (0, 1, 2, 3, 4)) -> dict[str, dict[str, list[float]]]:
+    """Only fits LightGBM fresh. For any dataset that already has a cached
+    skope_rules pool (seed 0) from an earlier run, all 6 models are evaluated
+    (xgb/skope pools are loaded from POOL_CACHE_DIR, not refit). Datasets
+    without that cache only get the 2 LightGBM rows, so no new xgb/skope fit
+    is ever triggered by this entry point. Prints a per-dataset and overall
+    mean-MCC comparison table across whatever models have data per dataset.
+    """
+    global MODELS
+    full_models = [
+        "iguanas_xgb_all_positive", "iguanas_xgb_all_positive_weight_grid",
+        "iguanas_lgbm_all_positive", "iguanas_lgbm_all_positive_weight_grid",
+        "skope_rules", "skope_rules_weight_grid",
+    ]
+    lgbm_only = ["iguanas_lgbm_all_positive", "iguanas_lgbm_all_positive_weight_grid"]
+    saved_models = MODELS
+    per_dataset: dict[str, dict[str, list[float]]] = {}
+    try:
+        for name in DATASETS:
+            if name in SEED_RUN_SKIP_DATASETS:
+                continue
+            already_cached = (POOL_CACHE_DIR / f"{name}__skope_rules__seed0.json").exists()
+            MODELS = full_models if already_cached else lgbm_only
+            for seed in seeds:
+                for model_name, metrics in _evaluate_dataset(name, seed=seed, combiner=combine_rules_greedy).items():
+                    per_dataset.setdefault(name, {}).setdefault(model_name, []).append(metrics["mcc"])
+    finally:
+        MODELS = saved_models
+
+    _print_comparison_table(per_dataset, full_models)
+    return per_dataset
+
+
+def _print_comparison_table(
+    per_dataset: dict[str, dict[str, list[float]]], models: list[str]
+) -> None:
+    print("\n=== per-dataset mean MCC (across available seeds) ===")
+    print(f"{'dataset':<20}" + "".join(f"{model:>34}" for model in models))
+    for name, model_mccs in per_dataset.items():
+        row = f"{name:<20}"
+        for model_name in models:
+            values = model_mccs.get(model_name)
+            row += f"{(sum(values) / len(values)):>34.3f}" if values else f"{'--':>34}"
+        print(row)
+
+    print("\n=== overall mean MCC (averaged over datasets with data) ===")
+    for model_name in models:
+        means = [sum(v) / len(v) for ds in per_dataset.values() if (v := ds.get(model_name))]
+        if means:
+            print(f"    {model_name:<40} mean={sum(means) / len(means):.3f} over {len(means)} datasets")
+
+
+def compare_all(
+    seeds: tuple[int, ...] = (0, 1, 2, 3, 4), diversify_fn=_diversify_pool
+) -> dict[str, dict[str, list[float]]]:
+    """All 6 models on every non-skipped dataset (unlike compare_lgbm, this
+    does refit xgb/skope wherever they aren't already cached). Reuses whatever
+    pools POOL_CACHE_DIR already has; only genuinely new (dataset, model, seed)
+    combos trigger a fresh fit. diversify_fn swaps in _correlation_filter_pool
+    for a rerun with correlation-based filtering instead of feature-overlap.
+    """
+    global MODELS
+    full_models = [
+        "iguanas_xgb_all_positive", "iguanas_xgb_all_positive_weight_grid",
+        "iguanas_lgbm_all_positive", "iguanas_lgbm_all_positive_weight_grid",
+        "iguanas_lgbm_rf_all_positive", "iguanas_rf_all_positive", "iguanas_rf_all_positive_weight_grid",
+        "skope_rules", "skope_rules_weight_grid",
+    ]
+    saved_models = MODELS
+    per_dataset: dict[str, dict[str, list[float]]] = {}
+    try:
+        MODELS = full_models
+        for name in DATASETS:
+            if name in SEED_RUN_SKIP_DATASETS:
+                continue
+            for seed in seeds:
+                for model_name, metrics in _evaluate_dataset(
+                    name, seed=seed, combiner=combine_rules_greedy, diversify_fn=diversify_fn
+                ).items():
+                    per_dataset.setdefault(name, {}).setdefault(model_name, []).append(metrics["mcc"])
+    finally:
+        MODELS = saved_models
+
+    _print_comparison_table(per_dataset, full_models)
+    return per_dataset
+
+
+RESULTS_DIR = Path(__file__).parent / "results"
+
+
+def correlation_sweep(
+    max_corrs: tuple[float, ...] = (0.9, 0.8, 0.7, 0.6, 0.5),
+    seeds: tuple[int, ...] = (0, 1, 2, 3, 4),
+    out_path: Path = RESULTS_DIR / "correlation_sweep.csv",
+) -> list[dict]:
+    """Rerun the full 6-model/24-dataset/5-seed grid once per max_corr in
+    max_corrs, using _correlation_filter_pool instead of the feature-overlap
+    diversifier, recording both mcc and f1. Reuses cached pools (no refits) --
+    only the filter/combine/evaluate step is redone per max_corr. Saves one
+    row per (max_corr, dataset, model, seed) to out_path, then prints a
+    mean-MCC/mean-F1 summary per (max_corr, model).
+    """
+    global MODELS
+    full_models = [
+        "iguanas_xgb_all_positive", "iguanas_xgb_all_positive_weight_grid",
+        "iguanas_lgbm_all_positive", "iguanas_lgbm_all_positive_weight_grid",
+        "skope_rules", "skope_rules_weight_grid",
+    ]
+    saved_models = MODELS
+    rows: list[dict] = []
+    try:
+        MODELS = full_models
+        for max_corr in max_corrs:
+            filter_fn = partial(_correlation_filter_pool, max_corr=max_corr)
+            for name in DATASETS:
+                if name in SEED_RUN_SKIP_DATASETS:
+                    continue
+                for seed in seeds:
+                    for model_name, metrics in _evaluate_dataset(
+                        name, seed=seed, combiner=combine_rules_greedy, diversify_fn=filter_fn
+                    ).items():
+                        rows.append({
+                            "max_corr": max_corr, "dataset": name, "model": model_name,
+                            "seed": seed, "mcc": metrics["mcc"], "f1": metrics["f1"],
+                        })
+    finally:
+        MODELS = saved_models
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=["max_corr", "dataset", "model", "seed", "mcc", "f1"])
+        writer.writeheader()
+        writer.writerows(rows)
+    print(f"Saved {len(rows)} rows to {out_path}")
+
+    summary: dict[float, dict[str, list[tuple[float, float]]]] = defaultdict(lambda: defaultdict(list))
+    for row in rows:
+        summary[row["max_corr"]][row["model"]].append((row["mcc"], row["f1"]))
+
+    print("\n=== mean MCC / mean F1 per max_corr, per model ===")
+    for max_corr in max_corrs:
+        print(f"--- max_corr={max_corr} ---")
+        for model_name in full_models:
+            values = summary[max_corr].get(model_name)
+            if not values:
+                continue
+            mean_mcc = sum(v[0] for v in values) / len(values)
+            mean_f1 = sum(v[1] for v in values) / len(values)
+            print(f"    {model_name:<40} mcc={mean_mcc:.3f} f1={mean_f1:.3f} n={len(values)}")
+    return rows
 
 
 if __name__ == "__main__":

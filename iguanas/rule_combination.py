@@ -759,7 +759,9 @@ def combine_rules_a_star(
             return False
         try:
             float(name[1:])
-        except ValueError:
+        except ValueError:  # pragma: no cover - unreachable: the fail-fast
+            # call above already rejects any "f"-prefixed metric with a
+            # non-numeric suffix.
             return False
         return True
 

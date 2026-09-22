@@ -1,11 +1,11 @@
-"""Extract interpretable rules from fitted XGBoost / LightGBM models.
+"""Extract interpretable rules from fitted XGBoost / LightGBM / RandomForest models.
 
-The generation step itself is standard decision-path extraction: a gradient
-boosted model is fitted, and a root-to-leaf path from each tree is serialised
-into a rule string. This is a well-established technique, not a new
-rule-induction algorithm, and no claim of optimality or completeness is made
-over the space of possible rules — the rules returned are exactly those the
-booster happened to build.
+The generation step itself is standard decision-path extraction: a tree-based
+model (gradient boosted or bagged) is fitted, and a root-to-leaf path from
+each tree is serialised into a rule string. This is a well-established
+technique, not a new rule-induction algorithm, and no claim of optimality or
+completeness is made over the space of possible rules — the rules returned
+are exactly those the model happened to build.
 
 Two aspects shape *which* path is taken and *how diverse* the resulting rule
 set is:
@@ -20,10 +20,13 @@ set is:
   (zero or more rules per tree, one for every leaf that favours the positive
   class).
 - **Sample-weight and ``scale_pos_weight`` steering.** The grid search refits
-  the booster across a grid of sample-weight schedules and ``scale_pos_weight``
-  values. Each combination reshapes the loss surface, so different splits win
-  and different rules are extracted; the grid is a diversity mechanism, not a
-  hyperparameter optimiser — results are pooled and deduplicated, not ranked.
+  the model across a grid of sample-weight schedules and ``scale_pos_weight``
+  values. Each combination reshapes the loss surface (or, for
+  RandomForestClassifier, which has no ``scale_pos_weight`` parameter, the
+  equivalent ``class_weight={0: 1.0, 1: scale_pos_weight}``), so different
+  splits win and different rules are extracted; the grid is a diversity
+  mechanism, not a hyperparameter optimiser — results are pooled and
+  deduplicated, not ranked.
 
 Execution model
 ---------------
@@ -39,6 +42,7 @@ import numpy as np
 import pandas as pd
 import polars as pl
 from joblib import Parallel, delayed
+from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 
 from .rule_formatting import simplify_rule
@@ -48,7 +52,9 @@ from .rule_formatting import simplify_rule
 # ---------------------------------------------------------------------------
 
 def _detect_booster_type(estimator: Any) -> str:
-    """Return ``"lightgbm"`` or ``"xgboost"`` based on the estimator's module."""
+    """Return ``"lightgbm"``, ``"randomforest"`` or ``"xgboost"`` for the estimator."""
+    if isinstance(estimator, RandomForestClassifier):
+        return "randomforest"
     return "lightgbm" if type(estimator).__module__.startswith("lightgbm") else "xgboost"
 
 
@@ -99,14 +105,101 @@ def _normalise_lgbm_tree_df(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def _get_trees_dataframe(estimator: Any) -> pd.DataFrame:
-    """Call the correct ``trees_to_dataframe()`` for XGBoost or LightGBM.
+def _rf_tree_to_dataframe(tree_idx: int, tree: Any, feature_names: list[str]) -> pd.DataFrame:
+    """Convert one scikit-learn ``DecisionTreeClassifier.tree_`` to the canonical schema.
 
-    XGBoost exposes it via ``estimator._Booster``;
-    LightGBM exposes it via ``estimator.booster_``.
+    Mirrors :func:`_normalise_lgbm_tree_df` for RandomForestClassifier's
+    per-tree Cython ``tree_`` structure (``feature``, ``threshold``,
+    ``children_left``/``children_right``, ``value``, ``impurity``,
+    ``n_node_samples``), so a single tree can be passed unchanged to
+    :func:`extract_max_gain_rule`, :func:`extract_positive_gain_rules` and
+    :func:`extract_rule_with_monotone_constraints`.
+
+    Leaf nodes are identified by ``children_left == -1`` (scikit-learn's
+    ``TREE_LEAF`` sentinel). A leaf's ``Gain`` is the fraction of
+    positive-class samples reaching it, minus 0.5, so positive values mean
+    the leaf favours the positive class -- matching the sign convention of
+    XGBoost/LightGBM raw leaf scores. A split's ``Gain`` is the weighted
+    impurity decrease; kept for schema parity, not consumed by any extractor.
     """
-    if _detect_booster_type(estimator) == "lightgbm":
+    feature_idx = tree.feature
+    threshold = tree.threshold
+    children_left = tree.children_left
+    children_right = tree.children_right
+    n_node_samples = tree.n_node_samples
+    impurity = tree.impurity
+    value = tree.value  # shape (n_nodes, 1, n_classes), already class fractions
+
+    rows = []
+    for node_id in range(tree.node_count):
+        if children_left[node_id] == -1:  # leaf
+            class_fracs = value[node_id, 0]
+            total = class_fracs.sum()
+            pos_frac = float(class_fracs[-1] / total) if total > 0 else 0.0
+            rows.append(
+                {
+                    "Tree": tree_idx,
+                    "Node": node_id,
+                    "ID": f"{tree_idx}-{node_id}",
+                    "Feature": "Leaf",
+                    "Split": np.nan,
+                    "Yes": None,
+                    "No": None,
+                    "Gain": pos_frac - 0.5,
+                    "Cover": int(n_node_samples[node_id]),
+                }
+            )
+            continue
+
+        left, right = int(children_left[node_id]), int(children_right[node_id])
+        parent_n = n_node_samples[node_id]
+        gain = impurity[node_id] - (
+            (n_node_samples[left] / parent_n) * impurity[left]
+            + (n_node_samples[right] / parent_n) * impurity[right]
+        )
+        rows.append(
+            {
+                "Tree": tree_idx,
+                "Node": node_id,
+                "ID": f"{tree_idx}-{node_id}",
+                "Feature": feature_names[feature_idx[node_id]],
+                "Split": float(threshold[node_id]),
+                "Yes": f"{tree_idx}-{left}",
+                "No": f"{tree_idx}-{right}",
+                "Gain": float(gain),
+                "Cover": int(parent_n),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _get_trees_dataframe(estimator: Any) -> pd.DataFrame:
+    """Return the canonical per-node tree table for XGBoost, LightGBM or RandomForest.
+
+    XGBoost exposes it via ``estimator._Booster.trees_to_dataframe()``;
+    LightGBM exposes it via ``estimator.booster_.trees_to_dataframe()``
+    (raw schema, normalised later per-tree in :func:`extract_rules`);
+    RandomForestClassifier has no such method, so each
+    ``estimator.estimators_[i].tree_`` is converted directly to the
+    canonical schema via :func:`_rf_tree_to_dataframe` and concatenated.
+    """
+    booster_type = _detect_booster_type(estimator)
+    if booster_type == "lightgbm":
         return estimator.booster_.trees_to_dataframe()
+    if booster_type == "randomforest":
+        feat_names_in = getattr(estimator, "feature_names_in_", None)
+        feature_names = (
+            list(feat_names_in)
+            if feat_names_in is not None
+            else [f"f{i}" for i in range(estimator.n_features_in_)]
+        )
+        return pd.concat(
+            [
+                _rf_tree_to_dataframe(i, tree.tree_, feature_names)
+                for i, tree in enumerate(estimator.estimators_)
+            ],
+            ignore_index=True,
+        )
     return estimator._Booster.trees_to_dataframe()
 
 
@@ -120,7 +213,7 @@ def _get_monotone_constraints_dict(estimator: Any) -> dict[str, int]:
 
     Parameters
     ----------
-    estimator : XGBClassifier | LGBMClassifier
+    estimator : XGBClassifier | LGBMClassifier | RandomForestClassifier
         Fitted estimator with monotone constraints already verified to be
         non-zero for every feature.
 
@@ -130,6 +223,13 @@ def _get_monotone_constraints_dict(estimator: Any) -> dict[str, int]:
         Mapping from feature name to constraint value (``+1`` or ``-1``).
     """
     booster_type = _detect_booster_type(estimator)
+    if booster_type == "randomforest":
+        feat_names = list(estimator.feature_names_in_)
+        return {
+            name: int(c)
+            for name, c in zip(feat_names, estimator.monotonic_cst, strict=False)
+            if int(c) != 0
+        }
     constraints_raw = estimator.monotone_constraints
     if booster_type == "lightgbm":
         if isinstance(constraints_raw, list | tuple):
@@ -207,7 +307,10 @@ def extract_max_gain_rule(tree_X: pd.DataFrame) -> str:
 
     # Trace path from node back to root (bottom-to-top)
     conditions = []
-    while current_id != root_id:
+    # root_id is the Tree column's int value, current_id is always a string
+    # "{tree}-{node}" ID, so this can never be False on entry; the loop's real
+    # exit is the `else: break` below once the walk reaches the actual root.
+    while current_id != root_id:  # pragma: no branch
         # Find the parent node (which node has current_id as Yes or No child)
         if current_id in yes_lookup:
             parent = yes_lookup[current_id]
@@ -351,12 +454,13 @@ def extract_rules(
     leaf_selection: str = "max_gain",
     **kwargs: Any,
 ) -> pd.DataFrame:
-    """Generate rules extracted from XGBoost or LightGBM trees.
+    """Generate rules extracted from XGBoost, LightGBM or RandomForest trees.
 
     Parameters
     ----------
-    estimator : XGBClassifier | LGBMClassifier
-        Fitted tree-based classifier. Both XGBoost and LightGBM are supported.
+    estimator : XGBClassifier | LGBMClassifier | RandomForestClassifier
+        Fitted tree-based classifier. XGBoost, LightGBM and scikit-learn's
+        RandomForestClassifier are supported.
     all_features_constrained : bool
         If True, uses monotone constraint-based extraction (top-to-bottom),
         which always yields one rule per tree; ``leaf_selection`` is ignored.
@@ -436,11 +540,12 @@ def _check_all_features_have_monotone_constraints(
 ) -> bool:
     """Check if all features have non-zero monotone constraints.
 
-    Handles both XGBoost (``dict``) and LightGBM (``list``) constraint formats.
+    Handles XGBoost (``dict``), LightGBM (``list``) and RandomForestClassifier
+    (``monotonic_cst`` array) constraint formats.
 
     Parameters
     ----------
-    estimator : XGBClassifier | LGBMClassifier
+    estimator : XGBClassifier | LGBMClassifier | RandomForestClassifier
         The fitted estimator to inspect.
     n_features : int
         Expected number of features.
@@ -450,9 +555,14 @@ def _check_all_features_have_monotone_constraints(
     bool
         True if all n_features features have constraints of +1 or -1.
     """
+    booster_type = _detect_booster_type(estimator)
+    if booster_type == "randomforest":
+        constraints = getattr(estimator, "monotonic_cst", None)
+        if constraints is None:
+            return False
+        return len(constraints) == n_features and all(int(c) != 0 for c in constraints)
     if not getattr(estimator, "monotone_constraints", None):
         return False
-    booster_type = _detect_booster_type(estimator)
     if booster_type == "lightgbm":
         constraints = estimator.monotone_constraints
         if isinstance(constraints, list | tuple):
@@ -466,6 +576,23 @@ def _check_all_features_have_monotone_constraints(
     return len(estimator.monotone_constraints) == n_features and all(
         constraint != 0 for constraint in estimator.monotone_constraints.values()
     )
+
+
+def _apply_scale_pos_weight(est: Any, scale_pos_weight: float, estimator_params: dict[str, Any]) -> None:
+    """Steer class balance for one grid-search fit.
+
+    XGBoost/LightGBM expose ``scale_pos_weight`` directly. RandomForestClassifier
+    has no such parameter, so the same steering effect is approximated via
+    ``class_weight={0: 1.0, 1: scale_pos_weight}`` -- a larger weight makes the
+    positive class relatively more influential on splits, mirroring what
+    ``scale_pos_weight`` does for the boosted estimators.
+    """
+    if estimator_params.get("objective") == "binary:hinge":
+        return
+    if isinstance(est, RandomForestClassifier):
+        est.set_params(class_weight={0: 1.0, 1: float(scale_pos_weight)})
+    else:
+        est.set_params(scale_pos_weight=scale_pos_weight)
 
 
 def _train_rules_for_weight_transformation(
@@ -524,8 +651,7 @@ def _train_rules_for_weight_transformation(
 
     for scale_pos_weight in scale_pos_weights:
         est = estimator_class(**estimator_params)
-        if estimator_params.get("objective") != "binary:hinge":
-            est.scale_pos_weight = scale_pos_weight
+        _apply_scale_pos_weight(est, scale_pos_weight, estimator_params)
         try:
             _ = est.fit(X_fit, y_train, sample_weight=weights_array)
         except Exception:
@@ -597,8 +723,7 @@ def _train_rules_for_scale(
     for i, name in enumerate(weight_columns):
         weights_array = weights_np[:, i]
         est = estimator_class(**estimator_params)
-        if estimator_params.get("objective") != "binary:hinge":
-            est.set_params(scale_pos_weight=scale_pos_weight)
+        _apply_scale_pos_weight(est, scale_pos_weight, estimator_params)
         try:
             est.fit(X_fit, y_train, sample_weight=weights_array)
         except Exception:

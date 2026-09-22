@@ -84,6 +84,16 @@ class TestRuleRegistry:
         with pytest.raises(ValueError, match="no saved metrics"):
             registry.compare("v1", "v2")
 
+    def test_compare_with_explicit_metric_cols(self, registry, metrics_df):
+        """Passing metric_cols skips the auto-derivation and restricts the join
+        to just the requested columns."""
+        registry.save("v1", rules=["r1", "r2"], metrics=metrics_df)
+        m2 = metrics_df.with_columns(pl.col("precision") + 0.05)
+        registry.save("v2", rules=["r1", "r2"], metrics=m2)
+        result = registry.compare("v1", "v2", metric_cols=["precision"])
+        assert "precision_v1" in result.columns
+        assert "recall_v1" not in result.columns
+
     def test_persistence(self, tmp_path):
         path = tmp_path / "registry.json"
         reg1 = RuleRegistry(path)

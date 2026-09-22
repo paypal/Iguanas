@@ -1422,6 +1422,13 @@ class TestCombineRulesBudgeted:
         with pytest.raises(ValueError, match="rules list cannot be empty"):
             combine_rules_budgeted(pl.DataFrame(), pl.Series("y", [True]), 0.5)
 
+    def test_zero_gain_candidate_within_budget_is_skipped(self):
+        """A feasible rule that catches no new positives must not be chosen."""
+        R, y = self._problem()
+        R = R.with_columns(pl.Series("noise", [False] * 100 + [True] * 20 + [False] * 880))
+        out = combine_rules_budgeted(R, y, max_alert_rate=0.5, max_rules=4)
+        assert "noise" not in out.columns[0]
+
 
 def _brute_force_best(R, y, metric, max_rules, operator):
     """Exhaustively score every rule subset up to max_rules and return the best."""
@@ -1657,3 +1664,42 @@ class TestAStarFairnessConstraint:
             combine_rules_a_star(
                 R, y, protected=protected, reference_group="z", min_dir=0.8
             )
+
+    def test_reference_group_defaults_to_the_majority_group(self):
+        """Omitting reference_group picks the most frequent protected value."""
+        R = pl.DataFrame(
+            {
+                "r1": [True, False, True, False, True, False, True, False],
+                "r2": [False, True, False, True, False, True, False, True],
+            }
+        )
+        y = pl.Series("y", [True, True, False, True, True, False, True, True])
+        protected = pl.Series("group", ["a", "a", "a", "a", "a", "b", "b", "b"])
+
+        out = combine_rules_a_star(R, y, metric="recall", max_rules=1, protected=protected, min_dir=0.0)
+        assert out.width >= 1
+
+    def test_reference_group_with_zero_metric_excludes_candidate(self):
+        """A candidate that never fires within the reference group is unfair by
+        construction (division by zero), so it must be excluded rather than raise.
+        """
+        R = pl.DataFrame(
+            {
+                "quiet": [False, False, False, False, True, True, False, False],
+                "other": [True, False, True, False, True, False, True, True],
+            }
+        )
+        y = pl.Series("y", [True, True, False, True, True, False, True, True])
+        protected = pl.Series("group", ["a", "a", "a", "a", "b", "b", "b", "b"])
+
+        out = combine_rules_a_star(
+            R,
+            y,
+            metric="precision",
+            max_rules=1,
+            return_top_k=2,
+            protected=protected,
+            reference_group="a",
+            min_dir=0.5,
+        )
+        assert "quiet" not in out.columns

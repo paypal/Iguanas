@@ -45,18 +45,20 @@ Built by the PSP Data Team at PayPal, Iguanas makes rule generation, evaluation,
 ## 🛠️ What Can Iguanas Do?
 
 ### ⚙️ Rule Generation
-Extract interpretable rules from labelled datasets by reading decision paths out of fitted XGBoost/LightGBM trees (standard decision-path extraction — the distinctive parts are the monotone-constraint-guided traversal and the weight/`scale_pos_weight` steering that drives rule diversity):
+Extract interpretable rules from labelled datasets by reading decision paths out of fitted XGBoost/LightGBM/RandomForest trees (standard decision-path extraction — the distinctive parts are the monotone-constraint-guided traversal and the weight/`scale_pos_weight` steering that drives rule diversity):
 - `rule_grid_search_sequential` - Single-threaded grid search over weight transformations and scale_pos_weight values
 - `rule_grid_search_parallel_weights` - Thread-parallel grid search, parallelised over weight transformations
 - `rule_grid_search_parallel_scales` - Thread-parallel grid search, parallelised over scale_pos_weight values
-- `extract_rules` - Extract rules from a fitted XGBoost model (with optional monotone constraints)
+- `extract_rules` - Extract rules from a fitted XGBoost, LightGBM or RandomForest model (with optional monotone constraints)
 - `extract_max_gain_rule` - Extract the highest-gain rule path from a single tree
 - `extract_rule_with_monotone_constraints` - Extract a rule path respecting monotone constraints
 
 ### 📊 Metrics
 Compute classification performance metrics for rule predictions:
-- `compute_metrics` - Compute a full metrics table (accuracy, precision, recall, F-beta, TP/FP/TN/FN, flagged %) for a set of rules
-- `compute_single_metric` - Compute a single scalar metric (accuracy, precision, recall or F-beta) — optimised for hot-path evaluation
+- `compute_metrics` - Compute a full metrics table (accuracy, precision, recall, F-beta, TP/FP/TN/FN, flagged %, plus coverage-aware metrics lift/wracc/laplace/m_estimate) for a set of rules
+- `compute_single_metric` - Compute a single scalar metric — optimised for hot-path evaluation
+- `count_conditions` - Count the atomic conditions in a rule expression
+- `count_features` - Count the distinct features a rule expression references
 
 ### 🔍 Rule Evaluation
 Evaluate rules on data and filter by performance:
@@ -76,6 +78,7 @@ Evaluate rules on data and filter by performance:
 Combine individual rules into compound rules to improve performance:
 - `combine_rules_full_search` - Exhaustive search over all rule pairs
 - `combine_rules_cumulative` - Incrementally combine rules with a running candidate
+- `combine_rules_budgeted` - Budgeted maximum-coverage OR-ruleset: maximise recall within a fixed alert-rate budget
 - `combine_rules_greedy` - Greedy combination selecting the best pair at each step
 - `combine_rules_beam_search` - Beam search combination balancing quality and efficiency
 - `combine_rules_a_star` - Exact best-first branch-and-bound search returning a provably optimal top-k combination

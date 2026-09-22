@@ -354,6 +354,28 @@ class TestComputeSingleMetric:
         result = compute_single_metric(combined, y, "mcc")
         assert result == 0.0
 
+    def test_coverage_metric_empty_series_returns_zero(self):
+        # total = len(y_bool) = 0 -> the total<=0 guard short-circuits before
+        # base_rate/covered are even considered.
+        combined = pl.Series([], dtype=pl.Boolean)
+        y = pl.Series([], dtype=pl.Boolean)
+        result = compute_single_metric(combined, y, "lift")
+        assert result == 0.0
+
+    def test_lift_zero_coverage_returns_zero(self):
+        # total > 0 but the rule fires nowhere, so covered == 0.
+        combined = pl.Series([False, False, False])
+        y = pl.Series([True, False, True])
+        result = compute_single_metric(combined, y, "lift")
+        assert result == 0.0
+
+    def test_lift_zero_base_rate_returns_zero(self):
+        # total > 0 and covered > 0, but y has no positives, so base_rate == 0.
+        combined = pl.Series([True, False, True])
+        y = pl.Series([False, False, False])
+        result = compute_single_metric(combined, y, "lift")
+        assert result == 0.0
+
 
 class TestComputeMetricsSeries:
     def test_series_input_is_converted_to_frame(self):

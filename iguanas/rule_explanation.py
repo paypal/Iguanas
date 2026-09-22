@@ -223,6 +223,10 @@ def compute_counterfactual(
             suggested = current + epsilon
         elif op == "!=":
             suggested = threshold  # set to the forbidden value
+        else:  # pragma: no cover - unreachable: any op combination other than
+            # the six above fails to parse as Python, so apply_rules() above
+            # already raises before this branch could run.
+            continue
 
         results.append(
             {
