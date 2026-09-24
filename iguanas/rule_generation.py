@@ -485,11 +485,20 @@ def extract_rules(
     Raises
     ------
     ValueError
-        If ``leaf_selection`` is not ``"max_gain"`` or ``"all_positive"``.
+        If ``leaf_selection`` is not ``"max_gain"`` or ``"all_positive"``, or
+        if ``all_features_constrained`` is True but the estimator was not
+        fitted with a non-zero monotone constraint for every feature.
     """
     if leaf_selection not in ("max_gain", "all_positive"):
         raise ValueError(
             f"leaf_selection must be 'max_gain' or 'all_positive', got {leaf_selection!r}"
+        )
+    if all_features_constrained and not _check_all_features_have_monotone_constraints(
+        estimator, estimator.n_features_in_
+    ):
+        raise ValueError(
+            "all_features_constrained=True requires the estimator to be fitted "
+            "with a non-zero monotone constraint for every feature."
         )
 
     booster_type = _detect_booster_type(estimator)

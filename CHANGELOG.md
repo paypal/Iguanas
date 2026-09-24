@@ -5,6 +5,8 @@ loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-09-24
+
 ### Added
 - `RandomForestClassifier` as a third rule-generation backend alongside
   XGBoost and LightGBM, including monotone-constraint support via
@@ -28,6 +30,10 @@ loosely follows [Keep a Changelog](https://keepachangelog.com/).
   `onnx`/`onnxruntime` version happens to be installed.
 - A potential `UnboundLocalError` in `compute_counterfactual` when a
   condition's operator isn't one of the six recognised comparison operators.
+- `extract_rules` now raises a clear `ValueError` (instead of an internal
+  `AttributeError`) when called with `all_features_constrained=True` on an
+  estimator that wasn't fitted with a non-zero monotone constraint for every
+  feature.
 - mypy `--strict` errors and ruff formatting across the package.
 
 ### Changed
@@ -36,6 +42,9 @@ loosely follows [Keep a Changelog](https://keepachangelog.com/).
   fairness/monitoring/cross-validation scope).
 - Test suite now has 100% line *and* branch coverage (`branch = true` in
   `[tool.coverage.run]`).
+- Trimmed the PyPI sdist from ~11MB/1500+ files down to <1MB by excluding the
+  `benchmarks/` and `paper/` research/paper directories, which aren't part of
+  the installable package.
 
 ### Docs
 - Added JOSS software paper and budgeted-composition methods paper drafts
