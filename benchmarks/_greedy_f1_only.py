@@ -11,6 +11,7 @@ import signal
 import math
 import json
 import csv
+import time
 from collections import defaultdict
 from functools import partial
 from pathlib import Path
@@ -46,7 +47,9 @@ from benchmarks.rule_extraction import rules_from_xgboost, rules_from_skope
 # that only changes the combination step (e.g. beam search vs greedy) doesn't
 # refit anything. Every model in MODELS below has an identity frame_fn, so only
 # the plain rule list needs to be cached.
-POOL_CACHE_DIR = Path("/tmp/iguanas_pool_cache")
+# Lives inside the repo (not /tmp) so it survives across sessions/reboots;
+# benchmarks/.gitignore already excludes .cache/ from version control.
+POOL_CACHE_DIR = Path(__file__).parent / ".cache" / "pool_cache"
 POOL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 # Same precision/recall floor applied to every model's pool, so no model gets an
@@ -270,6 +273,20 @@ def _pool_and_frame(name: str, X_train, y_train, seed: int = 0):
             RandomForestClassifier, "all_positive", X_train, y_train, weight_grid=True, seed=seed
         )
         return pool, lambda X: X
+    if name == "iguanas_rf_entropy_all_positive":
+        # Same RandomForest backend as iguanas_rf_all_positive, but splitting
+        # on information gain (entropy) instead of Gini impurity.
+        pool = _generate_iguanas_pool(
+            RandomForestClassifier, "all_positive", X_train, y_train, seed=seed,
+            extra_kwargs={"criterion": "entropy"},
+        )
+        return pool, lambda X: X
+    if name == "iguanas_rf_entropy_all_positive_weight_grid":
+        pool = _generate_iguanas_pool(
+            RandomForestClassifier, "all_positive", X_train, y_train, weight_grid=True, seed=seed,
+            extra_kwargs={"criterion": "entropy"},
+        )
+        return pool, lambda X: X
     if name == "skope_rules_weight_grid":
         pool = _generate_skope_pool_weight_grid(X_train, y_train, seed=seed)
         return pool, lambda X: X
@@ -416,6 +433,7 @@ def _evaluate_dataset(name: str, seed: int, combiner, diversify_fn=_diversify_po
 
     print(f"--- {name} seed={seed}: {dataset.X.height} rows x {dataset.X.width} features ---")
     for model_name in MODELS:
+        t0 = time.perf_counter()
         try:
             with _Timeout():
                 pool, frame_or_reason = _pool_and_frame_cached(
@@ -460,11 +478,13 @@ def _evaluate_dataset(name: str, seed: int, combiner, diversify_fn=_diversify_po
                 denom = math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
                 mcc = ((tp * tn) - (fp * fn)) / denom if denom else 0.0
                 n_selected = rule_expr.count(") | (") + 1
+                runtime_sec = time.perf_counter() - t0
                 print(
                     f"    {model_name:<14} pool={len(pool):>5} filtered={R_train.width:>5} "
-                    f"selected={n_selected} mcc={mcc:.3f} f1={f1:.3f} precision={precision:.3f} recall={recall:.3f}"
+                    f"selected={n_selected} mcc={mcc:.3f} f1={f1:.3f} precision={precision:.3f} "
+                    f"recall={recall:.3f} runtime={runtime_sec:.1f}s"
                 )
-                results[model_name] = {"mcc": mcc, "f1": f1}
+                results[model_name] = {"mcc": mcc, "f1": f1, "runtime_sec": runtime_sec}
         except _FitTimeout:
             print(f"    {model_name:<14} TIMEOUT after {FIT_TIMEOUT_SECONDS}s; continuing")
         except Exception as exc:
@@ -642,6 +662,272 @@ def correlation_sweep(
             mean_f1 = sum(v[1] for v in values) / len(values)
             print(f"    {model_name:<40} mcc={mean_mcc:.3f} f1={mean_f1:.3f} n={len(values)}")
     return rows
+
+
+# Rule-generation backend comparison: same generation/filter/combine pipeline,
+# only the base estimator differs. rf_gini and rf_entropy are the same
+# RandomForestClassifier backend, differing only in split criterion.
+BACKEND_MODELS: dict[str, tuple[str, str]] = {
+    "xgb": ("iguanas_xgb_all_positive", "iguanas_xgb_all_positive_weight_grid"),
+    "lightgbm": ("iguanas_lgbm_all_positive", "iguanas_lgbm_all_positive_weight_grid"),
+    "rf_gini": ("iguanas_rf_all_positive", "iguanas_rf_all_positive_weight_grid"),
+    "rf_entropy": ("iguanas_rf_entropy_all_positive", "iguanas_rf_entropy_all_positive_weight_grid"),
+}
+
+
+def backend_comparison(
+    seeds: tuple[int, ...] = (0, 1, 2, 3, 4),
+    out_csv: Path = RESULTS_DIR / "backend_comparison.csv",
+    datasets: list[str] | None = None,
+    append: bool = False,
+) -> list[dict]:
+    """Compare the 4 rule-generation backends (xgb, lightgbm, rf_gini,
+    rf_entropy), each with and without the weight-transformation grid, on
+    `datasets` (default: every non-skipped dataset) over `seeds` seeds/splits.
+
+    One row per (dataset, backend, weighted, seed) is appended to out_csv as
+    soon as it's computed, so a partial run still leaves usable results.
+    n_rows/n_features are the post-subsampling shape actually used for that
+    seed's split (see load_dataset's stratified subsampling). append=True
+    writes onto an existing out_csv (no header) instead of overwriting it --
+    e.g. to add SEED_RUN_SKIP_DATASETS afterwards without redoing the rest.
+    """
+    global MODELS
+    all_model_names = [name for pair in BACKEND_MODELS.values() for name in pair]
+    saved_models = MODELS
+    rows: list[dict] = []
+    out_csv.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = [
+        "dataset", "n_rows", "n_features", "backend", "weighted", "seed", "mcc", "f1", "runtime_sec",
+    ]
+    if datasets is None:
+        datasets = [name for name in DATASETS if name not in SEED_RUN_SKIP_DATASETS]
+    mode = "a" if append else "w"
+    with out_csv.open(mode, newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        if not append:
+            writer.writeheader()
+        try:
+            MODELS = all_model_names
+            for name in datasets:
+                for seed in seeds:
+                    dataset = load_dataset(name, max_rows=FULL_CONFIG.max_rows, seed=seed)
+                    metrics_by_model = _evaluate_dataset(name, seed=seed, combiner=combine_rules_greedy)
+                    for backend, (plain_name, weighted_name) in BACKEND_MODELS.items():
+                        for weighted, model_name in ((False, plain_name), (True, weighted_name)):
+                            metrics = metrics_by_model.get(model_name)
+                            if metrics is None:
+                                continue
+                            row = {
+                                "dataset": name,
+                                "n_rows": dataset.X.height,
+                                "n_features": dataset.X.width,
+                                "backend": backend,
+                                "weighted": weighted,
+                                "seed": seed,
+                                "mcc": metrics["mcc"],
+                                "f1": metrics["f1"],
+                                "runtime_sec": metrics["runtime_sec"],
+                            }
+                            rows.append(row)
+                            writer.writerow(row)
+                            fh.flush()
+        finally:
+            MODELS = saved_models
+
+    print(f"Saved {len(rows)} rows to {out_csv}")
+    return rows
+
+
+def write_backend_comparison_markdown(
+    csv_path: Path = RESULTS_DIR / "backend_comparison.csv",
+    out_md: Path = RESULTS_DIR / "backend_comparison.md",
+) -> Path:
+    """Aggregate backend_comparison's per-seed CSV into a per-(dataset, backend,
+    weighted) markdown table: n_rows, n_features, mean/std of mcc and f1
+    across whatever seeds are present for that combination.
+    """
+    with csv_path.open(newline="") as fh:
+        reader = csv.DictReader(fh)
+        raw_rows = list(reader)
+
+    groups: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for r in raw_rows:
+        key = (r["dataset"], r["backend"], r["weighted"])
+        group = groups.setdefault(
+            key,
+            {"n_rows": int(r["n_rows"]), "n_features": int(r["n_features"]), "mcc": [], "f1": [], "runtime_sec": []},
+        )
+        group["mcc"].append(float(r["mcc"]))
+        group["f1"].append(float(r["f1"]))
+        group["runtime_sec"].append(float(r["runtime_sec"]))
+
+    def _mean(values: list[float]) -> float:
+        return sum(values) / len(values)
+
+    def _std(values: list[float]) -> float:
+        if len(values) < 2:
+            return 0.0
+        m = _mean(values)
+        return math.sqrt(sum((v - m) ** 2 for v in values) / (len(values) - 1))
+
+    backend_order = list(BACKEND_MODELS.keys())
+    lines = [
+        "| dataset | rows | features | backend | weighted | mean MCC | std MCC | mean F1 | std F1 | mean runtime (s) | n seeds |",
+        "|---|---:|---:|---|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for dataset_name in sorted({k[0] for k in groups}, key=lambda d: DATASETS.index(d) if d in DATASETS else 999):
+        for backend in backend_order:
+            for weighted in ("False", "True"):
+                key = (dataset_name, backend, weighted)
+                group = groups.get(key)
+                if group is None:
+                    continue
+                mcc_values, f1_values = group["mcc"], group["f1"]
+                lines.append(
+                    f"| {dataset_name} | {group['n_rows']} | {group['n_features']} | {backend} | "
+                    f"{'yes' if weighted == 'True' else 'no'} | {_mean(mcc_values):.3f} | "
+                    f"{_std(mcc_values):.3f} | {_mean(f1_values):.3f} | {_std(f1_values):.3f} | "
+                    f"{_mean(group['runtime_sec']):.1f} | {len(mcc_values)} |"
+                )
+
+    out_md.parent.mkdir(parents=True, exist_ok=True)
+    out_md.write_text(
+        "# Rule-generation backend comparison\n\n"
+        "xgb / lightgbm / rf_gini / rf_entropy, each without and with the "
+        "weight-transformation grid. Mean/std of MCC and F1 (test split) "
+        "across the available seeds, per dataset.\n\n" + "\n".join(lines) + "\n"
+    )
+    print(f"Wrote {out_md}")
+    return out_md
+
+
+# Non-tree baselines (all registered in benchmarks.baselines.BASELINE_REGISTRY),
+# reusing the exact same generate -> filter -> combine -> evaluate pipeline as
+# BACKEND_MODELS above via _pool_and_frame's generic make_baseline() fallback.
+# None of these has a weight-transformation grid, so there is one variant each.
+BASELINE_MODELS: list[str] = ["ripper", "brl", "rulefit", "slipper", "greedy_rule_list", "oner"]
+
+
+def baseline_comparison(
+    seeds: tuple[int, ...] = (0, 1, 2, 3, 4),
+    out_csv: Path = RESULTS_DIR / "baseline_comparison.csv",
+    datasets: list[str] | None = None,
+    append: bool = False,
+) -> list[dict]:
+    """Compare the non-tree/imodels baselines in BASELINE_MODELS on `datasets`
+    (default: every non-skipped dataset) over `seeds` seeds/splits.
+
+    One row per (dataset, model, seed) is appended to out_csv as soon as it's
+    computed, so a partial/interrupted run still leaves usable results. Models
+    that time out (FIT_TIMEOUT_SECONDS, e.g. brl on wide datasets) or produce
+    no rules are simply absent for that (dataset, model, seed) -- see
+    _evaluate_dataset. Rule pools are cached to disk exactly like
+    backend_comparison (benchmarks/.cache/pool_cache/), keyed by
+    (dataset, model, seed), so a rerun never refits an already-cached combo.
+    """
+    global MODELS
+    saved_models = MODELS
+    rows: list[dict] = []
+    out_csv.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = ["dataset", "n_rows", "n_features", "model", "seed", "mcc", "f1", "runtime_sec"]
+    if datasets is None:
+        datasets = [name for name in DATASETS if name not in SEED_RUN_SKIP_DATASETS]
+    mode = "a" if append else "w"
+    with out_csv.open(mode, newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        if not append:
+            writer.writeheader()
+        try:
+            MODELS = BASELINE_MODELS
+            for name in datasets:
+                for seed in seeds:
+                    dataset = load_dataset(name, max_rows=FULL_CONFIG.max_rows, seed=seed)
+                    metrics_by_model = _evaluate_dataset(name, seed=seed, combiner=combine_rules_greedy)
+                    for model_name in BASELINE_MODELS:
+                        metrics = metrics_by_model.get(model_name)
+                        if metrics is None:
+                            continue
+                        row = {
+                            "dataset": name,
+                            "n_rows": dataset.X.height,
+                            "n_features": dataset.X.width,
+                            "model": model_name,
+                            "seed": seed,
+                            "mcc": metrics["mcc"],
+                            "f1": metrics["f1"],
+                            "runtime_sec": metrics["runtime_sec"],
+                        }
+                        rows.append(row)
+                        writer.writerow(row)
+                        fh.flush()
+        finally:
+            MODELS = saved_models
+
+    print(f"Saved {len(rows)} rows to {out_csv}")
+    return rows
+
+
+def write_baseline_comparison_markdown(
+    csv_path: Path = RESULTS_DIR / "baseline_comparison.csv",
+    out_md: Path = RESULTS_DIR / "baseline_comparison.md",
+) -> Path:
+    """Aggregate baseline_comparison's per-seed CSV into a per-(dataset, model)
+    markdown table: n_rows, n_features, mean/std of mcc, f1 and runtime_sec
+    across whatever seeds are present for that combination.
+    """
+    with csv_path.open(newline="") as fh:
+        reader = csv.DictReader(fh)
+        raw_rows = list(reader)
+
+    groups: dict[tuple[str, str], dict[str, Any]] = {}
+    for r in raw_rows:
+        key = (r["dataset"], r["model"])
+        group = groups.setdefault(
+            key,
+            {"n_rows": int(r["n_rows"]), "n_features": int(r["n_features"]), "mcc": [], "f1": [], "runtime_sec": []},
+        )
+        group["mcc"].append(float(r["mcc"]))
+        group["f1"].append(float(r["f1"]))
+        group["runtime_sec"].append(float(r["runtime_sec"]))
+
+    def _mean(values: list[float]) -> float:
+        return sum(values) / len(values)
+
+    def _std(values: list[float]) -> float:
+        if len(values) < 2:
+            return 0.0
+        m = _mean(values)
+        return math.sqrt(sum((v - m) ** 2 for v in values) / (len(values) - 1))
+
+    lines = [
+        "| dataset | rows | features | model | mean MCC | std MCC | mean F1 | std F1 | mean runtime (s) | std runtime (s) | n seeds |",
+        "|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for dataset_name in sorted({k[0] for k in groups}, key=lambda d: DATASETS.index(d) if d in DATASETS else 999):
+        for model_name in BASELINE_MODELS:
+            key = (dataset_name, model_name)
+            group = groups.get(key)
+            if group is None:
+                continue
+            mcc_values, f1_values, runtime_values = group["mcc"], group["f1"], group["runtime_sec"]
+            lines.append(
+                f"| {dataset_name} | {group['n_rows']} | {group['n_features']} | {model_name} | "
+                f"{_mean(mcc_values):.3f} | {_std(mcc_values):.3f} | {_mean(f1_values):.3f} | "
+                f"{_std(f1_values):.3f} | {_mean(runtime_values):.1f} | {_std(runtime_values):.1f} | "
+                f"{len(mcc_values)} |"
+            )
+
+    out_md.parent.mkdir(parents=True, exist_ok=True)
+    out_md.write_text(
+        "# Non-tree baseline comparison\n\n"
+        "ripper / brl / rulefit / slipper / greedy_rule_list / oner, through the "
+        "same generate -> filter -> combine -> evaluate pipeline as the backend "
+        "comparison. Mean/std of MCC, F1 and runtime (test split) across the "
+        "available seeds, per dataset.\n\n" + "\n".join(lines) + "\n"
+    )
+    print(f"Wrote {out_md}")
+    return out_md
 
 
 if __name__ == "__main__":

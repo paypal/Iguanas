@@ -88,6 +88,33 @@ def rules_from_brl(model: Any, columns: set[str] | None = None) -> list[str]:
     return rules_from_conjunctions(texts, columns)
 
 
+def rules_from_slipper(model: Any, columns: set[str] | None = None) -> list[str]:
+    """SLIPPER's ``get_rules()`` is already ``and``-joined conjunctions, one per
+    boosted rule, each with a non-negative confidence -- unused rules (weight
+    pruned to 0 by boosting) are simply absent from the frame.
+    """
+    frame = model.get_rules()
+    return rules_from_conjunctions([str(t) for t in frame["rule"].tolist()], columns)
+
+
+def rules_from_rule_list(model: Any, columns: set[str] | None = None) -> list[str]:
+    """Shared by ``GreedyRuleListClassifier`` and ``OneRClassifier``.
+
+    Both build a sequential decision list: each row of ``get_rules()`` is a
+    single-condition antecedent (never a conjunction) peeled off in order,
+    plus a trailing ``"else"`` default that is not a rule. As with BRL, only
+    antecedents whose branch is majority-positive (``prediction`` > 0.5) argue
+    for the positive class.
+    """
+    frame = model.get_rules()
+    texts = [
+        str(rule)
+        for rule, prediction in zip(frame["rule"], frame["prediction"], strict=True)
+        if str(rule) != "else" and float(prediction) > 0.5
+    ]
+    return rules_from_conjunctions(texts, columns)
+
+
 def rules_from_ripper(model: Any, columns: set[str] | None = None) -> list[str]:
     """Wittgenstein rules are ``feature=value`` conjunctions joined by ``^``.
 
