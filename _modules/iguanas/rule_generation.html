@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>iguanas.rule_generation &#8212; Iguanas - Lightning Fast Rule generation with Polars</title>
+    <title>iguanas.rule_generation &#8212; Iguanas - Rule Generation and Evaluation with Polars</title>
   
   
   
@@ -26,23 +26,22 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=720ed60b" />
     <link rel="stylesheet" type="text/css" href="../../_static/iguanas.css?v=8988652a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../../_static/documentation_options.js?v=692d9a0e"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
@@ -52,6 +51,11 @@
                     'ad_personalization': 'denied',
                     'analytics_storage': 'denied'
                 });
+            </script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', 'G-Z5TR8D9VTQ');
             </script>
@@ -135,8 +139,8 @@
       
     
     
-    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
-    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
+    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
+    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
   
   
 </a></div>
@@ -178,6 +182,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -208,8 +219,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -220,8 +230,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
       
@@ -296,6 +305,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -317,8 +333,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -329,8 +344,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
         
@@ -404,12 +418,51 @@
                 <article class="bd-article">
                   
   <h1>Source code for iguanas.rule_generation</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span></span><span class="sd">&quot;&quot;&quot;Extract interpretable rules from fitted XGBoost / LightGBM / RandomForest models.</span>
+
+<span class="sd">The generation step itself is standard decision-path extraction: a tree-based</span>
+<span class="sd">model (gradient boosted or bagged) is fitted, and a root-to-leaf path from</span>
+<span class="sd">each tree is serialised into a rule string. This is a well-established</span>
+<span class="sd">technique, not a new rule-induction algorithm, and no claim of optimality or</span>
+<span class="sd">completeness is made over the space of possible rules — the rules returned</span>
+<span class="sd">are exactly those the model happened to build.</span>
+
+<span class="sd">Two aspects shape *which* path is taken and *how diverse* the resulting rule</span>
+<span class="sd">set is:</span>
+
+<span class="sd">- **Monotone-constraint-guided traversal.** When every feature carries a</span>
+<span class="sd">  monotone constraint of +1 or -1, :func:`extract_rule_with_monotone_constraints`</span>
+<span class="sd">  walks root-to-leaf choosing the branch implied by each feature&#39;s constraint</span>
+<span class="sd">  direction, rather than following the highest-gain leaf. This yields rules</span>
+<span class="sd">  whose conditions all point in the business-expected direction. Otherwise,</span>
+<span class="sd">  ``leaf_selection`` picks between :func:`extract_max_gain_rule` (one rule per</span>
+<span class="sd">  tree, the single highest-gain leaf) and :func:`extract_positive_gain_rules`</span>
+<span class="sd">  (zero or more rules per tree, one for every leaf that favours the positive</span>
+<span class="sd">  class).</span>
+<span class="sd">- **Sample-weight and ``scale_pos_weight`` steering.** The grid search refits</span>
+<span class="sd">  the model across a grid of sample-weight schedules and ``scale_pos_weight``</span>
+<span class="sd">  values. Each combination reshapes the loss surface (or, for</span>
+<span class="sd">  RandomForestClassifier, which has no ``scale_pos_weight`` parameter, the</span>
+<span class="sd">  equivalent ``class_weight={0: 1.0, 1: scale_pos_weight}``), so different</span>
+<span class="sd">  splits win and different rules are extracted; the grid is a diversity</span>
+<span class="sd">  mechanism, not a hyperparameter optimiser — results are pooled and</span>
+<span class="sd">  deduplicated, not ranked.</span>
+
+<span class="sd">Execution model</span>
+<span class="sd">---------------</span>
+<span class="sd">The grid search runs on a single node. Parallelism is provided by</span>
+<span class="sd">:class:`joblib.Parallel` with the ``&quot;threading&quot;`` backend, so speed-up comes</span>
+<span class="sd">from the booster releasing the GIL during fitting. There is no multiprocessing,</span>
+<span class="sd">no cluster/distributed execution (no Dask, Ray or Spark), and no GPU-specific</span>
+<span class="sd">code path; scale is bounded by one machine&#39;s cores and memory.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestClassifier</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xgboost</span><span class="w"> </span><span class="kn">import</span> <span class="n">XGBClassifier</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.rule_formatting</span><span class="w"> </span><span class="kn">import</span> <span class="n">simplify_rule</span>
@@ -419,7 +472,9 @@
 <span class="c1"># ---------------------------------------------------------------------------</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_booster_type</span><span class="p">(</span><span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return ``&quot;lightgbm&quot;`` or ``&quot;xgboost&quot;`` based on the estimator&#39;s module.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return ``&quot;lightgbm&quot;``, ``&quot;randomforest&quot;`` or ``&quot;xgboost&quot;`` for the estimator.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">RandomForestClassifier</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;randomforest&quot;</span>
     <span class="k">return</span> <span class="s2">&quot;lightgbm&quot;</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span><span class="o">.</span><span class="vm">__module__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;lightgbm&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;xgboost&quot;</span>
 
 
@@ -427,7 +482,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Map a single-tree LightGBM ``trees_to_dataframe()`` slice to the XGBoost schema.</span>
 
 <span class="sd">    After normalisation the tree can be passed unchanged to</span>
-<span class="sd">    :func:`extract_rule_by_max_gain` and</span>
+<span class="sd">    :func:`extract_max_gain_rule` and</span>
 <span class="sd">    :func:`extract_rule_with_monotone_constraints`.</span>
 
 <span class="sd">    Column mapping</span>
@@ -470,14 +525,101 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_trees_dataframe</span><span class="p">(</span><span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Call the correct ``trees_to_dataframe()`` for XGBoost or LightGBM.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_rf_tree_to_dataframe</span><span class="p">(</span><span class="n">tree_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert one scikit-learn ``DecisionTreeClassifier.tree_`` to the canonical schema.</span>
 
-<span class="sd">    XGBoost exposes it via ``estimator._Booster``;</span>
-<span class="sd">    LightGBM exposes it via ``estimator.booster_``.</span>
+<span class="sd">    Mirrors :func:`_normalise_lgbm_tree_df` for RandomForestClassifier&#39;s</span>
+<span class="sd">    per-tree Cython ``tree_`` structure (``feature``, ``threshold``,</span>
+<span class="sd">    ``children_left``/``children_right``, ``value``, ``impurity``,</span>
+<span class="sd">    ``n_node_samples``), so a single tree can be passed unchanged to</span>
+<span class="sd">    :func:`extract_max_gain_rule`, :func:`extract_positive_gain_rules` and</span>
+<span class="sd">    :func:`extract_rule_with_monotone_constraints`.</span>
+
+<span class="sd">    Leaf nodes are identified by ``children_left == -1`` (scikit-learn&#39;s</span>
+<span class="sd">    ``TREE_LEAF`` sentinel). A leaf&#39;s ``Gain`` is the fraction of</span>
+<span class="sd">    positive-class samples reaching it, minus 0.5, so positive values mean</span>
+<span class="sd">    the leaf favours the positive class -- matching the sign convention of</span>
+<span class="sd">    XGBoost/LightGBM raw leaf scores. A split&#39;s ``Gain`` is the weighted</span>
+<span class="sd">    impurity decrease; kept for schema parity, not consumed by any extractor.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">_detect_booster_type</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;lightgbm&quot;</span><span class="p">:</span>
+    <span class="n">feature_idx</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">feature</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">threshold</span>
+    <span class="n">children_left</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">children_left</span>
+    <span class="n">children_right</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">children_right</span>
+    <span class="n">n_node_samples</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">n_node_samples</span>
+    <span class="n">impurity</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">impurity</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">value</span>  <span class="c1"># shape (n_nodes, 1, n_classes), already class fractions</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">node_count</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">children_left</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>  <span class="c1"># leaf</span>
+            <span class="n">class_fracs</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">node_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">total</span> <span class="o">=</span> <span class="n">class_fracs</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">pos_frac</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">class_fracs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">total</span><span class="p">)</span> <span class="k">if</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;Tree&quot;</span><span class="p">:</span> <span class="n">tree_idx</span><span class="p">,</span>
+                    <span class="s2">&quot;Node&quot;</span><span class="p">:</span> <span class="n">node_id</span><span class="p">,</span>
+                    <span class="s2">&quot;ID&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tree_idx</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">node_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Feature&quot;</span><span class="p">:</span> <span class="s2">&quot;Leaf&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Split&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                    <span class="s2">&quot;Yes&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;No&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;Gain&quot;</span><span class="p">:</span> <span class="n">pos_frac</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span>
+                    <span class="s2">&quot;Cover&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_node_samples</span><span class="p">[</span><span class="n">node_id</span><span class="p">]),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">children_left</span><span class="p">[</span><span class="n">node_id</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">children_right</span><span class="p">[</span><span class="n">node_id</span><span class="p">])</span>
+        <span class="n">parent_n</span> <span class="o">=</span> <span class="n">n_node_samples</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span>
+        <span class="n">gain</span> <span class="o">=</span> <span class="n">impurity</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">n_node_samples</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">/</span> <span class="n">parent_n</span><span class="p">)</span> <span class="o">*</span> <span class="n">impurity</span><span class="p">[</span><span class="n">left</span><span class="p">]</span>
+            <span class="o">+</span> <span class="p">(</span><span class="n">n_node_samples</span><span class="p">[</span><span class="n">right</span><span class="p">]</span> <span class="o">/</span> <span class="n">parent_n</span><span class="p">)</span> <span class="o">*</span> <span class="n">impurity</span><span class="p">[</span><span class="n">right</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;Tree&quot;</span><span class="p">:</span> <span class="n">tree_idx</span><span class="p">,</span>
+                <span class="s2">&quot;Node&quot;</span><span class="p">:</span> <span class="n">node_id</span><span class="p">,</span>
+                <span class="s2">&quot;ID&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tree_idx</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">node_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Feature&quot;</span><span class="p">:</span> <span class="n">feature_names</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">[</span><span class="n">node_id</span><span class="p">]],</span>
+                <span class="s2">&quot;Split&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">threshold</span><span class="p">[</span><span class="n">node_id</span><span class="p">]),</span>
+                <span class="s2">&quot;Yes&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tree_idx</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">left</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;No&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tree_idx</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">right</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Gain&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">gain</span><span class="p">),</span>
+                <span class="s2">&quot;Cover&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">parent_n</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_trees_dataframe</span><span class="p">(</span><span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the canonical per-node tree table for XGBoost, LightGBM or RandomForest.</span>
+
+<span class="sd">    XGBoost exposes it via ``estimator._Booster.trees_to_dataframe()``;</span>
+<span class="sd">    LightGBM exposes it via ``estimator.booster_.trees_to_dataframe()``</span>
+<span class="sd">    (raw schema, normalised later per-tree in :func:`extract_rules`);</span>
+<span class="sd">    RandomForestClassifier has no such method, so each</span>
+<span class="sd">    ``estimator.estimators_[i].tree_`` is converted directly to the</span>
+<span class="sd">    canonical schema via :func:`_rf_tree_to_dataframe` and concatenated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">booster_type</span> <span class="o">=</span> <span class="n">_detect_booster_type</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">booster_type</span> <span class="o">==</span> <span class="s2">&quot;lightgbm&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">estimator</span><span class="o">.</span><span class="n">booster_</span><span class="o">.</span><span class="n">trees_to_dataframe</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">booster_type</span> <span class="o">==</span> <span class="s2">&quot;randomforest&quot;</span><span class="p">:</span>
+        <span class="n">feat_names_in</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="s2">&quot;feature_names_in_&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">feature_names</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">list</span><span class="p">(</span><span class="n">feat_names_in</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">feat_names_in</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;f</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">estimator</span><span class="o">.</span><span class="n">n_features_in_</span><span class="p">)]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">_rf_tree_to_dataframe</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">tree_</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tree</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">estimator</span><span class="o">.</span><span class="n">estimators_</span><span class="p">)</span>
+            <span class="p">],</span>
+            <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">return</span> <span class="n">estimator</span><span class="o">.</span><span class="n">_Booster</span><span class="o">.</span><span class="n">trees_to_dataframe</span><span class="p">()</span>
 
 
@@ -491,7 +633,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    estimator : XGBClassifier | LGBMClassifier</span>
+<span class="sd">    estimator : XGBClassifier | LGBMClassifier | RandomForestClassifier</span>
 <span class="sd">        Fitted estimator with monotone constraints already verified to be</span>
 <span class="sd">        non-zero for every feature.</span>
 
@@ -501,6 +643,13 @@
 <span class="sd">        Mapping from feature name to constraint value (``+1`` or ``-1``).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">booster_type</span> <span class="o">=</span> <span class="n">_detect_booster_type</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">booster_type</span> <span class="o">==</span> <span class="s2">&quot;randomforest&quot;</span><span class="p">:</span>
+        <span class="n">feat_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">estimator</span><span class="o">.</span><span class="n">feature_names_in_</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">feat_names</span><span class="p">,</span> <span class="n">estimator</span><span class="o">.</span><span class="n">monotonic_cst</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
+        <span class="p">}</span>
     <span class="n">constraints_raw</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">monotone_constraints</span>
     <span class="k">if</span> <span class="n">booster_type</span> <span class="o">==</span> <span class="s2">&quot;lightgbm&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constraints_raw</span><span class="p">,</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">):</span>
@@ -510,17 +659,17 @@
                 <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">feat_names</span><span class="p">,</span> <span class="n">constraints_raw</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
             <span class="p">}</span>
-        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">constraints_raw</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="nb">dict</span><span class="p">(</span><span class="n">constraints_raw</span><span class="p">))</span>
     <span class="c1"># XGBoost: already a dict</span>
-    <span class="k">return</span> <span class="n">constraints_raw</span>  <span class="c1"># type: ignore[return-value]</span>
+    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">constraints_raw</span><span class="p">)</span>
 
 
 <span class="c1"># ---------------------------------------------------------------------------</span>
 
 
-<div class="viewcode-block" id="extract_rule_by_max_gain">
-<a class="viewcode-back" href="../../api/rule_generation.html#iguanas.rule_generation.extract_rule_by_max_gain">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">extract_rule_by_max_gain</span><span class="p">(</span><span class="n">tree_X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="extract_max_gain_rule">
+<a class="viewcode-back" href="../../api/rule_generation.html#iguanas.rule_generation.extract_max_gain_rule">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_max_gain_rule</span><span class="p">(</span><span class="n">tree_X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract the rule path to the leaf with maximum gain using bottom-to-top approach.</span>
 
 <span class="sd">    Finds the leaf node with highest gain value and traces back to the root node,</span>
@@ -548,7 +697,7 @@
 
     <span class="c1"># Find best leaf by gain</span>
     <span class="n">best_idx</span> <span class="o">=</span> <span class="n">leaves</span><span class="p">[</span><span class="s2">&quot;Gain&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span>
-    <span class="n">best_leaf_node</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">leaves</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">best_idx</span><span class="p">,</span> <span class="s2">&quot;Node&quot;</span><span class="p">])</span>  <span class="c1"># type: ignore</span>
+    <span class="n">best_leaf_node</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">leaves</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">best_idx</span><span class="p">,</span> <span class="s2">&quot;Node&quot;</span><span class="p">])</span>
 
     <span class="c1"># Index by ID for O(1) lookups</span>
     <span class="n">tree_X</span> <span class="o">=</span> <span class="n">tree_X</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span>
@@ -580,7 +729,10 @@
 
     <span class="c1"># Trace path from node back to root (bottom-to-top)</span>
     <span class="n">conditions</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">while</span> <span class="n">current_id</span> <span class="o">!=</span> <span class="n">root_id</span><span class="p">:</span>
+    <span class="c1"># root_id is the Tree column&#39;s int value, current_id is always a string</span>
+    <span class="c1"># &quot;{tree}-{node}&quot; ID, so this can never be False on entry; the loop&#39;s real</span>
+    <span class="c1"># exit is the `else: break` below once the walk reaches the actual root.</span>
+    <span class="k">while</span> <span class="n">current_id</span> <span class="o">!=</span> <span class="n">root_id</span><span class="p">:</span>  <span class="c1"># pragma: no branch</span>
         <span class="c1"># Find the parent node (which node has current_id as Yes or No child)</span>
         <span class="k">if</span> <span class="n">current_id</span> <span class="ow">in</span> <span class="n">yes_lookup</span><span class="p">:</span>
             <span class="n">parent</span> <span class="o">=</span> <span class="n">yes_lookup</span><span class="p">[</span><span class="n">current_id</span><span class="p">]</span>
@@ -596,6 +748,54 @@
     <span class="n">conditions</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
     <span class="k">return</span> <span class="s2">&quot; &amp; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">conditions</span><span class="p">)</span> <span class="k">if</span> <span class="n">conditions</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_positive_gain_rules</span><span class="p">(</span><span class="n">tree_X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract every root-to-leaf path whose leaf favours the positive class.</span>
+
+<span class="sd">    Unlike :func:`extract_max_gain_rule`, which returns only the single</span>
+<span class="sd">    highest-gain leaf per tree, this walks the tree top-to-bottom once and</span>
+<span class="sd">    collects every leaf whose value is positive -- so a single tree can</span>
+<span class="sd">    contribute zero, one, or several rules, mirroring how a boosted ensemble&#39;s</span>
+<span class="sd">    positive-leaf paths are pooled when treated as a flat disjunctive rule set.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tree_X : pd.DataFrame</span>
+<span class="sd">        Output from estimator._Booster.trees_to_dataframe() filtered for a</span>
+<span class="sd">        single tree. Required columns: Node, ID, Feature, Split, Yes, No, Gain.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[str]</span>
+<span class="sd">        Rule strings in format (X[&quot;feat1&quot;] &gt;= Split1) &amp; (X[&quot;feat2&quot;] &lt; Split2),</span>
+<span class="sd">        one per qualifying leaf. Empty list if the tree has no positive leaf.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">tree_X</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="n">tree_X</span> <span class="o">=</span> <span class="n">tree_X</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span>
+    <span class="n">root_rows</span> <span class="o">=</span> <span class="n">tree_X</span><span class="p">[</span><span class="n">tree_X</span><span class="p">[</span><span class="s2">&quot;Node&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">root_rows</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">root_id</span> <span class="o">=</span> <span class="n">root_rows</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">rules</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">walk</span><span class="p">(</span><span class="n">node_id</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">node_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tree_X</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">tree_X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;Feature&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Leaf&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Gain&quot;</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Gain&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">path</span><span class="p">:</span>
+                <span class="n">rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot; &amp; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="n">feature</span><span class="p">,</span> <span class="n">split</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;Feature&quot;</span><span class="p">],</span> <span class="nb">round</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Split&quot;</span><span class="p">],</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">walk</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Yes&quot;</span><span class="p">],</span> <span class="p">[</span><span class="o">*</span><span class="n">path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;(X[&quot;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s1">&quot;] &lt; </span><span class="si">{</span><span class="n">split</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">])</span>
+        <span class="n">walk</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;No&quot;</span><span class="p">],</span> <span class="p">[</span><span class="o">*</span><span class="n">path</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;(X[&quot;</span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s1">&quot;] &gt;= </span><span class="si">{</span><span class="n">split</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">])</span>
+
+    <span class="n">walk</span><span class="p">(</span><span class="n">root_id</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">return</span> <span class="n">rules</span>
 
 
 <div class="viewcode-block" id="extract_rule_with_monotone_constraints">
@@ -679,17 +879,28 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">extract_rules</span><span class="p">(</span>
     <span class="n">estimator</span><span class="p">:</span> <span class="n">XGBClassifier</span><span class="p">,</span>
     <span class="n">all_features_constrained</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="n">leaf_selection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;max_gain&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate rules extracted from XGBoost or LightGBM trees.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate rules extracted from XGBoost, LightGBM or RandomForest trees.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    estimator : XGBClassifier | LGBMClassifier</span>
-<span class="sd">        Fitted tree-based classifier. Both XGBoost and LightGBM are supported.</span>
+<span class="sd">    estimator : XGBClassifier | LGBMClassifier | RandomForestClassifier</span>
+<span class="sd">        Fitted tree-based classifier. XGBoost, LightGBM and scikit-learn&#39;s</span>
+<span class="sd">        RandomForestClassifier are supported.</span>
 <span class="sd">    all_features_constrained : bool</span>
-<span class="sd">        If True, uses monotone constraint-based extraction (top-to-bottom).</span>
-<span class="sd">        If False, uses max gain-based extraction (bottom-to-top).</span>
+<span class="sd">        If True, uses monotone constraint-based extraction (top-to-bottom),</span>
+<span class="sd">        which always yields one rule per tree; ``leaf_selection`` is ignored.</span>
+<span class="sd">        If False, ``leaf_selection`` picks the extraction strategy.</span>
+<span class="sd">    leaf_selection : {&quot;max_gain&quot;, &quot;all_positive&quot;}, default=&quot;max_gain&quot;</span>
+<span class="sd">        Strategy used when ``all_features_constrained`` is False:</span>
+
+<span class="sd">        - ``&quot;max_gain&quot;``: one rule per tree, the single highest-gain leaf</span>
+<span class="sd">          (see :func:`extract_max_gain_rule`).</span>
+<span class="sd">        - ``&quot;all_positive&quot;``: zero or more rules per tree, one for every leaf</span>
+<span class="sd">          whose value favours the positive class (see</span>
+<span class="sd">          :func:`extract_positive_gain_rules`).</span>
 <span class="sd">    **kwargs : dict</span>
 <span class="sd">        Additional metadata columns added to the output DataFrame</span>
 <span class="sd">        (e.g., transformation name, scale_pos_weight value).</span>
@@ -698,7 +909,26 @@
 <span class="sd">    -------</span>
 <span class="sd">    pd.DataFrame</span>
 <span class="sd">        DataFrame with columns: ``rule``, ``tree``, and any ``kwargs`` columns.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``leaf_selection`` is not ``&quot;max_gain&quot;`` or ``&quot;all_positive&quot;``, or</span>
+<span class="sd">        if ``all_features_constrained`` is True but the estimator was not</span>
+<span class="sd">        fitted with a non-zero monotone constraint for every feature.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">leaf_selection</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;max_gain&quot;</span><span class="p">,</span> <span class="s2">&quot;all_positive&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;leaf_selection must be &#39;max_gain&#39; or &#39;all_positive&#39;, got </span><span class="si">{</span><span class="n">leaf_selection</span><span class="si">!r}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">all_features_constrained</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_check_all_features_have_monotone_constraints</span><span class="p">(</span>
+        <span class="n">estimator</span><span class="p">,</span> <span class="n">estimator</span><span class="o">.</span><span class="n">n_features_in_</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;all_features_constrained=True requires the estimator to be fitted &quot;</span>
+            <span class="s2">&quot;with a non-zero monotone constraint for every feature.&quot;</span>
+        <span class="p">)</span>
+
     <span class="n">booster_type</span> <span class="o">=</span> <span class="n">_detect_booster_type</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">_get_trees_dataframe</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
     <span class="n">group_col</span> <span class="o">=</span> <span class="s2">&quot;tree_index&quot;</span> <span class="k">if</span> <span class="n">booster_type</span> <span class="o">==</span> <span class="s2">&quot;lightgbm&quot;</span> <span class="k">else</span> <span class="s2">&quot;Tree&quot;</span>
@@ -719,16 +949,20 @@
         <span class="k">if</span> <span class="n">all_features_constrained</span><span class="p">:</span>
             <span class="n">mc_dict</span> <span class="o">=</span> <span class="n">_get_monotone_constraints_dict</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
             <span class="n">rule</span> <span class="o">=</span> <span class="n">extract_rule_with_monotone_constraints</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">mc_dict</span><span class="p">)</span>
-            <span class="n">rule</span> <span class="o">=</span> <span class="n">simplify_rule</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+            <span class="n">rules_for_tree</span> <span class="o">=</span> <span class="p">[</span><span class="n">simplify_rule</span><span class="p">(</span><span class="n">rule</span><span class="p">)]</span> <span class="k">if</span> <span class="n">rule</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="n">leaf_selection</span> <span class="o">==</span> <span class="s2">&quot;all_positive&quot;</span><span class="p">:</span>
+            <span class="n">rules_for_tree</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">simplified</span>
+                <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">extract_positive_gain_rules</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">simplified</span> <span class="o">:=</span> <span class="n">simplify_rule</span><span class="p">(</span><span class="n">rule</span><span class="p">))</span>
+            <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">rule</span> <span class="o">=</span> <span class="n">extract_rule_by_max_gain</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
-            <span class="n">rule</span> <span class="o">=</span> <span class="n">simplify_rule</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+            <span class="n">rule</span> <span class="o">=</span> <span class="n">extract_max_gain_rule</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+            <span class="n">rules_for_tree</span> <span class="o">=</span> <span class="p">[</span><span class="n">simplify_rule</span><span class="p">(</span><span class="n">rule</span><span class="p">)]</span> <span class="k">if</span> <span class="n">rule</span> <span class="k">else</span> <span class="p">[]</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">rule</span><span class="p">:</span>
-            <span class="k">continue</span>
-
-        <span class="n">rule_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
-        <span class="n">tree_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tree_id</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules_for_tree</span><span class="p">:</span>
+            <span class="n">rule_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+            <span class="n">tree_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tree_id</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">rule_strings</span><span class="p">:</span>
         <span class="n">rules_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="n">rule_strings</span><span class="p">,</span> <span class="s2">&quot;tree&quot;</span><span class="p">:</span> <span class="n">tree_ids</span><span class="p">}</span>
@@ -744,11 +978,12 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if all features have non-zero monotone constraints.</span>
 
-<span class="sd">    Handles both XGBoost (``dict``) and LightGBM (``list``) constraint formats.</span>
+<span class="sd">    Handles XGBoost (``dict``), LightGBM (``list``) and RandomForestClassifier</span>
+<span class="sd">    (``monotonic_cst`` array) constraint formats.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    estimator : XGBClassifier | LGBMClassifier</span>
+<span class="sd">    estimator : XGBClassifier | LGBMClassifier | RandomForestClassifier</span>
 <span class="sd">        The fitted estimator to inspect.</span>
 <span class="sd">    n_features : int</span>
 <span class="sd">        Expected number of features.</span>
@@ -758,9 +993,14 @@
 <span class="sd">    bool</span>
 <span class="sd">        True if all n_features features have constraints of +1 or -1.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">booster_type</span> <span class="o">=</span> <span class="n">_detect_booster_type</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">booster_type</span> <span class="o">==</span> <span class="s2">&quot;randomforest&quot;</span><span class="p">:</span>
+        <span class="n">constraints</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="s2">&quot;monotonic_cst&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">constraints</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">constraints</span><span class="p">)</span> <span class="o">==</span> <span class="n">n_features</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">constraints</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="s2">&quot;monotone_constraints&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">False</span>
-    <span class="n">booster_type</span> <span class="o">=</span> <span class="n">_detect_booster_type</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">booster_type</span> <span class="o">==</span> <span class="s2">&quot;lightgbm&quot;</span><span class="p">:</span>
         <span class="n">constraints</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">monotone_constraints</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constraints</span><span class="p">,</span> <span class="nb">list</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">):</span>
@@ -776,6 +1016,23 @@
     <span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_apply_scale_pos_weight</span><span class="p">(</span><span class="n">est</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">scale_pos_weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">estimator_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Steer class balance for one grid-search fit.</span>
+
+<span class="sd">    XGBoost/LightGBM expose ``scale_pos_weight`` directly. RandomForestClassifier</span>
+<span class="sd">    has no such parameter, so the same steering effect is approximated via</span>
+<span class="sd">    ``class_weight={0: 1.0, 1: scale_pos_weight}`` -- a larger weight makes the</span>
+<span class="sd">    positive class relatively more influential on splits, mirroring what</span>
+<span class="sd">    ``scale_pos_weight`` does for the boosted estimators.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">estimator_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;objective&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;binary:hinge&quot;</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">RandomForestClassifier</span><span class="p">):</span>
+        <span class="n">est</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">class_weight</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">scale_pos_weight</span><span class="p">)})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">est</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">scale_pos_weight</span><span class="o">=</span><span class="n">scale_pos_weight</span><span class="p">)</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_train_rules_for_weight_transformation</span><span class="p">(</span>
     <span class="n">weights</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">estimator_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
@@ -785,6 +1042,7 @@
     <span class="n">all_features_constrained</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">feature_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">estimator_class</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">,</span>
+    <span class="n">leaf_selection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;max_gain&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Process a single weight column across all scale_pos_weight values.</span>
@@ -809,6 +1067,8 @@
 <span class="sd">        Original column names for X_train. When provided and X_train is a numpy</span>
 <span class="sd">        array, a DataFrame is reconstructed inside the worker so that XGBoost</span>
 <span class="sd">        preserves feature names (required for monotone-constraint rule extraction).</span>
+<span class="sd">    leaf_selection : {&quot;max_gain&quot;, &quot;all_positive&quot;}, default=&quot;max_gain&quot;</span>
+<span class="sd">        Forwarded to :func:`extract_rules`; ignored when all_features_constrained.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -816,8 +1076,8 @@
 <span class="sd">        List of DataFrames with extracted rules</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rules_dfs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">transformation</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;Baseline&quot;</span>  <span class="c1"># type: ignore</span>
-    <span class="n">weights_array</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="s2">&quot;values&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">weights</span>  <span class="c1"># type: ignore</span>
+    <span class="n">transformation</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;Baseline&quot;</span>
+    <span class="n">weights_array</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="s2">&quot;values&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">weights</span>
 
     <span class="c1"># Reconstruct DataFrame from numpy + names so XGBoost preserves feature names</span>
     <span class="c1"># in the booster (needed for monotone-constraint extraction and readable rules).</span>
@@ -829,8 +1089,7 @@
 
     <span class="k">for</span> <span class="n">scale_pos_weight</span> <span class="ow">in</span> <span class="n">scale_pos_weights</span><span class="p">:</span>
         <span class="n">est</span> <span class="o">=</span> <span class="n">estimator_class</span><span class="p">(</span><span class="o">**</span><span class="n">estimator_params</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">estimator_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;objective&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;binary:hinge&quot;</span><span class="p">:</span>
-            <span class="n">est</span><span class="o">.</span><span class="n">scale_pos_weight</span> <span class="o">=</span> <span class="n">scale_pos_weight</span>
+        <span class="n">_apply_scale_pos_weight</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">scale_pos_weight</span><span class="p">,</span> <span class="n">estimator_params</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">_</span> <span class="o">=</span> <span class="n">est</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_fit</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights_array</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
@@ -840,7 +1099,7 @@
             <span class="s2">&quot;transformation&quot;</span><span class="p">:</span> <span class="n">transformation</span><span class="p">,</span>
             <span class="s2">&quot;scale_pos_weight&quot;</span><span class="p">:</span> <span class="n">scale_pos_weight</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="n">rules_df</span> <span class="o">=</span> <span class="n">extract_rules</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">all_features_constrained</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">rules_df</span> <span class="o">=</span> <span class="n">extract_rules</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">all_features_constrained</span><span class="p">,</span> <span class="n">leaf_selection</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">rules_df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="n">rules_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rules_df</span><span class="p">)</span>
@@ -858,6 +1117,7 @@
     <span class="n">all_features_constrained</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">feature_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">estimator_class</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">,</span>
+    <span class="n">leaf_selection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;max_gain&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Process all weight transformations for a single scale_pos_weight value.</span>
@@ -883,6 +1143,8 @@
 <span class="sd">    feature_names : list[str] | None, default=None</span>
 <span class="sd">        Original column names for X_train. When provided, a DataFrame is</span>
 <span class="sd">        reconstructed so that XGBoost preserves feature names.</span>
+<span class="sd">    leaf_selection : {&quot;max_gain&quot;, &quot;all_positive&quot;}, default=&quot;max_gain&quot;</span>
+<span class="sd">        Forwarded to :func:`extract_rules`; ignored when all_features_constrained.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -899,15 +1161,17 @@
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">weight_columns</span><span class="p">):</span>
         <span class="n">weights_array</span> <span class="o">=</span> <span class="n">weights_np</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
         <span class="n">est</span> <span class="o">=</span> <span class="n">estimator_class</span><span class="p">(</span><span class="o">**</span><span class="n">estimator_params</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">estimator_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;objective&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;binary:hinge&quot;</span><span class="p">:</span>
-            <span class="n">est</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">scale_pos_weight</span><span class="o">=</span><span class="n">scale_pos_weight</span><span class="p">)</span>
-        <span class="n">est</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_fit</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights_array</span><span class="p">)</span>
+        <span class="n">_apply_scale_pos_weight</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">scale_pos_weight</span><span class="p">,</span> <span class="n">estimator_params</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">est</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_fit</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">weights_array</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">continue</span>
 
         <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;transformation&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
             <span class="s2">&quot;scale_pos_weight&quot;</span><span class="p">:</span> <span class="n">scale_pos_weight</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="n">rules_df</span> <span class="o">=</span> <span class="n">extract_rules</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">all_features_constrained</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">rules_df</span> <span class="o">=</span> <span class="n">extract_rules</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">all_features_constrained</span><span class="p">,</span> <span class="n">leaf_selection</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">rules_df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="n">rules_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rules_df</span><span class="p">)</span>
 
@@ -1028,14 +1292,15 @@
     <span class="n">scale_pos_weights</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">leaf_selection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;max_gain&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Sequential (single-process) variant of rule_grid_search.</span>
+<span class="sd">    Sequential (single-threaded) variant of rule_grid_search.</span>
 
-<span class="sd">    Identical behaviour to :func:`rule_grid_search` but runs in a single process</span>
-<span class="sd">    without joblib parallelism. Useful for debugging, environments where</span>
-<span class="sd">    multiprocessing is unavailable, or small workloads where process-spawn</span>
-<span class="sd">    overhead outweighs the benefit of parallelism.</span>
+<span class="sd">    Identical behaviour to :func:`rule_grid_search` but runs the grid in a</span>
+<span class="sd">    plain loop without joblib. Useful for debugging, for deterministic</span>
+<span class="sd">    profiling, or for small workloads where the thread-dispatch overhead</span>
+<span class="sd">    outweighs the benefit of parallelism.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1052,6 +1317,10 @@
 <span class="sd">        If None, uses baseline weights of 1.0 for all samples.</span>
 <span class="sd">    verbose : int, default=0</span>
 <span class="sd">        Controls verbosity. 0 = silent, 1 = summary.</span>
+<span class="sd">    leaf_selection : {&quot;max_gain&quot;, &quot;all_positive&quot;}, default=&quot;max_gain&quot;</span>
+<span class="sd">        Forwarded to :func:`extract_rules` for every unconstrained tree; see</span>
+<span class="sd">        that function for what each option does. Ignored for trees where every</span>
+<span class="sd">        feature carries a monotone constraint.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1093,6 +1362,7 @@
             <span class="n">all_features_constrained</span><span class="p">,</span>
             <span class="n">feature_names</span><span class="o">=</span><span class="n">feature_names</span><span class="p">,</span>
             <span class="n">estimator_class</span><span class="o">=</span><span class="n">estimator_class</span><span class="p">,</span>
+            <span class="n">leaf_selection</span><span class="o">=</span><span class="n">leaf_selection</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">rules_dfs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
 
@@ -1110,16 +1380,21 @@
     <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">leaf_selection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;max_gain&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Perform grid search over sample weight transformations and scale_pos_weight values to find optimal rules.</span>
+<span class="sd">    Grid search over sample weight transformations and scale_pos_weight values, parallelised over weight transformations.</span>
 
 <span class="sd">    This function systematically trains XGBoost models with different combinations of:</span>
 <span class="sd">    - sample weights</span>
 <span class="sd">    - scale_pos_weight values</span>
 
 <span class="sd">    For each combination, it extracts rules from the fitted models and returns them as a Polars DataFrame.</span>
-<span class="sd">    The weight transformations loop is parallelized using joblib for improved performance.</span>
+<span class="sd">    The results from all combinations are pooled and deduplicated; the grid is a</span>
+<span class="sd">    mechanism for producing a diverse candidate set, not a search for a single</span>
+<span class="sd">    &quot;best&quot; configuration, and no optimality over the space of rules is claimed.</span>
+<span class="sd">    The weight-transformation loop is parallelised with :class:`joblib.Parallel`</span>
+<span class="sd">    using the ``&quot;threading&quot;`` backend — single-node, thread-parallel only.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1130,12 +1405,13 @@
 <span class="sd">    y_train : pl.Series | pd.Series</span>
 <span class="sd">        Training target values.</span>
 <span class="sd">    scale_pos_weights : list | np.ndarray</span>
-<span class="sd">        Array of scale_pos_weight values to try. Parallelised across workers.</span>
+<span class="sd">        Array of scale_pos_weight values to try. Iterated sequentially within</span>
+<span class="sd">        each worker thread.</span>
 <span class="sd">    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None</span>
 <span class="sd">        DataFrame mapping transformation names to sample weight arrays.</span>
 <span class="sd">        If None, uses baseline weights of 1.0 for all samples.</span>
 <span class="sd">    n_jobs : int, default=-1</span>
-<span class="sd">        Number of parallel jobs to run. -1 means using all processors.</span>
+<span class="sd">        Number of joblib worker threads. -1 means one per available core.</span>
 <span class="sd">    verbose : int, default=0</span>
 <span class="sd">        Controls the verbosity level:</span>
 
@@ -1190,6 +1466,7 @@
             <span class="n">all_features_constrained</span><span class="p">,</span>
             <span class="n">feature_names</span><span class="p">,</span>
             <span class="n">estimator_class</span><span class="p">,</span>
+            <span class="n">leaf_selection</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">weight_columns</span>
     <span class="p">)</span>
@@ -1209,16 +1486,21 @@
     <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">leaf_selection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;max_gain&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Perform grid search parallelised over scale_pos_weight values.</span>
+<span class="sd">    Grid search parallelised over scale_pos_weight values.</span>
 
 <span class="sd">    This function systematically trains XGBoost models with different combinations of:</span>
 <span class="sd">    - sample weights</span>
 <span class="sd">    - scale_pos_weight values</span>
 
 <span class="sd">    For each combination, it extracts rules from the fitted models and returns them as a Polars DataFrame.</span>
-<span class="sd">    The weight transformations loop is parallelized using joblib for improved performance.</span>
+<span class="sd">    The results from all combinations are pooled and deduplicated; the grid is a</span>
+<span class="sd">    mechanism for producing a diverse candidate set, not a search for a single</span>
+<span class="sd">    &quot;best&quot; configuration, and no optimality over the space of rules is claimed.</span>
+<span class="sd">    The scale_pos_weight loop is parallelised with :class:`joblib.Parallel`</span>
+<span class="sd">    using the ``&quot;threading&quot;`` backend — single-node, thread-parallel only.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1229,12 +1511,12 @@
 <span class="sd">    y_train : pl.Series | pd.Series</span>
 <span class="sd">        Training target values.</span>
 <span class="sd">    scale_pos_weights : list | np.ndarray</span>
-<span class="sd">        Array of scale_pos_weight values to try. Parallelised across workers.</span>
+<span class="sd">        Array of scale_pos_weight values to try. Distributed across worker threads.</span>
 <span class="sd">    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None</span>
 <span class="sd">        DataFrame mapping transformation names to sample weight arrays.</span>
 <span class="sd">        If None, uses baseline weights of 1.0 for all samples.</span>
 <span class="sd">    n_jobs : int, default=-1</span>
-<span class="sd">        Number of parallel jobs to run. -1 means using all processors.</span>
+<span class="sd">        Number of joblib worker threads. -1 means one per available core.</span>
 <span class="sd">    verbose : int, default=0</span>
 <span class="sd">        Controls the verbosity level:</span>
 
@@ -1282,6 +1564,7 @@
             <span class="n">all_features_constrained</span><span class="p">,</span>
             <span class="n">feature_names</span><span class="p">,</span>
             <span class="n">estimator_class</span><span class="p">,</span>
+            <span class="n">leaf_selection</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">scale_pos_weight</span> <span class="ow">in</span> <span class="n">scale_pos_weights</span>
     <span class="p">)</span>
@@ -1301,16 +1584,25 @@
     <span class="n">sample_weights_df</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">leaf_selection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;max_gain&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Perform grid search parallelised over scale_pos_weight values or sample_weights to find optimal rules.</span>
+<span class="sd">    Grid search over scale_pos_weight values and sample weight transformations.</span>
+
+<span class="sd">    Dispatches to :func:`rule_grid_search_parallel_scales` or</span>
+<span class="sd">    :func:`rule_grid_search_parallel_weights` depending on which axis of the</span>
+<span class="sd">    grid is larger, so that the parallelised loop is the longer one.</span>
 
 <span class="sd">    This function systematically trains XGBoost models with different combinations of:</span>
 <span class="sd">    - sample weights</span>
 <span class="sd">    - scale_pos_weight values</span>
 
 <span class="sd">    For each combination, it extracts rules from the fitted models and returns them as a Polars DataFrame.</span>
-<span class="sd">    The weight transformations loop is parallelized using joblib for improved performance.</span>
+<span class="sd">    The results from all combinations are pooled and deduplicated; the grid is a</span>
+<span class="sd">    mechanism for producing a diverse candidate set, not a search for a single</span>
+<span class="sd">    &quot;best&quot; configuration, and no optimality over the space of rules is claimed.</span>
+<span class="sd">    Parallelism is :class:`joblib.Parallel` with the ``&quot;threading&quot;`` backend —</span>
+<span class="sd">    single-node, thread-parallel only.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1321,18 +1613,20 @@
 <span class="sd">    y_train : pl.Series | pd.Series</span>
 <span class="sd">        Training target values.</span>
 <span class="sd">    scale_pos_weights : list | np.ndarray</span>
-<span class="sd">        Array of scale_pos_weight values to try. Parallelised across workers.</span>
+<span class="sd">        Array of scale_pos_weight values to try.</span>
 <span class="sd">    sample_weights_df : pl.DataFrame | pd.DataFrame | None, default=None</span>
 <span class="sd">        DataFrame mapping transformation names to sample weight arrays.</span>
 <span class="sd">        If None, uses baseline weights of 1.0 for all samples.</span>
 <span class="sd">    n_jobs : int, default=-1</span>
-<span class="sd">        Number of parallel jobs to run. -1 means using all processors.</span>
+<span class="sd">        Number of joblib worker threads. -1 means one per available core.</span>
 <span class="sd">    verbose : int, default=0</span>
 <span class="sd">        Controls the verbosity level:</span>
 
 <span class="sd">        - 0: silent (no output)</span>
 <span class="sd">        - 1: progress information (start/end summary)</span>
 <span class="sd">        - &gt;=2: detailed progress with live updates from joblib Parallel backend</span>
+<span class="sd">    leaf_selection : {&quot;max_gain&quot;, &quot;all_positive&quot;}, default=&quot;max_gain&quot;</span>
+<span class="sd">        Forwarded to :func:`extract_rules` for every unconstrained tree.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1346,11 +1640,13 @@
         <span class="k">else</span> <span class="mi">1</span>
     <span class="p">):</span>
         <span class="k">return</span> <span class="n">rule_grid_search_parallel_scales</span><span class="p">(</span>
-            <span class="n">estimator</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">scale_pos_weights</span><span class="p">,</span> <span class="n">sample_weights_df</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">,</span> <span class="n">verbose</span>
+            <span class="n">estimator</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">scale_pos_weights</span><span class="p">,</span> <span class="n">sample_weights_df</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span>
+            <span class="n">leaf_selection</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">rule_grid_search_parallel_weights</span><span class="p">(</span>
-            <span class="n">estimator</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">scale_pos_weights</span><span class="p">,</span> <span class="n">sample_weights_df</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">,</span> <span class="n">verbose</span>
+            <span class="n">estimator</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">scale_pos_weights</span><span class="p">,</span> <span class="n">sample_weights_df</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span>
+            <span class="n">leaf_selection</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 </pre></div>
@@ -1382,8 +1678,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1394,7 +1690,7 @@
 
   <p class="copyright">
     
-      © Copyright Mozilla Public License (MPL) 2.0.
+      © Copyright Apache License 2.0.
       <br/>
     
   </p>

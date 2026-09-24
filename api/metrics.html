@@ -10,15 +10,15 @@
 <meta property="og:title" content="Metrics" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://paypal.github.io/Iguanas/api/metrics.html" />
-<meta property="og:site_name" content="Iguanas - Lightning Fast Rule generation with Polars" />
-<meta property="og:description" content="Functions: compute_single_metric: compute_metrics:" />
+<meta property="og:site_name" content="Iguanas - Rule Generation and Evaluation with Polars" />
+<meta property="og:description" content="Functions: count_conditions: count_features: compute_single_metric: compute_metrics:" />
 <meta property="og:image" content="https://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png" />
-<meta property="og:image:alt" content="Iguanas - Lightning Fast Rule generation with Polars" />
-<meta name="description" content="Functions: compute_single_metric: compute_metrics:" />
+<meta property="og:image:alt" content="Iguanas - Rule Generation and Evaluation with Polars" />
+<meta name="description" content="Functions: count_conditions: count_features: compute_single_metric: compute_metrics:" />
 <meta name="description" content="High-performance rule generation library with sklearn-compatible API." />
 <meta name="keywords" content="data science, machine learning, rule generation, python, polars, sklearn" />
 
-    <title>Metrics &#8212; Iguanas - Lightning Fast Rule generation with Polars</title>
+    <title>Metrics &#8212; Iguanas - Rule Generation and Evaluation with Polars</title>
   
   
   
@@ -37,23 +37,22 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=720ed60b" />
     <link rel="stylesheet" type="text/css" href="../_static/iguanas.css?v=8988652a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../_static/documentation_options.js?v=692d9a0e"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
@@ -63,6 +62,11 @@
                     'ad_personalization': 'denied',
                     'analytics_storage': 'denied'
                 });
+            </script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', 'G-Z5TR8D9VTQ');
             </script>
@@ -148,8 +152,8 @@
       
     
     
-    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
-    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
+    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
+    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
   
   
 </a></div>
@@ -191,6 +195,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -221,8 +232,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -233,8 +243,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
       
@@ -311,6 +320,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -332,8 +348,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -344,8 +359,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
         
@@ -374,9 +388,8 @@
 <li class="toctree-l1"><a class="reference internal" href="rule_registry.html">Rule Registry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotone_constraints.html">Monotone Constraints</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weight_transformations.html">Weight Transformations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rule_classifier.html">Rule Classifier</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ruleset_classifier.html">Ruleset Classifier</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rule_monitoring.html">Rule Monitoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnx_converter.html">ONNX Converter</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Classifiers (scikit-learn API)</span></p>
 <ul class="nav bd-sidenav">
@@ -453,6 +466,56 @@
 <h1>Metrics<a class="headerlink" href="#metrics" title="Link to this heading">#</a></h1>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h2>
+<section id="count-conditions">
+<h3>count_conditions<a class="headerlink" href="#count-conditions" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.metrics.count_conditions">
+<span class="sig-prename descclassname"><span class="pre">iguanas.metrics.</span></span><span class="sig-name descname"><span class="pre">count_conditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/iguanas/metrics.html#count_conditions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.metrics.count_conditions" title="Link to this definition">#</a></dt>
+<dd><p>Number of atomic conditions in a rule expression.</p>
+<p>Complexity is measured in conditions rather than rules: a 3-rule disjunction
+with 12 conditions is not simpler than a 5-rule one with 8.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rule</strong> (str) – Rule expression, e.g. <code class="docutils literal notranslate"><span class="pre">'(X[&quot;a&quot;]</span> <span class="pre">&gt;</span> <span class="pre">1)</span> <span class="pre">&amp;</span> <span class="pre">(X[&quot;b&quot;]</span> <span class="pre">&lt;=</span> <span class="pre">2)'</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Condition count. Zero for a string that references no features, which is
+what a plain rule <em>name</em> such as <code class="docutils literal notranslate"><span class="pre">&quot;rule_A&quot;</span></code> will yield.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">count_conditions</span><span class="p">(</span><span class="s1">&#39;(X[&quot;a&quot;] &gt; 1) &amp; (X[&quot;b&quot;] &lt;= 2)&#39;</span><span class="p">)</span>
+<span class="go">2</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="count-features">
+<h3>count_features<a class="headerlink" href="#count-features" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.metrics.count_features">
+<span class="sig-prename descclassname"><span class="pre">iguanas.metrics.</span></span><span class="sig-name descname"><span class="pre">count_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/iguanas/metrics.html#count_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.metrics.count_features" title="Link to this definition">#</a></dt>
+<dd><p>Number of <em>distinct</em> features a rule expression references.</p>
+<p>Two conditions on the same feature (a range) are easier to read than two
+conditions on different features, so this complements <a class="reference internal" href="#iguanas.metrics.count_conditions" title="iguanas.metrics.count_conditions"><code class="xref py py-func docutils literal notranslate"><span class="pre">count_conditions()</span></code></a>.</p>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">count_features</span><span class="p">(</span><span class="s1">&#39;(X[&quot;a&quot;] &gt; 1) &amp; (X[&quot;a&quot;] &lt; 5)&#39;</span><span class="p">)</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</section>
 <section id="compute-single-metric">
 <h3>compute_single_metric<a class="headerlink" href="#compute-single-metric" title="Link to this heading">#</a></h3>
 <dl class="py function">
@@ -467,7 +530,9 @@ combine_rules_beam_search during candidate evaluation.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>y_pred</strong> (<em>pl.Series</em>) – Boolean prediction series.</p></li>
 <li><p><strong>y</strong> (<em>pl.Series</em>) – Boolean target series.</p></li>
-<li><p><strong>metric</strong> (str) – Metric name: “precision”, “recall”, “accuracy”, or an F-beta score (f&lt;number&gt;).</p></li>
+<li><p><strong>metric</strong> (str) – Metric name: “precision”, “recall”, “accuracy”, “mcc”, an F-beta score
+(f&lt;number&gt;), or one of the coverage-aware rule metrics “lift”, “wracc”,
+“laplace” and “m_estimate”.</p></li>
 <li><p><strong>weights</strong> (<em>pl.Series</em><em> | </em><em>None</em><em>, </em><em>default=None</em>) – Optional sample weights. When provided, all counts use weighted sums.</p></li>
 </ul>
 </dd>
@@ -485,7 +550,7 @@ combine_rules_beam_search during candidate evaluation.</p>
 <h3>compute_metrics<a class="headerlink" href="#compute-metrics" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="iguanas.metrics.compute_metrics">
-<span class="sig-prename descclassname"><span class="pre">iguanas.metrics.</span></span><span class="sig-name descname"><span class="pre">compute_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/metrics.html#compute_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.metrics.compute_metrics" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">iguanas.metrics.</span></span><span class="sig-name descname"><span class="pre">compute_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/metrics.html#compute_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.metrics.compute_metrics" title="Link to this definition">#</a></dt>
 <dd><p>Compute comprehensive performance metrics for all rule columns.</p>
 <p>Calculates confusion matrix, precision, recall, F-beta scores, and TPVE metrics
 for each rule. Optionally computes weighted versions of all metrics.</p>
@@ -500,6 +565,8 @@ Will be cast to Boolean if not already.</p></li>
 computes both count-based and weighted versions of all metrics.</p></li>
 <li><p><strong>betas</strong> (list<em>[</em>float<em>]</em><em>, </em><em>default=</em><em>[</em><em>0.25</em><em>, </em><em>0.5</em><em>, </em><em>1</em><em>, </em><em>1.5</em><em>, </em><em>2</em><em>]</em>) – F-beta values to compute. Each value <code class="docutils literal notranslate"><span class="pre">b</span></code> produces a column named
 <code class="docutils literal notranslate"><span class="pre">f{b}</span></code> (and <code class="docutils literal notranslate"><span class="pre">f{b}_weight</span></code> when <em>weights</em> is provided).</p></li>
+<li><p><strong>m</strong> (float<em>, </em><em>default=10.0</em>) – Shrinkage strength for the <code class="docutils literal notranslate"><span class="pre">m_estimate</span></code> column. Larger values pull
+low-coverage rules further toward the base rate.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -511,7 +578,13 @@ computes both count-based and weighted versions of all metrics.</p></li>
 <li><p>flagged(%): Percentage of total flagged as positive</p></li>
 <li><p>good_flagged(%): Percentage of negatives flagged as positive</p></li>
 <li><p>f{b} for each b in <em>betas</em>: F-beta scores</p></li>
+<li><p>lift: precision divided by the base rate</p></li>
+<li><p>wracc: weighted relative accuracy, <code class="docutils literal notranslate"><span class="pre">coverage</span> <span class="pre">*</span> <span class="pre">(precision</span> <span class="pre">-</span> <span class="pre">base_rate)</span></code></p></li>
+<li><p>laplace: <code class="docutils literal notranslate"><span class="pre">(TP</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">/</span> <span class="pre">(TP</span> <span class="pre">+</span> <span class="pre">FP</span> <span class="pre">+</span> <span class="pre">2)</span></code></p></li>
+<li><p>m_estimate: precision shrunk toward the base rate by <em>m</em></p></li>
 <li><p>num_rules: Number of individual rules y_pred (1 for single rules)</p></li>
+<li><p>num_conditions: Atomic conditions in the rule expression</p></li>
+<li><p>num_features: Distinct features the rule expression references</p></li>
 </ul>
 <p>If weights is provided, additional columns with “_weight” suffix:</p>
 <ul class="simple">
@@ -607,6 +680,14 @@ computes both count-based and weighted versions of all metrics.</p></li>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#count-conditions">count_conditions</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.metrics.count_conditions"><code class="docutils literal notranslate"><span class="pre">count_conditions()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#count-features">count_features</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.metrics.count_features"><code class="docutils literal notranslate"><span class="pre">count_features()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compute-single-metric">compute_single_metric</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.metrics.compute_single_metric"><code class="docutils literal notranslate"><span class="pre">compute_single_metric()</span></code></a></li>
 </ul>
@@ -649,8 +730,8 @@ computes both count-based and weighted versions of all metrics.</p></li>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -661,7 +742,7 @@ computes both count-based and weighted versions of all metrics.</p></li>
 
   <p class="copyright">
     
-      © Copyright Mozilla Public License (MPL) 2.0.
+      © Copyright Apache License 2.0.
       <br/>
     
   </p>

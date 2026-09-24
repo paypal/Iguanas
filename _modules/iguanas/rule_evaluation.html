@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>iguanas.rule_evaluation &#8212; Iguanas - Lightning Fast Rule generation with Polars</title>
+    <title>iguanas.rule_evaluation &#8212; Iguanas - Rule Generation and Evaluation with Polars</title>
   
   
   
@@ -26,23 +26,22 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=720ed60b" />
     <link rel="stylesheet" type="text/css" href="../../_static/iguanas.css?v=8988652a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../../_static/documentation_options.js?v=692d9a0e"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
@@ -52,6 +51,11 @@
                     'ad_personalization': 'denied',
                     'analytics_storage': 'denied'
                 });
+            </script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', 'G-Z5TR8D9VTQ');
             </script>
@@ -135,8 +139,8 @@
       
     
     
-    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
-    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
+    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
+    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
   
   
 </a></div>
@@ -178,6 +182,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -208,8 +219,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -220,8 +230,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
       
@@ -296,6 +305,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -317,8 +333,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -329,8 +344,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
         
@@ -442,7 +456,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_rule_to_expr</span><span class="p">(</span><span class="n">rule</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">Expr</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compile a rule string to a Polars ``Expr``, caching the result.</span>
 
-<span class="sd">    The first call for a given rule string calls :pyfunc:`eval` to produce an</span>
+<span class="sd">    The first call for a given rule string calls :func:`eval` to produce an</span>
 <span class="sd">    ``Expr``; subsequent calls for the same string return the cached object</span>
 <span class="sd">    directly, making repeated evaluation of the same rules fast.</span>
 
@@ -467,6 +481,17 @@
 <span class="sd">    Takes a list of rule strings (logical conditions) and evaluates them against</span>
 <span class="sd">    the input DataFrame to produce a boolean DataFrame where each column represents</span>
 <span class="sd">    the evaluation result of one rule.</span>
+
+<span class="sd">    .. warning::</span>
+
+<span class="sd">       **Rule strings are executed as Python code.** Each rule is compiled with</span>
+<span class="sd">       :func:`eval`, so a rule string can run arbitrary Python with the</span>
+<span class="sd">       privileges of the calling process. Only pass rules from a trusted</span>
+<span class="sd">       source — rules generated by Iguanas itself, loaded from a trusted</span>
+<span class="sd">       store, or reviewed by a human. **Never** pass a rule string that</span>
+<span class="sd">       originates from untrusted or user-supplied input, and never build one</span>
+<span class="sd">       by interpolating untrusted values. See the Notes section for the</span>
+<span class="sd">       non-executing deployment alternative.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -509,6 +534,19 @@
 <span class="sd">    -----</span>
 <span class="sd">    Rule strings are compiled to ``pl.Expr`` objects on the first call and</span>
 <span class="sd">    cached for subsequent calls, avoiding repeated ``eval()`` overhead.</span>
+
+<span class="sd">    Because compilation uses ``eval()``, this function must only ever be given</span>
+<span class="sd">    trusted rule strings (see the warning above). If rules must be scored in an</span>
+<span class="sd">    environment where their provenance cannot be guaranteed, export them with</span>
+<span class="sd">    :func:`~iguanas.onnx_converter.rules_to_onnx` instead: that path parses the</span>
+<span class="sd">    rule with :mod:`ast` and emits a static ONNX graph, so no Python is</span>
+<span class="sd">    executed at scoring time.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    apply_rules_lazy : LazyFrame equivalent (same ``eval()`` caveat).</span>
+<span class="sd">    iguanas.onnx_converter.rules_to_onnx : Non-executing export path</span>
+<span class="sd">        recommended for production deployment.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">exprs</span> <span class="o">=</span> <span class="p">[</span><span class="n">_rule_to_expr</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">exprs</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">rules</span><span class="p">)</span></div>
@@ -523,6 +561,16 @@
 <span class="sd">    Functionally equivalent to :func:`apply_rules` but operates on a</span>
 <span class="sd">    ``pl.LazyFrame``, enabling out-of-core or query-plan-optimised scoring</span>
 <span class="sd">    without collecting the full dataset into memory.</span>
+
+<span class="sd">    .. warning::</span>
+
+<span class="sd">       **Rule strings are executed as Python code.** Rules are compiled with</span>
+<span class="sd">       :func:`eval` exactly as in :func:`apply_rules`, so a rule string can</span>
+<span class="sd">       run arbitrary Python with the privileges of the calling process. Only</span>
+<span class="sd">       pass rules from a trusted source — generated by Iguanas, loaded from a</span>
+<span class="sd">       trusted store, or human-reviewed — never rules derived from untrusted</span>
+<span class="sd">       or user-supplied input. Laziness does not mitigate this: the ``eval()``</span>
+<span class="sd">       happens when the expression is built, before ``.collect()`` is called.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -549,6 +597,9 @@
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
 <span class="sd">    apply_rules : Eager equivalent for in-memory DataFrames.</span>
+<span class="sd">    iguanas.onnx_converter.rules_to_onnx : Export rules to a static ONNX graph</span>
+<span class="sd">        that scores without executing Python — the recommended path when rule</span>
+<span class="sd">        provenance cannot be guaranteed at scoring time.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">rules</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">lf</span><span class="o">.</span><span class="n">select</span><span class="p">([])</span>
@@ -799,9 +850,11 @@
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    The function applies filtering in sequence:</span>
+
 <span class="sd">    - Threshold filtering removes low-performing rules</span>
 <span class="sd">    - Top-N selection limits the rule set size (optional)</span>
-<span class="sd">    - Correlation filtering ensures diversity in the final rule set</span>
+<span class="sd">    - Correlation filtering reduces redundancy by dropping rules whose</span>
+<span class="sd">      predictions correlate above ``max_corr`` with a higher-ranked rule</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
@@ -858,8 +911,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -870,7 +923,7 @@
 
   <p class="copyright">
     
-      © Copyright Mozilla Public License (MPL) 2.0.
+      © Copyright Apache License 2.0.
       <br/>
     
   </p>

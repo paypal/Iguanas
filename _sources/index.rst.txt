@@ -1,8 +1,4 @@
 
-.. image:: _static/IGUANAS_LOGO.png
-   :align: center
-   :alt: Iguanas Logo
-
 .. toctree::
    :maxdepth: 2
    :caption: Getting Started
@@ -25,9 +21,16 @@
 
    examples
 
-Iguanas is a **lightning-fast rule generation** library built on top of `Polars <https://pola.rs/>`_,
+.. toctree::
+   :maxdepth: 2
+   :caption: Evaluation
+   :hidden:
+
+   benchmark
+
+Iguanas is a **rule generation and evaluation** library built on top of `Polars <https://pola.rs/>`_,
 designed to streamline the entire rule-based system development workflow — from raw data to
-production-ready rules — leveraging Polars' blazing-fast multi-core processing.
+production-ready rules.
 
 .. note::
 
@@ -37,17 +40,26 @@ production-ready rules — leveraging Polars' blazing-fast multi-core processing
    imputation, scaling, and more.
 
 Built by the PSP Data Team at PayPal, Iguanas makes rule generation, evaluation, and selection
-both **faster** and **simpler**.
+**simpler**, with a single-node execution model that uses multi-threading where it helps.
 
 Key Features
 ============
 
-* 🚀 **Lightning Fast**: Built on Polars for multi-core parallel processing
+* ⚙️ **Vectorised evaluation**: Rules are compiled once to Polars expressions (cached) and applied as columnar, multi-threaded operations
+* 🧵 **Thread-parallel grid search**: Grid search is parallelised on a single machine via joblib's threading backend
 * 🎯 **End-to-End**: Generate, evaluate, combine, and select rules in one library
-* 📦 **Production Ready**: Lightweight rule strings that deploy anywhere
-* 🔧 **Flexible**: Sequential and parallel grid search strategies
+* 📦 **Production Ready**: Lightweight rule strings that deploy anywhere, plus ONNX export for runtimes that must not execute Python
+* 🔧 **Flexible**: Sequential and thread-parallel grid search strategies
 * 🔗 **Composable**: Chain generation → evaluation → selection with a few function calls
 * 🎓 **Easy to Learn**: Simple functional API with clear, consistent signatures
+
+.. note::
+
+   **Scope of parallelism.** Iguanas runs on a single node. Grid search uses
+   ``joblib.Parallel`` with the ``"threading"`` backend, and rule evaluation relies on
+   Polars' internal multi-threading. There is no multiprocessing, no distributed or
+   cluster execution (no Dask, Ray or Spark), and no GPU code path. No published
+   benchmark accompanies this release, so no throughput or speed-up figure is claimed.
 
 Quick Start
 ===========
@@ -79,14 +91,14 @@ Quick Start
     rules_df = rule_grid_search_parallel_weights(
         estimator, X_train, y_train,
         scale_pos_weights=scale_pos_weights,
-        weights_train_vec=weights,
+        sample_weights_df=weights,
         n_jobs=-1,
     )
 
     # 4. Evaluate, filter, and deduplicate rules
     R, metrics, selected_rules = apply_filter_and_deduplicate_rules(
         X_train, y_train, rules_df,
-        metrics_threshold=[
+        metric_thresholds=[
             {"name": "precision", "operator": ">=", "value": 0.6},
             {"name": "recall",    "operator": ">=", "value": 0.5},
         ],
@@ -98,24 +110,27 @@ Quick Start
 What Can Iguanas Do?
 ====================
 
-* ⚙️ :doc:`Rule Generation <api/rule_generation>` - Extract rules from XGBoost models with grid search
-* 📊 :doc:`Metrics <api/metrics>` - Precision, recall, F-beta, and weighted variants
-* 🔍 :doc:`Rule Evaluation <api/rule_evaluation>` - Evaluate, filter, and deduplicate rule sets; lazy scoring via ``apply_rules_lazy``
-* 🔁 :doc:`Rule Cross-Validation <api/rule_cv>` - Validate rule stability across K folds (cv mean, std, min per metric)
+* ⚙️ :doc:`Rule Generation <api/rule_generation>` - Extract rules from XGBoost/LightGBM models with grid search
+* 📊 :doc:`Metrics <api/metrics>` - Precision, recall, F-beta, MCC, and weighted variants
+* 🔍 :doc:`Rule Evaluation <api/rule_evaluation>` - Evaluate, filter, and deduplicate rule sets; lazy scoring via ``apply_rules_lazy`` (compiles rules with ``eval()`` — trusted rule sources only)
+* 🔁 :doc:`Rule Cross-Validation <api/rule_cv>` - Check rule stability across K folds (cv mean, std, min per metric; optimistically biased — see the module notes)
 * 🔀 :doc:`Rule Combination <api/rule_combination>` - Combine rules with greedy, beam, and A* search
 * ✂️ :doc:`Rule Selection <api/rule_selection>` - Prune by feature overlap and correlation
 * 🔬 :doc:`Rule Analysis <api/rule_analysis>` - Inspect and report on rule structure
 * 💬 :doc:`Rule Explanation <api/rule_explanation>` - Verbalize rules, compute coverage overlap, and generate counterfactual explanations
-* 🖊️ :doc:`Rule Formatting <api/rule_formatting>` - Simplify rules and export to SQL
-* ⚖️ :doc:`Rule Fairness <api/rule_fairness>` - Audit rule performance across demographic subgroups
-* 🗂️ :doc:`Rule Registry <api/rule_registry>` - Version-control rulesets and filter pairs by Jaccard overlap
+* 🖊️ :doc:`Rule Formatting <api/rule_formatting>` - Simplify rules, export to SQL, and reverse encoded-feature rules (e.g. from gators) back to the original columns
+* ⚖️ :doc:`Rule Fairness <api/rule_fairness>` - Post-hoc bias measurement across demographic subgroups (measured, not optimised)
+* 🗂️ :doc:`Rule Registry <api/rule_registry>` - Store named ruleset snapshots and filter pairs by Jaccard overlap
+* 📈 :doc:`Rule Monitoring <api/rule_monitoring>` - Flag per-rule performance degradation between reference and current periods (threshold on metric deltas, not a statistical drift test)
+* 🤖 :doc:`Classifiers <api/rule_classifier>` - scikit-learn compatible ``RuleClassifier`` and ``RulesetClassifier``
+* 📦 :doc:`ONNX Export <api/onnx_converter>` - Convert rules to portable ONNX models for any runtime (parses with ``ast``; executes no Python at scoring time)
 * 📐 :doc:`Monotone Constraints <api/monotone_constraints>` - Infer feature directionality
-* ⚖️ :doc:`Weight Transformations <api/weight_transformations>` - Generate sample weight schedules
+* 🔧 :doc:`Weight Transformations <api/weight_transformations>` - Generate and select sample weight schedules
 
 Use Cases
 =========
 
-Iguanas is perfect for:
+Iguanas is intended for:
 
 * **Fraud Detection** — Generate high-precision rules to flag suspicious transactions
 * **Risk Scoring** — Build interpretable rule sets for credit or operational risk

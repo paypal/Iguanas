@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>iguanas.metrics &#8212; Iguanas - Lightning Fast Rule generation with Polars</title>
+    <title>iguanas.metrics &#8212; Iguanas - Rule Generation and Evaluation with Polars</title>
   
   
   
@@ -26,23 +26,22 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=720ed60b" />
     <link rel="stylesheet" type="text/css" href="../../_static/iguanas.css?v=8988652a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../../_static/documentation_options.js?v=692d9a0e"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
@@ -52,6 +51,11 @@
                     'ad_personalization': 'denied',
                     'analytics_storage': 'denied'
                 });
+            </script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', 'G-Z5TR8D9VTQ');
             </script>
@@ -135,8 +139,8 @@
       
     
     
-    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
-    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
+    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
+    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
   
   
 </a></div>
@@ -178,6 +182,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -208,8 +219,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -220,8 +230,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
       
@@ -296,6 +305,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -317,8 +333,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -329,8 +344,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
         
@@ -404,7 +418,63 @@
                 <article class="bd-article">
                   
   <h1>Source code for iguanas.metrics</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+
+<span class="c1"># Default shrinkage strength for the m-estimate. Larger values pull the estimate</span>
+<span class="c1"># of a low-coverage rule further toward the base rate.</span>
+<span class="n">M_ESTIMATE_M</span> <span class="o">=</span> <span class="mf">10.0</span>
+
+<span class="n">_COVERAGE_METRICS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">&quot;lift&quot;</span><span class="p">,</span> <span class="s2">&quot;wracc&quot;</span><span class="p">,</span> <span class="s2">&quot;laplace&quot;</span><span class="p">,</span> <span class="s2">&quot;m_estimate&quot;</span><span class="p">})</span>
+
+<span class="c1"># A rule references each feature as X[&quot;col&quot;] / X[&#39;col&#39;], once per condition.</span>
+<span class="n">_FEATURE_REF_PATTERN</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;X\[[&quot;&#39;][^&quot;&#39;]+[&quot;&#39;]\]&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="count_conditions">
+<a class="viewcode-back" href="../../api/metrics.html#iguanas.metrics.count_conditions">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">count_conditions</span><span class="p">(</span><span class="n">rule</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of atomic conditions in a rule expression.</span>
+
+<span class="sd">    Complexity is measured in conditions rather than rules: a 3-rule disjunction</span>
+<span class="sd">    with 12 conditions is not simpler than a 5-rule one with 8.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rule : str</span>
+<span class="sd">        Rule expression, e.g. ``&#39;(X[&quot;a&quot;] &gt; 1) &amp; (X[&quot;b&quot;] &lt;= 2)&#39;``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        Condition count. Zero for a string that references no features, which is</span>
+<span class="sd">        what a plain rule *name* such as ``&quot;rule_A&quot;`` will yield.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; count_conditions(&#39;(X[&quot;a&quot;] &gt; 1) &amp; (X[&quot;b&quot;] &lt;= 2)&#39;)</span>
+<span class="sd">    2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">_FEATURE_REF_PATTERN</span><span class="p">,</span> <span class="n">rule</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="count_features">
+<a class="viewcode-back" href="../../api/metrics.html#iguanas.metrics.count_features">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">count_features</span><span class="p">(</span><span class="n">rule</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of *distinct* features a rule expression references.</span>
+
+<span class="sd">    Two conditions on the same feature (a range) are easier to read than two</span>
+<span class="sd">    conditions on different features, so this complements :func:`count_conditions`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; count_features(&#39;(X[&quot;a&quot;] &gt; 1) &amp; (X[&quot;a&quot;] &lt; 5)&#39;)</span>
+<span class="sd">    1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">_FEATURE_REF_PATTERN</span><span class="p">,</span> <span class="n">rule</span><span class="p">)))</span></div>
+
 
 
 <div class="viewcode-block" id="compute_single_metric">
@@ -428,7 +498,9 @@
 <span class="sd">    y : pl.Series</span>
 <span class="sd">        Boolean target series.</span>
 <span class="sd">    metric : str</span>
-<span class="sd">        Metric name: &quot;precision&quot;, &quot;recall&quot;, &quot;accuracy&quot;, or an F-beta score (f&lt;number&gt;).</span>
+<span class="sd">        Metric name: &quot;precision&quot;, &quot;recall&quot;, &quot;accuracy&quot;, &quot;mcc&quot;, an F-beta score</span>
+<span class="sd">        (f&lt;number&gt;), or one of the coverage-aware rule metrics &quot;lift&quot;, &quot;wracc&quot;,</span>
+<span class="sd">        &quot;laplace&quot; and &quot;m_estimate&quot;.</span>
 <span class="sd">    weights : pl.Series | None, default=None</span>
 <span class="sd">        Optional sample weights. When provided, all counts use weighted sums.</span>
 
@@ -468,6 +540,22 @@
         <span class="p">)</span>
         <span class="n">denom</span> <span class="o">=</span> <span class="p">((</span><span class="n">TP</span> <span class="o">+</span> <span class="n">FP</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">FN</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">TN</span> <span class="o">+</span> <span class="n">FP</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">TN</span> <span class="o">+</span> <span class="n">FN</span><span class="p">))</span> <span class="o">**</span> <span class="mf">0.5</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">TP</span> <span class="o">*</span> <span class="n">TN</span> <span class="o">-</span> <span class="n">FP</span> <span class="o">*</span> <span class="n">FN</span><span class="p">)</span> <span class="o">/</span> <span class="n">denom</span> <span class="k">if</span> <span class="n">denom</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
+    <span class="k">if</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">_COVERAGE_METRICS</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_bool</span><span class="p">))</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">covered</span> <span class="o">=</span> <span class="n">TP</span> <span class="o">+</span> <span class="n">FP</span>
+        <span class="n">positives</span> <span class="o">=</span> <span class="n">TP</span> <span class="o">+</span> <span class="n">FN</span>
+        <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;laplace&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">covered</span> <span class="o">+</span> <span class="mf">2.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">total</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        <span class="n">base_rate</span> <span class="o">=</span> <span class="n">positives</span> <span class="o">/</span> <span class="n">total</span>
+        <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;m_estimate&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">M_ESTIMATE_M</span> <span class="o">*</span> <span class="n">base_rate</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">covered</span> <span class="o">+</span> <span class="n">M_ESTIMATE_M</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;wracc&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">TP</span> <span class="o">/</span> <span class="n">total</span> <span class="o">-</span> <span class="p">(</span><span class="n">covered</span> <span class="o">*</span> <span class="n">positives</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">total</span> <span class="o">*</span> <span class="n">total</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">covered</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">base_rate</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">TP</span> <span class="o">/</span> <span class="n">covered</span><span class="p">)</span> <span class="o">/</span> <span class="n">base_rate</span>
     <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;f&quot;</span><span class="p">):</span>
         <span class="n">beta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
         <span class="n">precision</span> <span class="o">=</span> <span class="n">TP</span> <span class="o">/</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">FP</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">FP</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
@@ -476,7 +564,8 @@
         <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">beta</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">precision</span> <span class="o">*</span> <span class="n">recall</span> <span class="o">/</span> <span class="n">denom</span> <span class="k">if</span> <span class="n">denom</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;Unsupported metric &#39;</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&#39;. Must be &#39;precision&#39;, &#39;recall&#39;, &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;&#39;accuracy&#39;, &#39;mcc&#39;, or an F-beta score (f&lt;number&gt;).&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;&#39;accuracy&#39;, &#39;mcc&#39;, an F-beta score (f&lt;number&gt;), or one of &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">_COVERAGE_METRICS</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
     <span class="p">)</span></div>
 
 
@@ -488,6 +577,7 @@
     <span class="n">y</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">weights</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">betas</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">m</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">M_ESTIMATE_M</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute comprehensive performance metrics for all rule columns.</span>
 
@@ -508,6 +598,9 @@
 <span class="sd">    betas : list[float], default=[0.25, 0.5, 1, 1.5, 2]</span>
 <span class="sd">        F-beta values to compute. Each value ``b`` produces a column named</span>
 <span class="sd">        ``f{b}`` (and ``f{b}_weight`` when *weights* is provided).</span>
+<span class="sd">    m : float, default=10.0</span>
+<span class="sd">        Shrinkage strength for the ``m_estimate`` column. Larger values pull</span>
+<span class="sd">        low-coverage rules further toward the base rate.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -520,7 +613,13 @@
 <span class="sd">        - flagged(%): Percentage of total flagged as positive</span>
 <span class="sd">        - good_flagged(%): Percentage of negatives flagged as positive</span>
 <span class="sd">        - f{b} for each b in *betas*: F-beta scores</span>
+<span class="sd">        - lift: precision divided by the base rate</span>
+<span class="sd">        - wracc: weighted relative accuracy, ``coverage * (precision - base_rate)``</span>
+<span class="sd">        - laplace: ``(TP + 1) / (TP + FP + 2)``</span>
+<span class="sd">        - m_estimate: precision shrunk toward the base rate by *m*</span>
 <span class="sd">        - num_rules: Number of individual rules y_pred (1 for single rules)</span>
+<span class="sd">        - num_conditions: Atomic conditions in the rule expression</span>
+<span class="sd">        - num_features: Distinct features the rule expression references</span>
 
 <span class="sd">        If weights is provided, additional columns with &quot;_weight&quot; suffix:</span>
 
@@ -623,7 +722,42 @@
         <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;mcc&quot;</span><span class="p">),</span>
         <span class="c1"># Number of rules</span>
         <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;rule&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">count_matches</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\) \| \(&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;num_rules&quot;</span><span class="p">),</span>
+        <span class="c1"># Complexity. Counted from the rule string, so these are 0 when columns</span>
+        <span class="c1"># carry plain names rather than rule expressions.</span>
+        <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;rule&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">count_matches</span><span class="p">(</span><span class="n">_FEATURE_REF_PATTERN</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;num_conditions&quot;</span><span class="p">),</span>
+        <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;rule&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">extract_all</span><span class="p">(</span><span class="n">_FEATURE_REF_PATTERN</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">len</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;num_features&quot;</span><span class="p">),</span>
     <span class="p">]</span>
+
+    <span class="c1"># Coverage-aware rule quality metrics. Unlike precision these cannot be gamed</span>
+    <span class="c1"># by a rule firing on a handful of rows, and unlike recall they are not</span>
+    <span class="c1"># maximised by flagging everything.</span>
+    <span class="n">n_expr</span> <span class="o">=</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;FP&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TN&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;FN&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Float64</span><span class="p">)</span>
+    <span class="n">covered_expr</span> <span class="o">=</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;FP&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Float64</span><span class="p">)</span>
+    <span class="n">positives_expr</span> <span class="o">=</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;FN&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Float64</span><span class="p">)</span>
+    <span class="n">tp_expr</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Float64</span><span class="p">)</span>
+    <span class="n">expressions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">pl</span><span class="o">.</span><span class="n">when</span><span class="p">((</span><span class="n">covered_expr</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">positives_expr</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">n_expr</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+            <span class="o">.</span><span class="n">otherwise</span><span class="p">((</span><span class="n">tp_expr</span> <span class="o">/</span> <span class="n">covered_expr</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">positives_expr</span> <span class="o">/</span> <span class="n">n_expr</span><span class="p">))</span>
+            <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;lift&quot;</span><span class="p">),</span>
+            <span class="n">pl</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">n_expr</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+            <span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">tp_expr</span> <span class="o">/</span> <span class="n">n_expr</span> <span class="o">-</span> <span class="p">(</span><span class="n">covered_expr</span> <span class="o">*</span> <span class="n">positives_expr</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_expr</span> <span class="o">*</span> <span class="n">n_expr</span><span class="p">))</span>
+            <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;wracc&quot;</span><span class="p">),</span>
+            <span class="p">((</span><span class="n">tp_expr</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">covered_expr</span> <span class="o">+</span> <span class="mf">2.0</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;laplace&quot;</span><span class="p">),</span>
+            <span class="n">pl</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">n_expr</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+            <span class="o">.</span><span class="n">otherwise</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">tp_expr</span> <span class="o">+</span> <span class="n">m</span> <span class="o">*</span> <span class="p">(</span><span class="n">positives_expr</span> <span class="o">/</span> <span class="n">n_expr</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">covered_expr</span> <span class="o">+</span> <span class="n">m</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;m_estimate&quot;</span><span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># First compute total_weight</span>
@@ -682,6 +816,23 @@
                 <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;mcc_weight&quot;</span><span class="p">),</span>
             <span class="p">]</span>
         <span class="p">)</span>
+        <span class="n">n_w</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;total_weight&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Float64</span><span class="p">)</span>
+        <span class="n">covered_w</span> <span class="o">=</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP_weight&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;FP_weight&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Float64</span><span class="p">)</span>
+        <span class="n">positives_w</span> <span class="o">=</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP_weight&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;FN_weight&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Float64</span><span class="p">)</span>
+        <span class="n">tp_w</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;TP_weight&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Float64</span><span class="p">)</span>
+        <span class="c1"># laplace/m_estimate smooth *counts*, so they have no weighted analogue.</span>
+        <span class="n">expressions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">pl</span><span class="o">.</span><span class="n">when</span><span class="p">((</span><span class="n">covered_w</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">positives_w</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">n_w</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">))</span>
+                <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+                <span class="o">.</span><span class="n">otherwise</span><span class="p">((</span><span class="n">tp_w</span> <span class="o">/</span> <span class="n">covered_w</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">positives_w</span> <span class="o">/</span> <span class="n">n_w</span><span class="p">))</span>
+                <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;lift_weight&quot;</span><span class="p">),</span>
+                <span class="n">pl</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">n_w</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+                <span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">tp_w</span> <span class="o">/</span> <span class="n">n_w</span> <span class="o">-</span> <span class="p">(</span><span class="n">covered_w</span> <span class="o">*</span> <span class="n">positives_w</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_w</span> <span class="o">*</span> <span class="n">n_w</span><span class="p">))</span>
+                <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;wracc_weight&quot;</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
 
     <span class="n">metrics_df</span> <span class="o">=</span> <span class="n">metrics_df</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">expressions</span><span class="p">)</span>
 
@@ -716,8 +867,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -728,7 +879,7 @@
 
   <p class="copyright">
     
-      © Copyright Mozilla Public License (MPL) 2.0.
+      © Copyright Apache License 2.0.
       <br/>
     
   </p>

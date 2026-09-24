@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; Iguanas - Lightning Fast Rule generation with Polars</title>
+    <title>Index &#8212; Iguanas - Rule Generation and Evaluation with Polars</title>
   
   
   
@@ -26,23 +26,22 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=720ed60b" />
     <link rel="stylesheet" type="text/css" href="_static/iguanas.css?v=8988652a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="_static/documentation_options.js?v=692d9a0e"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
@@ -52,6 +51,11 @@
                     'ad_personalization': 'denied',
                     'analytics_storage': 'denied'
                 });
+            </script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', 'G-Z5TR8D9VTQ');
             </script>
@@ -135,8 +139,8 @@
       
     
     
-    <img src="_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
-    <img src="_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
+    <img src="_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
+    <img src="_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
   
   
 </a></div>
@@ -178,6 +182,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -208,8 +219,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -220,8 +230,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
       
@@ -296,6 +305,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -317,8 +333,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -329,8 +344,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
         
@@ -389,21 +403,23 @@
  | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#P"><strong>P</strong></a>
+ | <a href="#Q"><strong>Q</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
- | <a href="#T"><strong>T</strong></a>
  | <a href="#V"><strong>V</strong></a>
  
 </div>
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/rule_evaluation.html#iguanas.rule_evaluation.apply_and_filter_by_performance">apply_and_filter_by_performance() (in module iguanas.rule_evaluation)</a>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.add_missing_value_conditions">add_missing_value_conditions() (in module iguanas.rule_formatting)</a>
 </li>
-      <li><a href="api/rule_evaluation.html#iguanas.rule_evaluation.apply_filter_and_deduplicate_rules">apply_filter_and_deduplicate_rules() (in module iguanas.rule_evaluation)</a>
+      <li><a href="api/rule_evaluation.html#iguanas.rule_evaluation.apply_and_filter_by_performance">apply_and_filter_by_performance() (in module iguanas.rule_evaluation)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/rule_evaluation.html#iguanas.rule_evaluation.apply_filter_and_deduplicate_rules">apply_filter_and_deduplicate_rules() (in module iguanas.rule_evaluation)</a>
+</li>
       <li><a href="api/rule_evaluation.html#iguanas.rule_evaluation.apply_rules">apply_rules() (in module iguanas.rule_evaluation)</a>
 </li>
       <li><a href="api/rule_evaluation.html#iguanas.rule_evaluation.apply_rules_lazy">apply_rules_lazy() (in module iguanas.rule_evaluation)</a>
@@ -418,6 +434,8 @@
 </li>
       <li><a href="api/rule_combination.html#iguanas.rule_combination.combine_rules_beam_search">combine_rules_beam_search() (in module iguanas.rule_combination)</a>
 </li>
+      <li><a href="api/rule_combination.html#iguanas.rule_combination.combine_rules_budgeted">combine_rules_budgeted() (in module iguanas.rule_combination)</a>
+</li>
       <li><a href="api/rule_combination.html#iguanas.rule_combination.combine_rules_cumulative">combine_rules_cumulative() (in module iguanas.rule_combination)</a>
 </li>
       <li><a href="api/rule_combination.html#iguanas.rule_combination.combine_rules_full_search">combine_rules_full_search() (in module iguanas.rule_combination)</a>
@@ -426,10 +444,10 @@
 </li>
       <li><a href="api/rule_registry.html#iguanas.rule_registry.RuleRegistry.compare">compare() (iguanas.rule_registry.RuleRegistry method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/rule_monitoring.html#iguanas.rule_monitoring.compare_rule_metrics">compare_rule_metrics() (in module iguanas.rule_monitoring)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/rule_explanation.html#iguanas.rule_explanation.compute_counterfactual">compute_counterfactual() (in module iguanas.rule_explanation)</a>
 </li>
       <li><a href="api/rule_explanation.html#iguanas.rule_explanation.compute_coverage_overlap">compute_coverage_overlap() (in module iguanas.rule_explanation)</a>
@@ -442,13 +460,35 @@
 </li>
       <li><a href="api/rule_fairness.html#iguanas.rule_fairness.compute_subgroup_metrics">compute_subgroup_metrics() (in module iguanas.rule_fairness)</a>
 </li>
+      <li><a href="api/metrics.html#iguanas.metrics.count_conditions">count_conditions() (in module iguanas.metrics)</a>
+</li>
+      <li><a href="api/metrics.html#iguanas.metrics.count_features">count_features() (in module iguanas.metrics)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.decode_discretized_bins">decode_discretized_bins() (in module iguanas.rule_formatting)</a>
+</li>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.decode_null_indicators">decode_null_indicators() (in module iguanas.rule_formatting)</a>
+</li>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.decode_numeric_encodings">decode_numeric_encodings() (in module iguanas.rule_formatting)</a>
+</li>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.decode_onehot_encodings">decode_onehot_encodings() (in module iguanas.rule_formatting)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.decode_scaled_thresholds">decode_scaled_thresholds() (in module iguanas.rule_formatting)</a>
+</li>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.decode_string_imputation">decode_string_imputation() (in module iguanas.rule_formatting)</a>
+</li>
       <li><a href="api/rule_registry.html#iguanas.rule_registry.RuleRegistry.delete">delete() (iguanas.rule_registry.RuleRegistry method)</a>
+</li>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.drop_not_null_conditions">drop_not_null_conditions() (in module iguanas.rule_formatting)</a>
+</li>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.drop_null_clauses">drop_null_clauses() (in module iguanas.rule_formatting)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -466,7 +506,7 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/rule_generation.html#iguanas.rule_generation.extract_rule_by_max_gain">extract_rule_by_max_gain() (in module iguanas.rule_generation)</a>
+      <li><a href="api/rule_generation.html#iguanas.rule_generation.extract_max_gain_rule">extract_max_gain_rule() (in module iguanas.rule_generation)</a>
 </li>
       <li><a href="api/rule_generation.html#iguanas.rule_generation.extract_rule_with_monotone_constraints">extract_rule_with_monotone_constraints() (in module iguanas.rule_generation)</a>
 </li>
@@ -498,6 +538,10 @@
         <li><a href="api/ruleset_classifier.html#iguanas.ruleset_classifier.RulesetClassifier.fit_predict">(iguanas.ruleset_classifier.RulesetClassifier method)</a>
 </li>
       </ul></li>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.format_as_boolean_conditions">format_as_boolean_conditions() (in module iguanas.rule_formatting)</a>
+</li>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.format_floats_as_integers">format_floats_as_integers() (in module iguanas.rule_formatting)</a>
+</li>
       <li><a href="api/rule_classifier.html#iguanas.rule_classifier.RuleClassifier.from_export">from_export() (iguanas.rule_classifier.RuleClassifier class method)</a>
 
       <ul>
@@ -570,6 +614,16 @@
         <li><a href="api/ruleset_classifier.html#iguanas.ruleset_classifier.RulesetClassifier.predict_proba">(iguanas.ruleset_classifier.RulesetClassifier method)</a>
 </li>
       </ul></li>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.prettify_rules">prettify_rules() (in module iguanas.rule_formatting)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Q">Q</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.quote_string_values">quote_string_values() (in module iguanas.rule_formatting)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -577,6 +631,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/rule_analysis.html#iguanas.rule_analysis.rebuild_from_levels">rebuild_from_levels() (in module iguanas.rule_analysis)</a>
+</li>
+      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.round_thresholds">round_thresholds() (in module iguanas.rule_formatting)</a>
 </li>
       <li><a href="api/rule_generation.html#iguanas.rule_generation.rule_grid_search">rule_grid_search() (in module iguanas.rule_generation)</a>
 </li>
@@ -593,6 +649,8 @@
       <li><a href="api/rule_classifier.html#iguanas.rule_classifier.RuleClassifier">RuleClassifier (class in iguanas.rule_classifier)</a>
 </li>
       <li><a href="api/rule_registry.html#iguanas.rule_registry.RuleRegistry">RuleRegistry (class in iguanas.rule_registry)</a>
+</li>
+      <li><a href="api/onnx_converter.html#iguanas.onnx_converter.rules_to_onnx">rules_to_onnx() (in module iguanas.onnx_converter)</a>
 </li>
       <li><a href="api/ruleset_classifier.html#iguanas.ruleset_classifier.RulesetClassifier">RulesetClassifier (class in iguanas.ruleset_classifier)</a>
 </li>
@@ -619,14 +677,6 @@
 </li>
       </ul></li>
       <li><a href="api/rule_formatting.html#iguanas.rule_formatting.simplify_rule">simplify_rule() (in module iguanas.rule_formatting)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="T">T</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/rule_formatting.html#iguanas.rule_formatting.to_sql">to_sql() (in module iguanas.rule_formatting)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -672,8 +722,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -684,7 +734,7 @@
 
   <p class="copyright">
     
-      © Copyright Mozilla Public License (MPL) 2.0.
+      © Copyright Apache License 2.0.
       <br/>
     
   </p>

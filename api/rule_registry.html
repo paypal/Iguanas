@@ -10,15 +10,15 @@
 <meta property="og:title" content="Rule Registry" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://paypal.github.io/Iguanas/api/rule_registry.html" />
-<meta property="og:site_name" content="Iguanas - Lightning Fast Rule generation with Polars" />
+<meta property="og:site_name" content="Iguanas - Rule Generation and Evaluation with Polars" />
 <meta property="og:description" content="Classes: RuleRegistry: Functions: filter_rule_pairs_by_overlap:" />
 <meta property="og:image" content="https://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png" />
-<meta property="og:image:alt" content="Iguanas - Lightning Fast Rule generation with Polars" />
+<meta property="og:image:alt" content="Iguanas - Rule Generation and Evaluation with Polars" />
 <meta name="description" content="Classes: RuleRegistry: Functions: filter_rule_pairs_by_overlap:" />
 <meta name="description" content="High-performance rule generation library with sklearn-compatible API." />
 <meta name="keywords" content="data science, machine learning, rule generation, python, polars, sklearn" />
 
-    <title>Rule Registry &#8212; Iguanas - Lightning Fast Rule generation with Polars</title>
+    <title>Rule Registry &#8212; Iguanas - Rule Generation and Evaluation with Polars</title>
   
   
   
@@ -37,23 +37,22 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=720ed60b" />
     <link rel="stylesheet" type="text/css" href="../_static/iguanas.css?v=8988652a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../_static/documentation_options.js?v=692d9a0e"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
@@ -63,6 +62,11 @@
                     'ad_personalization': 'denied',
                     'analytics_storage': 'denied'
                 });
+            </script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', 'G-Z5TR8D9VTQ');
             </script>
@@ -148,8 +152,8 @@
       
     
     
-    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
-    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
+    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
+    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
   
   
 </a></div>
@@ -191,6 +195,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -221,8 +232,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -233,8 +243,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
       
@@ -311,6 +320,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -332,8 +348,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -344,8 +359,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
         
@@ -374,9 +388,8 @@
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Rule Registry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotone_constraints.html">Monotone Constraints</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weight_transformations.html">Weight Transformations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rule_classifier.html">Rule Classifier</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ruleset_classifier.html">Ruleset Classifier</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rule_monitoring.html">Rule Monitoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnx_converter.html">ONNX Converter</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Classifiers (scikit-learn API)</span></p>
 <ul class="nav bd-sidenav">
@@ -458,11 +471,15 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="iguanas.rule_registry.RuleRegistry">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">iguanas.rule_registry.</span></span><span class="sig-name descname"><span class="pre">RuleRegistry</span></span><a class="reference internal" href="../_modules/iguanas/rule_registry.html#RuleRegistry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_registry.RuleRegistry" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Store, version, and compare named rule snapshots.</p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Store, retrieve, and compare named rule snapshots.</p>
 <p>Each snapshot records the rule list, optional metrics, optional metadata,
 and a UTC timestamp.  The registry can be persisted to/from a JSON file
 for cross-session use, or kept in-memory only.</p>
+<p>Versioning is by user-supplied name only: snapshots are keyed by <code class="docutils literal notranslate"><span class="pre">name</span></code>
+and <a class="reference internal" href="#iguanas.rule_registry.RuleRegistry.save" title="iguanas.rule_registry.RuleRegistry.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a> overwrites an existing entry with the same name. There is
+no revision history, no content hashing, and no rollback — callers who want
+a history must supply distinct names (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;v1&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;v2&quot;</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>path</strong> (str<em> | </em><em>Path</em><em> | </em><em>None</em><em>, </em><em>default=None</em>) – Path to a JSON file used for persistence.  If the file already exists
@@ -523,7 +540,7 @@ description, experiment notes).</p></li>
 <dd class="field-odd"><p>dict</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.14)"><strong>KeyError</strong></a> – If no snapshot with the given name exists.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><strong>KeyError</strong></a> – If no snapshot with the given name exists.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -545,7 +562,7 @@ description, experiment notes).</p></li>
 <dd class="field-odd"><p><strong>name</strong> (str) – Snapshot to remove.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.14)"><strong>KeyError</strong></a> – If no snapshot with the given name exists.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><strong>KeyError</strong></a> – If no snapshot with the given name exists.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -573,8 +590,8 @@ from one snapshot produce null values for its columns.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If either snapshot was saved without a metrics DataFrame.</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.14)"><strong>KeyError</strong></a> – If either snapshot name does not exist.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If either snapshot was saved without a metrics DataFrame.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><strong>KeyError</strong></a> – If either snapshot name does not exist.</p></li>
 </ul>
 </dd>
 </dl>
@@ -741,8 +758,8 @@ Returns an empty DataFrame with the correct schema when no pairs match.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -753,7 +770,7 @@ Returns an empty DataFrame with the correct schema when no pairs match.</p>
 
   <p class="copyright">
     
-      © Copyright Mozilla Public License (MPL) 2.0.
+      © Copyright Apache License 2.0.
       <br/>
     
   </p>

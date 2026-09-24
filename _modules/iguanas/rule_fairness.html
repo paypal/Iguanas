@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>iguanas.rule_fairness &#8212; Iguanas - Lightning Fast Rule generation with Polars</title>
+    <title>iguanas.rule_fairness &#8212; Iguanas - Rule Generation and Evaluation with Polars</title>
   
   
   
@@ -26,23 +26,22 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=720ed60b" />
     <link rel="stylesheet" type="text/css" href="../../_static/iguanas.css?v=8988652a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../../_static/documentation_options.js?v=692d9a0e"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
@@ -52,6 +51,11 @@
                     'ad_personalization': 'denied',
                     'analytics_storage': 'denied'
                 });
+            </script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', 'G-Z5TR8D9VTQ');
             </script>
@@ -135,8 +139,8 @@
       
     
     
-    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
-    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
+    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
+    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
   
   
 </a></div>
@@ -178,6 +182,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -208,8 +219,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -220,8 +230,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
       
@@ -296,6 +305,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -317,8 +333,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -329,8 +344,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
         
@@ -404,7 +418,24 @@
                 <article class="bd-article">
                   
   <h1>Source code for iguanas.rule_fairness</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span></span><span class="sd">&quot;&quot;&quot;Post-hoc fairness auditing for already-generated rules.</span>
+
+<span class="sd">This module provides *measurement* only. It computes standard performance</span>
+<span class="sd">metrics broken down by the levels of a protected attribute</span>
+<span class="sd">(:func:`compute_subgroup_metrics`) and the ratio of those metrics against a</span>
+<span class="sd">reference group (:func:`compute_disparate_impact_ratio`).</span>
+
+<span class="sd">Fairness is measured, not optimised. Iguanas contains no fairness-aware rule</span>
+<span class="sd">generation, no fairness-constrained selection, and no bias-mitigation step:</span>
+<span class="sd">nothing in this module feeds back into how rules are learned or chosen. The</span>
+<span class="sd">functions here are a bias-measurement report to be read by a human, who must</span>
+<span class="sd">decide what — if anything — to do about the disparities it surfaces.</span>
+
+<span class="sd">The metrics computed are descriptive statistics on the supplied sample. No</span>
+<span class="sd">statistical significance test, confidence interval, or hypothesis test is</span>
+<span class="sd">performed, so small subgroups can produce unstable ratios.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
 
@@ -423,9 +454,10 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute rule performance metrics broken down by a protected attribute.</span>
 
 <span class="sd">    Evaluates each rule&#39;s precision, recall, and other metrics within every</span>
-<span class="sd">    subgroup defined by the unique values of ``group_col``.  Useful for</span>
-<span class="sd">    detecting disparate impact — e.g. a rule that has high precision overall</span>
-<span class="sd">    but systematically mis-fires on a particular demographic group.</span>
+<span class="sd">    subgroup defined by the unique values of ``group_col``.  This is a</span>
+<span class="sd">    post-hoc audit: it surfaces performance disparities — e.g. a rule that has</span>
+<span class="sd">    high precision overall but systematically mis-fires on a particular</span>
+<span class="sd">    demographic group — but does not change the rules in any way.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -457,6 +489,14 @@
 
 <span class="sd">        Sorted by ``group`` then ``rule``.  Returns an empty DataFrame if</span>
 <span class="sd">        ``R`` is empty.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Descriptive measurement only. The returned numbers are raw per-subgroup</span>
+<span class="sd">    metrics on the supplied sample: no statistical test, confidence interval,</span>
+<span class="sd">    or minimum-subgroup-size check is applied, and no rule is modified,</span>
+<span class="sd">    reweighted, or filtered as a result. Groups with few samples can therefore</span>
+<span class="sd">    show large apparent disparities from sampling noise alone.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -518,8 +558,9 @@
 
 <span class="sd">        \\text{DIR} = \\frac{\\text{metric}_{\\text{group}}}{\\text{metric}_{\\text{reference}}}</span>
 
-<span class="sd">    A ratio below **0.8** (the &quot;four-fifths rule&quot;) typically signals</span>
-<span class="sd">    potentially disparate impact under US EEOC guidelines.</span>
+<span class="sd">    A ratio below **0.8** (the &quot;four-fifths rule&quot;) is a conventional screening</span>
+<span class="sd">    threshold associated with US EEOC guidance. It is a heuristic flag for</span>
+<span class="sd">    human review, not a statistical test and not a legal determination.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -544,6 +585,14 @@
 <span class="sd">          when reference metric is zero or null.</span>
 
 <span class="sd">        Sorted by ``rule`` then ``disparate_impact_ratio`` ascending.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This is a post-hoc audit metric. Computing it does not alter, reweight, or</span>
+<span class="sd">    filter any rule — Iguanas performs no fairness-aware generation or</span>
+<span class="sd">    selection. The ratio is a point estimate with no confidence interval and no</span>
+<span class="sd">    significance test, so it should be interpreted alongside ``group_size``</span>
+<span class="sd">    from :func:`compute_subgroup_metrics`.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -608,8 +657,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -620,7 +669,7 @@
 
   <p class="copyright">
     
-      © Copyright Mozilla Public License (MPL) 2.0.
+      © Copyright Apache License 2.0.
       <br/>
     
   </p>

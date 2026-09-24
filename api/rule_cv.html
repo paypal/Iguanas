@@ -10,15 +10,15 @@
 <meta property="og:title" content="Rule Cross-Validation" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://paypal.github.io/Iguanas/api/rule_cv.html" />
-<meta property="og:site_name" content="Iguanas - Lightning Fast Rule generation with Polars" />
+<meta property="og:site_name" content="Iguanas - Rule Generation and Evaluation with Polars" />
 <meta property="og:description" content="Functions: validate_rules_cv: identify_unstable_rules:" />
 <meta property="og:image" content="https://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png" />
-<meta property="og:image:alt" content="Iguanas - Lightning Fast Rule generation with Polars" />
+<meta property="og:image:alt" content="Iguanas - Rule Generation and Evaluation with Polars" />
 <meta name="description" content="Functions: validate_rules_cv: identify_unstable_rules:" />
 <meta name="description" content="High-performance rule generation library with sklearn-compatible API." />
 <meta name="keywords" content="data science, machine learning, rule generation, python, polars, sklearn" />
 
-    <title>Rule Cross-Validation &#8212; Iguanas - Lightning Fast Rule generation with Polars</title>
+    <title>Rule Cross-Validation &#8212; Iguanas - Rule Generation and Evaluation with Polars</title>
   
   
   
@@ -37,23 +37,22 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=720ed60b" />
     <link rel="stylesheet" type="text/css" href="../_static/iguanas.css?v=8988652a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../_static/documentation_options.js?v=692d9a0e"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
@@ -63,6 +62,11 @@
                     'ad_personalization': 'denied',
                     'analytics_storage': 'denied'
                 });
+            </script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', 'G-Z5TR8D9VTQ');
             </script>
@@ -148,8 +152,8 @@
       
     
     
-    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
-    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
+    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
+    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
   
   
 </a></div>
@@ -191,6 +195,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -221,8 +232,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -233,8 +243,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
       
@@ -311,6 +320,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -332,8 +348,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -344,8 +359,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
         
@@ -374,9 +388,8 @@
 <li class="toctree-l1"><a class="reference internal" href="rule_registry.html">Rule Registry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotone_constraints.html">Monotone Constraints</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weight_transformations.html">Weight Transformations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rule_classifier.html">Rule Classifier</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ruleset_classifier.html">Ruleset Classifier</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rule_monitoring.html">Rule Monitoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnx_converter.html">ONNX Converter</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Classifiers (scikit-learn API)</span></p>
 <ul class="nav bd-sidenav">
@@ -459,11 +472,22 @@
 <dt class="sig sig-object py" id="iguanas.rule_cv.validate_rules_cv">
 <span class="sig-prename descclassname"><span class="pre">iguanas.rule_cv.</span></span><span class="sig-name descname"><span class="pre">validate_rules_cv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_cv.html#validate_rules_cv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_cv.validate_rules_cv" title="Link to this definition">#</a></dt>
 <dd><p>Evaluate rule stability across K folds.</p>
-<p>Validates already-generated rules on K held-out folds without re-generating
-them. For each fold the rules are evaluated on the validation split, and the
+<p>Validates already-generated rules on K folds without re-generating them.
+For each fold the rules are evaluated on the validation split, and the
 mean, standard deviation, and minimum of each requested metric across folds
 are returned. Rules with a high <code class="docutils literal notranslate"><span class="pre">{metric}_cv_std</span></code> or a low
 <code class="docutils literal notranslate"><span class="pre">{metric}_cv_min</span></code> are likely over-fitted to the training data.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>The folds are not truly held out, and the reported statistics are
+optimistically biased.</strong> This function does not generate rules; it takes
+rules that were already produced from the <em>entire</em> dataset and then
+re-scores them on subsets of that same dataset. Every validation fold
+was therefore part of the data used to choose the rules’ features and
+thresholds. <code class="docutils literal notranslate"><span class="pre">{metric}_cv_mean</span></code>, <code class="docutils literal notranslate"><span class="pre">{metric}_cv_std</span></code> and
+<code class="docutils literal notranslate"><span class="pre">{metric}_cv_min</span></code> must <strong>not</strong> be reported as out-of-sample or
+generalisation estimates. See Notes for an unbiased protocol.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -509,13 +533,32 @@ metrics. If <code class="docutils literal notranslate"><span class="pre">None</s
 </div>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>The CV stability scores carry an optimism bias: because <code class="docutils literal notranslate"><span class="pre">rules</span></code> are
-generated from the full dataset <em>before</em> <code class="docutils literal notranslate"><span class="pre">validate_rules_cv</span></code> is called,
-the held-out folds were already seen during rule extraction.  The
-reported <code class="docutils literal notranslate"><span class="pre">{metric}_cv_min</span></code> and <code class="docutils literal notranslate"><span class="pre">{metric}_cv_std</span></code> are therefore a
-lower bound on overfitting, not a true out-of-sample estimate.  Use
-them to flag unstable rules rather than to estimate deployment
-performance.</p>
+<p><strong>Optimism bias.</strong> The intended usage is: generate rules on <code class="docutils literal notranslate"><span class="pre">X</span></code>/<code class="docutils literal notranslate"><span class="pre">y</span></code>,
+then call this function on the same <code class="docutils literal notranslate"><span class="pre">X</span></code>/<code class="docutils literal notranslate"><span class="pre">y</span></code>. Rule selection has
+therefore already seen every fold, which leaks information into each
+“validation” split. The consequences are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">{metric}_cv_mean</span></code> is inflated relative to true held-out performance.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">{metric}_cv_std</span></code> is deflated and <code class="docutils literal notranslate"><span class="pre">{metric}_cv_min</span></code> is inflated, so
+the numbers understate how badly a rule can degrade on genuinely unseen
+data. They are a <em>lower bound</em> on overfitting, not a measure of it.</p></li>
+<li><p>A rule that looks stable here can still fail out of sample; a rule that
+looks unstable here is almost certainly unstable.</p></li>
+</ul>
+<p>Use these statistics as a <em>relative</em> screen to rank and discard fragile
+rules within a candidate set — never as an estimate of deployment
+performance, and never as a headline result.</p>
+<p>For an unbiased estimate, use a nested protocol in which rule generation
+happens strictly inside the training split of each outer fold:</p>
+<ol class="arabic simple">
+<li><p>Split the data into outer folds (or a single held-out test set).</p></li>
+<li><p>For each outer fold, run the full pipeline — weight transformations,
+grid search, filtering, deduplication — on the training portion only.</p></li>
+<li><p>Evaluate the resulting rules on the outer fold, which no step of the
+pipeline has seen.</p></li>
+<li><p>Aggregate across outer folds.</p></li>
+</ol>
+<p>Only step 3 yields a defensible generalisation estimate.</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -536,6 +579,15 @@ performance.</p>
 <p>Filters the output of <a class="reference internal" href="#iguanas.rule_cv.validate_rules_cv" title="iguanas.rule_cv.validate_rules_cv"><code class="xref py py-func docutils literal notranslate"><span class="pre">validate_rules_cv()</span></code></a> to surface rules that are
 likely over-fitted (high variance across folds) or simply weak (low mean
 metric).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Inherits the optimism bias of <a class="reference internal" href="#iguanas.rule_cv.validate_rules_cv" title="iguanas.rule_cv.validate_rules_cv"><code class="xref py py-func docutils literal notranslate"><span class="pre">validate_rules_cv()</span></code></a>: the folds were
+already seen during rule generation, so <code class="docutils literal notranslate"><span class="pre">{metric}_cv_std</span></code> is deflated
+and <code class="docutils literal notranslate"><span class="pre">{metric}_cv_mean</span></code> inflated. This function is therefore a
+one-sided screen — rules it flags are genuinely unstable, but rules it
+does <strong>not</strong> flag are not thereby shown to generalise. Absence from the
+returned set is not evidence of stability.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -556,7 +608,7 @@ this threshold (consistently weak rules).</p></li>
 <dd class="field-odd"><p>pl.DataFrame</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If required columns are absent from <code class="docutils literal notranslate"><span class="pre">cv_result</span></code>.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If required columns are absent from <code class="docutils literal notranslate"><span class="pre">cv_result</span></code>.</p>
 </dd>
 </dl>
 <div class="admonition-examples admonition">
@@ -662,8 +714,8 @@ this threshold (consistently weak rules).</p></li>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -674,7 +726,7 @@ this threshold (consistently weak rules).</p></li>
 
   <p class="copyright">
     
-      © Copyright Mozilla Public License (MPL) 2.0.
+      © Copyright Apache License 2.0.
       <br/>
     
   </p>

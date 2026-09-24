@@ -1,0 +1,771 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iguanas.onnx_converter &#8212; Iguanas - Rule Generation and Evaluation with Polars</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=720ed60b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/iguanas.css?v=8988652a" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+
+    <script src="../../_static/documentation_options.js?v=692d9a0e"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
+            </script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'G-Z5TR8D9VTQ');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/iguanas/onnx_converter';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://paypal.github.io/Iguanas/_modules/iguanas/onnx_converter.html" />
+    <link rel="icon" href="../../_static/iguanas.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
+    <img src="../../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../quickstart.html">
+    Quick Start
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_reference.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../examples.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../quickstart.html">
+    Quick Start
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_reference.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../examples.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">iguanas.onnx_converter</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for iguanas.onnx_converter</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Convert Iguanas rule strings to an ONNX binary classifier model.</span>
+
+<span class="sd">Rules are parsed with :mod:`ast` — never :func:`eval` — and translated into</span>
+<span class="sd">a static ONNX computation graph of comparison and boolean operators. Only a</span>
+<span class="sd">fixed whitelist of AST node types is accepted; anything else raises</span>
+<span class="sd">``ValueError``. Consequently the exported model contains no Python code and</span>
+<span class="sd">scoring it executes no Python, which makes this the recommended deployment</span>
+<span class="sd">path for environments where :func:`~iguanas.rule_evaluation.apply_rules` (which</span>
+<span class="sd">compiles rule strings with ``eval()``) is unacceptable.</span>
+
+<span class="sd">Note that parsing itself is safe, but the *export* step still reads the rule</span>
+<span class="sd">string, so a malformed or unsupported rule is rejected rather than silently</span>
+<span class="sd">mistranslated.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">onnx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">onnx</span><span class="w"> </span><span class="kn">import</span> <span class="n">TensorProto</span><span class="p">,</span> <span class="n">helper</span><span class="p">,</span> <span class="n">numpy_helper</span>
+
+<span class="n">_DTYPE_MAP</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">type</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;f32&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">TensorProto</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+    <span class="s2">&quot;f64&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">TensorProto</span><span class="o">.</span><span class="n">DOUBLE</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="c1"># Minimum opset that covers all operators used (GreaterOrEqual/LessOrEqual=16,</span>
+<span class="c1"># Equal=19). Kept at 21 (rather than the latest schema revision) since that is</span>
+<span class="c1"># the newest opset officially released and supported by onnxruntime.</span>
+<span class="n">_OPSET</span> <span class="o">=</span> <span class="mi">21</span>
+<span class="c1"># IR version paired with opset 21 (onnx 1.16.x). Pinned explicitly so the</span>
+<span class="c1"># model&#39;s IR version doesn&#39;t drift with whichever onnx package is installed</span>
+<span class="c1"># and outrun what onnxruntime supports.</span>
+<span class="n">_IR_VERSION</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="n">_CMP_OPS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">ast</span><span class="o">.</span><span class="n">GtE</span><span class="p">:</span> <span class="s2">&quot;GreaterOrEqual&quot;</span><span class="p">,</span>
+    <span class="n">ast</span><span class="o">.</span><span class="n">Gt</span><span class="p">:</span> <span class="s2">&quot;Greater&quot;</span><span class="p">,</span>
+    <span class="n">ast</span><span class="o">.</span><span class="n">LtE</span><span class="p">:</span> <span class="s2">&quot;LessOrEqual&quot;</span><span class="p">,</span>
+    <span class="n">ast</span><span class="o">.</span><span class="n">Lt</span><span class="p">:</span> <span class="s2">&quot;Less&quot;</span><span class="p">,</span>
+    <span class="n">ast</span><span class="o">.</span><span class="n">Eq</span><span class="p">:</span> <span class="s2">&quot;Equal&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="rules_to_onnx">
+<a class="viewcode-back" href="../../api/onnx_converter.html#iguanas.onnx_converter.rules_to_onnx">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rules_to_onnx</span><span class="p">(</span>
+    <span class="n">rules</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;f32&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">onnx</span><span class="o">.</span><span class="n">ModelProto</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert Iguanas rule strings to an ONNX binary classifier.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rules : str | list[str]</span>
+<span class="sd">        One rule string or a list of rule strings.  When a list is supplied,</span>
+<span class="sd">        the rules are OR&#39;d together — the model outputs 1 if *any* rule fires.</span>
+<span class="sd">        Each rule must use the ``X[&quot;col&quot;] op val`` notation produced by</span>
+<span class="sd">        Iguanas, where ``op`` is one of ``&gt;=``, ``&gt;``, ``&lt;=``, ``&lt;``,</span>
+<span class="sd">        ``==``, ``!=``, and conditions may be combined with ``&amp;`` / ``|``.</span>
+<span class="sd">    dtype : str, default ``&quot;f32&quot;``</span>
+<span class="sd">        Numeric dtype for the input tensor and thresholds.</span>
+<span class="sd">        ``&quot;f32&quot;`` → float32, ``&quot;f64&quot;`` → float64.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    onnx.ModelProto</span>
+<span class="sd">        ONNX model with:</span>
+
+<span class="sd">        * input ``X`` shape ``[N, num_features]`` (*dtype* as requested)</span>
+<span class="sd">        * output ``prediction`` shape ``[N]`` (int64, values 0 or 1)</span>
+
+<span class="sd">        Feature names are stored in ``metadata_props`` as</span>
+<span class="sd">        ``&quot;feature_0&quot;``, ``&quot;feature_1&quot;``, … in first-appearance order.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``rules`` is empty, ``dtype`` is not ``&quot;f32&quot;`` or ``&quot;f64&quot;``, or</span>
+<span class="sd">        a rule string is syntactically invalid or uses unsupported node types.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    **Security.** This conversion parses each rule with :mod:`ast` and emits</span>
+<span class="sd">    a static ONNX graph; it never calls :func:`eval`, and the resulting model</span>
+<span class="sd">    executes no Python at scoring time. Only a whitelist of AST nodes</span>
+<span class="sd">    (subscripted column access, numeric-literal comparisons, and ``&amp;``/``|``)</span>
+<span class="sd">    is accepted — anything else raises ``ValueError`` rather than being</span>
+<span class="sd">    executed. This makes ONNX export the recommended production deployment</span>
+<span class="sd">    path, in contrast to</span>
+<span class="sd">    :func:`~iguanas.rule_evaluation.apply_rules`, which compiles rule strings</span>
+<span class="sd">    with ``eval()`` and therefore requires trusted rule sources.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    iguanas.rule_evaluation.apply_rules : In-process evaluation via ``eval()``;</span>
+<span class="sd">        requires trusted rule strings.</span>
+<span class="sd">    iguanas.rule_evaluation.apply_rules_lazy : Lazy in-process evaluation, same</span>
+<span class="sd">        ``eval()`` caveat.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rules</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rules</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;rules must not be empty&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rules</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rules</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;rules must not be empty&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rules</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;rules must be a string or a list of strings&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rules</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">rules</span> <span class="o">=</span> <span class="p">[</span><span class="n">rules</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">dtype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_DTYPE_MAP</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dtype must be &#39;f32&#39; or &#39;f64&#39;, got </span><span class="si">{</span><span class="n">dtype</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">dtype_onnx</span><span class="p">,</span> <span class="n">dtype_np</span> <span class="o">=</span> <span class="n">_DTYPE_MAP</span><span class="p">[</span><span class="n">dtype</span><span class="p">]</span>
+
+    <span class="n">parsed</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ast</span><span class="o">.</span><span class="n">expr</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">parsed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">rule</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;eval&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">SyntaxError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid rule syntax: </span><span class="si">{</span><span class="n">rule</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+    <span class="n">feature_index</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">parsed</span><span class="p">:</span>
+        <span class="n">_collect_features</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">feature_index</span><span class="p">)</span>
+
+    <span class="n">ctx</span> <span class="o">=</span> <span class="n">_BuildCtx</span><span class="p">(</span><span class="n">dtype_onnx</span><span class="p">,</span> <span class="n">dtype_np</span><span class="p">,</span> <span class="n">feature_index</span><span class="p">)</span>
+    <span class="n">rule_outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctx</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">parsed</span><span class="p">]</span>
+
+    <span class="n">combined</span> <span class="o">=</span> <span class="n">rule_outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="n">rule_outputs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">fresh</span><span class="p">(</span><span class="s2">&quot;top_or&quot;</span><span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">helper</span><span class="o">.</span><span class="n">make_node</span><span class="p">(</span><span class="s2">&quot;Or&quot;</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">combined</span><span class="p">,</span> <span class="n">other</span><span class="p">],</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">out</span><span class="p">]))</span>
+        <span class="n">combined</span> <span class="o">=</span> <span class="n">out</span>
+
+    <span class="n">pred_out</span> <span class="o">=</span> <span class="s2">&quot;prediction&quot;</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">helper</span><span class="o">.</span><span class="n">make_node</span><span class="p">(</span><span class="s2">&quot;Cast&quot;</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">combined</span><span class="p">],</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">pred_out</span><span class="p">],</span> <span class="n">to</span><span class="o">=</span><span class="n">TensorProto</span><span class="o">.</span><span class="n">INT64</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">num_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_index</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">helper</span><span class="o">.</span><span class="n">make_graph</span><span class="p">(</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span>
+        <span class="s2">&quot;iguanas_rules&quot;</span><span class="p">,</span>
+        <span class="p">[</span><span class="n">helper</span><span class="o">.</span><span class="n">make_tensor_value_info</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="n">dtype_onnx</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_features</span><span class="p">])],</span>
+        <span class="p">[</span><span class="n">helper</span><span class="o">.</span><span class="n">make_tensor_value_info</span><span class="p">(</span><span class="n">pred_out</span><span class="p">,</span> <span class="n">TensorProto</span><span class="o">.</span><span class="n">INT64</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">])],</span>
+        <span class="n">initializer</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">initializers</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">helper</span><span class="o">.</span><span class="n">make_model</span><span class="p">(</span>
+        <span class="n">graph</span><span class="p">,</span> <span class="n">opset_imports</span><span class="o">=</span><span class="p">[</span><span class="n">helper</span><span class="o">.</span><span class="n">make_opsetid</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">_OPSET</span><span class="p">)],</span> <span class="n">ir_version</span><span class="o">=</span><span class="n">_IR_VERSION</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">feat_name</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">feature_index</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">metadata_props</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
+        <span class="n">entry</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;feature_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">entry</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">feat_name</span>
+
+    <span class="n">onnx</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">check_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Internal helpers</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_collect_features</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">ast</span><span class="o">.</span><span class="n">expr</span><span class="p">,</span> <span class="n">feature_index</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;First-pass traversal: register every X[&quot;col&quot;] column name.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">BinOp</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">BitAnd</span> <span class="o">|</span> <span class="n">ast</span><span class="o">.</span><span class="n">BitOr</span><span class="p">):</span>
+        <span class="n">_collect_features</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">feature_index</span><span class="p">)</span>
+        <span class="n">_collect_features</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">feature_index</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Compare</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Subscript</span><span class="p">):</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">_subscript_col</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">feature_index</span><span class="p">:</span>
+            <span class="n">feature_index</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_index</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_subscript_col</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">ast</span><span class="o">.</span><span class="n">expr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the column name from an ``X[&quot;col&quot;]`` subscript node.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Subscript</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected X[&#39;col&#39;] subscript, got </span><span class="si">{</span><span class="n">ast</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">slice</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Constant</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rule column key must be a string literal, got </span><span class="si">{</span><span class="n">ast</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_BuildCtx</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Accumulates ONNX nodes and initializers while traversing a rule AST.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dtype_onnx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">dtype_np</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+        <span class="n">feature_index</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype_onnx</span> <span class="o">=</span> <span class="n">dtype_onnx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype_np</span> <span class="o">=</span> <span class="n">dtype_np</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_index</span> <span class="o">=</span> <span class="n">feature_index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">onnx</span><span class="o">.</span><span class="n">NodeProto</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">onnx</span><span class="o">.</span><span class="n">TensorProto</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_counter</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">name</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">ast</span><span class="o">.</span><span class="n">expr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Emit ONNX nodes for *node* and return the output tensor name.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">BinOp</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">BitAnd</span> <span class="o">|</span> <span class="n">ast</span><span class="o">.</span><span class="n">BitOr</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visit_binop</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Compare</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visit_compare</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported rule expression: </span><span class="si">{</span><span class="n">ast</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_visit_binop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">ast</span><span class="o">.</span><span class="n">BinOp</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">onnx_op</span> <span class="o">=</span> <span class="s2">&quot;And&quot;</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">BitAnd</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;Or&quot;</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fresh</span><span class="p">(</span><span class="n">onnx_op</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">helper</span><span class="o">.</span><span class="n">make_node</span><span class="p">(</span><span class="n">onnx_op</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">],</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">out</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_visit_compare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">ast</span><span class="o">.</span><span class="n">Compare</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">_subscript_col</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">ops</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">comparator</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">comparators</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">comparator</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Constant</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">comparator</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">comparator</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">comparator</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">UnaryOp</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">comparator</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">USub</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">comparator</span><span class="o">.</span><span class="n">operand</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Constant</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">comparator</span><span class="o">.</span><span class="n">operand</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">comparator</span><span class="o">.</span><span class="n">operand</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Rule threshold must be a numeric literal, got </span><span class="si">{</span><span class="n">ast</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">comparator</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">feat_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_feature</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+        <span class="n">thresh_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_scalar</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">NotEq</span><span class="p">):</span>
+            <span class="n">eq_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fresh</span><span class="p">(</span><span class="s2">&quot;eq&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">helper</span><span class="o">.</span><span class="n">make_node</span><span class="p">(</span><span class="s2">&quot;Equal&quot;</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">feat_out</span><span class="p">,</span> <span class="n">thresh_name</span><span class="p">],</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">eq_out</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="n">cmp_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fresh</span><span class="p">(</span><span class="s2">&quot;neq&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">helper</span><span class="o">.</span><span class="n">make_node</span><span class="p">(</span><span class="s2">&quot;Not&quot;</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">eq_out</span><span class="p">],</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">cmp_out</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">onnx_op</span> <span class="o">=</span> <span class="n">_CMP_OPS</span><span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">op</span><span class="p">)]</span>
+            <span class="n">cmp_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fresh</span><span class="p">(</span><span class="s2">&quot;cmp&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">helper</span><span class="o">.</span><span class="n">make_node</span><span class="p">(</span><span class="n">onnx_op</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">feat_out</span><span class="p">,</span> <span class="n">thresh_name</span><span class="p">],</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">cmp_out</span><span class="p">])</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">cmp_out</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Emit a Gather node slicing column *col* from X → output shape [N].&quot;&quot;&quot;</span>
+        <span class="n">idx_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fresh</span><span class="p">(</span><span class="s2">&quot;idx&quot;</span><span class="p">)</span>
+        <span class="c1"># 0-D indices drop the gathered axis, giving output shape [N] from [N, F]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">numpy_helper</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_index</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">idx_name</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">feat_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fresh</span><span class="p">(</span><span class="s2">&quot;feat&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">helper</span><span class="o">.</span><span class="n">make_node</span><span class="p">(</span><span class="s2">&quot;Gather&quot;</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="n">idx_name</span><span class="p">],</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">feat_out</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">feat_out</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fresh</span><span class="p">(</span><span class="s2">&quot;thresh&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">numpy_helper</span><span class="o">.</span><span class="n">from_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype_np</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">name</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Apache License 2.0.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

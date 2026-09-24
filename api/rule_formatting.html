@@ -10,15 +10,15 @@
 <meta property="og:title" content="Rule Formatting" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://paypal.github.io/Iguanas/api/rule_formatting.html" />
-<meta property="og:site_name" content="Iguanas - Lightning Fast Rule generation with Polars" />
-<meta property="og:description" content="Functions: simplify_rule: to_sql: rule_to_sql:" />
+<meta property="og:site_name" content="Iguanas - Rule Generation and Evaluation with Polars" />
+<meta property="og:description" content="Functions: simplify_rule: rule_to_sql: format_floats_as_integers: add_missing_value_conditions: decode_string_imputation: decode_numeric_encodings: format_as..." />
 <meta property="og:image" content="https://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png" />
-<meta property="og:image:alt" content="Iguanas - Lightning Fast Rule generation with Polars" />
-<meta name="description" content="Functions: simplify_rule: to_sql: rule_to_sql:" />
+<meta property="og:image:alt" content="Iguanas - Rule Generation and Evaluation with Polars" />
+<meta name="description" content="Functions: simplify_rule: rule_to_sql: format_floats_as_integers: add_missing_value_conditions: decode_string_imputation: decode_numeric_encodings: format_as..." />
 <meta name="description" content="High-performance rule generation library with sklearn-compatible API." />
 <meta name="keywords" content="data science, machine learning, rule generation, python, polars, sklearn" />
 
-    <title>Rule Formatting &#8212; Iguanas - Lightning Fast Rule generation with Polars</title>
+    <title>Rule Formatting &#8212; Iguanas - Rule Generation and Evaluation with Polars</title>
   
   
   
@@ -37,23 +37,22 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=720ed60b" />
     <link rel="stylesheet" type="text/css" href="../_static/iguanas.css?v=8988652a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../_static/documentation_options.js?v=692d9a0e"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
@@ -63,6 +62,11 @@
                     'ad_personalization': 'denied',
                     'analytics_storage': 'denied'
                 });
+            </script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', 'G-Z5TR8D9VTQ');
             </script>
@@ -148,8 +152,8 @@
       
     
     
-    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
-    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
+    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
+    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
   
   
 </a></div>
@@ -191,6 +195,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -221,8 +232,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -233,8 +243,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
       
@@ -311,6 +320,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -332,8 +348,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -344,8 +359,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
         
@@ -374,9 +388,8 @@
 <li class="toctree-l1"><a class="reference internal" href="rule_registry.html">Rule Registry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotone_constraints.html">Monotone Constraints</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weight_transformations.html">Weight Transformations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rule_classifier.html">Rule Classifier</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ruleset_classifier.html">Ruleset Classifier</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rule_monitoring.html">Rule Monitoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnx_converter.html">ONNX Converter</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Classifiers (scikit-learn API)</span></p>
 <ul class="nav bd-sidenav">
@@ -494,40 +507,6 @@ Column order is preserved based on first appearance.</p>
 </dd></dl>
 
 </section>
-<section id="to-sql">
-<h3>to_sql<a class="headerlink" href="#to-sql" title="Link to this heading">#</a></h3>
-<dl class="py function">
-<dt class="sig sig-object py" id="iguanas.rule_formatting.to_sql">
-<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">to_sql</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#to_sql"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.to_sql" title="Link to this definition">#</a></dt>
-<dd><p>Convert a rule expression string to a SQL WHERE clause fragment.</p>
-<p>Replaces <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> accessors with bare column names and converts
-<code class="docutils literal notranslate"><span class="pre">&amp;</span></code> / <code class="docutils literal notranslate"><span class="pre">|</span></code> to <code class="docutils literal notranslate"><span class="pre">AND</span></code> / <code class="docutils literal notranslate"><span class="pre">OR</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>rule</strong> (str) – Rule string using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation with <code class="docutils literal notranslate"><span class="pre">&amp;</span></code> / <code class="docutils literal notranslate"><span class="pre">|</span></code> operators.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>SQL WHERE clause fragment with column names unquoted and boolean
-operators uppercased.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-<div class="admonition-examples admonition">
-<p class="admonition-title">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">to_sql</span><span class="p">(</span><span class="s1">&#39;(X[&quot;age&quot;] &gt;= 30) &amp; (X[&quot;income&quot;] &lt; 50000)&#39;</span><span class="p">)</span>
-<span class="go">&#39;(age &gt;= 30) AND (income &lt; 50000)&#39;</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">to_sql</span><span class="p">(</span><span class="s1">&#39;(X[&quot;score&quot;] &gt;= 0.8) | (X[&quot;flag&quot;] == 1)&#39;</span><span class="p">)</span>
-<span class="go">&#39;(score &gt;= 0.8) OR (flag == 1)&#39;</span>
-</pre></div>
-</div>
-</div>
-</dd></dl>
-
-</section>
 <section id="rule-to-sql">
 <h3>rule_to_sql<a class="headerlink" href="#rule-to-sql" title="Link to this heading">#</a></h3>
 <dl class="py function">
@@ -562,6 +541,491 @@ For example, <code class="docutils literal notranslate"><span class="pre">table_
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rule_to_sql</span><span class="p">(</span><span class="s1">&#39;(X[&quot;age&quot;] &gt; 30) | (X[&quot;flag&quot;] == 1)&#39;</span><span class="p">,</span> <span class="n">table_alias</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">)</span>
 <span class="go">&#39;(t.age &gt; 30.0) OR (t.flag = 1.0)&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="format-floats-as-integers">
+<h3>format_floats_as_integers<a class="headerlink" href="#format-floats-as-integers" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.format_floats_as_integers">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">format_floats_as_integers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#format_floats_as_integers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.format_floats_as_integers" title="Link to this definition">#</a></dt>
+<dd><p>Convert float thresholds to integers for the given columns.</p>
+<p>Uses ceiling for <code class="docutils literal notranslate"><span class="pre">&gt;=</span></code>/<code class="docutils literal notranslate"><span class="pre">&lt;</span></code> and floor for <code class="docutils literal notranslate"><span class="pre">&gt;</span></code>/<code class="docutils literal notranslate"><span class="pre">&lt;=</span></code>, so the integer
+boundary preserves the original condition’s semantics. <code class="docutils literal notranslate"><span class="pre">==</span></code>/<code class="docutils literal notranslate"><span class="pre">!=</span></code> are
+left unchanged since there is no boundary to round.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (str) – Rule expression using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation.</p></li>
+<li><p><strong>int_columns</strong> (list<em>[</em>str<em>]</em>) – Columns whose float thresholds should be converted to integers.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rule string with integer thresholds for the given columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">format_floats_as_integers</span><span class="p">(</span><span class="s1">&#39;(X[&quot;a&quot;] &gt;= 0.1) &amp; (X[&quot;b&quot;] &gt;= 9.1)&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">])</span>
+<span class="go">&#39;(X[&quot;a&quot;] &gt;= 1) &amp; (X[&quot;b&quot;] &gt;= 9.1)&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="add-missing-value-conditions">
+<h3>add_missing_value_conditions<a class="headerlink" href="#add-missing-value-conditions" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.add_missing_value_conditions">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">add_missing_value_conditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#add_missing_value_conditions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.add_missing_value_conditions" title="Link to this definition">#</a></dt>
+<dd><p>Append an <code class="docutils literal notranslate"><span class="pre">is_null()</span></code> clause to conditions satisfied by an imputed value.</p>
+<p>When a column’s nulls were filled with a value that also satisfies an
+existing condition, that condition implicitly matches originally-null
+rows too. This makes that explicit by OR-ing in <code class="docutils literal notranslate"><span class="pre">X[col].is_null()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (str) – Rule expression using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation.</p></li>
+<li><p><strong>mapping</strong> (dict<em>[</em>str<em>, </em>float<em>]</em>) – Maps column name to the value nulls were imputed with.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rule string with <code class="docutils literal notranslate"><span class="pre">is_null()</span></code> clauses added where relevant.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">add_missing_value_conditions</span><span class="p">(</span><span class="s1">&#39;(X[&quot;a&quot;] &lt; 1)&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+<span class="go">&#39;((X[&quot;a&quot;] &lt; 1) | X[&quot;a&quot;].is_null())&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="decode-string-imputation">
+<h3>decode_string_imputation<a class="headerlink" href="#decode-string-imputation" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.decode_string_imputation">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">decode_string_imputation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#decode_string_imputation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.decode_string_imputation" title="Link to this definition">#</a></dt>
+<dd><p>Convert an equality on a string-imputed placeholder into <code class="docutils literal notranslate"><span class="pre">is_null()</span></code>.</p>
+<p>For columns where nulls were filled with a placeholder string (e.g.
+gators <code class="docutils literal notranslate"><span class="pre">StringImputer</span></code>’s default <code class="docutils literal notranslate"><span class="pre">&quot;MISSING&quot;</span></code>), rewrites an equality
+condition on that placeholder back to an is-null check.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (str) – Rule expression using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation.</p></li>
+<li><p><strong>mapping</strong> (dict<em>[</em>str<em>, </em>str<em>]</em>) – Maps column name to the placeholder value strings were imputed with.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rule string with placeholder equality conditions decoded.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decode_string_imputation</span><span class="p">(</span><span class="s1">&#39;(X[&quot;status&quot;] == &quot;MISSING&quot;)&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;MISSING&quot;</span><span class="p">})</span>
+<span class="go">&#39;X[&quot;status&quot;].is_null()&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="decode-numeric-encodings">
+<h3>decode_numeric_encodings<a class="headerlink" href="#decode-numeric-encodings" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.decode_numeric_encodings">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">decode_numeric_encodings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#decode_numeric_encodings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.decode_numeric_encodings" title="Link to this definition">#</a></dt>
+<dd><p>Reverse a numeric category encoding back to the original category labels.</p>
+<p>For encodings where each category maps to a numeric statistic (e.g. WOE
+score, category count, mean target value), finds which categories satisfy
+the condition’s operator/threshold and replaces it with an equality (single
+match) or <code class="docutils literal notranslate"><span class="pre">.is_in()</span></code> (multiple matches) condition on the original values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (str) – Rule expression using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation, where col holds the
+encoded numeric values.</p></li>
+<li><p><strong>mapping</strong> (dict<em>[</em>str<em>, </em>dict<em>[</em>str<em>, </em>float<em>]</em><em>]</em>) – Maps column name to a dict of {category: encoded_value}.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rule string with conditions decoded back to category labels.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decode_numeric_encodings</span><span class="p">(</span><span class="s1">&#39;(X[&quot;A&quot;] &gt;= 2)&#39;</span><span class="p">,</span> <span class="n">mapping</span><span class="p">)</span>
+<span class="go">&#39;(X[&quot;A&quot;].is_in([&quot;b&quot;, &quot;c&quot;]))&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="format-as-boolean-conditions">
+<h3>format_as_boolean_conditions<a class="headerlink" href="#format-as-boolean-conditions" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.format_as_boolean_conditions">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">format_as_boolean_conditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bool_columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#format_as_boolean_conditions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.format_as_boolean_conditions" title="Link to this definition">#</a></dt>
+<dd><p>Convert True/False-like condition values to Python booleans.</p>
+<p>Recognises two condition shapes for the given columns:</p>
+<ul class="simple">
+<li><p>“True”/”true”/”1” and “False”/”false”/”0” (quoted or bare), combined
+with <code class="docutils literal notranslate"><span class="pre">==</span></code>/<code class="docutils literal notranslate"><span class="pre">!=</span></code>.</p></li>
+<li><p>Raw numeric threshold splits on <code class="docutils literal notranslate"><span class="pre">&gt;=</span></code>/<code class="docutils literal notranslate"><span class="pre">&gt;</span></code>/<code class="docutils literal notranslate"><span class="pre">&lt;</span></code>/<code class="docutils literal notranslate"><span class="pre">&lt;=</span></code> (as produced
+by a model trained on a boolean column cast to float), where the
+threshold unambiguously selects only the 0.0 or only the 1.0 value.</p></li>
+</ul>
+<p>Both shapes are rewritten as <code class="docutils literal notranslate"><span class="pre">==</span> <span class="pre">True</span></code>/<code class="docutils literal notranslate"><span class="pre">==</span> <span class="pre">False</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (str) – Rule expression using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation.</p></li>
+<li><p><strong>bool_columns</strong> (list<em>[</em>str<em>]</em>) – Columns to treat as boolean.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rule string with boolean conditions normalised.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">format_as_boolean_conditions</span><span class="p">(</span><span class="s1">&#39;(X[&quot;flag&quot;] != &quot;False&quot;)&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;flag&quot;</span><span class="p">])</span>
+<span class="go">&#39;(X[&quot;flag&quot;] == True)&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">format_as_boolean_conditions</span><span class="p">(</span><span class="s1">&#39;(X[&quot;flag&quot;] &gt;= 1.0)&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;flag&quot;</span><span class="p">])</span>
+<span class="go">&#39;(X[&quot;flag&quot;] == True)&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">format_as_boolean_conditions</span><span class="p">(</span><span class="s1">&#39;(X[&quot;flag&quot;] &lt; 1.0)&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;flag&quot;</span><span class="p">])</span>
+<span class="go">&#39;(X[&quot;flag&quot;] == False)&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="decode-onehot-encodings">
+<h3>decode_onehot_encodings<a class="headerlink" href="#decode-onehot-encodings" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.decode_onehot_encodings">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">decode_onehot_encodings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">null_category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#decode_onehot_encodings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.decode_onehot_encodings" title="Link to this definition">#</a></dt>
+<dd><p>Reverse a one-hot encoding back to a categorical condition.</p>
+<p>One-hot encoders typically produce a binary column per category, split
+by the model at 0.5. This converts those splits back to equality/
+inequality conditions on the original categorical column. If one category
+represents “value was null” (<code class="docutils literal notranslate"><span class="pre">null_category</span></code>), it’s rendered as
+<code class="docutils literal notranslate"><span class="pre">is_null()</span></code>/<code class="docutils literal notranslate"><span class="pre">~is_null()</span></code> instead of a literal category comparison.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (str) – Rule expression using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation, where col is the
+one-hot encoded binary column.</p></li>
+<li><p><strong>mapping</strong> (dict<em>[</em>str<em>, </em>tuple<em>[</em>str<em>, </em>str<em>]</em><em>]</em>) – Maps encoded column name to (original_col, category).</p></li>
+<li><p><strong>null_category</strong> (str<em> | </em><em>None</em><em>, </em><em>optional</em>) – Category value that represents an originally-null value, by default None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rule string with one-hot conditions decoded back to category labels.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status__active&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="s2">&quot;active&quot;</span><span class="p">)}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decode_onehot_encodings</span><span class="p">(</span><span class="s1">&#39;(X[&quot;status__active&quot;] &gt;= 0.5)&#39;</span><span class="p">,</span> <span class="n">mapping</span><span class="p">)</span>
+<span class="go">&#39;(X[&quot;status&quot;] == &quot;active&quot;)&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="decode-null-indicators">
+<h3>decode_null_indicators<a class="headerlink" href="#decode-null-indicators" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.decode_null_indicators">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">decode_null_indicators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#decode_null_indicators"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.decode_null_indicators" title="Link to this definition">#</a></dt>
+<dd><p>Convert null-indicator binary columns to <code class="docutils literal notranslate"><span class="pre">is_null()</span></code> conditions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (str) – Rule expression using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation, where col is a binary
+column indicating whether the original column was null.</p></li>
+<li><p><strong>mapping</strong> (dict<em>[</em>str<em>, </em>str<em>]</em>) – Maps encoded column name to the original column name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rule string with is-null conditions decoded.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decode_null_indicators</span><span class="p">(</span><span class="s1">&#39;(X[&quot;amount__is_null&quot;] &gt;= 0.5)&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;amount__is_null&quot;</span><span class="p">:</span> <span class="s2">&quot;amount&quot;</span><span class="p">})</span>
+<span class="go">&#39;X[&quot;amount&quot;].is_null()&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="decode-discretized-bins">
+<h3>decode_discretized_bins<a class="headerlink" href="#decode-discretized-bins" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.decode_discretized_bins">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">decode_discretized_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#decode_discretized_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.decode_discretized_bins" title="Link to this definition">#</a></dt>
+<dd><p>Reverse a discretizer’s bin index back to a threshold on the original column.</p>
+<p>Discretizers (equal-width, equal-frequency, quantile, k-means, tree-based,
+geometric, custom bin edges, …) all replace a numeric column with an
+integer bin index. Given the fitted bin edges, this converts a condition
+on the bin index back to a condition on the original numeric column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (str) – Rule expression using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation, where col holds the bin
+index.</p></li>
+<li><p><strong>mapping</strong> (dict<em>[</em>str<em>, </em>list<em>[</em>float<em>]</em><em>]</em>) – Maps column name to its sorted bin edges, where <code class="docutils literal notranslate"><span class="pre">edges[i]</span></code> is the
+lower boundary of bin <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rule string with bin-index conditions decoded to original thresholds.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decode_discretized_bins</span><span class="p">(</span><span class="s1">&#39;(X[&quot;amount&quot;] &gt;= 2)&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">200</span><span class="p">]})</span>
+<span class="go">&#39;(X[&quot;amount&quot;] &gt;= 50)&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="decode-scaled-thresholds">
+<h3>decode_scaled_thresholds<a class="headerlink" href="#decode-scaled-thresholds" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.decode_scaled_thresholds">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">decode_scaled_thresholds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">collections.abc.Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#decode_scaled_thresholds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.decode_scaled_thresholds" title="Link to this definition">#</a></dt>
+<dd><p>Reverse a monotonic numeric scaling back to a threshold on the original column.</p>
+<p>Works for any strictly increasing scaler (standardisation, min-max,
+log1p, Box-Cox, Yeo-Johnson, arcsinh, power, robust, …) since the
+<code class="docutils literal notranslate"><span class="pre">&gt;=</span></code>/<code class="docutils literal notranslate"><span class="pre">&lt;</span></code>/etc. ordering is preserved - pass the scaler’s inverse
+transform as the mapping value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (str) – Rule expression using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation, where col holds the
+scaled values.</p></li>
+<li><p><strong>mapping</strong> (dict<em>[</em>str<em>, </em><em>Callable</em><em>[</em><em>[</em>float<em>]</em><em>, </em>float<em>]</em><em>]</em>) – Maps column name to a function that inverts the scaling
+(e.g. <code class="docutils literal notranslate"><span class="pre">scaler.inverse_transform</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rule string with scaled thresholds decoded back to original values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decode_scaled_thresholds</span><span class="p">(</span><span class="s1">&#39;(X[&quot;amount&quot;] &gt;= 5.0)&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">})</span>
+<span class="go">&#39;(X[&quot;amount&quot;] &gt;= 10.0)&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="quote-string-values">
+<h3>quote_string_values<a class="headerlink" href="#quote-string-values" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.quote_string_values">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">quote_string_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#quote_string_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.quote_string_values" title="Link to this definition">#</a></dt>
+<dd><p>Wrap bare (unquoted) condition values in double quotes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (str) – Rule expression using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation.</p></li>
+<li><p><strong>columns</strong> (list<em>[</em>str<em>]</em>) – Columns whose values should be quoted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rule string with bare values quoted.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">quote_string_values</span><span class="p">(</span><span class="s1">&#39;(X[&quot;col&quot;] == retail)&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;col&quot;</span><span class="p">])</span>
+<span class="go">&#39;(X[&quot;col&quot;] == &quot;retail&quot;)&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="round-thresholds">
+<h3>round_thresholds<a class="headerlink" href="#round-thresholds" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.round_thresholds">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">round_thresholds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndigits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#round_thresholds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.round_thresholds" title="Link to this definition">#</a></dt>
+<dd><p>Round numeric thresholds to a fixed number of decimal places.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (str) – Rule expression using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation.</p></li>
+<li><p><strong>columns</strong> (list<em>[</em>str<em>]</em>) – Columns to round.</p></li>
+<li><p><strong>ndigits</strong> (int<em>, </em><em>optional</em>) – Decimal places, by default 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rule string with rounded thresholds.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">round_thresholds</span><span class="p">(</span><span class="s1">&#39;(X[&quot;amount&quot;] &gt;= 1234.56789)&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;amount&quot;</span><span class="p">])</span>
+<span class="go">&#39;(X[&quot;amount&quot;] &gt;= 1234.57)&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="drop-null-clauses">
+<h3>drop_null_clauses<a class="headerlink" href="#drop-null-clauses" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.drop_null_clauses">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">drop_null_clauses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#drop_null_clauses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.drop_null_clauses" title="Link to this definition">#</a></dt>
+<dd><p>Strip <code class="docutils literal notranslate"><span class="pre">|</span> <span class="pre">X[col].is_null()</span></code> clauses added for always-imputed columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (str) – Rule expression using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation.</p></li>
+<li><p><strong>columns</strong> (list<em>[</em>str<em>]</em>) – Columns for which to strip the is-null clause, e.g. because the
+column is never actually null once imputed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rule string with the is-null clauses removed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">drop_null_clauses</span><span class="p">(</span><span class="s1">&#39;((X[&quot;amount&quot;] &gt;= 5.0) | X[&quot;amount&quot;].is_null())&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;amount&quot;</span><span class="p">])</span>
+<span class="go">&#39;(X[&quot;amount&quot;] &gt;= 5.0)&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="drop-not-null-conditions">
+<h3>drop_not_null_conditions<a class="headerlink" href="#drop-not-null-conditions" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.drop_not_null_conditions">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">drop_not_null_conditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#drop_not_null_conditions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.drop_not_null_conditions" title="Link to this definition">#</a></dt>
+<dd><p>Drop standalone <code class="docutils literal notranslate"><span class="pre">(~X[col].is_null())</span></code> conditions for given columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rule</strong> (str) – Rule expression using <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span></code> notation.</p></li>
+<li><p><strong>columns</strong> (list<em>[</em>str<em>]</em>) – Columns for which a not-null condition is trivially true and can
+be dropped, e.g. because the column is never actually null.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rule string with the not-null conditions removed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">drop_not_null_conditions</span><span class="p">(</span><span class="s1">&#39;(X[&quot;a&quot;] &gt; 1) &amp; (~X[&quot;b&quot;].is_null())&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">])</span>
+<span class="go">&#39;(X[&quot;a&quot;] &gt; 1)&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="prettify-rules">
+<h3>prettify_rules<a class="headerlink" href="#prettify-rules" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_formatting.prettify_rules">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_formatting.</span></span><span class="sig-name descname"><span class="pre">prettify_rules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">collections.abc.Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_name_mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/iguanas/rule_formatting.html#prettify_rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_formatting.prettify_rules" title="Link to this definition">#</a></dt>
+<dd><p>Apply an ordered list of rule-string transformations to each rule.</p>
+<p>Each step is a plain function taking and returning a rule string (e.g.
+<code class="docutils literal notranslate"><span class="pre">simplify_rule</span></code>, or <code class="docutils literal notranslate"><span class="pre">functools.partial(decode_numeric_encodings,</span>
+<span class="pre">mapping=woe_mapping)</span></code>), applied in order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rules</strong> (list<em>[</em>str<em>]</em>) – Raw rule strings to prettify.</p></li>
+<li><p><strong>steps</strong> (list<em>[</em><em>Callable</em><em>[</em><em>[</em>str<em>]</em><em>, </em>str<em>]</em><em>]</em>) – Ordered transformations to apply to each rule.</p></li>
+<li><p><strong>column_name_mapping</strong> (dict<em>[</em>str<em>, </em>str<em>] </em><em>| </em><em>None</em><em>, </em><em>optional</em>) – Maps column name to a display name, applied last, by default None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Prettified rule strings.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">steps</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="n">partial</span><span class="p">(</span><span class="n">decode_numeric_encodings</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}}),</span>
+<span class="gp">... </span>    <span class="n">partial</span><span class="p">(</span><span class="n">round_thresholds</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;amount&quot;</span><span class="p">]),</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prettify_rules</span><span class="p">([</span><span class="s1">&#39;(X[&quot;A&quot;] &gt;= 2) &amp; (X[&quot;amount&quot;] &gt; 1.239)&#39;</span><span class="p">],</span> <span class="n">steps</span><span class="p">)</span>
+<span class="go">[&#39;(X[&quot;A&quot;] == &quot;y&quot;) &amp; (X[&quot;amount&quot;] &gt; 1.24)&#39;]</span>
 </pre></div>
 </div>
 </div>
@@ -623,12 +1087,64 @@ For example, <code class="docutils literal notranslate"><span class="pre">table_
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.simplify_rule"><code class="docutils literal notranslate"><span class="pre">simplify_rule()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#to-sql">to_sql</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.to_sql"><code class="docutils literal notranslate"><span class="pre">to_sql()</span></code></a></li>
-</ul>
-</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rule-to-sql">rule_to_sql</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.rule_to_sql"><code class="docutils literal notranslate"><span class="pre">rule_to_sql()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#format-floats-as-integers">format_floats_as_integers</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.format_floats_as_integers"><code class="docutils literal notranslate"><span class="pre">format_floats_as_integers()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-missing-value-conditions">add_missing_value_conditions</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.add_missing_value_conditions"><code class="docutils literal notranslate"><span class="pre">add_missing_value_conditions()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#decode-string-imputation">decode_string_imputation</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.decode_string_imputation"><code class="docutils literal notranslate"><span class="pre">decode_string_imputation()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#decode-numeric-encodings">decode_numeric_encodings</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.decode_numeric_encodings"><code class="docutils literal notranslate"><span class="pre">decode_numeric_encodings()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#format-as-boolean-conditions">format_as_boolean_conditions</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.format_as_boolean_conditions"><code class="docutils literal notranslate"><span class="pre">format_as_boolean_conditions()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#decode-onehot-encodings">decode_onehot_encodings</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.decode_onehot_encodings"><code class="docutils literal notranslate"><span class="pre">decode_onehot_encodings()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#decode-null-indicators">decode_null_indicators</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.decode_null_indicators"><code class="docutils literal notranslate"><span class="pre">decode_null_indicators()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#decode-discretized-bins">decode_discretized_bins</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.decode_discretized_bins"><code class="docutils literal notranslate"><span class="pre">decode_discretized_bins()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#decode-scaled-thresholds">decode_scaled_thresholds</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.decode_scaled_thresholds"><code class="docutils literal notranslate"><span class="pre">decode_scaled_thresholds()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#quote-string-values">quote_string_values</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.quote_string_values"><code class="docutils literal notranslate"><span class="pre">quote_string_values()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#round-thresholds">round_thresholds</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.round_thresholds"><code class="docutils literal notranslate"><span class="pre">round_thresholds()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#drop-null-clauses">drop_null_clauses</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.drop_null_clauses"><code class="docutils literal notranslate"><span class="pre">drop_null_clauses()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#drop-not-null-conditions">drop_not_null_conditions</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.drop_not_null_conditions"><code class="docutils literal notranslate"><span class="pre">drop_not_null_conditions()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prettify-rules">prettify_rules</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_formatting.prettify_rules"><code class="docutils literal notranslate"><span class="pre">prettify_rules()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -665,8 +1181,8 @@ For example, <code class="docutils literal notranslate"><span class="pre">table_
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -677,7 +1193,7 @@ For example, <code class="docutils literal notranslate"><span class="pre">table_
 
   <p class="copyright">
     
-      © Copyright Mozilla Public License (MPL) 2.0.
+      © Copyright Apache License 2.0.
       <br/>
     
   </p>

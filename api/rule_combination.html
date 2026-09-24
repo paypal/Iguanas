@@ -10,15 +10,15 @@
 <meta property="og:title" content="Rule Combination" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://paypal.github.io/Iguanas/api/rule_combination.html" />
-<meta property="og:site_name" content="Iguanas - Lightning Fast Rule generation with Polars" />
-<meta property="og:description" content="Functions: combine_rules_full_search: combine_rules_cumulative: combine_rules_greedy: combine_rules_beam_search: combine_rules_a_star:" />
+<meta property="og:site_name" content="Iguanas - Rule Generation and Evaluation with Polars" />
+<meta property="og:description" content="Functions: combine_rules_full_search: combine_rules_cumulative: combine_rules_budgeted: combine_rules_greedy: combine_rules_beam_search: combine_rules_a_star:" />
 <meta property="og:image" content="https://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png" />
-<meta property="og:image:alt" content="Iguanas - Lightning Fast Rule generation with Polars" />
-<meta name="description" content="Functions: combine_rules_full_search: combine_rules_cumulative: combine_rules_greedy: combine_rules_beam_search: combine_rules_a_star:" />
+<meta property="og:image:alt" content="Iguanas - Rule Generation and Evaluation with Polars" />
+<meta name="description" content="Functions: combine_rules_full_search: combine_rules_cumulative: combine_rules_budgeted: combine_rules_greedy: combine_rules_beam_search: combine_rules_a_star:" />
 <meta name="description" content="High-performance rule generation library with sklearn-compatible API." />
 <meta name="keywords" content="data science, machine learning, rule generation, python, polars, sklearn" />
 
-    <title>Rule Combination &#8212; Iguanas - Lightning Fast Rule generation with Polars</title>
+    <title>Rule Combination &#8212; Iguanas - Rule Generation and Evaluation with Polars</title>
   
   
   
@@ -37,23 +37,22 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=720ed60b" />
     <link rel="stylesheet" type="text/css" href="../_static/iguanas.css?v=8988652a" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
     <script src="../_static/documentation_options.js?v=692d9a0e"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
@@ -63,6 +62,11 @@
                     'ad_personalization': 'denied',
                     'analytics_storage': 'denied'
                 });
+            </script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-Z5TR8D9VTQ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', 'G-Z5TR8D9VTQ');
             </script>
@@ -148,8 +152,8 @@
       
     
     
-    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
-    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Lightning Fast Rule generation with Polars - Home"/>
+    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-light" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
+    <img src="../_static/IGUANAS_LOGO.png" class="logo__image only-dark pst-js-only" alt="Iguanas - Rule Generation and Evaluation with Polars - Home"/>
   
   
 </a></div>
@@ -191,6 +195,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -221,8 +232,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -233,8 +243,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
       
@@ -311,6 +320,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../benchmark.html">
+    Benchmark
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -332,8 +348,7 @@
           
           
           
-          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/paypal/Iguanas" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -344,8 +359,7 @@
           
           
           
-          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">PyPI</span></a>
+          <a href="https://pypi.org/project/iguanas/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-box fa-lg" aria-hidden="true"></i><span class="visually-hidden">PyPI</span></a>
         </li>
 </ul></div>
         
@@ -374,9 +388,8 @@
 <li class="toctree-l1"><a class="reference internal" href="rule_registry.html">Rule Registry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotone_constraints.html">Monotone Constraints</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weight_transformations.html">Weight Transformations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rule_classifier.html">Rule Classifier</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ruleset_classifier.html">Ruleset Classifier</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rule_monitoring.html">Rule Monitoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnx_converter.html">ONNX Converter</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Classifiers (scikit-learn API)</span></p>
 <ul class="nav bd-sidenav">
@@ -471,9 +484,9 @@ represent a boolean or binary rule evaluation. All columns will be
 used as candidate rules.</p></li>
 <li><p><strong>n</strong> (int<em>, </em><em>default=3</em>) – Maximum number of rules to combine. Generates all combinations from
 size 2 up to size n.</p></li>
-<li><p><strong>max_combinations_per_n</strong> (int<em>, </em><em>default=250_000</em>) – Maximum number of combinations to generate per combination size.
+<li><p><strong>max_combinations_per_n</strong> (int<em>, </em><em>default=200_000</em>) – Maximum number of combinations to generate per combination size.
 If exceeded, only the first max_combinations_per_n are used.</p></li>
-<li><p><strong>batch_size</strong> (int<em>, </em><em>default=100_000</em>) – Number of combinations to process in each batch to manage memory.</p></li>
+<li><p><strong>batch_size</strong> (int<em>, </em><em>default=50_000</em>) – Number of combinations to process in each batch to manage memory.</p></li>
 <li><p><strong>operator</strong> (str<em>, </em><em>default='or'</em>) – Boolean operator to apply: ‘or’ for OR operations (any True),
 ‘and’ for AND operations (all True).</p></li>
 </ul>
@@ -537,7 +550,7 @@ Must have the same length as R.columns.</p></li>
 <dd class="field-odd"><p>pl.DataFrame</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If operator is not ‘or’ or ‘and’, or if output_names length doesn’t match columns.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If operator is not ‘or’ or ‘and’, or if output_names length doesn’t match columns.</p>
 </dd>
 </dl>
 <div class="admonition-examples admonition">
@@ -554,6 +567,63 @@ Must have the same length as R.columns.</p></li>
 <span class="go"># Named columns, each True only if all rules up to that position are True</span>
 </pre></div>
 </div>
+</div>
+</dd></dl>
+
+</section>
+<section id="combine-rules-budgeted">
+<h3>combine_rules_budgeted<a class="headerlink" href="#combine-rules-budgeted" title="Link to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="iguanas.rule_combination.combine_rules_budgeted">
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_combination.</span></span><span class="sig-name descname"><span class="pre">combine_rules_budgeted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_alert_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_rules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_combination.html#combine_rules_budgeted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_combination.combine_rules_budgeted" title="Link to this definition">#</a></dt>
+<dd><p>Build the OR-ruleset that catches the most positives within an alert budget.</p>
+<p>Operational rule systems are constrained by review capacity, not by F1: only
+a fixed fraction of the population can be flagged. This selects a disjunction
+maximising recall subject to that constraint, which is the <em>budgeted maximum
+coverage</em> problem. The greedy rule below is its standard
+<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">1/e</span></code> approximation.</p>
+<p>This differs from <a class="reference internal" href="#iguanas.rule_combination.combine_rules_greedy" title="iguanas.rule_combination.combine_rules_greedy"><code class="xref py py-func docutils literal notranslate"><span class="pre">combine_rules_greedy()</span></code></a> in what it optimises. Greedy
+metric maximisation ignores coverage, so under OR it tends to keep widening
+the ruleset until it flags far more than the budget permits; here a candidate
+is simply infeasible once the union breaches the budget.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>R</strong> (<em>pl.DataFrame</em>) – DataFrame containing boolean rule columns. All columns are candidates.</p></li>
+<li><p><strong>y</strong> (<em>pl.Series</em>) – Boolean target series indicating true labels.</p></li>
+<li><p><strong>max_alert_rate</strong> (float) – Maximum fraction of the population the ruleset may flag, in (0, 1].
+With <em>weights</em>, this is a fraction of total weight rather than of rows.</p></li>
+<li><p><strong>max_rules</strong> (int<em>, </em><em>default=5</em>) – Maximum number of rules in the returned disjunction.</p></li>
+<li><p><strong>weights</strong> (<em>pl.Series</em><em> | </em><em>None</em><em>, </em><em>default=None</em>) – Optional sample weights. When given, both the budget and the positives
+caught are measured in weight rather than row counts.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Single boolean column named by the combined rule expression. Empty when
+no single rule fits within the budget.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pl.DataFrame</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <em>max_alert_rate</em> is outside (0, 1], or R has no columns.</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">R</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ruleset</span> <span class="o">=</span> <span class="n">combine_rules_budgeted</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">max_alert_rate</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>Coverage is monotone under OR, so a rule that breaches the budget can never
+be rescued by adding more rules. Each step therefore takes the feasible rule
+with the greatest <em>marginal</em> gain in positives caught, breaking ties toward
+the cheaper rule, and stops as soon as nothing feasible adds a positive.</p>
 </div>
 </dd></dl>
 
@@ -605,7 +675,7 @@ Column name reflects the selected rules using the operator.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If operator is not ‘or’ or ‘and’, or if metric column not found.</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If operator is not ‘or’ or ‘and’, or if metric column not found.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -619,7 +689,9 @@ Column name reflects the selected rules using the operator.</p>
 <dd><p>Find top rule combinations using beam search.</p>
 <p>Maintains beam_width best partial combinations at each depth level,
 exploring a broader set of combinations than greedy search while
-remaining more efficient than exhaustive search.</p>
+evaluating far fewer than exhaustive enumeration. Like greedy search this
+is a heuristic: it offers no optimality guarantee. Use
+<a class="reference internal" href="#iguanas.rule_combination.combine_rules_a_star" title="iguanas.rule_combination.combine_rules_a_star"><code class="xref py py-func docutils literal notranslate"><span class="pre">combine_rules_a_star()</span></code></a> when the top-k must be provably optimal.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -663,7 +735,7 @@ the combined rule expression.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If operator is not ‘or’ or ‘and’, or if metric column not found.</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If operator is not ‘or’ or ‘and’, or if metric column not found.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -673,43 +745,122 @@ the combined rule expression.</p>
 <h3>combine_rules_a_star<a class="headerlink" href="#combine-rules-a-star" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="iguanas.rule_combination.combine_rules_a_star">
-<span class="sig-prename descclassname"><span class="pre">iguanas.rule_combination.</span></span><span class="sig-name descname"><span class="pre">combine_rules_a_star</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'f1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_rules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'or'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_improvement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_top_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_combination.html#combine_rules_a_star"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_combination.combine_rules_a_star" title="Link to this definition">#</a></dt>
-<dd><p>Find top rule combinations using A* search algorithm.</p>
-<p>Uses A* to efficiently explore the space of rule combinations, finding
-optimal or near-optimal combinations by balancing actual performance (g)
-with estimated potential (h). More thorough than greedy or beam search
-when finding the globally best combination is important.</p>
-<dl class="simple">
-<dt>A* Cost Function:</dt><dd><ul class="simple">
-<li><p>g(n): Negative metric value (better metrics = lower cost)</p></li>
-<li><p>h(n): Optimistic estimate of best possible improvement from remaining rules</p></li>
-<li><p>f(n): g(n) + h(n) (total estimated cost)</p></li>
-</ul>
-</dd>
-</dl>
+<span class="sig-prename descclassname"><span class="pre">iguanas.rule_combination.</span></span><span class="sig-name descname"><span class="pre">combine_rules_a_star</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'f1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_rules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'or'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_improvement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_top_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protected</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><span class="pre">object</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_alert_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_diagnostics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">polars.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/iguanas/rule_combination.html#combine_rules_a_star"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_combination.combine_rules_a_star" title="Link to this definition">#</a></dt>
+<dd><p>Find the top rule combinations by best-first branch-and-bound search.</p>
+<p>Searches the space of rule subsets containing between 1 and <code class="docutils literal notranslate"><span class="pre">max_rules</span></code>
+rules, and returns the <code class="docutils literal notranslate"><span class="pre">return_top_k</span></code> best-scoring combinations. Unlike
+greedy or beam search, this returns a <em>provably</em> optimal top-k under the
+conditions in Notes.</p>
+<section id="search-formulation">
+<h4>Search formulation<a class="headerlink" href="#search-formulation" title="Link to this heading">#</a></h4>
+<p>Nodes are rule <em>subsets</em>; children extend a subset by one rule. Each node
+carries an <strong>upper bound</strong> on the metric attainable by any descendant. The
+frontier is ordered by that bound (best-first), and a node is discarded when
+its bound cannot beat the current k-th best incumbent. Search stops as soon
+as the best remaining bound falls below the k-th incumbent, at which point
+no unexplored subset can enter the top-k.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">param R<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataFrame containing boolean rule columns. All columns are candidates.</p>
+</dd>
+<dt class="field-even">type R<span class="colon">:</span></dt>
+<dd class="field-even"><p>pl.DataFrame</p>
+</dd>
+<dt class="field-odd">param y<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Boolean target series indicating true labels.</p>
+</dd>
+<dt class="field-even">type y<span class="colon">:</span></dt>
+<dd class="field-even"><p>pl.Series</p>
+</dd>
+<dt class="field-odd">param metric<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Metric to maximise: “precision”, “recall”, “accuracy”, “mcc”, or an
+F-beta score (“f1”, “f0.5”, “f2”, …).</p>
+</dd>
+<dt class="field-even">type metric<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, default=”f1”</p>
+</dd>
+<dt class="field-odd">param max_rules<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Maximum number of rules in a combination.</p>
+</dd>
+<dt class="field-even">type max_rules<span class="colon">:</span></dt>
+<dd class="field-even"><p>int, default=5</p>
+</dd>
+<dt class="field-odd">param operator<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Boolean operator for combining rules: ‘or’ or ‘and’.</p>
+</dd>
+<dt class="field-even">type operator<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, default=”or”</p>
+</dd>
+<dt class="field-odd">param weights<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional sample weights for weighted metric computation.</p>
+</dd>
+<dt class="field-even">type weights<span class="colon">:</span></dt>
+<dd class="field-even"><p>pl.Series | None, default=None</p>
+</dd>
+<dt class="field-odd">param min_improvement<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If set, a child is discarded unless it improves on its parent by at
+least this much. This is a <em>heuristic</em> filter that <em>forfeits the
+optimality guarantee</em> (the best subset may only be reachable through a
+temporarily worse ancestor – under OR-composition, adding a rule
+typically lowers precision before later rules raise recall). Leave as
+None for exact search.</p>
+</dd>
+<dt class="field-even">type min_improvement<span class="colon">:</span></dt>
+<dd class="field-even"><p>float | None, default=None</p>
+</dd>
+<dt class="field-odd">param return_top_k<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of top combinations to return. Set to 1 for the single best.</p>
+</dd>
+<dt class="field-even">type return_top_k<span class="colon">:</span></dt>
+<dd class="field-even"><p>int, default=10</p>
+</dd>
+<dt class="field-odd">param protected<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional protected-attribute series used to enforce a fairness
+constraint on returned combinations.</p>
+</dd>
+<dt class="field-even">type protected<span class="colon">:</span></dt>
+<dd class="field-even"><p>pl.Series | None, default=None</p>
+</dd>
+<dt class="field-odd">param reference_group<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Value of <em>protected</em> to treat as the reference group. Defaults to the
+most frequent value.</p>
+</dd>
+<dt class="field-even">type reference_group<span class="colon">:</span></dt>
+<dd class="field-even"><p>object | None, default=None</p>
+</dd>
+<dt class="field-odd">param min_dir<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Minimum acceptable disparate impact ratio. When set (together with
+<em>protected</em>), a combination is only admitted to the results if its DIR
+is at least this value; 0.8 corresponds to the “four-fifths rule”.
+Search remains exact over the feasible set.</p>
+</dd>
+<dt class="field-even">type min_dir<span class="colon">:</span></dt>
+<dd class="field-even"><p>float | None, default=None</p>
+</dd>
+<dt class="field-odd">param max_alert_rate<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If set, only combinations flagging at most this fraction of the
+population are admitted. This makes the search the <em>exact</em> counterpart
+of <a class="reference internal" href="#iguanas.rule_combination.combine_rules_budgeted" title="iguanas.rule_combination.combine_rules_budgeted"><code class="xref py py-func docutils literal notranslate"><span class="pre">combine_rules_budgeted()</span></code></a>, whose greedy rule is a <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">1/e</span></code>
+approximation, so the two together measure the approximation gap.</p>
+</dd>
+<dt class="field-even">type max_alert_rate<span class="colon">:</span></dt>
+<dd class="field-even"><p>float | None, default=None</p>
+</dd>
+<dt class="field-odd">param return_diagnostics<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If True, return <code class="docutils literal notranslate"><span class="pre">(results,</span> <span class="pre">diagnostics)</span></code> where diagnostics reports
+node counts and whether the optimality guarantee held.</p>
+</dd>
+<dt class="field-even">type return_diagnostics<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool, default=False</p>
+</dd>
+<dt class="field-odd">returns<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>R</strong> (<em>pl.DataFrame</em>) – DataFrame containing boolean rule columns. All columns will be
-used as candidate rules.</p></li>
-<li><p><strong>y</strong> (<em>pl.Series</em>) – Boolean target series indicating true labels.</p></li>
-<li><p><strong>metric</strong> (str<em>, </em><em>default=&quot;f1&quot;</em>) – Performance metric to optimize. Must be a column name produced by
-compute_metrics (e.g., “f1”, “accuracy”, “precision”, “recall”).</p></li>
-<li><p><strong>max_rules</strong> (int<em>, </em><em>default=5</em>) – Maximum number of rules in a combination.</p></li>
-<li><p><strong>operator</strong> (str<em>, </em><em>default=&quot;or&quot;</em>) – Boolean operator for combining rules: ‘or’ or ‘and’.</p></li>
-<li><p><strong>weights</strong> (<em>pl.Series</em><em> | </em><em>None</em><em>, </em><em>default=None</em>) – Optional sample weights for weighted metric computation.</p></li>
-<li><p><strong>min_improvement</strong> (float<em>, </em><em>default=0.0</em>) – Minimum metric improvement required over parent combination to
-expand a node. Acts as a pruning criterion.</p></li>
-<li><p><strong>return_top_k</strong> (int<em>, </em><em>default=10</em>) – Number of top combinations to return. Set to 1 for single best.</p></li>
+<li><p><em>pl.DataFrame</em> – One column per returned combination, named by the combined rule
+expression, ordered best-first.</p></li>
+<li><p><em>dict</em> – Only when <em>return_diagnostics</em> is True. Keys: <code class="docutils literal notranslate"><span class="pre">nodes_expanded</span></code>,
+<code class="docutils literal notranslate"><span class="pre">nodes_pruned</span></code>, <code class="docutils literal notranslate"><span class="pre">combinations_evaluated</span></code>, <code class="docutils literal notranslate"><span class="pre">bounds_computed</span></code>,
+<code class="docutils literal notranslate"><span class="pre">exact</span></code>, <code class="docutils literal notranslate"><span class="pre">bound_is_tight</span></code>.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataFrame containing columns for the top rule combinations found.
-Each column represents one combination, with the column name showing
-the combined rule expression. Ordered by metric value (best first).</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pl.DataFrame</p>
 </dd>
 </dl>
 <div class="admonition-examples admonition">
@@ -719,25 +870,69 @@ the combined rule expression. Ordered by metric value (best first).</p>
 <span class="gp">... </span>                  <span class="s2">&quot;rule_B&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span>
 <span class="gp">... </span>                  <span class="s2">&quot;rule_C&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Find single best combination</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">best</span> <span class="o">=</span> <span class="n">combine_rules_a_star</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;f1&quot;</span><span class="p">,</span> <span class="n">return_top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Find top 5 combinations</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">top_5</span> <span class="o">=</span> <span class="n">combine_rules_a_star</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;f1&quot;</span><span class="p">,</span> <span class="n">return_top_k</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">top_5</span><span class="p">,</span> <span class="n">diag</span> <span class="o">=</span> <span class="n">combine_rules_a_star</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">return_top_k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="gp">... </span>                                   <span class="n">return_diagnostics</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If operator is not ‘or’ or ‘and’, or if metric column not found.</p>
+<dt class="field-odd">raises ValueError<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If operator is not ‘or’ or ‘and’, or the metric is unsupported.</p>
 </dd>
 </dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>A* is guaranteed to find the optimal solution if the heuristic is admissible
-(never overestimates the true cost). The heuristic used here estimates the
-best possible improvement from remaining rules, which is optimistic and
-thus admissible.</p>
+<p><strong>Optimality.</strong> The returned top-k is exact when <code class="docutils literal notranslate"><span class="pre">min_improvement</span></code> is None
+and the metric admits a non-trivial bound (see below). Exactness holds over
+the feasible set when a fairness constraint is active.</p>
+<p><strong>Why a bound rather than an A* heuristic.</strong> Metric value is a property of
+a <em>state</em>, not a sum of edge costs, so classical A* <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">=</span> <span class="pre">g</span> <span class="pre">+</span> <span class="pre">h</span></code> does not
+apply: there is no additive path cost to decompose. This routine is
+therefore a best-first branch-and-bound, which is the correct formulation
+for maximising a non-additive set function. The public name is retained for
+backwards compatibility.</p>
+<p><strong>Admissibility.</strong> Under OR-composition, coverage is monotonically
+non-decreasing in the rule set: TP and FP can only grow and FN can only
+shrink. Writing <code class="docutils literal notranslate"><span class="pre">P</span></code> for total positive mass and <code class="docutils literal notranslate"><span class="pre">k</span></code> for the remaining
+slots, an attainable-TP upper bound follows from the union bound,
+<code class="docutils literal notranslate"><span class="pre">TP_max</span> <span class="pre">=</span> <span class="pre">TP</span> <span class="pre">+</span> <span class="pre">(sum</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">k</span> <span class="pre">largest</span> <span class="pre">per-rule</span> <span class="pre">new-TP</span> <span class="pre">masses)</span></code>, clipped at
+<code class="docutils literal notranslate"><span class="pre">P</span></code>, while <code class="docutils literal notranslate"><span class="pre">FP</span></code> is bounded below by its current value. Every metric
+below is non-decreasing in TP and non-increasing in FP, so evaluating it at
+<code class="docutils literal notranslate"><span class="pre">(TP_max,</span> <span class="pre">FP_min)</span></code> maximises it over the reachable region and never
+understates what a descendant can achieve:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">recall</span> <span class="pre">=</span> <span class="pre">TP</span> <span class="pre">/</span> <span class="pre">P</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">precision</span> <span class="pre">=</span> <span class="pre">TP</span> <span class="pre">/</span> <span class="pre">(TP</span> <span class="pre">+</span> <span class="pre">FP)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">accuracy</span> <span class="pre">=</span> <span class="pre">(TP</span> <span class="pre">+</span> <span class="pre">(N</span> <span class="pre">-</span> <span class="pre">P)</span> <span class="pre">-</span> <span class="pre">FP)</span> <span class="pre">/</span> <span class="pre">N</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">f_beta</span> <span class="pre">=</span> <span class="pre">(1</span> <span class="pre">+</span> <span class="pre">b^2)</span> <span class="pre">TP</span> <span class="pre">/</span> <span class="pre">(TP</span> <span class="pre">+</span> <span class="pre">b^2</span> <span class="pre">P</span> <span class="pre">+</span> <span class="pre">FP)</span></code></p></li>
+</ul>
+<p>The F-beta identity uses <code class="docutils literal notranslate"><span class="pre">FN</span> <span class="pre">=</span> <span class="pre">P</span> <span class="pre">-</span> <span class="pre">TP</span></code> to eliminate FN, which is what
+makes the bound monotone in only two quantities. Under AND-composition the
+monotonicity reverses – coverage shrinks, so TP is bounded above by its
+current value and FP is bounded below by subtracting the k largest
+per-rule FP removals – and the same four expressions apply.</p>
+<p><code class="docutils literal notranslate"><span class="pre">mcc</span></code> has no non-trivial bound implemented and falls back to 1.0. That is
+admissible, so the result is still exact, but no pruning occurs and the
+search degenerates to exhaustive enumeration.</p>
+<p><strong>Alert budget.</strong> Under OR the constraint is <em>monotone</em>: coverage only grows,
+so a node already over budget can never be rescued and its entire subtree is
+discarded – the constraint makes the search cheaper, not more expensive. It
+also tightens the bound, since any rows a descendant adds consume the
+remaining capacity, capping attainable TP at <code class="docutils literal notranslate"><span class="pre">budget</span> <span class="pre">-</span> <span class="pre">coverage</span></code>. Under AND
+coverage shrinks, so an over-budget node may still have feasible descendants;
+there it is excluded from the results but still expanded.</p>
+<p><strong>Prior behaviour.</strong> Before v1.4 this function ordered the frontier by
+<code class="docutils literal notranslate"><span class="pre">-mean(best</span> <span class="pre">remaining</span> <span class="pre">single-rule</span> <span class="pre">metrics)</span></code>, which is <em>not</em> admissible:
+for disjoint rules under OR the achievable recall gain is the <em>sum</em> of
+per-rule gains, so a mean understates it and the optimum could be ordered
+away. It also defaulted to <code class="docutils literal notranslate"><span class="pre">min_improvement=0.0</span></code>, discarding every
+non-improving child, which reduced the search to hill-climbing. Both are
+fixed here; <code class="docutils literal notranslate"><span class="pre">min_improvement</span></code> now defaults to None.</p>
 </div>
+</section>
+<dl class="field-list simple">
+</dl>
 </dd></dl>
 
 </section>
@@ -800,6 +995,10 @@ thus admissible.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_combination.combine_rules_cumulative"><code class="docutils literal notranslate"><span class="pre">combine_rules_cumulative()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#combine-rules-budgeted">combine_rules_budgeted</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_combination.combine_rules_budgeted"><code class="docutils literal notranslate"><span class="pre">combine_rules_budgeted()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#combine-rules-greedy">combine_rules_greedy</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_combination.combine_rules_greedy"><code class="docutils literal notranslate"><span class="pre">combine_rules_greedy()</span></code></a></li>
 </ul>
@@ -846,8 +1045,8 @@ thus admissible.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -858,7 +1057,7 @@ thus admissible.</p>
 
   <p class="copyright">
     
-      © Copyright Mozilla Public License (MPL) 2.0.
+      © Copyright Apache License 2.0.
       <br/>
     
   </p>

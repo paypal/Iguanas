@@ -7,18 +7,18 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="Rule Monitoring" />
+<meta property="og:title" content="ONNX Converter" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://paypal.github.io/Iguanas/api/rule_monitoring.html" />
+<meta property="og:url" content="https://paypal.github.io/Iguanas/api/onnx_converter.html" />
 <meta property="og:site_name" content="Iguanas - Rule Generation and Evaluation with Polars" />
-<meta property="og:description" content="Functions: compare_rule_metrics:" />
+<meta property="og:description" content="Export fitted Iguanas rule strings to a self-contained ONNX binary classifier that can be served by any ONNX-compatible runtime (e.g. onnxruntime, ONNX.js, T..." />
 <meta property="og:image" content="https://paypal.github.io/Iguanas/_static/IGUANAS_LOGO.png" />
 <meta property="og:image:alt" content="Iguanas - Rule Generation and Evaluation with Polars" />
-<meta name="description" content="Functions: compare_rule_metrics:" />
+<meta name="description" content="Export fitted Iguanas rule strings to a self-contained ONNX binary classifier that can be served by any ONNX-compatible runtime (e.g. onnxruntime, ONNX.js, T..." />
 <meta name="description" content="High-performance rule generation library with sklearn-compatible API." />
 <meta name="keywords" content="data science, machine learning, rule generation, python, polars, sklearn" />
 
-    <title>Rule Monitoring &#8212; Iguanas - Rule Generation and Evaluation with Polars</title>
+    <title>ONNX Converter &#8212; Iguanas - Rule Generation and Evaluation with Polars</title>
   
   
   
@@ -70,14 +70,14 @@
                 gtag('js', new Date());
                 gtag('config', 'G-Z5TR8D9VTQ');
             </script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api/rule_monitoring';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/onnx_converter';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
-    <link rel="canonical" href="https://paypal.github.io/Iguanas/api/rule_monitoring.html" />
+    <link rel="canonical" href="https://paypal.github.io/Iguanas/api/onnx_converter.html" />
     <link rel="icon" href="../_static/iguanas.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ONNX Converter" href="onnx_converter.html" />
-    <link rel="prev" title="Weight Transformations" href="weight_transformations.html" />
+    <link rel="next" title="Rule Classifier" href="rule_classifier.html" />
+    <link rel="prev" title="Rule Monitoring" href="rule_monitoring.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -388,8 +388,8 @@
 <li class="toctree-l1"><a class="reference internal" href="rule_registry.html">Rule Registry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotone_constraints.html">Monotone Constraints</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weight_transformations.html">Weight Transformations</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Rule Monitoring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnx_converter.html">ONNX Converter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rule_monitoring.html">Rule Monitoring</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">ONNX Converter</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Classifiers (scikit-learn API)</span></p>
 <ul class="nav bd-sidenav">
@@ -445,7 +445,7 @@
     
     <li class="breadcrumb-item"><a href="../api_reference.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Rule Monitoring</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ONNX Converter</span></li>
   </ul>
 </nav>
 </div>
@@ -462,84 +462,69 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="rule-monitoring">
-<h1>Rule Monitoring<a class="headerlink" href="#rule-monitoring" title="Link to this heading">#</a></h1>
+  <section id="onnx-converter">
+<h1>ONNX Converter<a class="headerlink" href="#onnx-converter" title="Link to this heading">#</a></h1>
+<p>Export fitted Iguanas rule strings to a self-contained ONNX binary
+classifier that can be served by any ONNX-compatible runtime
+(e.g. <code class="docutils literal notranslate"><span class="pre">onnxruntime</span></code>, ONNX.js, Triton, Azure ML, etc.).</p>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h2>
-<section id="compare-rule-metrics">
-<h3>compare_rule_metrics<a class="headerlink" href="#compare-rule-metrics" title="Link to this heading">#</a></h3>
+<section id="rules-to-onnx">
+<h3>rules_to_onnx<a class="headerlink" href="#rules-to-onnx" title="Link to this heading">#</a></h3>
 <dl class="py function">
-<dt class="sig sig-object py" id="iguanas.rule_monitoring.compare_rule_metrics">
-<span class="sig-prename descclassname"><span class="pre">iguanas.rule_monitoring.</span></span><span class="sig-name descname"><span class="pre">compare_rule_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr_metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.DataFrame</span></span></span><a class="reference internal" href="../_modules/iguanas/rule_monitoring.html#compare_rule_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.rule_monitoring.compare_rule_metrics" title="Link to this definition">#</a></dt>
-<dd><p>Flag per-rule performance degradation between two periods.</p>
-<p>Takes two <a class="reference internal" href="metrics.html#iguanas.metrics.compute_metrics" title="iguanas.metrics.compute_metrics"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_metrics()</span></code></a> outputs and returns the
-per-rule delta for every shared metric column, together with a boolean flag
-indicating whether the metric dropped by more than an optional threshold.</p>
+<dt class="sig sig-object py" id="iguanas.onnx_converter.rules_to_onnx">
+<span class="sig-prename descclassname"><span class="pre">iguanas.onnx_converter.</span></span><span class="sig-name descname"><span class="pre">rules_to_onnx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'f32'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">onnx.onnx_ml_pb2.ModelProto</span></span></span><a class="reference internal" href="../_modules/iguanas/onnx_converter.html#rules_to_onnx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iguanas.onnx_converter.rules_to_onnx" title="Link to this definition">#</a></dt>
+<dd><p>Convert Iguanas rule strings to an ONNX binary classifier.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ref_metrics</strong> (<em>pl.DataFrame</em>) – Baseline metrics from <a class="reference internal" href="metrics.html#iguanas.metrics.compute_metrics" title="iguanas.metrics.compute_metrics"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_metrics()</span></code></a>.
-Must contain a <code class="docutils literal notranslate"><span class="pre">rule</span></code> column.</p></li>
-<li><p><strong>curr_metrics</strong> (<em>pl.DataFrame</em>) – Current-period metrics from <a class="reference internal" href="metrics.html#iguanas.metrics.compute_metrics" title="iguanas.metrics.compute_metrics"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_metrics()</span></code></a>.
-Must contain a <code class="docutils literal notranslate"><span class="pre">rule</span></code> column. Only rules present in both DataFrames
-are compared (inner join on <code class="docutils literal notranslate"><span class="pre">rule</span></code>).</p></li>
-<li><p><strong>thresholds</strong> (dict<em>[</em>str<em>, </em>float<em>] </em><em>| </em><em>None</em><em>, </em><em>default=None</em>) – Maximum allowed drop per metric, e.g. <code class="docutils literal notranslate"><span class="pre">{&quot;precision&quot;:</span> <span class="pre">0.05}</span></code> flags
-rules whose precision fell by more than 5 pp. When <code class="docutils literal notranslate"><span class="pre">None</span></code>, any
-negative delta is flagged.</p></li>
+<li><p><strong>rules</strong> (str<em> | </em>list<em>[</em>str<em>]</em>) – One rule string or a list of rule strings.  When a list is supplied,
+the rules are OR’d together — the model outputs 1 if <em>any</em> rule fires.
+Each rule must use the <code class="docutils literal notranslate"><span class="pre">X[&quot;col&quot;]</span> <span class="pre">op</span> <span class="pre">val</span></code> notation produced by
+Iguanas, where <code class="docutils literal notranslate"><span class="pre">op</span></code> is one of <code class="docutils literal notranslate"><span class="pre">&gt;=</span></code>, <code class="docutils literal notranslate"><span class="pre">&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">==</span></code>, <code class="docutils literal notranslate"><span class="pre">!=</span></code>, and conditions may be combined with <code class="docutils literal notranslate"><span class="pre">&amp;</span></code> / <code class="docutils literal notranslate"><span class="pre">|</span></code>.</p></li>
+<li><p><strong>dtype</strong> (str, default <code class="docutils literal notranslate"><span class="pre">&quot;f32&quot;</span></code>) – Numeric dtype for the input tensor and thresholds.
+<code class="docutils literal notranslate"><span class="pre">&quot;f32&quot;</span></code> → float32, <code class="docutils literal notranslate"><span class="pre">&quot;f64&quot;</span></code> → float64.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><p>One row per rule with columns:</p>
+<dd class="field-even"><p><p>ONNX model with:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">rule</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">{metric}_ref</span></code> — metric value in the reference period</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">{metric}_curr</span></code> — metric value in the current period</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">{metric}_delta</span></code> — <code class="docutils literal notranslate"><span class="pre">curr</span> <span class="pre">-</span> <span class="pre">ref</span></code> (negative means degradation)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">{metric}_degraded</span></code> — <code class="docutils literal notranslate"><span class="pre">True</span></code> when the drop exceeds the threshold</p></li>
+<li><p>input <code class="docutils literal notranslate"><span class="pre">X</span></code> shape <code class="docutils literal notranslate"><span class="pre">[N,</span> <span class="pre">num_features]</span></code> (<em>dtype</em> as requested)</p></li>
+<li><p>output <code class="docutils literal notranslate"><span class="pre">prediction</span></code> shape <code class="docutils literal notranslate"><span class="pre">[N]</span></code> (int64, values 0 or 1)</p></li>
 </ul>
+<p>Feature names are stored in <code class="docutils literal notranslate"><span class="pre">metadata_props</span></code> as
+<code class="docutils literal notranslate"><span class="pre">&quot;feature_0&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;feature_1&quot;</span></code>, … in first-appearance order.</p>
 </p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pl.DataFrame</p>
+<dd class="field-odd"><p>onnx.ModelProto</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">rules</span></code> is empty, <code class="docutils literal notranslate"><span class="pre">dtype</span></code> is not <code class="docutils literal notranslate"><span class="pre">&quot;f32&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;f64&quot;</span></code>, or
+    a rule string is syntactically invalid or uses unsupported node types.</p>
 </dd>
 </dl>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
-<p>What this does: an inner join on <code class="docutils literal notranslate"><span class="pre">rule</span></code>, an arithmetic difference per
-shared metric column, and a comparison of that difference against a fixed
-threshold.</p>
-<p>What this does <strong>not</strong> do:</p>
-<ul class="simple">
-<li><p>It is not a statistical drift test. No Kolmogorov-Smirnov test,
-Population Stability Index, Jensen-Shannon/KL divergence, or
-change-point detection is computed.</p></li>
-<li><p>It performs no significance testing and returns no p-value or
-confidence interval, so a flagged drop may be sampling noise —
-particularly for low-volume rules. Inspect the <code class="docutils literal notranslate"><span class="pre">TP</span></code>/<code class="docutils literal notranslate"><span class="pre">FP</span></code> counts in
-the source metric tables before acting on a flag.</p></li>
-<li><p>It compares <em>supervised</em> metrics only, so both periods must be labelled.
-It cannot detect feature or covariate shift on unlabelled data.</p></li>
-<li><p>It compares exactly two snapshots. There is no trend estimation over a
-series of periods.</p></li>
-<li><p>Rules absent from either input are silently dropped by the inner join.</p></li>
-</ul>
-<p>Choosing <code class="docutils literal notranslate"><span class="pre">thresholds</span></code> is a judgement call: with the default (<code class="docutils literal notranslate"><span class="pre">None</span></code>)
-every negative delta is flagged, including a one-sample fluctuation.</p>
+<p><strong>Security.</strong> This conversion parses each rule with <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> and emits
+a static ONNX graph; it never calls <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, and the resulting model
+executes no Python at scoring time. Only a whitelist of AST nodes
+(subscripted column access, numeric-literal comparisons, and <code class="docutils literal notranslate"><span class="pre">&amp;</span></code>/<code class="docutils literal notranslate"><span class="pre">|</span></code>)
+is accepted — anything else raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> rather than being
+executed. This makes ONNX export the recommended production deployment
+path, in contrast to
+<a class="reference internal" href="rule_evaluation.html#iguanas.rule_evaluation.apply_rules" title="iguanas.rule_evaluation.apply_rules"><code class="xref py py-func docutils literal notranslate"><span class="pre">apply_rules()</span></code></a>, which compiles rule strings
+with <code class="docutils literal notranslate"><span class="pre">eval()</span></code> and therefore requires trusted rule sources.</p>
 </div>
-<div class="admonition-examples admonition">
-<p class="admonition-title">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">iguanas.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_metrics</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">iguanas.rule_monitoring</span><span class="w"> </span><span class="kn">import</span> <span class="n">compare_rule_metrics</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">R_ref</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;rule_A&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y_ref</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">R_curr</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;rule_A&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y_curr</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ref</span> <span class="o">=</span> <span class="n">compute_metrics</span><span class="p">(</span><span class="n">R_ref</span><span class="p">,</span> <span class="n">y_ref</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">curr</span> <span class="o">=</span> <span class="n">compute_metrics</span><span class="p">(</span><span class="n">R_curr</span><span class="p">,</span> <span class="n">y_curr</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">compare_rule_metrics</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">curr</span><span class="p">,</span> <span class="n">thresholds</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;precision&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">})</span>
-</pre></div>
-</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt>iguanas.rule_evaluation.apply_rules</dt><dd><p>In-process evaluation via <code class="docutils literal notranslate"><span class="pre">eval()</span></code>; requires trusted rule strings.</p>
+</dd>
+<dt>iguanas.rule_evaluation.apply_rules_lazy</dt><dd><p>Lazy in-process evaluation, same <code class="docutils literal notranslate"><span class="pre">eval()</span></code> caveat.</p>
+</dd>
+</dl>
 </div>
 </dd></dl>
 
@@ -558,20 +543,20 @@ every negative delta is flagged, including a one-sample fluctuation.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="weight_transformations.html"
+       href="rule_monitoring.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Weight Transformations</p>
+        <p class="prev-next-title">Rule Monitoring</p>
       </div>
     </a>
     <a class="right-next"
-       href="onnx_converter.html"
+       href="rule_classifier.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ONNX Converter</p>
+        <p class="prev-next-title">Rule Classifier</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -595,8 +580,8 @@ every negative delta is flagged, including a one-sample fluctuation.</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a><ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compare-rule-metrics">compare_rule_metrics</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.rule_monitoring.compare_rule_metrics"><code class="docutils literal notranslate"><span class="pre">compare_rule_metrics()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rules-to-onnx">rules_to_onnx</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#iguanas.onnx_converter.rules_to_onnx"><code class="docutils literal notranslate"><span class="pre">rules_to_onnx()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -608,7 +593,7 @@ every negative delta is flagged, including a one-sample fluctuation.</p>
 
   
   <div class="tocsection editthispage">
-    <a href="https://github.com/paypal/Iguanas/edit/main/docs/source/api/rule_monitoring.rst">
+    <a href="https://github.com/paypal/Iguanas/edit/main/docs/source/api/onnx_converter.rst">
       <i class="fa-solid fa-pencil"></i>
       
       
