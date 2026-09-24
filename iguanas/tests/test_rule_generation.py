@@ -972,6 +972,23 @@ class TestExtractRules:
         with pytest.raises(ValueError, match="leaf_selection"):
             extract_rules(estimator, all_features_constrained=False, leaf_selection="bogus")
 
+    def test_extract_rules_all_features_constrained_without_constraints_raises(self):
+        """all_features_constrained=True on an unconstrained estimator should raise ValueError,
+        not crash with an AttributeError deep inside monotone-constraint extraction."""
+        np.random.seed(42)
+        X_train = pd.DataFrame(
+            {
+                "feature1": np.random.randn(50),
+                "feature2": np.random.randn(50),
+            }
+        )
+        y_train = pd.Series(np.random.randint(0, 2, 50))
+        estimator = XGBClassifier(max_depth=2, n_estimators=2, random_state=42)
+        estimator.fit(X_train, y_train)
+
+        with pytest.raises(ValueError, match="all_features_constrained"):
+            extract_rules(estimator, all_features_constrained=True)
+
 
 class TestExtractRuleEdgeCases:
     """Additional test cases for extract_rule functions to achieve better coverage."""

@@ -84,7 +84,9 @@ exclude = [
     "htmlcov/",
     "*.ipynb",
     "__pycache__/",
-    "docs/"
+    "docs/",
+    "benchmarks/",
+    "paper/"
 ]
 
 [tool.hatch.version]
