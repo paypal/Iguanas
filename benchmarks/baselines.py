@@ -31,9 +31,11 @@ from .rule_extraction import (
     rules_from_brl,
     rules_from_figs,
     rules_from_ripper,
+    rules_from_rule_list,
     rules_from_rulefit,
     rules_from_skope,
     rules_from_sklearn_tree,
+    rules_from_slipper,
     rules_from_xgboost,
 )
 from .ruleset_selection import NoRulesError, select_ruleset
@@ -425,11 +427,36 @@ class BRLBaseline(_ImodelsBaseline):
     name = "brl"
     class_names = ("BayesianRuleListClassifier",)
     needs_discretization = True
+    # num_bins is a plain _ImodelsBaseline attribute (used by _fit_discretizer),
+    # NOT a BayesianRuleListClassifier constructor param -- it cannot live in
+    # default_kwargs, which only reaches the model via _build()'s get_params()
+    # filter and would silently drop it.
+    num_bins = 3
     # imodels defaults run 3 chains x 50k MCMC iterations, which dominates a run;
-    # these are the smallest settings that still produce a non-trivial list.
-    # maxcardinality caps antecedent length (conditions per rule) at candidate
-    # mining time -- the imodels default is 2, tightened here to the shared 4.
-    default_kwargs = {"n_chains": 1, "max_iter": 1_000, "listlengthprior": 3, "maxcardinality": 4}
+    # max_iter=100 matches the shared "100 trees" iteration budget used by every
+    # ensemble baseline (gbm_ceiling/rulefit/skope_rules/slipper n_estimators=100).
+    #
+    # Runtime does NOT scale with row/feature count alone -- it scales with how
+    # many itemsets clear minsupport, which on a *balanced* dataset (e.g.
+    # spambase, ~39% positive) is combinatorially more than on the heavily
+    # imbalanced ones the rest of the suite is mostly made of. On spambase,
+    # maxcardinality=3/num_bins=8/minsupport=0.1 (imodels default) never
+    # finished (>20min, well past the intended per-model timeout); the in-process
+    # signal.alarm timeout in _greedy_f1_only._Timeout does NOT preempt this --
+    # mlxtend's itemset mining runs long C-level calls that only see the pending
+    # signal once they return, so a slow fit can silently run for a very long
+    # time regardless of FIT_TIMEOUT_SECONDS. minsupport=0.2 (up from 0.1) prunes
+    # the survivor count enough to finish spambase in ~18s; num_bins=3 and
+    # maxcardinality=2 shrink the candidate itemset count further as a second
+    # line of defence. select_ruleset's max_conditions_per_rule=4 still caps the
+    # final rule length regardless of what BRL itself mines.
+    default_kwargs = {
+        "n_chains": 1,
+        "max_iter": 100,
+        "listlengthprior": 3,
+        "maxcardinality": 2,
+        "minsupport": 0.2,
+    }
 
     def _extract_rules(self) -> list[str]:
         return rules_from_brl(self._model, set(self._feature_names))
@@ -459,6 +486,49 @@ class CorelsBaseline(_ImodelsBaseline):
 
     def _extract_rules(self) -> list[str]:
         return rules_from_brl(self._model, set(self._feature_names))
+
+
+class SlipperBaseline(_ImodelsBaseline):
+    """SLIPPER: AdaBoost over individual conjunctive rules, not trees."""
+
+    name = "slipper"
+    class_names = ("SlipperClassifier",)
+    # n_estimators=100 matches every other ensemble baseline's iteration budget.
+    # SlipperBaseEstimator exposes no rule-length cap, so max_conditions_per_rule=4
+    # is only enforced downstream by select_ruleset, not at generation time.
+    default_kwargs = {"n_estimators": 100}
+
+    def _extract_rules(self) -> list[str]:
+        return rules_from_slipper(self._model, set(self._feature_names))
+
+
+class GreedyRuleListBaseline(_ImodelsBaseline):
+    """Sequential covering: one single-condition split peeled off per depth.
+
+    Despite picking each cutoff by ``criterion='gini'`` (a stump, like a tree
+    split), the result is a flat decision *list*, not a branching tree -- the
+    "no" branch is never split further, only the "yes" residual is.
+    """
+
+    name = "greedy_rule_list"
+    class_names = ("GreedyRuleListClassifier",)
+    # max_depth caps the list length (each depth contributes one single-condition
+    # rule), matched to the shared max_conditions_per_rule=4 policy.
+    default_kwargs = {"max_depth": 4}
+
+    def _extract_rules(self) -> list[str]:
+        return rules_from_rule_list(self._model, set(self._feature_names))
+
+
+class OneRBaseline(_ImodelsBaseline):
+    """Classic 1R: same decision-list builder as GreedyRuleList, shallower."""
+
+    name = "oner"
+    class_names = ("OneRClassifier",)
+    default_kwargs = {"max_depth": 4}
+
+    def _extract_rules(self) -> list[str]:
+        return rules_from_rule_list(self._model, set(self._feature_names))
 
 
 class RipperBaseline(RuleSetMixin, _BaseBaseline):
@@ -499,6 +569,9 @@ BASELINE_REGISTRY: dict[str, BaselineFactory] = {
     "figs": FIGSBaseline,
     "corels": CorelsBaseline,
     "ripper": RipperBaseline,
+    "slipper": SlipperBaseline,
+    "greedy_rule_list": GreedyRuleListBaseline,
+    "oner": OneRBaseline,
 }
 
 
